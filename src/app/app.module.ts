@@ -3,11 +3,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 // import { AppConfigModule } from '@config/app.config.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { HealthModule } from '@app/modules/health/health.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { SharedModule } from '../core/shared.module';
 import { CoreModule } from './core.module';
 import { AppConfigModule } from '../config/app.config.module';
+import { HealthModule } from './modules/health/health.module';
 
 /** This is a TypeScript module that imports various modules and sets up a TypeORM connection using
 configuration values obtained from a ConfigService. */
@@ -34,7 +34,7 @@ configuration values obtained from a ConfigService. */
       }),
       inject: [ConfigService],
     }),
-
+    // TypeOrmModule.forRootAsync(dataSource),
     HealthModule,
   ],
 })

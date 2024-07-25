@@ -4,8 +4,15 @@ import { BaseModel } from '../../../../database/base.model';
 /** This is a TypeScript class representing a Permission entity with an id and a unique name and slug columns. */
 @Entity()
 export class Permission extends BaseModel {
-  @Column({ unique: true, nullable: false })
-  nameeee: string;
-  @Column({ unique: true, nullable: false })
+  @Column()
+  name: string;
+
+  @Column({ unique: true })
   slug: string;
+
+  @Column({ nullable: true })
+  description: string;
+
+  @Column({ nullable: true })
+  permissionGroupId: string;
 }

@@ -1,26 +1,51 @@
+import { Pagination } from 'nestjs-typeorm-paginate';
 import { CreatePermissionDto } from '../dto/create-permission.dto';
-import { Permission } from '../entities/permission.entity';
 
 export const permissionData = () => {
   return {
     id: '1',
-    name: 'create product',
-    slug: 'create_product',
+    name: 'Create permission',
+    slug: 'create_permission',
+    description: 'Description for create permission',
+    permissionGroupId: "permissionGroupId",
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
   };
 };
 
-export const createpermissionData = (): CreatePermissionDto => {
+export const createPermission = () => {
   return {
-    name: 'create product',
-    slug: 'create_product',
+    name: 'Create permission',
+    slug: 'create_permission',
+    description: 'Description for create permission',
+    permissionGroupId: "permissionGroupId"
   };
 };
 
-export const deletepermissionData = () => {
+export const findAllPermissions = (): Pagination<CreatePermissionDto> => {
   return {
-    raw: '',
+    items: [permissionData()],
+    meta: {
+      totalItems: 1,
+      itemCount: 1,
+      itemsPerPage: 10,
+      totalPages: 1,
+      currentPage: 1,
+    },
+  };
+};
+
+export const updatePermission = () => {
+  return {
+    raw: [],
+    generatedMaps: [],
+    affected: 1,
+  };
+};
+
+export const deletePermission = () => {
+  return {
+    raw: [],
     affected: 1,
     generatedMaps: [],
   };
