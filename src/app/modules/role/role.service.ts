@@ -21,9 +21,8 @@ export class RoleService {
   constructor(
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
-    private readonly paginationService: PaginationService,
-    // private readonly rolePermissionService: RolePermissionService,
-  ) { }
+    private readonly paginationService: PaginationService, // private readonly rolePermissionService: RolePermissionService,
+  ) {}
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     const data = this.roleRepository.create(createRoleDto);

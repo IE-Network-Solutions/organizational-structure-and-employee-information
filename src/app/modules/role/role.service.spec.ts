@@ -7,24 +7,19 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
 import { RoleService } from './role.service';
 import { Role } from './entities/role.entity';
 import {
-  createRoleData,
-  deleteRoleData,
-  paginationResultRoleData,
+  createRole,
+  deleteRole,
+  findAllRoles,
   roleData,
-  roleDataSave,
-  updateRoleData,
 } from './tests/role.data';
-import * as applySearchFilterUtils from '../../../core/utils/search-filter.utils'; // Adjust the path to the correct module
 
-import { RolePermissionService } from '../role-permission/role-permission.service';
-import { rolePermissionReturnedData } from '../role-permission/tests/role-permission.data';
-import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
+import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { searchFilter } from '@root/src/core/commonTestData/search-filter.data';
 
 describe('RoleService', () => {
   let roleService: RoleService;
   let roleRepository: MockProxy<Repository<Role>>;
   let paginationService: MockProxy<PaginationService>;
-  let rolePermissionService: MockProxy<RolePermissionService>;
   const roleToken = getRepositoryToken(Role);
 
   beforeEach(async () => {
@@ -36,10 +31,6 @@ describe('RoleService', () => {
           useValue: mock<PaginationService>(),
         },
         {
-          provide: RolePermissionService,
-          useValue: mock<RolePermissionService>(),
-        },
-        {
           provide: roleToken,
           useValue: mock<Repository<Role>>(),
         },
@@ -47,7 +38,6 @@ describe('RoleService', () => {
     }).compile();
 
     roleService = moduleRef.get<RoleService>(RoleService);
-    rolePermissionService = moduleRef.get(RolePermissionService);
     roleRepository = moduleRef.get(roleToken);
     paginationService = moduleRef.get(PaginationService);
   });
@@ -57,39 +47,22 @@ describe('RoleService', () => {
       let role: Role;
 
       beforeEach(() => {
-        roleRepository.create.mockReturnValue(createRoleData() as any);
-        roleRepository.save.mockResolvedValue(roleDataSave());
-        rolePermissionService.createRoleWithPermissions.mockResolvedValue([
-          rolePermissionReturnedData(),
-        ]);
+        roleRepository.create.mockReturnValue(roleData());
+        roleRepository.save.mockResolvedValue(roleData());
       });
 
       it('should call roleRepository.create', async () => {
-        await roleService.create(createRoleData());
-        expect(roleRepository.create).toHaveBeenCalledWith(createRoleData());
+        await roleService.create(createRole());
+        expect(roleRepository.create).toHaveBeenCalledWith(createRole());
       });
 
       it('should call roleRepository.save', async () => {
-        await roleService.create(createRoleData());
-
-        expect(roleRepository.save).toHaveBeenCalledWith(createRoleData());
+        await roleService.create(createRole());
+        expect(roleRepository.save).toHaveBeenCalledWith(roleData());
       });
-      it('should call  rolePermissionService.createRolePermission', async () => {
-        const roleId = roleData().id;
-        const permissions = createRoleData().permission;
-        await rolePermissionService.createRoleWithPermissions(
-          roleId,
-          permissions,
-        );
-
-        expect(
-          rolePermissionService.createRoleWithPermissions,
-        ).toHaveBeenCalledWith(roleId, permissions);
-      });
-
       it('should return the created role', async () => {
-        role = await roleService.create(createRoleData());
-        expect(role).toEqual(roleDataSave());
+        role = await roleService.create(createRole());
+        expect(role).toEqual(roleData());
       });
     });
   });
@@ -97,10 +70,9 @@ describe('RoleService', () => {
   describe('findOne', () => {
     describe('when findOne is called', () => {
       let role: Role;
-
       beforeEach(async () => {
         role = await roleService.findOne(roleData().id);
-        roleRepository.findOne.mockResolvedValue(roleDataSave());
+        roleRepository.findOne.mockResolvedValue(roleData());
       });
 
       it('should call roleRepository.findOne', async () => {
@@ -113,91 +85,22 @@ describe('RoleService', () => {
   });
 
   describe('findAll', () => {
-    beforeEach(async () => {
-      paginationService.paginate.mockResolvedValue(paginationResultRoleData());
+    describe('when findAll is called', () => {
+      beforeEach(async () => {
+        paginationService.paginate.mockResolvedValue(findAllRoles());
+      });
 
-      const queryBuilderMock = {
-        withDeleted: jest.fn().mockReturnThis(),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-      };
-      jest
-        .spyOn(roleRepository, 'createQueryBuilder')
-        .mockReturnValue(queryBuilderMock as any);
+      it('should call paginationService.paginate with correct parameters', async () => {
+        await roleService.findAll(paginationOptions(), searchFilter());
+      });
 
-      // Mock the applySearchFiltersService function
-      jest
-        .spyOn(applySearchFilterUtils, 'applySearchFilterUtils')
-        .mockImplementation(
-          async (
-            queryBuilder: any,
-            searchFilterDTO: SearchFilterDTO,
-            repository: any,
-          ) => {
-            if (searchFilterDTO.columnName === 'name') {
-              queryBuilder.andWhere('role.name LIKE :query', {
-                query: `%${searchFilterDTO.query}%`,
-              });
-            }
-            return queryBuilder;
-          },
+      it('should return paginated roles', async () => {
+        const permissions = await roleService.findAll(
+          paginationOptions(),
+          searchFilter(),
         );
-    });
-
-    it('should call paginationService.paginate with correct parameters', async () => {
-      const paginationOptions = { page: 1, limit: 10 };
-      const searchFilterDTO: SearchFilterDTO = {
-        columnName: 'name',
-        query: 'Admin',
-      };
-
-      await roleService.findAll(paginationOptions, searchFilterDTO);
-
-      expect(paginationService.paginate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          withDeleted: expect.any(Function),
-        }),
-        {
-          page: paginationOptions.page,
-          limit: paginationOptions.limit,
-        },
-      );
-    });
-
-    it('should call applySearchFiltersService with correct parameters', async () => {
-      const paginationOptions = { page: 1, limit: 10 };
-      const searchFilterDTO: SearchFilterDTO = {
-        columnName: 'name',
-        query: 'Admin',
-      };
-
-      const applySearchFiltersServiceSpy = jest.spyOn(
-        applySearchFilterUtils,
-        'applySearchFilterUtils',
-      );
-
-      await roleService.findAll(paginationOptions, searchFilterDTO);
-
-      expect(applySearchFiltersServiceSpy).toHaveBeenCalledWith(
-        expect.any(Object),
-        searchFilterDTO,
-        roleRepository,
-      );
-    });
-
-    it('should return paginated roles', async () => {
-      const paginationOptions = { page: 1, limit: 10 };
-      const searchFilterDTO: SearchFilterDTO = {
-        columnName: 'name',
-        query: 'Admin',
-      };
-
-      const result = await roleService.findAll(
-        paginationOptions,
-        searchFilterDTO,
-      );
-
-      expect(result).toEqual(paginationResultRoleData());
+        expect(permissions).toEqual(findAllRoles());
+      });
     });
   });
 
@@ -206,8 +109,7 @@ describe('RoleService', () => {
       let role: Role;
 
       beforeEach(async () => {
-        roleRepository.findOneOrFail.mockResolvedValue(roleDataSave());
-        roleRepository.update.mockResolvedValue(updateRoleData());
+        roleRepository.findOneOrFail.mockResolvedValue(roleData());
         role = await roleService.update(roleData().id, roleData());
       });
 
@@ -233,7 +135,7 @@ describe('RoleService', () => {
 
       it('should return the updated role', async () => {
         expect(await roleService.update(roleData().id, roleData())).toEqual(
-          roleDataSave(),
+          roleData(),
         );
       });
     });
@@ -242,8 +144,8 @@ describe('RoleService', () => {
   describe('remove', () => {
     describe('when remove is called', () => {
       beforeEach(async () => {
-        roleRepository.findOneOrFail.mockResolvedValue(roleDataSave());
-        roleRepository.softDelete.mockResolvedValue(deleteRoleData());
+        roleRepository.findOneOrFail.mockResolvedValue(roleData());
+        roleRepository.softDelete.mockResolvedValue(deleteRole());
       });
 
       it('should call roleRepository.findOne', async () => {
@@ -260,7 +162,7 @@ describe('RoleService', () => {
 
       it('should return void when the role is removed', async () => {
         const result = await roleService.remove(roleData().id);
-        expect(result).toEqual(deleteRoleData());
+        expect(result).toEqual(deleteRole());
       });
     });
   });

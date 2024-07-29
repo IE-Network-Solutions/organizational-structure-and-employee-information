@@ -2,7 +2,12 @@ import { PermissionController } from './permission.controller';
 import { PermissionService } from './permission.service';
 import { Test } from '@nestjs/testing';
 import { Permission } from './entities/permission.entity';
-import { createPermission, findAllPermissions, permissionData, updatePermission } from './tests/permission.data';
+import {
+  createPermission,
+  findAllPermissions,
+  permissionData,
+  updatePermissionData,
+} from './tests/permission.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 import { searchFilter } from '@root/src/core/commonTestData/search-filter.data';
 
@@ -19,7 +24,8 @@ describe('PermissionController', () => {
       providers: [PermissionService],
     }).compile();
 
-    permissionController = moduleRef.get<PermissionController>(PermissionController);
+    permissionController =
+      moduleRef.get<PermissionController>(PermissionController);
     permissionService = moduleRef.get<PermissionService>(PermissionService);
 
     jest.clearAllMocks();
@@ -34,27 +40,13 @@ describe('PermissionController', () => {
       });
 
       test('then it should call permissionService class', () => {
-        expect(permissionService.create).toHaveBeenCalledWith(createPermission());
+        expect(permissionService.create).toHaveBeenCalledWith(
+          createPermission(),
+        );
       });
 
       test('then it should return a permission', () => {
         expect(permissions).toEqual(permissionData());
-      });
-    });
-  });
-
-  describe('findAll', () => {
-    describe('when findAll is called', () => {
-      beforeEach(async () => {
-        await permissionController.findAll(paginationOptions(), searchFilter());
-      });
-
-      test('then it should call PermissionService class', () => {
-        expect(permissionService.findAll).toHaveBeenCalledWith(paginationOptions(), searchFilter());
-      });
-
-      test('then is should return all permissions', async () => {
-        expect(await permissionController.findAll()).toEqual(findAllPermissions());
       });
     });
   });
@@ -68,11 +60,34 @@ describe('PermissionController', () => {
       });
 
       test('then it should call PermissionService class', () => {
-        expect(permissionService.findOne).toHaveBeenCalledWith(permissionData().id);
+        expect(permissionService.findOne).toHaveBeenCalledWith(
+          permissionData().id,
+        );
       });
 
       test('then it should return permission', () => {
         expect(permission).toEqual(permissionData());
+      });
+    });
+  });
+
+  describe('findAll', () => {
+    describe('when findAll is called', () => {
+      beforeEach(async () => {
+        await permissionController.findAll(paginationOptions(), searchFilter());
+      });
+
+      test('then it should call PermissionService class', () => {
+        expect(permissionService.findAll).toHaveBeenCalledWith(
+          paginationOptions(),
+          searchFilter(),
+        );
+      });
+
+      test('then is should return all permissions', async () => {
+        expect(await permissionController.findAll()).toEqual(
+          findAllPermissions(),
+        );
       });
     });
   });
@@ -82,11 +97,17 @@ describe('PermissionController', () => {
       let permission: Permission;
 
       beforeEach(async () => {
-        permission = await permissionController.update(permissionData().id, createPermission());
+        permission = await permissionController.update(
+          permissionData().id,
+          updatePermissionData(),
+        );
       });
 
       test('then it should call PermissionService class', () => {
-        expect(permissionService.update).toHaveBeenCalledWith(permissionData().id, createPermission());
+        expect(permissionService.update).toHaveBeenCalledWith(
+          permissionData().id,
+          updatePermissionData(),
+        );
       });
 
       test('then it should return a permission', () => {
@@ -105,11 +126,15 @@ describe('PermissionController', () => {
       });
 
       test('then it should call PermissionService class', () => {
-        expect(permissionService.remove).toHaveBeenCalledWith(permissionData().id);
+        expect(permissionService.remove).toHaveBeenCalledWith(
+          permissionData().id,
+        );
       });
 
       test('then it should return a Clients', async () => {
-        expect(await permissionController.remove(permissionData().id)).toEqual('Promise resolves with void');
+        expect(await permissionController.remove(permissionData().id)).toEqual(
+          'Promise resolves with void',
+        );
       });
     });
   });

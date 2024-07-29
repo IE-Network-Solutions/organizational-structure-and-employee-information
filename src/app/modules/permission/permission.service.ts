@@ -14,6 +14,7 @@ import { Permission } from './entities/permission.entity';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
 import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
+import { UpdatePermissionGroupDto } from '../permission-group/dto/update-permission-group.dto';
 
 @Injectable()
 export class PermissionService {
@@ -21,7 +22,7 @@ export class PermissionService {
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
   async create(createPermissionDto: CreatePermissionDto) {
     try {
       const permission = this.permissionRepository.create(createPermissionDto);
@@ -33,11 +34,26 @@ export class PermissionService {
     }
   }
 
-  async findAll(paginationOptions: PaginationDto, searchFilterDTO: SearchFilterDTO): Promise<Pagination<Permission>> {
-    const options: IPaginationOptions = { page: paginationOptions.page, limit: paginationOptions.limit };
-    const queryBuilder = await this.permissionRepository.createQueryBuilder('permission');
-    await applySearchFilterUtils(queryBuilder, searchFilterDTO, this.permissionRepository);
-    return await this.paginationService.paginate<Permission>(queryBuilder, options);
+  async findAll(
+    paginationOptions: PaginationDto,
+    searchFilterDTO: SearchFilterDTO,
+  ): Promise<Pagination<Permission>> {
+    const options: IPaginationOptions = {
+      page: paginationOptions.page,
+      limit: paginationOptions.limit,
+    };
+    const queryBuilder = await this.permissionRepository.createQueryBuilder(
+      'permission',
+    );
+    await applySearchFilterUtils(
+      queryBuilder,
+      searchFilterDTO,
+      this.permissionRepository,
+    );
+    return await this.paginationService.paginate<Permission>(
+      queryBuilder,
+      options,
+    );
   }
   async findOne(id: string): Promise<Permission> {
     try {
@@ -78,5 +94,12 @@ export class PermissionService {
       }
       throw error;
     }
+  }
+  async findBulkPermissionsByPermissionId(
+    updatePermissionGroupDto: UpdatePermissionGroupDto,
+  ) {
+    return await this.permissionRepository.findByIds(
+      updatePermissionGroupDto.permissions,
+    );
   }
 }

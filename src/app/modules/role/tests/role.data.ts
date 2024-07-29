@@ -9,6 +9,7 @@ export const roleData = () => {
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
     permission: ['List of permission ids'],
+    rolePermissions: [],
   };
 };
 export const roleDataSave = () => {
@@ -44,7 +45,7 @@ export const findAllRoles = (): Pagination<CreateRoleDto> => {
   };
 };
 
-export const updateRoleData = () => {
+export const updateRole = () => {
   return {
     raw: [],
     generatedMaps: [],
@@ -52,7 +53,7 @@ export const updateRoleData = () => {
   };
 };
 
-export const deleteRoleData = () => {
+export const deleteRole = () => {
   return {
     raw: [],
     affected: 1,

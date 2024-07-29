@@ -5,8 +5,13 @@ import { Permission } from './entities/permission.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Test } from '@nestjs/testing';
-import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
-import { createPermission, deletePermission, findAllPermissions, permissionData } from './tests/permission.data';
+import {
+  createPermission,
+  deletePermission,
+  findAllPermissions,
+  permissionData,
+  updatePermissionData,
+} from './tests/permission.data';
 import { searchFilter } from '@root/dist/core/commonTestData/search-filter.data';
 import { paginationOptions } from '@root/dist/core/commonTestData/commonTest.data';
 
@@ -22,11 +27,11 @@ describe('PermissionService', () => {
         PermissionService,
         {
           provide: PaginationService,
-          useValue: mock<PaginationService>()
+          useValue: mock<PaginationService>(),
         },
         {
           provide: permissionToken,
-          useValue: mock<Repository<Permission>>()
+          useValue: mock<Repository<Permission>>(),
         },
       ],
     }).compile();
@@ -40,18 +45,21 @@ describe('PermissionService', () => {
     describe('when createPermission is called', () => {
       let permission: Permission;
       beforeEach(async () => {
-        await permissionRepository.create.mockReturnValue(createPermission() as any);
-        await permissionRepository.save.mockResolvedValue(permissionData());
+        await permissionRepository.create.mockReturnValue(permissionData());
+        permissionRepository.save.mockResolvedValue(permissionData());
       });
 
       it('should call permissionRepository.create', async () => {
         permission = await permissionService.create(createPermission());
-        expect(permissionRepository.create).toHaveBeenCalledWith(createPermission());
+        expect(permissionRepository.create).toHaveBeenCalledWith(
+          createPermission(),
+        );
       });
 
       it('should call permissionRepository.save', async () => {
         await permissionService.create(createPermission());
-        expect(permissionRepository.save).toHaveBeenCalledWith(createPermission(),
+        expect(permissionRepository.save).toHaveBeenCalledWith(
+          permissionData(),
         );
       });
 
@@ -103,7 +111,10 @@ describe('PermissionService', () => {
       });
 
       it('should return paginated permissions', async () => {
-        const permissions = await permissionService.findAll(paginationOptions(), searchFilter());
+        const permissions = await permissionService.findAll(
+          paginationOptions(),
+          searchFilter(),
+        );
         expect(permissions).toEqual(findAllPermissions());
       });
     });
@@ -114,7 +125,10 @@ describe('PermissionService', () => {
       let permission: Permission;
       beforeEach(async () => {
         permissionRepository.findOneOrFail.mockResolvedValue(permissionData());
-        permission = await permissionService.update(permissionData().id, createPermission());
+        permission = await permissionService.update(
+          permissionData().id,
+          updatePermissionData(),
+        );
       });
 
       it('should call permissionRepository.findOne', async () => {
@@ -124,7 +138,10 @@ describe('PermissionService', () => {
       });
 
       it('should call permissionRepository.update', async () => {
-        expect(permissionRepository.update).toHaveBeenCalledWith({ id: permissionData().id }, createPermission());
+        expect(permissionRepository.update).toHaveBeenCalledWith(
+          { id: permissionData().id },
+          updatePermissionData(),
+        );
       });
 
       it('should call permisionRepository.findOne again to return the updated permission', async () => {

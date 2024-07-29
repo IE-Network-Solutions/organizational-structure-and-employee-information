@@ -12,4 +12,4 @@ import { RoleController } from './role.controller';
   providers: [RoleService, PaginationService],
   exports: [RoleService],
 })
-export class RoleModule { }
+export class RoleModule {}

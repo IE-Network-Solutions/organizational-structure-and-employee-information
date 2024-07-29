@@ -1,28 +1,40 @@
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { CreatePermissionDto } from '../dto/create-permission.dto';
+import { Permission } from '../entities/permission.entity';
+import { UpdatePermissionDto } from '../dto/update-permission.dto';
 
-export const permissionData = () => {
+export const permissionData = (): Permission => {
   return {
     id: '1',
     name: 'Create permission',
     slug: 'create_permission',
     description: 'Description for create permission',
-    permissionGroupId: "permissionGroupId",
+    permissionGroupId: 'permissionGroupId',
+    permissionGroup: null,
+    rolePermissions: [],
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
   };
 };
 
-export const createPermission = () => {
+export const createPermission = (): CreatePermissionDto => {
   return {
     name: 'Create permission',
     slug: 'create_permission',
     description: 'Description for create permission',
-    permissionGroupId: "permissionGroupId"
   };
 };
 
-export const findAllPermissions = (): Pagination<CreatePermissionDto> => {
+export const updatePermissionData = (): UpdatePermissionDto => {
+  return {
+    name: 'Create permission',
+    slug: 'create_permission',
+    description: 'Description for create permission',
+    permissionGroupId: 'permissionGroupId',
+  };
+};
+
+export const findAllPermissions = (): Pagination<Permission> => {
   return {
     items: [permissionData()],
     meta: {
