@@ -4,7 +4,12 @@ import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { NotFoundException } from '@nestjs/common';
-import { createdepartmentData, departmentData, paginationResultdepartmentData, updatedepartmentData } from './tests/department.data';
+import {
+  createdepartmentData,
+  departmentData,
+  paginationResultdepartmentData,
+  updatedepartmentData,
+} from './tests/department.data';
 
 describe('DepartmentsController', () => {
   let controller: DepartmentsController;
@@ -12,7 +17,9 @@ describe('DepartmentsController', () => {
 
   const mockDepartmentsService = {
     createDepartment: jest.fn().mockResolvedValue(departmentData()),
-    findAllDepartments: jest.fn().mockResolvedValue(paginationResultdepartmentData().items),
+    findAllDepartments: jest
+      .fn()
+      .mockResolvedValue(paginationResultdepartmentData().items),
     findOneDepartment: jest.fn().mockImplementation((id: string) => {
       if (id === '4567') {
         throw new NotFoundException(`Department with Id ${id} not found`);
@@ -44,7 +51,10 @@ describe('DepartmentsController', () => {
     const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
     const result = await controller.createDepartment(req, createDepartmentDto);
     expect(result).toEqual(departmentData());
-    expect(service.createDepartment).toHaveBeenCalledWith(createDepartmentDto, req.tenantId);
+    expect(service.createDepartment).toHaveBeenCalledWith(
+      createDepartmentDto,
+      req.tenantId,
+    );
   });
 
   it('should find all departments', async () => {
@@ -52,37 +62,58 @@ describe('DepartmentsController', () => {
     const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
     const result = await controller.findAllDepartments(req, paginationOptions);
     expect(result).toEqual(paginationResultdepartmentData().items);
-    expect(service.findAllDepartments).toHaveBeenCalledWith(paginationOptions, req.tenantId);
+    expect(service.findAllDepartments).toHaveBeenCalledWith(
+      paginationOptions,
+      req.tenantId,
+    );
   });
 
   it('should find one department', async () => {
-    const result = await controller.findOneDepartment('be21f28b-4651-4d6f-8f08-d8128da64ee5');
+    const result = await controller.findOneDepartment(
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+    );
     expect(result).toEqual(departmentData());
-    expect(service.findOneDepartment).toHaveBeenCalledWith('be21f28b-4651-4d6f-8f08-d8128da64ee5');
+    expect(service.findOneDepartment).toHaveBeenCalledWith(
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+    );
   });
 
   it('should throw not found exception for non-existent department', async () => {
-    await expect(controller.findOneDepartment('4567')).rejects.toThrow(NotFoundException);
+    await expect(controller.findOneDepartment('4567')).rejects.toThrow(
+      NotFoundException,
+    );
     expect(service.findOneDepartment).toHaveBeenCalledWith('4567');
   });
 
   it('should update a department', async () => {
     const updateDepartmentDto: UpdateDepartmentDto = updatedepartmentData();
-    const result = await controller.updateDepartment('be21f28b-4651-4d6f-8f08-d8128da64ee5', updateDepartmentDto);
+    const result = await controller.updateDepartment(
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      updateDepartmentDto,
+    );
     expect(result).toEqual(departmentData());
-    expect(service.updateDepartment).toHaveBeenCalledWith('be21f28b-4651-4d6f-8f08-d8128da64ee5', updateDepartmentDto);
+    expect(service.updateDepartment).toHaveBeenCalledWith(
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      updateDepartmentDto,
+    );
   });
 
   it('should remove a department', async () => {
-    const result = await controller.removeDepartment('be21f28b-4651-4d6f-8f08-d8128da64ee5');
+    const result = await controller.removeDepartment(
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+    );
     expect(result).toEqual(departmentData());
-    expect(service.removeDepartment).toHaveBeenCalledWith('be21f28b-4651-4d6f-8f08-d8128da64ee5');
+    expect(service.removeDepartment).toHaveBeenCalledWith(
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+    );
   });
 
   it('should throw not found exception for remove of non-existent department', async () => {
     jest.spyOn(service, 'removeDepartment').mockImplementationOnce(() => {
       throw new NotFoundException(`Department with Id 4567 not found`);
     });
-    await expect(controller.removeDepartment('4567')).rejects.toThrow(NotFoundException);
+    await expect(controller.removeDepartment('4567')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 });

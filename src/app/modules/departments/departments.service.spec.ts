@@ -7,7 +7,13 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
-import { createdepartmentData, departmentData, updatedepartmentData, createdepartmentDataOnCreate, departmentsData } from './tests/department.data';
+import {
+  createdepartmentData,
+  departmentData,
+  updatedepartmentData,
+  createdepartmentDataOnCreate,
+  departmentsData,
+} from './tests/department.data';
 
 describe('DepartmentsService', () => {
   let service: DepartmentsService;
@@ -26,7 +32,9 @@ describe('DepartmentsService', () => {
     }).compile();
 
     service = module.get<DepartmentsService>(DepartmentsService);
-    repository = module.get<TreeRepository<Department>>(getRepositoryToken(Department));
+    repository = module.get<TreeRepository<Department>>(
+      getRepositoryToken(Department),
+    );
   });
 
   it('should be defined', () => {
@@ -52,7 +60,6 @@ describe('DepartmentsService', () => {
   //     // expect(result).toEqual(departmentsData());
   //   });
 
-
   //   it('should throw a BadRequestException on error', async () => {
   //     const createDepartmentDto: CreateDepartmentDto = createdepartmentData();
   //     const tenantId = 'tenant1';
@@ -62,13 +69,15 @@ describe('DepartmentsService', () => {
   //   });
   // });
 
-
   describe('findAllDepartments', () => {
     it('should return an array of departments', async () => {
       const departments = [departmentData()];
       jest.spyOn(repository, 'findTrees').mockResolvedValue(departments as any);
 
-      const result = await service.findAllDepartments({ page: 1, limit: 10 }, 'tenant1');
+      const result = await service.findAllDepartments(
+        { page: 1, limit: 10 },
+        'tenant1',
+      );
 
       expect(result).toEqual(departments);
     });
@@ -77,8 +86,12 @@ describe('DepartmentsService', () => {
   describe('findOneDepartment', () => {
     it('should return a department with descendants', async () => {
       const department = departmentData();
-      jest.spyOn(repository, 'findOneByOrFail').mockResolvedValue(department as any);
-      jest.spyOn(repository, 'findDescendantsTree').mockResolvedValue(department as any);
+      jest
+        .spyOn(repository, 'findOneByOrFail')
+        .mockResolvedValue(department as any);
+      jest
+        .spyOn(repository, 'findDescendantsTree')
+        .mockResolvedValue(department as any);
 
       const result = await service.findOneDepartment('1');
 
@@ -86,9 +99,13 @@ describe('DepartmentsService', () => {
     });
 
     it('should throw a NotFoundException if department not found', async () => {
-      jest.spyOn(repository, 'findOneByOrFail').mockRejectedValue(new Error('Not Found'));
+      jest
+        .spyOn(repository, 'findOneByOrFail')
+        .mockRejectedValue(new Error('Not Found'));
 
-      await expect(service.findOneDepartment('1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOneDepartment('1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -117,7 +134,6 @@ describe('DepartmentsService', () => {
   //     });
   //   });
 
-
   //   it('should throw a NotFoundException if department not found', async () => {
   //     const updateDepartmentDto: UpdateDepartmentDto = {
   //       id: '1',
@@ -135,7 +151,9 @@ describe('DepartmentsService', () => {
   describe('removeDepartment', () => {
     it('should remove a department', async () => {
       const department = departmentData();
-      jest.spyOn(service, 'findOneDepartment').mockResolvedValue(department as any);
+      jest
+        .spyOn(service, 'findOneDepartment')
+        .mockResolvedValue(department as any);
       jest.spyOn(repository, 'softDelete').mockResolvedValue({} as any);
 
       const result = await service.removeDepartment('1');
@@ -145,9 +163,13 @@ describe('DepartmentsService', () => {
     });
 
     it('should throw a NotFoundException if department not found', async () => {
-      jest.spyOn(service, 'findOneDepartment').mockRejectedValue(new NotFoundException());
+      jest
+        .spyOn(service, 'findOneDepartment')
+        .mockRejectedValue(new NotFoundException());
 
-      await expect(service.removeDepartment('1')).rejects.toThrow(NotFoundException);
+      await expect(service.removeDepartment('1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

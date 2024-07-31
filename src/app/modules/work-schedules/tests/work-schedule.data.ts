@@ -93,6 +93,6 @@ export const workScheduleDetailData = (): CreateWorkScheduleDetailDto => {
     endTime: '05:00 PM',
     hours: 8,
 
-    status: true
+    status: true,
   };
 };

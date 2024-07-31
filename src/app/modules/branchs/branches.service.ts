@@ -18,7 +18,7 @@ export class BranchesService {
   constructor(
     @InjectRepository(Branch) private branchRepository: Repository<Branch>,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
   async createBranch(
     createBranchDto: CreateBranchDto,
     tenantId: string,
