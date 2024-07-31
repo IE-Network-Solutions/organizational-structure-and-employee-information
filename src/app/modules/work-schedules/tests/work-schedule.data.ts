@@ -85,11 +85,14 @@ export const findOneNotFoundReturnValue = () => {
 
 export const workScheduleDetailData = (): CreateWorkScheduleDetailDto => {
   return {
+    id: '4',
     dayOfWeek: DayOfWeek.MONDAY,
     startTime: '09:00 AM',
     breakStartTime: '10:00 AM',
     breakEndTime: '10:30 AM',
     endTime: '05:00 PM',
     hours: 8,
+
+    status: true
   };
 };

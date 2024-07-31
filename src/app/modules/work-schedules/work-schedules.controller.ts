@@ -20,7 +20,7 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 @Controller('work-schedules')
 @ApiTags('Work-Schedules')
 export class WorkSchedulesController {
-  constructor(private readonly workSchedulesService: WorkSchedulesService) {}
+  constructor(private readonly workSchedulesService: WorkSchedulesService) { }
 
   @Post()
   async createWorkSchedule(

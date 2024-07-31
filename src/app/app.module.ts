@@ -8,6 +8,11 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { SharedModule } from '../core/shared.module';
 import { CoreModule } from './core.module';
 import { AppConfigModule } from '../config/app.config.module';
+import { TenantGuard } from '../core/guards/tenant.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { CalendarSubscriber } from './modules/calendars/subscribers/calendar.subscriber';
+import { BranchSubscriber } from './modules/branchs/subscribers/branch.subscriber';
+import { WorkScheduleSubscriber } from './modules/work-schedules/subscribers/work-schedules.subscribers';
 
 /** This is a TypeScript module that imports various modules and sets up a TypeORM connection using
 configuration values obtained from a ConfigService. */
@@ -31,11 +36,22 @@ configuration values obtained from a ConfigService. */
         database: configService.get<string>('db.name'),
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         synchronize: configService.get<boolean>('db.synchronize'),
+        subscribers: [
+          CalendarSubscriber,
+          BranchSubscriber,
+          WorkScheduleSubscriber,
+        ],
       }),
       inject: [ConfigService],
     }),
 
     HealthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: TenantGuard,
+    },
   ],
 })
 export class AppModule {}

@@ -1,16 +1,18 @@
 import { Global, Module } from '@nestjs/common';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
 
-import { PermissionModule } from './modules/permission/permission.module';
-import { ProductsModule } from './modules/products/products.module';
-import { UsersModule } from './modules/users/users.module';
-import { ClientsModule } from './modules/clients/clients.module';
+import { WorkSchedulesModule } from './modules/work-schedules/work-schedules.module';
+import { DepartmentsModule } from './modules/departments/departments.module';
+import { BranchesModule } from './modules/branchs/branches.module';
+import { CalendarsModule } from './modules/calendars/calendars.module';
 @Global()
 @Module({
   imports: [
-    PermissionModule,
-    ProductsModule,
-    UsersModule,
-    ClientsModule,
+    OrganizationsModule,
+    WorkSchedulesModule,
+    CalendarsModule,
+    DepartmentsModule,
+    BranchesModule,
   ],
 })
-export class CoreModule { }
+export class CoreModule {}
