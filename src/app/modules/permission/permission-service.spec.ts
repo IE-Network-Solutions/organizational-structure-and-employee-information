@@ -12,8 +12,8 @@ import {
   permissionData,
   updatePermissionData,
 } from './tests/permission.data';
-import { searchFilter } from '@root/dist/core/commonTestData/search-filter.data';
-import { paginationOptions } from '@root/dist/core/commonTestData/commonTest.data';
+import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { searchFilter } from '@root/src/core/commonTestData/search-filter.data';
 
 describe('PermissionService', () => {
   let permissionService: PermissionService;
@@ -83,6 +83,7 @@ describe('PermissionService', () => {
         await permissionService.findOne(permissionData().id);
         expect(permissionRepository.findOneOrFail).toHaveBeenCalledWith({
           where: { id: permissionData().id },
+          relations: 'roles'
         });
       });
 

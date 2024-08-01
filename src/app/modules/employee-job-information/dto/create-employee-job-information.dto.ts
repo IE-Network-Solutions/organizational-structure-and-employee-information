@@ -1,3 +1,4 @@
+import { EmployementContractType } from '@root/src/core/enum/employementContractType.enum';
 import {
   IsOptional,
   IsString,
@@ -37,8 +38,8 @@ export class CreateEmployeeJobInformationDto {
   @IsBoolean()
   departmentLeadOrNot: boolean;
 
-  @IsEnum(['permanent', 'contractual'])
-  employmentContractType: string;
+  @IsEnum(EmployementContractType)
+  employmentContractType: EmployementContractType;
 
   @IsUUID()
   workScheduleId: string;

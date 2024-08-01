@@ -1,4 +1,4 @@
-// import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
+import { FileUploadService } from '../../../core/commonServices/upload.service';
 import {
   Controller,
   Get,
@@ -8,6 +8,8 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,15 +18,46 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 import { User } from './entities/user.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { imageUploadOptions } from '@root/src/core/utils/upload-file.utils';
+import { CreateEmployeeInformationDto } from '../employee-information/dto/create-employee-information.dto';
+import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto/create-employee-job-information.dto';
+import { CreateEmployeeInformationFormDto } from '../employee-information-form/dto/create-employee-information-form.dto';
+import { CreateNationalityDto } from '../nationality/dto/create-nationality.dto';
+import { CreatePermissionDto } from '../permission/dto/create-permission.dto';
+import { CreatePermissionGroupDto } from '../permission-group/dto/create-permission-group.dto';
+import { CreateRoleDto } from '../role/dto/create-role.dto';
+import { CreateEmployementTypeDto } from '../employment-type/dto/create-employement-type.dto';
 
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService,
+    private readonly fileUploadService: FileUploadService,
+  ) { }
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @UseInterceptors(FileInterceptor('profileImage', imageUploadOptions))
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @Body() createEmployeeInformationDto: CreateEmployeeInformationDto,
+    @Body() createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
+    @Body() createNationalityDto: CreateNationalityDto,
+    @Body() createEmployementTypeDto: CreateEmployementTypeDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const uploadedFilePath = await this.fileUploadService.uploadFileToServer(createUserDto.tenantId, file);
+    createUserDto.profileImage = uploadedFilePath['viewImage']
+    createUserDto.profileImageDownload = uploadedFilePath['image']
+    return this.userService.create(
+      createUserDto,
+      createEmployeeInformationDto,
+      createEmployeeJobInformationDto,
+      createEmployeeInformationFormDto,
+      createNationalityDto,
+      createEmployementTypeDto
+    );
   }
 
   @Get()

@@ -11,8 +11,6 @@ import { CreateEmployeeInformationDto } from './dto/create-employee-information.
 import { EmployeeInformation } from './entities/employee-information.entity';
 import { UpdateEmployeeInformationDto } from './dto/update-employee-information.dto';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
-import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 
 @Injectable()
 export class EmployeeInformationService {
@@ -20,9 +18,9 @@ export class EmployeeInformationService {
     @InjectRepository(EmployeeInformation)
     private userRepository: Repository<EmployeeInformation>,
     private readonly paginationService: PaginationService,
-  ) {}
+  ) { }
 
-  async create(createEmployeeInformationDto: CreateEmployeeInformationDto) {
+  async create(createEmployeeInformationDto: CreateEmployeeInformationDto): Promise<EmployeeInformation> {
     const user = await this.userRepository.create(createEmployeeInformationDto);
     try {
       return await this.userRepository.save(user);

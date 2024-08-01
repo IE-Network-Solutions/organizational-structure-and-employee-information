@@ -131,7 +131,7 @@ describe('PermissionController', () => {
         );
       });
 
-      test('then it should return a Clients', async () => {
+      test('then it should return a permission', async () => {
         expect(await permissionController.remove(permissionData().id)).toEqual(
           'Promise resolves with void',
         );

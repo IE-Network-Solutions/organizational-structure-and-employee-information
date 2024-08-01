@@ -13,20 +13,63 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
+import { EmployeeInformationService } from '../employee-information/employee-information.service';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
+import { EmployeeInformationFormService } from '../employee-information-form/employee-information-form.service';
+import { EmployementTypeService } from '../employment-type/employement-type.service';
+import { NationalityService } from '../nationality/nationality.service';
+import { PermissionService } from '../permission/permission.service';
+import { RoleService } from '../role/role.service';
+import { PermissionGroupService } from '../permission-group/permission-group.service';
+import { CreateEmployeeInformationDto } from '../employee-information/dto/create-employee-information.dto';
+import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto/create-employee-job-information.dto';
+import { CreateEmployeeInformationFormDto } from '../employee-information-form/dto/create-employee-information-form.dto';
+import { CreateNationalityDto } from '../nationality/dto/create-nationality.dto';
+import { CreatePermissionDto } from '../permission/dto/create-permission.dto';
+import { CreatePermissionGroupDto } from '../permission-group/dto/create-permission-group.dto';
+import { CreateRoleDto } from '../role/dto/create-role.dto';
+import { CreateEmployementTypeDto } from '../employment-type/dto/create-employement-type.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) {}
+    private readonly paginationService: PaginationService,
+    private readonly employeeInformationService: EmployeeInformationService,
+    private readonly employeeJobInformationService: EmployeeJobInformationService,
+    private readonly employeeInformationFormService: EmployeeInformationFormService,
+    private readonly nationalityService: NationalityService,
+    private readonly permissionService: PermissionService,
+    private readonly permissionGroupService: PermissionGroupService,
+    private readonly roleService: RoleService,
+    private readonly employementTypeService: EmployementTypeService
+  ) { }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(
+    createUserDto: CreateUserDto,
+    createEmployeeInformationDto: CreateEmployeeInformationDto,
+    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+    createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
+    createNationalityDto: CreateNationalityDto,
+    createEmployementTypeDto: CreateEmployementTypeDto
+  ) {
     const user = this.userRepository.create(createUserDto);
     const valuesToCheck = { email: user.email };
     try {
       await checkIfDataExists(valuesToCheck, this.userRepository);
-      return await this.userRepository.save(user);
+
+      const result = await this.userRepository.save(user);
+      createEmployeeInformationDto.userId = result.id;
+      createEmployeeJobInformationDto.userId = result.id;
+
+      await this.employeeInformationService.create(createEmployeeInformationDto);
+      await this.employeeJobInformationService.create(createEmployeeJobInformationDto);
+      await this.employeeInformationFormService.create(createEmployeeInformationFormDto);
+      await this.nationalityService.create(createNationalityDto);
+      await this.employementTypeService.create(createEmployementTypeDto);
+
+      return result;
+
     } catch (error) {
       throw new ConflictException(error.message);
     }

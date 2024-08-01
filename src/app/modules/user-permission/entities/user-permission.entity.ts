@@ -1,20 +1,28 @@
-import { Entity, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
 import { Permission } from '../../permission/entities/permission.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class UserPermission extends BaseModel {
-  // @ManyToOne(() => User, (user) => user.userPermissions, {
-  //   onDelete: 'SET NULL',
-  //   onUpdate: 'CASCADE',
-  // })
-  // @JoinColumn({ name: 'userId' })
-  // user: User;
+  @Column({ nullable: true })
+  tenantId: string;
 
-  // @ManyToOne(() => Permission, (permission) => permission.userPermissions, {
-  //   onDelete: 'SET NULL',
-  //   onUpdate: 'CASCADE',
-  // })
-  // @JoinColumn({ name: 'permissionId' })
-  // permission: Permission;
+  @Column({ nullable: true })
+  userId: string;
+
+  @Column({ nullable: true })
+  permissionId: string;
+
+  @ManyToOne(() => User, (user) => user.userPermissions, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  user: User;
+
+  @ManyToOne(() => Permission, (permission) => permission.userPermissions, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  permission: Permission;
 }

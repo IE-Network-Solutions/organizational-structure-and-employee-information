@@ -8,23 +8,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '../../../core/pagination/pagination.service';
-import { CreateEmployeeTypeDto } from './dto/create-employee-type.dto';
-import { EmployeeType } from './entities/employee-type.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
-import { UpdateEmployeeTypeDto } from './dto/update-employee-type.dto';
+import { EmploymentType } from './entities/employement-type.entity';
+import { CreateEmployementTypeDto } from './dto/create-employement-type.dto';
+import { UpdateEmployementTypeDto } from './dto/update-employement-type.dto';
 
 @Injectable()
-export class EmployeeTypeService {
+export class EmployementTypeService {
   constructor(
-    @InjectRepository(EmployeeType)
-    private EmployeeTypeRepository: Repository<EmployeeType>,
+    @InjectRepository(EmploymentType)
+    private EmployeeTypeRepository: Repository<EmploymentType>,
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) {}
+  ) { }
 
-  async create(CreateEmployeeTypeDto: CreateEmployeeTypeDto) {
+  async create(createEmployementTypeDto: CreateEmployementTypeDto) {
     const employeeType = this.EmployeeTypeRepository.create(
-      CreateEmployeeTypeDto,
+      createEmployementTypeDto,
     );
     try {
       return await this.EmployeeTypeRepository.save(employeeType);
@@ -35,17 +34,17 @@ export class EmployeeTypeService {
 
   async findAll(
     paginationOptions: PaginationDto,
-  ): Promise<Pagination<EmployeeType>> {
+  ): Promise<Pagination<EmploymentType>> {
     try {
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
       const queryBuilder = await this.EmployeeTypeRepository.createQueryBuilder(
-        'EmployeeType',
-      ).orderBy('EmployeeType.createdAt', 'DESC');
+        'EmploymentType',
+      ).orderBy('EmploymentType.createdAt', 'DESC');
 
-      return await this.paginationService.paginate<EmployeeType>(
+      return await this.paginationService.paginate<EmploymentType>(
         queryBuilder,
         options,
       );
@@ -74,10 +73,10 @@ export class EmployeeTypeService {
     }
   }
 
-  async update(id: string, UpdateEmployeeTypeDto: UpdateEmployeeTypeDto) {
+  async update(id: string, updateEmployementTypeDto: UpdateEmployementTypeDto) {
     try {
       await this.EmployeeTypeRepository.findOneOrFail({ where: { id: id } });
-      await this.EmployeeTypeRepository.update({ id }, UpdateEmployeeTypeDto);
+      await this.EmployeeTypeRepository.update({ id }, updateEmployementTypeDto);
       return await this.EmployeeTypeRepository.findOneOrFail({
         where: { id: id },
       });

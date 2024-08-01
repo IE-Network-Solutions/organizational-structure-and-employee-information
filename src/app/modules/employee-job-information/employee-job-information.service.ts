@@ -1,3 +1,4 @@
+import { Nationality } from './../nationality/entities/nationality.entity';
 // import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import {
   ConflictException,
@@ -9,27 +10,23 @@ import { Repository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '../../../core/pagination/pagination.service';
 import { CreateEmployeeJobInformationDto } from './dto/create-employee-job-information.dto';
-import { EmployeeJobInformation } from './entities/employee-job-information.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 import { UpdateEmployeeJobInformationDto } from './dto/update-employee-job-information.dto';
+import { EmployeeJobInformation } from './entities/employee-job-information.entity';
 
 @Injectable()
 export class EmployeeJobInformationService {
   constructor(
     @InjectRepository(EmployeeJobInformation)
-    private employeejobinformationRepository: Repository<EmployeeJobInformation>,
-    private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) {}
-
+    private employeeJobInformationRepository: Repository<EmployeeJobInformation>,
+    private readonly paginationService: PaginationService,
+  ) { }
   async create(
     createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
   ) {
-    const user = this.employeejobinformationRepository.create(
-      createEmployeeJobInformationDto,
-    );
+    const user = this.employeeJobInformationRepository.create(createEmployeeJobInformationDto);
     try {
-      return await this.employeejobinformationRepository.save(user);
+      return await this.employeeJobInformationRepository.save(user);
     } catch (error) {
       throw new ConflictException(error.message);
     }
@@ -43,7 +40,7 @@ export class EmployeeJobInformationService {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      const queryBuilder = await this.employeejobinformationRepository
+      const queryBuilder = await this.employeeJobInformationRepository
         .createQueryBuilder('employee-job-information')
         .orderBy('employee-job-information.createdAt', 'DESC');
 
@@ -61,7 +58,7 @@ export class EmployeeJobInformationService {
 
   async findOne(id: string) {
     try {
-      const employeejobinformation = await this.employeejobinformationRepository
+      const employeejobinformation = await this.employeeJobInformationRepository
         .createQueryBuilder('employee-job-information')
         .where('employee-job-information.id = :id', { id })
         .getOne();
@@ -82,14 +79,14 @@ export class EmployeeJobInformationService {
     updateEmployeeJobInformationDto: UpdateEmployeeJobInformationDto,
   ) {
     try {
-      await this.employeejobinformationRepository.findOneOrFail({
+      await this.employeeJobInformationRepository.findOneOrFail({
         where: { id: id },
       });
-      await this.employeejobinformationRepository.update(
+      await this.employeeJobInformationRepository.update(
         { id },
         updateEmployeeJobInformationDto,
       );
-      return await this.employeejobinformationRepository.findOneOrFail({
+      return await this.employeeJobInformationRepository.findOneOrFail({
         where: { id: id },
       });
     } catch (error) {
@@ -104,10 +101,10 @@ export class EmployeeJobInformationService {
 
   async remove(id: string) {
     try {
-      await this.employeejobinformationRepository.findOneOrFail({
+      await this.employeeJobInformationRepository.findOneOrFail({
         where: { id: id },
       });
-      return await this.employeejobinformationRepository.softDelete({ id });
+      return await this.employeeJobInformationRepository.softDelete({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(

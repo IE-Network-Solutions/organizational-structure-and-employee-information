@@ -12,6 +12,7 @@ export const permissionData = (): Permission => {
     permissionGroupId: 'permissionGroupId',
     permissionGroup: null,
     rolePermissions: [],
+    userPermissions: [],
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
   };

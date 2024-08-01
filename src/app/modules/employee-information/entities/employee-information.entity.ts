@@ -1,21 +1,21 @@
 // import { BaseModel } from '@root/src/database/base.entity';
 import { Gender } from '@root/src/core/enum/gender.enum';
 import { BaseModel } from '../../../../database/base.model';
-import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
 import { MaritalStatus } from '@root/src/core/enum/marital-status.enum';
-// import { MaritalStatus } from '@root/dist/core/enum/marital-status.tenum';
-// import { Role } from '../../role/entities/role.entity';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Nationality } from '../../nationality/entities/nationality.entity';
+import { EmployeeDocument } from '../../employee-documents/entities/employee-documents.entity';
 
 @Entity()
 export class EmployeeInformation extends BaseModel {
+  @Column({ nullable: true })
+  userId: string;
+
   @Column({ nullable: true })
   gender: Gender;
 
   @Column({ nullable: true })
   maritalStatus: MaritalStatus;
-
-  @Column({ nullable: true })
-  userId: string;
 
   @Column({ nullable: true })
   dateOfBirth: Date;
@@ -24,7 +24,7 @@ export class EmployeeInformation extends BaseModel {
   joinedDate: Date;
 
   @Column({ nullable: true })
-  nationalityID: string;
+  nationalityId: string;
 
   @Column({ type: 'json', nullable: true })
   addresses: string;
@@ -39,20 +39,20 @@ export class EmployeeInformation extends BaseModel {
   additionalInformation: string;
 
   @Column({ nullable: true })
-  roleId: string;
-
-  @Column({ nullable: true })
   tenantId: string;
 
-  //   @ManyToOne(() => Role, (role) => role.user, {
-  //     onDelete: 'SET NULL',
-  //     onUpdate: 'CASCADE',
-  //   })
-  //   role: Role;
+  @ManyToOne(() => Nationality, (nationality) => nationality.employeeInformation, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  nationality: Nationality;
 
-  //   @OneToMany(() => UserPermission, (userPermission) => userPermission.user, {
-  //     onDelete: 'SET NULL',
-  //     onUpdate: 'CASCADE',
-  //   })
-  //   userPermissions: UserPermission[];
+  // @ManyToOne(() => Tenant, (tenant) => tenant.user, {
+  //   onDelete: 'SET NULL',
+  //   onUpdate: 'CASCADE',
+  // })
+  // tenant: Tenant;
+
+  @OneToMany(() => EmployeeDocument, employeeDocument => employeeDocument.user)
+  employeeDocument: EmployeeDocument;
 }

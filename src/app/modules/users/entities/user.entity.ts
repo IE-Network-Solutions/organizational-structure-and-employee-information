@@ -2,6 +2,9 @@
 import { BaseModel } from '../../../../database/base.model';
 import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
 import { Role } from '../../role/entities/role.entity';
+import { UserPermission } from '../../user-permission/entities/user-permission.entity';
+import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
+import { EmployeeDocument } from '../../employee-documents/entities/employee-documents.entity';
 
 @Entity()
 export class User extends BaseModel {
@@ -14,11 +17,14 @@ export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
   lastName: string;
 
-  @Column({ unique: true, length: 50, type: 'varchar' })
-  email: string;
-
   @Column('json', { nullable: true })
   profileImage: string;
+
+  @Column('json', { nullable: true })
+  profileImageDownload: string;
+
+  @Column({ unique: true, length: 50, type: 'varchar' })
+  email: string;
 
   @Column({ nullable: true })
   roleId: string;
@@ -31,4 +37,22 @@ export class User extends BaseModel {
     onUpdate: 'CASCADE',
   })
   role: Role;
+
+  // @ManyToOne(() => Tenant, (tenant) => tenant.user, {
+  //   onDelete: 'SET NULL',
+  //   onUpdate: 'CASCADE',
+  // })
+  // tenant: Tenant;
+
+  @OneToMany(() => UserPermission, (userPermissions) => userPermissions.user, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  userPermissions: UserPermission[];
+
+  @OneToMany(() => EmployeeJobInformation, employeeJobInformation => employeeJobInformation.user)
+  employeeJobInformation: EmployeeJobInformation;
+
+  @OneToMany(() => EmployeeDocument, employeeDocument => employeeDocument.user)
+  employeeDocument: EmployeeDocument;
 }

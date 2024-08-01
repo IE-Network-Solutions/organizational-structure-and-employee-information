@@ -33,10 +33,10 @@ export class Permission extends BaseModel {
   )
   rolePermissions: RolePermission[];
 
-  // @OneToMany(
-  //   () => UserPermission,
-  //   (userPermissions) => userPermissions.permission,
-  //   { onDelete: 'SET NULL', onUpdate: 'CASCADE' },
-  // )
-  // userPermissions: UserPermission[];
+  @OneToMany(
+    () => UserPermission,
+    (userPermissions) => userPermissions.permission,
+    { onDelete: 'SET NULL', onUpdate: 'CASCADE' },
+  )
+  userPermissions: UserPermission[];
 }

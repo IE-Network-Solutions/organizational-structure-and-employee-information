@@ -15,6 +15,7 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
 import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
+import { RolePermissionService } from '../role-permission/role-permission.service';
 
 @Injectable()
 export class RoleService {
@@ -22,7 +23,8 @@ export class RoleService {
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
     private readonly paginationService: PaginationService, // private readonly rolePermissionService: RolePermissionService,
-  ) {}
+    private readonly rolePermissionService: RolePermissionService
+  ) { }
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     const data = this.roleRepository.create(createRoleDto);
@@ -30,10 +32,10 @@ export class RoleService {
     try {
       await checkIfDataExists(valuesToCheck, this.roleRepository);
       const role = await this.roleRepository.save(data);
-      // await this.rolePermissionService.createRoleWithPermissions(
-      //   role.id,
-      //   createRoleDto.permission,
-      // );
+      await this.rolePermissionService.createRoleWithPermissions(
+        role.id,
+        createRoleDto.permission,
+      );
       return role;
     } catch (error) {
       throw new ConflictException(error.message);
@@ -84,10 +86,10 @@ export class RoleService {
         name: updateRoleDto.name,
         description: updateRoleDto.description,
       });
-      // await this.rolePermissionService.updateRolePermissions(
-      //   id,
-      //   updateRoleDto['permission'],
-      // );
+      await this.rolePermissionService.updateRolePermissions(
+        id,
+        updateRoleDto['permission'],
+      );
       return await this.findOne(id);
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
@@ -142,34 +144,34 @@ export class RoleService {
   //   }
   // }
 
-  // async findOneRoleWithPermissions(id: string) {
-  //   try {
-  //     const role = await this.roleRepository
-  //       .createQueryBuilder('role')
-  //       .leftJoinAndSelect('role.rolePermissions', 'rolePermission')
-  //       .leftJoinAndSelect('rolePermission.permissions', 'permissions')
-  //       .where('role.id = :id', { id })
-  //       .getOne();
+  async findOneRoleWithPermissions(id: string) {
+    try {
+      const role = await this.roleRepository
+        .createQueryBuilder('role')
+        .leftJoinAndSelect('role.rolePermissions', 'rolePermission')
+        .leftJoinAndSelect('rolePermission.permissions', 'permissions')
+        .where('role.id = :id', { id })
+        .getOne();
 
-  //     if (role) {
-  //       const permissions = role.rolePermissions.map(
-  //         (rolePermission) => rolePermission.permissions,
-  //       );
-  //       delete role.rolePermissions;
-  //       return {
-  //         ...role,
-  //         permissions,
-  //       };
-  //     } else {
-  //       return null;
-  //     }
-  //   } catch (error) {
-  //     if (error.name === 'EntityNotFoundError') {
-  //       throw new NotFoundException(`Role not found.`);
-  //     }
-  //     throw error;
-  //   }
-  // }
+      if (role) {
+        const permissions = role.rolePermissions.map(
+          (rolePermission) => rolePermission.permissions,
+        );
+        delete role.rolePermissions;
+        return {
+          ...role,
+          permissions,
+        };
+      } else {
+        return null;
+      }
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`Role not found.`);
+      }
+      throw error;
+    }
+  }
 
   // async deAttachPermissionsFromRole(roleId: string, permissionIds: string[]) {
   //   try {

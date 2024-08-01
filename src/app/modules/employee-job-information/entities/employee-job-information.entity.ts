@@ -1,41 +1,63 @@
 import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
+import { EmploymentType } from '../../employment-type/entities/employement-type.entity';
+import { IsEnum } from 'class-validator';
+import { User } from '../../users/entities/user.entity';
+import { EmployementContractType } from '@root/src/core/enum/employementContractType.enum';
 
 @Entity()
 export class EmployeeJobInformation extends BaseModel {
   @Column({ nullable: true })
   jobTitle: string;
 
-  // @ManyToOne(() => User, user => user.jobInformations)
-  // userId: string;
+  @Column({ nullable: true })
+  userId: string;
 
-  // @ManyToOne(() => Branch, branch => branch.jobInformations)
-  // branchId: string;
+  @Column({ nullable: true })
+  branchId: string;
 
-  // @Column({ type: 'boolean' })
-  // isPositionActive: boolean;
+  @Column({ type: 'boolean', default: true })
+  isPositionActive: boolean;
 
-  // @Column({ type: 'timestamp' })
-  // effectiveStartDate: Date;
+  @Column({ type: 'timestamp' })
+  effectiveStartDate: Date;
 
-  // @Column({ type: 'timestamp', nullable: true })
-  // effectiveEndDate: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  effectiveEndDate: Date;
 
-  // @ManyToOne(() => EmploymentType, employmentType => employmentType.jobInformations)
-  // employmentTypeId: string;
+  @Column({ nullable: true })
+  employmentTypeId: string;
 
-  // @ManyToOne(() => Department, department => department.jobInformations)
-  // departmentId: string;
+  @Column({ nullable: true })
+  departmentId: string;
 
-  // @Column({ type: 'boolean' })
-  // departmentLeadOrNot: boolean;
+  @Column({ type: 'boolean' })
+  departmentLeadOrNot: boolean;
 
-  // @Column({ type: 'enum', enum: ['permanent', 'contractual'] })
-  // employmentContractType: string;
+  @IsEnum({ nullable: true })
+  employmentContractType: EmployementContractType;
 
-  // @ManyToOne(() => WorkSchedule, workSchedule => workSchedule.jobInformations)
-  // workScheduleId: string;
+  @Column()
+  workScheduleId: string;
 
-  // @Column({ nullable: true })
-  // tenantId: string;
+  @Column({ nullable: true })
+  tenantId: string;
+
+  @ManyToOne(() => User, user => user.employeeJobInformation)
+  user: User;
+
+  // @ManyToOne(() => Branch, branch => branch.employeeJobInformation)
+  // branch: Branch;
+
+  @ManyToOne(() => EmploymentType, employmentType => employmentType.employeeJobInformation)
+  employmentType: EmploymentType
+
+  // @ManyToOne(() => Department, department => department.employeeJobInformation)
+  // department: Department;
+
+  // @ManyToOne(() => WorkSchedule, workSchedule => workSchedule.employeeJobInformation)
+  // workSchedule: WorkSchedule
+
+  // @ManyToOne(() => Tenant, tenant => tenant.employeeJobInformation)
+  // tenant: Tenant;
 }
