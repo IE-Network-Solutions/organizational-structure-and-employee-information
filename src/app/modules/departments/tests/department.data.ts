@@ -1,6 +1,7 @@
 import { Pagination } from 'nestjs-typeorm-paginate';
-import { CreateDepartmentDto } from '../dto/create-Department.dto';
+
 import { Department } from '../entities/department.entity';
+import { CreateDepartmentDto } from '../dto/create-department.dto';
 
 export const departmentData = (): Department => {
   return {
