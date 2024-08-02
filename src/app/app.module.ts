@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 // import { AppConfigModule } from '@config/app.config.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { HealthModule } from '@app/modules/health/health.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { SharedModule } from '../core/shared.module';
 import { CoreModule } from './core.module';
@@ -13,6 +12,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { CalendarSubscriber } from './modules/calendars/subscribers/calendar.subscriber';
 import { BranchSubscriber } from './modules/branchs/subscribers/branch.subscriber';
 import { WorkScheduleSubscriber } from './modules/work-schedules/subscribers/work-schedules.subscribers';
+import { HealthModule } from './modules/health/health.module';
 
 /** This is a TypeScript module that imports various modules and sets up a TypeORM connection using
 configuration values obtained from a ConfigService. */
@@ -44,14 +44,14 @@ configuration values obtained from a ConfigService. */
       }),
       inject: [ConfigService],
     }),
-
+    // TypeOrmModule.forRootAsync(dataSource),
     HealthModule,
   ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: TenantGuard,
-    },
-  ],
+  // providers: [
+  //   {
+  //     provide: APP_GUARD,
+  //     useClass: TenantGuard,
+  //   },
+  // ],
 })
-export class AppModule {}
+export class AppModule { }

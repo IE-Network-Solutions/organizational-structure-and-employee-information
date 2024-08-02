@@ -1,6 +1,8 @@
 import { BaseModel } from '@root/src/database/base.model';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Department } from '../../departments/entities/department.entity';
+import { User } from '../../users/entities/user.entity';
+import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
 
 @Entity()
 export class Branch extends BaseModel {
@@ -14,8 +16,11 @@ export class Branch extends BaseModel {
   contactNumber: string;
   @Column({ type: 'varchar', nullable: true })
   contactEmail: string;
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true })
   tenantId: string;
   @OneToMany(() => Department, (dep) => dep.department)
   departments: Department[];
+
+  @OneToMany(() => EmployeeJobInformation, employeeJobInformation => employeeJobInformation.branch)
+  employeeJobInformation: EmployeeJobInformation;
 }

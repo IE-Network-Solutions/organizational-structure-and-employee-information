@@ -12,6 +12,7 @@ export const branchData = (): Branch => {
     contactEmail: 's@s.com',
     tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
     departments: null,
+    employeeJobInformation: null,
     updatedAt: new Date('2022-10-22 07:11:42'),
     createdAt: new Date('2022-10-22 07:11:42'),
   };
