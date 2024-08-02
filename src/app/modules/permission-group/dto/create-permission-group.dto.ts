@@ -13,8 +13,4 @@ export class CreatePermissionGroupDto {
   @IsArray()
   @IsString({ each: true })
   permissions: string[];
-
-  @IsOptional()
-  @IsString()
-  tenantId: string;
 }

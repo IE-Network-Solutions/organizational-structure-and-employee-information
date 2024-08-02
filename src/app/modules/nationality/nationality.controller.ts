@@ -20,11 +20,11 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 @Controller('nationality')
 @ApiTags('Nationality')
 export class NationalitysController {
-  constructor(private readonly NationalityService: NationalityService) {}
+  constructor(private readonly NationalityService: NationalityService) { }
 
   @Post()
-  create(@Body() createNationalityDto: CreateNationalityDto) {
-    return this.NationalityService.create(createNationalityDto);
+  create(@Body() createNationalityDto: CreateNationalityDto, tenantId: string) {
+    return this.NationalityService.create(createNationalityDto, tenantId);
   }
 
   @Get()

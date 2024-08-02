@@ -19,7 +19,6 @@ export const createPermissionGroup = (): CreatePermissionGroupDto => {
     name: 'Group One',
     description: 'This is for Group one description',
     permissions: [],
-    tenantId: 'tenantId',
   };
 };
 
@@ -28,7 +27,6 @@ export const updatePermissionGroupData = (): UpdatePermissionGroupDto => {
     name: 'Group One',
     description: 'This is for Group one description',
     permissions: [],
-    tenantId: 'tenantId',
   };
 };
 

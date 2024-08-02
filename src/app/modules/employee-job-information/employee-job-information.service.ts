@@ -22,9 +22,9 @@ export class EmployeeJobInformationService {
     private readonly paginationService: PaginationService,
   ) { }
   async create(
-    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto, tenantId: string
   ) {
-    const user = this.employeeJobInformationRepository.create(createEmployeeJobInformationDto);
+    const user = this.employeeJobInformationRepository.create({ ...createEmployeeJobInformationDto, tenantId });
     try {
       return await this.employeeJobInformationRepository.save(user);
     } catch (error) {

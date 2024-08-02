@@ -21,10 +21,10 @@ export class EmployementTypeService {
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
   ) { }
 
-  async create(createEmployementTypeDto: CreateEmployementTypeDto) {
-    const employeeType = this.EmployeeTypeRepository.create(
-      createEmployementTypeDto,
-    );
+  async create(createEmployementTypeDto: CreateEmployementTypeDto, tenantId: string) {
+    const employeeType = this.EmployeeTypeRepository.create({
+      ...createEmployementTypeDto, tenantId
+    });
     try {
       return await this.EmployeeTypeRepository.save(employeeType);
     } catch (error) {

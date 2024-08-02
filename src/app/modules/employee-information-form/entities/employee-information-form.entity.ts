@@ -5,7 +5,7 @@ import { Entity, Column } from 'typeorm';
 
 @Entity()
 export class EmployeeInformationForm extends BaseModel {
-  @Column({ length: 500, type: 'varchar' })
+  @Column({ length: 500, type: 'varchar', nullable: true })
   formTitle: string;
 
   @Column('json', { nullable: true })

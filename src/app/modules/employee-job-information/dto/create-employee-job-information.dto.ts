@@ -10,18 +10,19 @@ import {
 } from 'class-validator';
 
 export class CreateEmployeeJobInformationDto {
+  @IsOptional()
   @IsString()
   jobTitle: string;
 
-  @IsUUID()
-  userId: string;
-
-  @IsUUID()
+  @IsOptional()
+  @IsString()
   branchId: string;
 
+  @IsOptional()
   @IsBoolean()
   isPositionActive: boolean;
 
+  @IsOptional()
   @IsDateString()
   effectiveStartDate: Date;
 
@@ -29,18 +30,23 @@ export class CreateEmployeeJobInformationDto {
   @IsDateString()
   effectiveEndDate?: Date;
 
-  @IsUUID()
+  @IsOptional()
+  @IsString()
   employmentTypeId: string;
 
-  @IsUUID()
+  @IsOptional()
+  @IsString()
   departmentId: string;
 
+  @IsOptional()
   @IsBoolean()
   departmentLeadOrNot: boolean;
 
+  @IsOptional()
   @IsEnum(EmployementContractType)
   employmentContractType: EmployementContractType;
 
-  @IsUUID()
+  @IsOptional()
+  @IsString()
   workScheduleId: string;
 }

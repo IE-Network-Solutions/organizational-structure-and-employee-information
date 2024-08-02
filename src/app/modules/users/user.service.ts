@@ -1,11 +1,12 @@
 // import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import {
+  Body,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { getConnection, QueryRunner, Repository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '../../../core/pagination/pagination.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -29,6 +30,7 @@ import { CreatePermissionDto } from '../permission/dto/create-permission.dto';
 import { CreatePermissionGroupDto } from '../permission-group/dto/create-permission-group.dto';
 import { CreateRoleDto } from '../role/dto/create-role.dto';
 import { CreateEmployementTypeDto } from '../employment-type/dto/create-employement-type.dto';
+import { CreateBulkRequestDto } from '@root/src/core/commonDto/createBulkRequest.dto';
 
 @Injectable()
 export class UserService {
@@ -45,33 +47,44 @@ export class UserService {
     private readonly employementTypeService: EmployementTypeService
   ) { }
 
-  async create(
-    createUserDto: CreateUserDto,
-    createEmployeeInformationDto: CreateEmployeeInformationDto,
-    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
-    createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
-    createNationalityDto: CreateNationalityDto,
-    createEmployementTypeDto: CreateEmployementTypeDto
-  ) {
-    const user = this.userRepository.create(createUserDto);
-    const valuesToCheck = { email: user.email };
+  async create(tenantId: string, createBulkRequestDto: CreateBulkRequestDto) {
+    // const queryRunner: QueryRunner = getConnection().createQueryRunner();
+
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
+
     try {
+      const { createUserDto, createEmployeeInformationDto, createEmployeeJobInformationDto, createEmployeeInformationFormDto } = createBulkRequestDto;
+      const user = this.userRepository.create({ ...createUserDto, tenantId });
+
+      // Check for existing data
+      const valuesToCheck = { email: user.email };
       await checkIfDataExists(valuesToCheck, this.userRepository);
-
       const result = await this.userRepository.save(user);
-      createEmployeeInformationDto.userId = result.id;
-      createEmployeeJobInformationDto.userId = result.id;
 
-      await this.employeeInformationService.create(createEmployeeInformationDto);
-      await this.employeeJobInformationService.create(createEmployeeJobInformationDto);
-      await this.employeeInformationFormService.create(createEmployeeInformationFormDto);
-      await this.nationalityService.create(createNationalityDto);
-      await this.employementTypeService.create(createEmployementTypeDto);
+      // Perform other service operations within the transaction
+      createEmployeeInformationDto['userId'] = result.id;
+      await this.employeeInformationService.create(createEmployeeInformationDto, tenantId);
+
+      createEmployeeJobInformationDto['userId'] = result.id;
+      await this.employeeJobInformationService.create(createEmployeeJobInformationDto, tenantId);
+
+      await this.employeeInformationFormService.create(createEmployeeInformationFormDto, tenantId);
+
+      // Commit the transaction
+      // await queryRunner.commitTransaction();
 
       return result;
 
     } catch (error) {
+      // Rollback the transaction if any operation fails
+      // await queryRunner.rollbackTransaction();
+
       throw new ConflictException(error.message);
+
+    } finally {
+      // Release the query runner
+      // await queryRunner.release();
     }
   }
 

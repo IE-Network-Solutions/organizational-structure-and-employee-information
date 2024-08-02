@@ -5,11 +5,14 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 
 @Entity()
 export class EmploymentType extends BaseModel {
-  @Column({ length: 500, type: 'varchar' })
+  @Column({ length: 500, nullable: true })
   name: string;
 
   @OneToMany(() => EmployeeJobInformation, employeeJobInformation => employeeJobInformation.employmentType)
   employeeJobInformation: EmployeeJobInformation;
+
+  @Column({ nullable: true })
+  tenantId?: string;
 
   //   @ManyToOne(() => Tenant, tenant => tenant.employeeInformationForm)
   //   tenant: Tenant;

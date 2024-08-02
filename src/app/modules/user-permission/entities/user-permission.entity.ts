@@ -6,13 +6,16 @@ import { User } from '../../users/entities/user.entity';
 @Entity()
 export class UserPermission extends BaseModel {
   @Column({ nullable: true })
-  tenantId: string;
-
-  @Column({ nullable: true })
   userId: string;
 
   @Column({ nullable: true })
   permissionId: string;
+
+  @Column({ nullable: true })
+  tenantId: string;
+
+  @Column({ nullable: true })
+  deligationId: string;
 
   @ManyToOne(() => User, (user) => user.userPermissions, {
     onDelete: 'SET NULL',

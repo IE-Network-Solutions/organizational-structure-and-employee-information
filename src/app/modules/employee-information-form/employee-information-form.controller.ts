@@ -24,10 +24,11 @@ export class EmployeeInformationFormsController {
 
   @Post()
   create(
-    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
+    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto, tenantId: string
   ) {
     return this.EmployeeInformationFormService.create(
       createEmployeeInformationFormDto,
+      tenantId
     );
   }
 

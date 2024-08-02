@@ -20,15 +20,14 @@ export class EmployeeInformationService {
     private readonly paginationService: PaginationService,
   ) { }
 
-  async create(createEmployeeInformationDto: CreateEmployeeInformationDto): Promise<EmployeeInformation> {
-    const user = await this.userRepository.create(createEmployeeInformationDto);
+  async create(createEmployeeInformationDto: CreateEmployeeInformationDto, tenantId: string): Promise<EmployeeInformation> {
+    const user = await this.userRepository.create({ ...createEmployeeInformationDto, tenantId });
     try {
       return await this.userRepository.save(user);
     } catch (error) {
       throw new ConflictException(error.message);
     }
   }
-
   async findAll(
     paginationOptions: PaginationDto,
   ): Promise<Pagination<EmployeeInformation>> {

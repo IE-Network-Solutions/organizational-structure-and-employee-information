@@ -20,10 +20,10 @@ export class NationalityService {
     @InjectRepository(Nationality)
     private nationalityRepository: Repository<Nationality>,
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) {}
+  ) { }
 
-  async create(createNationalityDto: CreateNationalityDto) {
-    const user = this.nationalityRepository.create(createNationalityDto);
+  async create(createNationalityDto: CreateNationalityDto, tenantId: string) {
+    const user = this.nationalityRepository.create({ ...createNationalityDto, tenantId });
     try {
       return await this.nationalityRepository.save(user);
     } catch (error) {

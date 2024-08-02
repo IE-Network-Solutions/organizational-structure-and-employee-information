@@ -5,6 +5,7 @@ import { MaritalStatus } from '@root/src/core/enum/marital-status.enum';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Nationality } from '../../nationality/entities/nationality.entity';
 import { EmployeeDocument } from '../../employee-documents/entities/employee-documents.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class EmployeeInformation extends BaseModel {
@@ -55,4 +56,7 @@ export class EmployeeInformation extends BaseModel {
 
   @OneToMany(() => EmployeeDocument, employeeDocument => employeeDocument.user)
   employeeDocument: EmployeeDocument;
+
+  @ManyToOne(() => User, user => user.employeeInformation)
+  user: User;
 }

@@ -5,8 +5,14 @@ import { EmployeeInformation } from '../../employee-information/entities/employe
 
 @Entity()
 export class Nationality extends BaseModel {
-  @Column({ length: 500, type: 'varchar' })
+  @Column({ length: 500, nullable: true })
   name: string;
+
+  @Column({ nullable: true })
+  tenantId?: string;
+
+  //   @ManyToOne(() => Tenant, tenant => tenant.employeeInformationForm)
+  //   tenant: Tenant;
 
   @OneToMany(() => EmployeeInformation, (employeeInformation) => employeeInformation.nationality)
   employeeInformation: EmployeeInformation[];

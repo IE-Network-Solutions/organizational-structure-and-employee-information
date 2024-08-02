@@ -14,17 +14,15 @@ export class CreateUserDto {
   @IsOptional()
   profileImage: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   profileImageDownload: string;
 
+  @IsOptional()
+  @IsString()
   @IsEmail()
   email: string;
 
   @IsString()
   roleId?: string;
-
-  @IsString()
-  @IsOptional()
-  tenantId?: string;
 }

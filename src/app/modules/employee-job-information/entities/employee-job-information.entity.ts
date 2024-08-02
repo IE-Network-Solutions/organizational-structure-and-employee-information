@@ -4,6 +4,9 @@ import { EmploymentType } from '../../employment-type/entities/employement-type.
 import { IsEnum } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { EmployementContractType } from '@root/src/core/enum/employementContractType.enum';
+import { Branch } from '../../branchs/entities/branch.entity';
+import { Department } from '../../departments/entities/department.entity';
+import { WorkSchedule } from '../../work-schedules/entities/work-schedule.entity';
 
 @Entity()
 export class EmployeeJobInformation extends BaseModel {
@@ -19,10 +22,10 @@ export class EmployeeJobInformation extends BaseModel {
   @Column({ type: 'boolean', default: true })
   isPositionActive: boolean;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: true })
   effectiveStartDate: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true })
   effectiveEndDate: Date;
 
   @Column({ nullable: true })
@@ -31,13 +34,13 @@ export class EmployeeJobInformation extends BaseModel {
   @Column({ nullable: true })
   departmentId: string;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', nullable: true })
   departmentLeadOrNot: boolean;
 
   @IsEnum({ nullable: true })
   employmentContractType: EmployementContractType;
 
-  @Column()
+  @Column({ nullable: true })
   workScheduleId: string;
 
   @Column({ nullable: true })
@@ -46,17 +49,17 @@ export class EmployeeJobInformation extends BaseModel {
   @ManyToOne(() => User, user => user.employeeJobInformation)
   user: User;
 
-  // @ManyToOne(() => Branch, branch => branch.employeeJobInformation)
-  // branch: Branch;
+  @ManyToOne(() => Branch, branch => branch.employeeJobInformation)
+  branch: Branch;
 
   @ManyToOne(() => EmploymentType, employmentType => employmentType.employeeJobInformation)
   employmentType: EmploymentType
 
-  // @ManyToOne(() => Department, department => department.employeeJobInformation)
-  // department: Department;
+  @ManyToOne(() => Department, department => department.employeeJobInformation)
+  department: Department;
 
-  // @ManyToOne(() => WorkSchedule, workSchedule => workSchedule.employeeJobInformation)
-  // workSchedule: WorkSchedule
+  @ManyToOne(() => WorkSchedule, workSchedule => workSchedule.employeeJobInformation)
+  workSchedule: WorkSchedule
 
   // @ManyToOne(() => Tenant, tenant => tenant.employeeJobInformation)
   // tenant: Tenant;

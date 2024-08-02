@@ -1,27 +1,30 @@
 // import { MaritalStatus } from '@root/dist/core/enum/marital-status.tenum';
 import { Gender } from '@root/src/core/enum/gender.enum';
 import { MaritalStatus } from '@root/src/core/enum/marital-status.enum';
-import { IsEnum, IsJSON, IsString, Validate } from 'class-validator';
+import { IsEnum, IsJSON, IsOptional, IsString, Validate } from 'class-validator';
 
 export class CreateEmployeeInformationDto {
+  @IsOptional()
   @IsEnum(Gender)
   gender: Gender;
 
+  @IsOptional()
   @IsEnum(MaritalStatus)
   maritalStatus: MaritalStatus;
 
-  @IsString()
-  userId: string;
-
+  @IsOptional()
   @IsString()
   dateOfBirth: Date;
 
+  @IsOptional()
   @IsString()
   joinedDate: Date;
 
+  @IsOptional()
   @IsString()
-  nationalityID: string;
+  nationalityId: string;
 
+  @IsOptional()
   @IsString()
   addresses: string;
 
@@ -39,10 +42,4 @@ export class CreateEmployeeInformationDto {
     message: 'additional Information contact must be string',
   })
   additionalInformation: string;
-
-  @IsString()
-  roleId: string;
-
-  @IsString()
-  tenantId: string;
 }

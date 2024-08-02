@@ -24,8 +24,8 @@ export class EmployeeInformationController {
   ) { }
 
   @Post()
-  create(@Body() createEmployeeInformationDto: CreateEmployeeInformationDto) {
-    return this.employeeInformationService.create(createEmployeeInformationDto);
+  create(@Body() createEmployeeInformationDto: CreateEmployeeInformationDto, tenantId: string) {
+    return this.employeeInformationService.create(createEmployeeInformationDto, tenantId);
   }
 
   @Get()

@@ -4,7 +4,4 @@ export class CreateEmployementTypeDto {
   @IsString()
   @IsOptional()
   name: string;
-
-  @IsString()
-  tenantId?: string;
 }

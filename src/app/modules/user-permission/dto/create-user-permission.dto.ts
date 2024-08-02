@@ -10,4 +10,8 @@ export class CreateUserPermissionDto {
   @IsUUID(undefined, { each: true })
   @IsNotEmpty()
   permissionId: string[];
+
+  @IsUUID()
+  @IsNotEmpty()
+  deligationId: string;
 }
