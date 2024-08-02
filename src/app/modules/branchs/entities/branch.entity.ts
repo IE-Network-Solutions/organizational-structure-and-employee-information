@@ -10,9 +10,9 @@ export class Branch extends BaseModel {
   description: string;
   @Column({ length: 500, type: 'varchar' })
   location: string;
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   contactNumber: string;
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   contactEmail: string;
   @Column({ type: 'uuid' })
   tenantId: string;

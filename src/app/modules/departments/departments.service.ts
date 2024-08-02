@@ -19,7 +19,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) {}
+  ) { }
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -47,20 +47,18 @@ export class DepartmentsService {
           await this.createDepartment(dep, tenantId, newDepartment, level + 1);
         }
       }
-      return newDepartment;
+      return await this.findAllDepartments(tenantId)
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
   async findAllDepartments(
-    paginationOptions: PaginationDto,
+
     tenantId: string,
-  ): Promise<Department[]> {
-    const options: IPaginationOptions = {
-      page: paginationOptions.page,
-      limit: paginationOptions.limit,
-    };
-    return await this.departmentRepository.findTrees();
+  ): Promise<Department> {
+
+    const departments = await this.departmentRepository.findTrees();
+    return departments[0]
   }
 
   async findOneDepartment(id: string): Promise<Department> {

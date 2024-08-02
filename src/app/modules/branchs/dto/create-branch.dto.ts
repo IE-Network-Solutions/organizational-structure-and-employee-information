@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class CreateBranchDto {
   @IsString()
@@ -7,8 +7,10 @@ export class CreateBranchDto {
   description: string;
   @IsString()
   location: string;
+  @IsOptional()
   @IsString()
-  contactNumber: string;
+  contactNumber?: string;
+  @IsOptional()
   @IsEmail()
-  contactEmail: string;
+  contactEmail?: string;
 }

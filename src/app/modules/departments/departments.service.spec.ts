@@ -75,7 +75,7 @@ describe('DepartmentsService', () => {
       jest.spyOn(repository, 'findTrees').mockResolvedValue(departments as any);
 
       const result = await service.findAllDepartments(
-        { page: 1, limit: 10 },
+
         'tenant1',
       );
 

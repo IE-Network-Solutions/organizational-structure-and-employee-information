@@ -13,7 +13,7 @@ export class Calendar extends BaseModel {
   endDate: Date;
   @Column({ type: 'json', nullable: true })
   closedDates: [CreateClosedDatesDto];
-  @Column({ length: 500, type: 'varchar' })
+  @Column({ length: 500, type: 'varchar', nullable: true })
   description: string;
   @Column({ type: 'uuid' })
   tenantId: string;

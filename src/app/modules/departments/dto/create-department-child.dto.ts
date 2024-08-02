@@ -7,8 +7,9 @@ export class CreateDepartmentChildDto {
   @IsOptional()
   @IsString()
   description?: string;
+  @IsOptional()
   @IsString()
-  branchId: string;
+  branchId?: string;
 
   @ValidateNested({ each: true })
   @Type(() => CreateDepartmentChildDto)

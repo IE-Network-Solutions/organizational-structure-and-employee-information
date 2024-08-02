@@ -1,4 +1,4 @@
-import { IsDateString, IsString } from 'class-validator';
+import { IsDateString, IsOptional, IsString } from 'class-validator';
 export class CreateClosedDatesDto {
   @IsString()
   id: string;
@@ -8,6 +8,7 @@ export class CreateClosedDatesDto {
   date: Date;
   @IsString()
   type: string;
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 }
