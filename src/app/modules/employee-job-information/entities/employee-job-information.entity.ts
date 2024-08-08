@@ -1,12 +1,12 @@
 import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
-import { EmploymentType } from '../../employment-type/entities/employement-type.entity';
 import { IsEnum } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { EmployementContractType } from '@root/src/core/enum/employementContractType.enum';
 import { Branch } from '../../branchs/entities/branch.entity';
 import { Department } from '../../departments/entities/department.entity';
 import { WorkSchedule } from '../../work-schedules/entities/work-schedule.entity';
+import { EmployementType } from '../../employment-type/entities/employement-type.entity';
 
 @Entity()
 export class EmployeeJobInformation extends BaseModel {
@@ -52,8 +52,8 @@ export class EmployeeJobInformation extends BaseModel {
   @ManyToOne(() => Branch, branch => branch.employeeJobInformation)
   branch: Branch;
 
-  @ManyToOne(() => EmploymentType, employmentType => employmentType.employeeJobInformation)
-  employmentType: EmploymentType
+  @ManyToOne(() => EmployementType, employementType => employementType.employeeJobInformation)
+  employmentType: EmployementType
 
   @ManyToOne(() => Department, department => department.employeeJobInformation)
   department: Department;

@@ -1,8 +1,9 @@
 // create-role-permission.dto.ts
-import { IsArray, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateUserPermissionDto {
   @IsUUID()
+  @IsOptional()
   @IsNotEmpty()
   userId: string;
 
@@ -12,6 +13,7 @@ export class CreateUserPermissionDto {
   permissionId: string[];
 
   @IsUUID()
+  @IsOptional()
   @IsNotEmpty()
   deligationId: string;
 }

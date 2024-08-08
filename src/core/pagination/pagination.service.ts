@@ -8,7 +8,7 @@ import {
 
 @Injectable()
 export class PaginationService {
-  private readonly defaultLimit = Number.MAX_SAFE_INTEGER; // Or use a specific high number
+  private readonly defaultLimit = Number.MAX_SAFE_INTEGER; // No limit by default
   private readonly defaultPage = 1;
 
   // Overload signatures
@@ -37,19 +37,16 @@ export class PaginationService {
     filter?: Partial<Entity>, // Add filter parameter
   ): Promise<Pagination<Entity>> {
     let qb: SelectQueryBuilder<Entity>;
+    let opts: IPaginationOptions;
 
     if (repositoryOrQueryBuilder instanceof Repository) {
       const alias = aliasOrOptions as string;
-      const opts = this.applyDefaultPaginationOptions(
-        options as IPaginationOptions,
-      );
+      opts = this.applyDefaultPaginationOptions(options as IPaginationOptions);
       qb = repositoryOrQueryBuilder.createQueryBuilder(alias);
       qb.orderBy(`${alias}.${orderBy}`, orderDirection);
     } else {
       qb = repositoryOrQueryBuilder as SelectQueryBuilder<Entity>;
-      const opts = this.applyDefaultPaginationOptions(
-        aliasOrOptions as IPaginationOptions,
-      );
+      opts = this.applyDefaultPaginationOptions(aliasOrOptions as IPaginationOptions);
     }
 
     // Apply filter if provided
@@ -59,7 +56,7 @@ export class PaginationService {
       });
     }
 
-    return paginate<Entity>(qb, options);
+    return paginate<Entity>(qb, opts);
   }
 
   private applyDefaultPaginationOptions(

@@ -23,7 +23,7 @@ export class PermissionGroupService {
     private readonly permissionGroupRepository: Repository<PermissionGroup>,
     private readonly paginationService: PaginationService,
     private readonly permissionService: PermissionService,
-  ) {}
+  ) { }
   async create(
     permissionGroupDto: CreatePermissionGroupDto,
   ): Promise<PermissionGroup> {

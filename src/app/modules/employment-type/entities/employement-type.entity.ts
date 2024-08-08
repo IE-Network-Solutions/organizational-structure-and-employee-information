@@ -4,7 +4,7 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
 
 @Entity()
-export class EmploymentType extends BaseModel {
+export class EmployementType extends BaseModel {
   @Column({ length: 500, nullable: true })
   name: string;
 

@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { EmployementTypeService } from './employement-type.service';
 import { Pagination } from 'nestjs-typeorm-paginate';
-import { EmploymentType } from './entities/employement-type.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { CreateEmployementTypeDto } from './dto/create-employement-type.dto';
 import { UpdateEmployementTypeDto } from './dto/update-employement-type.dto';
+import { EmployementType } from './entities/employement-type.entity';
 
 @Controller('employement-type')
 @ApiTags('Employement Type')
@@ -30,7 +30,7 @@ export class EmployementTypesController {
   @Get()
   async findAll(
     @Query() paginationOptions?: PaginationDto,
-  ): Promise<Pagination<EmploymentType>> {
+  ): Promise<Pagination<EmployementType>> {
     return await this.employementTypeService.findAll(paginationOptions);
   }
 

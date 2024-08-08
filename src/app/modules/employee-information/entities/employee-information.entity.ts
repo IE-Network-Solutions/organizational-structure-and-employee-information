@@ -2,7 +2,7 @@
 import { Gender } from '@root/src/core/enum/gender.enum';
 import { BaseModel } from '../../../../database/base.model';
 import { MaritalStatus } from '@root/src/core/enum/marital-status.enum';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { Nationality } from '../../nationality/entities/nationality.entity';
 import { EmployeeDocument } from '../../employee-documents/entities/employee-documents.entity';
 import { User } from '../../users/entities/user.entity';
@@ -57,6 +57,6 @@ export class EmployeeInformation extends BaseModel {
   @OneToMany(() => EmployeeDocument, employeeDocument => employeeDocument.user)
   employeeDocument: EmployeeDocument;
 
-  @ManyToOne(() => User, user => user.employeeInformation)
+  @OneToOne(() => User, user => user.employeeInformation)
   user: User;
 }

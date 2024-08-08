@@ -55,6 +55,7 @@ export class PermissionService {
       options,
     );
   }
+
   async findOne(id: string): Promise<Permission> {
     try {
       return await this.permissionRepository.findOneOrFail({

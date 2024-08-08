@@ -17,10 +17,10 @@ export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
   lastName: string;
 
-  @Column('json', { nullable: true })
+  @Column({ nullable: true })
   profileImage: string;
 
-  @Column('json', { nullable: true })
+  @Column({ nullable: true })
   profileImageDownload: string;
 
   @Column({ unique: true, length: 50, type: 'varchar' })

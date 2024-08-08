@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { CreateEmployeeInformationDto } from './dto/create-employee-information.dto';
 import { UpdateEmployeeInformationDto } from './dto/update-employee-information.dto';
@@ -15,6 +16,7 @@ import { EmployeeInformation } from './entities/employee-information.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { EmployeeInformationService } from './employee-information.service';
+import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 
 @Controller('employee-information')
 @ApiTags('Employee Information')
@@ -30,9 +32,11 @@ export class EmployeeInformationController {
 
   @Get()
   async findAll(
+    @Req() request: Request,
     @Query() paginationOptions?: PaginationDto,
+    @Query() searchFilterDTO?: SearchFilterDTO
   ): Promise<Pagination<EmployeeInformation>> {
-    return await this.employeeInformationService.findAll(paginationOptions);
+    return await this.employeeInformationService.findAll(paginationOptions, searchFilterDTO, request['tenantId']);
   }
 
   @Get(':id')

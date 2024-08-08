@@ -3,11 +3,12 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateEmployeeDocumentsDto {
-  @IsString()
-  documentName: string;
+export class CreateEmployeeDocumentDto {
+  @IsOptional()
+  documentName: any;
 
   @IsString()
   @IsOptional()
   documentLink: string;
 }
+

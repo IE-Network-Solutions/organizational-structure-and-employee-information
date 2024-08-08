@@ -60,13 +60,14 @@ export class RolePermissionService {
     }
   }
 
-  async updateRolePermissions(roleId: string, permissionIds: string[]) {
+  async updateRolePermissions(roleId: string, permissionIds: string[], tenantId: string) {
     try {
       await this.rolePermissionRepository.delete({ role: { id: roleId } });
       const assignedPermissions = permissionIds.map((permissionId) => {
         return this.rolePermissionRepository.create({
           role: { id: roleId },
           permissions: { id: permissionId },
+          tenantId: tenantId
         });
       });
       return await this.rolePermissionRepository.save(assignedPermissions);

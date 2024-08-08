@@ -4,7 +4,7 @@ import { UserService } from './user.service';
 import { PaginationService } from '../../../core/pagination/pagination.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { UsersController } from './user.controller';
+import { UserController } from './user.controller';
 import { FileUploadModule } from '@root/src/core/commonServices/upload.module';
 import { EmployeeJobInformationModule } from '../employee-job-information/employee-job-information.module';
 import { EmployeeInformationFormModule } from '../employee-information-form/employee-information-form.module';
@@ -13,6 +13,9 @@ import { PermissionModule } from '../permission/permission.module';
 import { PermissionGroupModule } from '../permission-group/permission-group.module';
 import { RoleModule } from '../role/role.module';
 import { EmployementTypeModule } from '../employment-type/employement-type.module';
+import { EmployeeDocumentModule } from '../employee-documents/employee-document.module';
+import { RolePermissionModule } from '../role-permission/role-permission.module';
+import { UserPermissionModule } from '../user-permission/user-permission.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]),
@@ -24,10 +27,14 @@ import { EmployementTypeModule } from '../employment-type/employement-type.modul
     PermissionGroupModule,
     RoleModule,
     EmployementTypeModule,
-    FileUploadModule
+    FileUploadModule,
+    EmployeeDocumentModule,
+    RolePermissionModule,
+    UserPermissionModule
   ],
-  controllers: [UsersController],
+  controllers: [UserController],
   providers: [UserService, PaginationService],
   exports: [UserService],
 })
 export class UserModule { }
+

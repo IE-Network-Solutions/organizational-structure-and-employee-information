@@ -9,9 +9,6 @@ export class EmployeeDocument extends BaseModel {
   userId: string;
 
   @Column({ nullable: true })
-  employementInformation: string;
-
-  @Column({ nullable: true })
   documentName: string;
 
   @Column({ nullable: true })
@@ -19,7 +16,4 @@ export class EmployeeDocument extends BaseModel {
 
   @ManyToOne(() => User, user => user.employeeDocument)
   user: User
-
-  @ManyToOne(() => EmployeeInformation, employeeInformation => employeeInformation)
-  employeeInformation: EmployeeInformation;
 }

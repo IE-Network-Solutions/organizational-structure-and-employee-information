@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { EmployeeInformationFormService } from './employee-information-form.service';
 import { CreateEmployeeInformationFormDto } from './dto/create-employee-information-form.dto';
@@ -19,35 +20,32 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 @ApiTags('Employee Information Form')
 export class EmployeeInformationFormsController {
   constructor(
-    private readonly EmployeeInformationFormService: EmployeeInformationFormService,
+    private readonly employeeInformationFormService: EmployeeInformationFormService,
   ) { }
-
   @Post()
   create(
-    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto, tenantId: string
+    @Req() request: Request,
+    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto
   ) {
-    return this.EmployeeInformationFormService.create(
-      createEmployeeInformationFormDto,
-      tenantId
-    );
+    return this.employeeInformationFormService.create(createEmployeeInformationFormDto, request['tenantId']);
   }
 
   @Get()
   async findAll(
     @Query() paginationOptions?: PaginationDto,
   ): Promise<Pagination<EmployeeInformationForm>> {
-    return await this.EmployeeInformationFormService.findAll(paginationOptions);
+    return await this.employeeInformationFormService.findAll(paginationOptions);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.EmployeeInformationFormService.findOne(id);
+    return this.employeeInformationFormService.findOne(id);
   }
 
 
-  @Get('/tenant/:tenantId')
-  findFormFieldsByTenantId(@Param('tenantId') tenantId: string) {
-    return this.EmployeeInformationFormService.findFormFieldsByTenantId(tenantId);
+  @Get('/tenant/find-form-fields-by-tenant-id')
+  findFormFieldsByTenantId(@Req() request: Request) {
+    return this.employeeInformationFormService.findFormFieldsByTenantId(request['tenantId']);
   }
 
   // @Patch(':id')
@@ -63,6 +61,6 @@ export class EmployeeInformationFormsController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.EmployeeInformationFormService.remove(id);
+    return this.employeeInformationFormService.remove(id);
   }
 }

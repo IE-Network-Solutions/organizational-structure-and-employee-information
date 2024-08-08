@@ -1,120 +1,143 @@
-// import { Test } from '@nestjs/testing';
-// import { UsersController } from './users.controller';
-// import { UsersService } from './users.service';
-// import { paginationResultUserData, userData } from './tests/user.data';
-// import { User } from './entities/user.entity';
+import { Test } from '@nestjs/testing';
 
-// jest.mock('./users.service');
+import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { EmployementTypesController } from './employement-type.controller';
+import { EmployementTypeService } from './employement-type.service';
+import { EmployementType } from './entities/employement-type.entity';
+import { createEmployementTypeData, employementTypeData, paginationResultEmploymentTypeData } from './tests/employement-type.data';
 
-// describe('UsersController', () => {
-//   let usersController: UsersController;
-//   let usersService: UsersService;
+jest.mock('./employement-type.service');
 
-//   beforeEach(async () => {
-//     const moduleRef = await Test.createTestingModule({
-//       imports: [],
-//       controllers: [UsersController],
-//       providers: [UsersService],
-//     }).compile();
+describe('EmployementTypesController', () => {
+    let employementTypesController: EmployementTypesController;
+    let employementTypeService: EmployementTypeService;
 
-//     usersController = moduleRef.get<UsersController>(UsersController);
-//     usersService = moduleRef.get<UsersService>(UsersService);
-//     jest.clearAllMocks();
-//   });
+    beforeEach(async () => {
+        const moduleRef = await Test.createTestingModule({
+            imports: [],
+            controllers: [EmployementTypesController],
+            providers: [EmployementTypeService],
+        }).compile();
 
-//   describe('findAll', () => {
-//     describe('when findAll is called', () => {
-//       const options = { page: 1, limit: 10 };
-//       beforeEach(async () => {
-//         await usersController.findAll(options);
-//       });
+        employementTypesController = moduleRef.get<EmployementTypesController>(
+            EmployementTypesController,
+        );
+        employementTypeService = moduleRef.get<EmployementTypeService>(
+            EmployementTypeService,
+        );
+        jest.clearAllMocks();
+    });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.findAll).toHaveBeenCalled();
-//       });
+    describe('create', () => {
+        describe('when create is called', () => {
+            let employementType: EmployementType;
+            let request: Request;
 
-//       test('then is should return a userss', async () => {
-//         expect(await usersController.findAll(options)).toEqual(
-//           paginationResultUserData(),
-//         );
-//       });
-//     });
-//   });
+            beforeEach(async () => {
+                employementType = await employementTypesController.create(
+                    createEmployementTypeData(),
+                    request['tenantId']
+                );
+            });
 
-//   describe('findOne', () => {
-//     describe('when findOne is called', () => {
-//       let users: User;
+            test('then it should call create', () => {
+                expect(employementTypeService.create).toHaveBeenCalledWith(
+                    createEmployementTypeData(),
+                    request['tenantId']
+                );
+            });
 
-//       beforeEach(async () => {
-//         users = await usersController.findOne(userData().id);
-//       });
+            test('then it should return a employementType', () => {
+                expect(employementType).toEqual(employementTypeData());
+            });
+        });
+    });
 
-//       test('then it should call userservice', () => {
-//         expect(usersService.findOne).toHaveBeenCalledWith(userData().id);
-//       });
+    describe('findOne', () => {
+        describe('when findOne is called', () => {
+            let employementType: EmployementType;
+            let request: Request;
 
-//       test('then it should return users', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            beforeEach(async () => {
+                employementType = await employementTypesController.findOne(
+                    employementTypeData().id);
+            });
 
-//   describe('create', () => {
-//     describe('when create is called', () => {
-//       let users: User;
+            test('then it should call findOne', () => {
+                expect(employementTypeService.findOne).toHaveBeenCalledWith(
+                    employementTypeData().id,
+                );
+            });
 
-//       beforeEach(async () => {
-//         users = await usersController.create(userData());
-//       });
+            test('then it should return  employementType', () => {
+                expect(employementType).toEqual(employementTypeData());
+            });
+        });
+    });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.create).toHaveBeenCalledWith(userData());
-//       });
+    describe('findAll', () => {
+        describe('when findAll is called', () => {
+            beforeEach(async () => {
+                await employementTypesController.findAll(
+                    paginationOptions(),);
+            });
 
-//       test('then it should return a product', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            test('then it should call findAll service', () => {
+                expect(employementTypeService.findAll).toHaveBeenCalledWith(
+                    paginationOptions(),
+                );
+            });
 
-//   describe('update', () => {
-//     describe('when update is called', () => {
-//       let users: User;
+            test('then is should return employementType', async () => {
+                expect(await employementTypesController.findAll()).toEqual(
+                    paginationResultEmploymentTypeData(),
+                );
+            });
+        });
+    });
 
-//       beforeEach(async () => {
-//         users = await usersController.update(userData().id, userData() as any);
-//       });
+    describe('update', () => {
+        describe('when update is called', () => {
+            let employementType: EmployementType;
+            let request: Request;
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.update).toHaveBeenCalledWith(
-//           userData().id,
-//           userData(),
-//         );
-//       });
+            beforeEach(async () => {
+                employementType = await employementTypesController.update(
+                    employementTypeData().id,
+                    createEmployementTypeData(),
+                );
+            });
 
-//       test('then it should return a users', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            test('then it should call update', () => {
+                expect(employementTypeService.update).toHaveBeenCalledWith(
+                    employementTypeData().id,
+                    createEmployementTypeData(),
+                );
+            });
 
-//   describe('remove', () => {
-//     describe('when remove is called', () => {
-//       // let users: Product;
+            test('then it should return a employementType', () => {
+                expect(employementType).toEqual(employementTypeData());
+            });
+        });
+    });
 
-//       beforeEach(async () => {
-//         await usersController.remove(userData().id);
-//       });
+    describe('remove', () => {
+        describe('when remove is called', () => {
+            beforeEach(async () => {
+                await employementTypesController.remove(employementTypeData().id);
+            });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.remove).toHaveBeenCalledWith(userData().id);
-//       });
+            test('then it should call remove', () => {
+                expect(employementTypeService.remove).toHaveBeenCalledWith(
+                    employementTypeData().id,
+                );
+            });
 
-//       test('then it should return a users', async () => {
-//         expect(await usersController.remove(userData().id)).toEqual(
-//           'Promise resolves with void',
-//         );
-//       });
-//     });
-//   });
-// });
+            test('then it should return a employementType', async () => {
+                expect(
+                    await employementTypesController.remove(employementTypeData().id),
+                ).toEqual('Promise resolves with void');
+            });
+        });
+    });
+});

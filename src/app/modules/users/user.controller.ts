@@ -1,4 +1,5 @@
-import { FileUploadService } from '../../../core/commonServices/upload.service';
+import { UserService } from './user.service';
+import { SearchFilterDTO } from './../../../core/commonDto/search-filter-dto';
 import {
   Controller,
   Get,
@@ -9,49 +10,88 @@ import {
   Delete,
   Query,
   UseInterceptors,
-  UploadedFile,
   Req,
+  UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { User } from './entities/user.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { imageUploadOptions } from '@root/src/core/utils/upload-file.utils';
-import { CreateBulkRequestDto } from '@root/src/core/commonDto/createBulkRequest.dto';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateUserPermissionDto } from '../user-permission/dto/create-user-permission.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { CreateRolePermissionDto } from '../role-permission/dto/create-role-permission.dto';
+import { CreateEmployeeInformationDto } from '../employee-information/dto/create-employee-information.dto';
+import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto/create-employee-job-information.dto';
+import { CreateEmployeeDocumentDto } from '../employee-documents/dto/create-employee-documents.dto';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
+import { parseNestedJson } from '@root/src/core/utils/parseNestedJson.utils';
 
 @Controller('users')
 @ApiTags('Users')
-export class UsersController {
+export class UserController {
   constructor(private readonly userService: UserService,
-    private readonly fileUploadService: FileUploadService,
   ) { }
 
   @Post()
-  @UseInterceptors(FileInterceptor('profileImage', imageUploadOptions))
+  @UseInterceptors(AnyFilesInterceptor())
   async create(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: any,
     @Req() request: Request,
-    @Body() createBulkRequestDto: CreateBulkRequestDto,
-    @UploadedFile() file: Express.Multer.File,
   ) {
-    const tenantId = 'tenantId';
 
-    // Example file upload logic
-    // const uploadedFilePath = await this.fileUploadService.uploadFileToServer(tenantId, file);
-    // createUserRequestDto.createUserDto.profileImage = uploadedFilePath['viewImage'];
-    // createUserRequestDto.createUserDto.profileImageDownload = uploadedFilePath['image'];
+    const profileImage = files.find(file => file.fieldname === 'profileImage');
 
-    return this.userService.create(tenantId, createBulkRequestDto);
+    const documentName = files.find(file => file.fieldname === 'documentName');
+
+    const { createUserDto, createRolePermissionDto, createUserPermissionDto, createEmployeeInformationDto, createEmployeeJobInformationDto, createEmployeeDocumentDto } = body;
+
+    const createUser = plainToInstance(CreateUserDto, createUserDto ? JSON.parse(createUserDto) : {});
+
+    const createRolePermission = plainToInstance(CreateRolePermissionDto, createRolePermissionDto ? JSON.parse(createRolePermissionDto) : {});
+
+    const createUserPermission = plainToInstance(CreateUserPermissionDto, createUserPermissionDto ? JSON.parse(createUserPermissionDto) : {});
+
+    const createEmployeeInfo = plainToInstance(CreateEmployeeInformationDto, createEmployeeInformationDto ? JSON.parse(createEmployeeInformationDto) : {});
+
+    const createEmployeeJob = plainToInstance(CreateEmployeeJobInformationDto, createEmployeeJobInformationDto ? JSON.parse(createEmployeeJobInformationDto) : {});
+
+    const createEmployeeDoc = plainToInstance(CreateEmployeeDocumentDto, createEmployeeDocumentDto ? JSON.parse(createEmployeeDocumentDto) : {});
+
+    for (const dto of [createUser, createRolePermission, createUserPermission, createEmployeeInfo, createEmployeeJob, createEmployeeDoc]) {
+
+      const errors = await validate(dto);
+
+      if (errors.length > 0) {
+        throw new BadRequestException(`Validation failed: ${errors.map(err => Object.values(err.constraints || {}).join(', ')).join(', ')}`);
+      }
+    }
+
+    let createBulkRequestDto = {
+      createUserDto: parseNestedJson(createUserDto),
+      createRolePermissionDto: parseNestedJson(createRolePermissionDto),
+      createUserPermissionDto: parseNestedJson(createUserPermissionDto),
+      createEmployeeInformationDto: parseNestedJson(createEmployeeInformationDto),
+      createEmployeeJobInformationDto: parseNestedJson(createEmployeeJobInformationDto),
+      createEmployeeDocumentDto: parseNestedJson(createEmployeeDocumentDto),
+    }
+
+    const tenantId = request['tenantId'];
+
+    return await this.userService.create(tenantId, createBulkRequestDto, profileImage, documentName);
   }
 
   @Get()
   async findAll(
+    @Req() request: Request,
     @Query() paginationOptions?: PaginationDto,
+    @Query() searchFilterDTO?: SearchFilterDTO
   ): Promise<Pagination<User>> {
-    return await this.userService.findAll(paginationOptions);
+    return await this.userService.findAll(paginationOptions, searchFilterDTO, request['tenantId']);
   }
 
   @Get(':id')
@@ -69,26 +109,27 @@ export class UsersController {
     return this.userService.remove(id);
   }
 
-  // @Post('/assign-permission-to-user')
-  // assignPermissionToRole(
-  //   @Body() createUserPermissionDto: CreateUserPermissionDto,
-  // ) {
-  //   return this.usersService.assignPermissionToUser(createUserPermissionDto);
-  // }
+  @Post('/assign-permission-to-user')
+  assignPermissionToRole(
+    @Req() request: Request,
+    @Body() createUserPermissionDto: CreateUserPermissionDto,
+  ) {
+    return this.userService.assignPermissionToUser(createUserPermissionDto, request['tenantId']);
+  }
 
-  // @Get('/permissions/:userId')
-  // findPermissionsByUserId(@Param('userId') id: string) {
-  //   return this.usersService.findPermissionsByUserId(id);
-  // }
+  @Get('/permissions/:userId')
+  findPermissionsByUserId(@Param('userId') id: string) {
+    return this.userService.findPermissionsByUserId(id);
+  }
 
-  // @Delete('/:userId/deAttach-permission/:permissionId')
-  // async deAttachOneUserPermissionByUserId(
-  //   @Param('userId') userId: string,
-  //   @Param('permissionId') permissionId: string,
-  // ) {
-  //   return this.usersService.deAttachOneUserPermissionByUserId(
-  //     userId,
-  //     permissionId,
-  //   );
-  // }
+  @Delete('/:userId/deAttach-permission/:permissionId')
+  async deAttachOneUserPermissionByUserId(
+    @Param('userId') userId: string,
+    @Param('permissionId') permissionId: string,
+  ) {
+    return this.userService.deAttachOneUserPermissionByUserId(
+      userId,
+      permissionId,
+    );
+  }
 }

@@ -9,26 +9,36 @@ import { Repository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '../../../core/pagination/pagination.service';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto/create-employee-job-information.dto';
-import { UpdateEmployeeDocumentsDto } from './dto/update-employee-documents.dto';
+import { UpdateEmployeeDocumentDto } from './dto/update-employee-documents.dto';
 import { EmployeeDocument } from './entities/employee-documents.entity';
-import { CreateEmployeeDocumentsDto } from './dto/create-employee-documents.dto';
+import { CreateEmployeeDocumentDto } from './dto/create-employee-documents.dto';
+import { FileUploadService } from '@root/src/core/commonServices/upload.service';
 
 @Injectable()
 export class EmployeeDocumentService {
   constructor(
     @InjectRepository(EmployeeDocument)
-    private employeejobinformationRepository: Repository<EmployeeDocument>,
-    private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
+    private readonly employeeDocumentRepository: Repository<EmployeeDocument>,
+    private readonly paginationService: PaginationService,
+    private readonly fileUploadService: FileUploadService,
   ) { }
 
   async create(
-    createEmployeeDocumentsDto: CreateEmployeeDocumentsDto,
+    createEmployeeDocumentsDto: CreateEmployeeDocumentDto, documentName: Express.Multer.File, tenantId: string
   ) {
-    const user = this.employeejobinformationRepository.create(createEmployeeDocumentsDto);
+
+    const uploadedDocumentPath = await this.fileUploadService.uploadFileToServer(tenantId, documentName);
+
+    createEmployeeDocumentsDto['documentName'] = uploadedDocumentPath['viewImage'];
+
+    createEmployeeDocumentsDto['documentLink'] = uploadedDocumentPath['image'];
+
+    const employeeDocument = this.employeeDocumentRepository.create(createEmployeeDocumentsDto);
     try {
-      return await this.employeejobinformationRepository.save(user);
+      return await this.employeeDocumentRepository.save(employeeDocument);
+
     } catch (error) {
+
       throw new ConflictException(error.message);
     }
   }
@@ -41,9 +51,10 @@ export class EmployeeDocumentService {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      const queryBuilder = await this.employeejobinformationRepository
-        .createQueryBuilder('employee-documents')
-        .orderBy('employee-documents.createdAt', 'DESC');
+
+      const queryBuilder = this.employeeDocumentRepository
+        .createQueryBuilder('employee_document')
+        .orderBy('employee_document.createdAt', 'DESC');
 
       return await this.paginationService.paginate<EmployeeDocument>(
         queryBuilder,
@@ -51,7 +62,7 @@ export class EmployeeDocumentService {
       );
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`EmployeeDocument not found.`);
+        throw new NotFoundException('EmployeeDocument not found.');
       }
       throw error;
     }
@@ -59,12 +70,10 @@ export class EmployeeDocumentService {
 
   async findOne(id: string) {
     try {
-      const employeejobinformation = await this.employeejobinformationRepository
-        .createQueryBuilder('employee-job-information')
-        .where('employee-job-information.id = :id', { id })
+      return await this.employeeDocumentRepository
+        .createQueryBuilder('employee_document')
+        .where('employee_document.id = :id', { id })
         .getOne();
-
-      return { ...employeejobinformation };
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(
@@ -77,23 +86,23 @@ export class EmployeeDocumentService {
 
   async update(
     id: string,
-    updateEmployeeDocumentsDto: UpdateEmployeeDocumentsDto,
+    updateEmployeeDocumentsDto: UpdateEmployeeDocumentDto,
   ) {
     try {
-      await this.employeejobinformationRepository.findOneOrFail({
+      await this.employeeDocumentRepository.findOneOrFail({
         where: { id: id },
       });
-      // await this.employeejobinformationRepository.update(
-      //   { id },
-      //   updateEmployeeJobInformationDto,
-      // );
-      return await this.employeejobinformationRepository.findOneOrFail({
+      await this.employeeDocumentRepository.update(
+        { id },
+        updateEmployeeDocumentsDto,
+      );
+      return await this.employeeDocumentRepository.findOneOrFail({
         where: { id: id },
       });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(
-          `EmployeeJobInformation with id ${id} not found.`,
+          `EmployeeDocument with id ${id} not found.`,
         );
       }
       throw error;
@@ -102,14 +111,14 @@ export class EmployeeDocumentService {
 
   async remove(id: string) {
     try {
-      await this.employeejobinformationRepository.findOneOrFail({
+      await this.employeeDocumentRepository.findOneOrFail({
         where: { id: id },
       });
-      return await this.employeejobinformationRepository.softDelete({ id });
+      return await this.employeeDocumentRepository.softDelete({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(
-          `EmployeeJobInformation with id ${id} not found.`,
+          `EmployeeDocument with id ${id} not found.`,
         );
       }
       throw error;

@@ -21,20 +21,17 @@ export class EmployeeInformationFormService {
   ) { }
 
   async create(createEmployeeInformationFormDto: CreateEmployeeInformationFormDto, tenantId: string) {
-    // Retrieve the existing form by title
     const existingForm = await this.getEmployeeFormByFormTitle(createEmployeeInformationFormDto.formTitle);
 
     if (existingForm) {
       const existingFormFields = existingForm.form || [];
       const newFormFields = createEmployeeInformationFormDto.form || [];
 
-      // Assuming the fields are objects with `id` and other properties
       const mergedFormFields = [
         ...existingFormFields,
         ...newFormFields,
       ];
 
-      // Remove duplicates based on ID if needed
       const uniqueMergedFields = mergedFormFields.reduce((acc, current) => {
         const x = acc.find(item => item.id === current.id);
         if (!x) {
@@ -82,16 +79,14 @@ export class EmployeeInformationFormService {
         limit: paginationOptions.limit,
       };
       const queryBuilder = await this.employeeInformationFormRepository
-        .createQueryBuilder('employee-job-information')
-        .orderBy('employee-job-information.createdAt', 'DESC');
-
+        .createQueryBuilder('employee_information_form');
       return await this.paginationService.paginate<EmployeeInformationForm>(
         queryBuilder,
         options,
       );
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`EmployeeJobInformation not found.`);
+        throw new NotFoundException(`employeeInformationForm not found.`);
       }
       throw error;
     }
@@ -99,16 +94,15 @@ export class EmployeeInformationFormService {
 
   async findOne(id: string) {
     try {
-      const employeejobinformation = await this.employeeInformationFormRepository
-        .createQueryBuilder('employee-job-information')
-        .where('employee-job-information.id = :id', { id })
+      const employeeInformationForm = await this.employeeInformationFormRepository
+        .createQueryBuilder('employee-information-form')
         .getOne();
 
-      return { ...employeejobinformation };
+      return { ...employeeInformationForm };
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(
-          `EmployeeJobInformation with id ${id} not found.`,
+          `employeeInformationForm with id ${id} not found.`,
         );
       }
       throw error;

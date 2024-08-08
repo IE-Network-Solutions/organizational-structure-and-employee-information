@@ -1,120 +1,181 @@
 // import { Test } from '@nestjs/testing';
-// import { UsersController } from './users.controller';
-// import { UsersService } from './users.service';
-// import { paginationResultUserData, userData } from './tests/user.data';
+// import { UserService } from './user.service';
+// import { UserController } from './user.controller';
+// import { UpdateUserDto } from './dto/update-user.dto';
 // import { User } from './entities/user.entity';
+// import { Pagination } from 'nestjs-typeorm-paginate';
+// import { parseNestedJson } from '@root/src/core/utils/parseNestedJson.utils';
+// import {
+//     userData,
+//     userDataSave,
+//     userDataOnFindOne,
+//     createUserData,
+//     paginationResultUserData,
+//     updateUserData,
+//     deleteUserData
+// } from './tests/user.data';
+// import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+// import { searchFilter } from '@root/src/core/commonTestData/search-filter.data';
 
-// jest.mock('./users.service');
+// // Mock the UserService
+// jest.mock('./user.service');
 
-// describe('UsersController', () => {
-//   let usersController: UsersController;
-//   let usersService: UsersService;
+// describe('UserController', () => {
+//     let userController: UserController;
+//     let userService: UserService;
 
-//   beforeEach(async () => {
-//     const moduleRef = await Test.createTestingModule({
-//       imports: [],
-//       controllers: [UsersController],
-//       providers: [UsersService],
-//     }).compile();
+//     beforeEach(async () => {
+//         const moduleRef = await Test.createTestingModule({
+//             imports: [],
+//             controllers: [UserController],
+//             providers: [UserService],
+//         }).compile();
 
-//     usersController = moduleRef.get<UsersController>(UsersController);
-//     usersService = moduleRef.get<UsersService>(UsersService);
-//     jest.clearAllMocks();
-//   });
-
-//   describe('findAll', () => {
-//     describe('when findAll is called', () => {
-//       const options = { page: 1, limit: 10 };
-//       beforeEach(async () => {
-//         await usersController.findAll(options);
-//       });
-
-//       test('then it should call UsersService', () => {
-//         expect(usersService.findAll).toHaveBeenCalled();
-//       });
-
-//       test('then is should return a userss', async () => {
-//         expect(await usersController.findAll(options)).toEqual(
-//           paginationResultUserData(),
-//         );
-//       });
+//         userController = moduleRef.get<UserController>(UserController);
+//         userService = moduleRef.get<UserService>(UserService);
+//         jest.clearAllMocks();
 //     });
-//   });
 
-//   describe('findOne', () => {
-//     describe('when findOne is called', () => {
-//       let users: User;
+//     describe('create', () => {
+//         describe('when create is called', () => {
+//             let user: User;
+//             let request: Partial<Request>;
+//             let files: Express.Multer.File[];
+//             let body: any;
 
-//       beforeEach(async () => {
-//         users = await usersController.findOne(userData().id);
-//       });
+//             beforeEach(async () => {
+//                 files = [
+//                     { fieldname: 'profileImage', originalname: 'profile.png', buffer: Buffer.from('profile image') } as Express.Multer.File,
+//                     { fieldname: 'documentName', originalname: 'document.pdf', buffer: Buffer.from('document') } as Express.Multer.File,
+//                 ];
 
-//       test('then it should call userservice', () => {
-//         expect(usersService.findOne).toHaveBeenCalledWith(userData().id);
-//       });
+//                 body = {
+//                     createUserDto: JSON.stringify(createUserData()),
+//                     createRolePermissionDto: JSON.stringify({}),
+//                     createUserPermissionDto: JSON.stringify({}),
+//                     createEmployeeInformationDto: JSON.stringify({}),
+//                     createEmployeeJobInformationDto: JSON.stringify({}),
+//                     createEmployeeDocumentDto: JSON.stringify({}),
+//                 };
 
-//       test('then it should return users', () => {
-//         expect(users).toEqual(userData());
-//       });
+//                 (userService.create as jest.Mock).mockResolvedValue(userDataSave());
+
+//                 user = await userController.create(files, body, request as Request);
+//             });
+
+//             it('should call userService.create with correct arguments', () => {
+//                 const expectedBulkRequestDto = {
+//                     createUserDto: parseNestedJson(body.createUserDto),
+//                     createRolePermissionDto: parseNestedJson(body.createRolePermissionDto),
+//                     createUserPermissionDto: parseNestedJson(body.createUserPermissionDto),
+//                     createEmployeeInformationDto: parseNestedJson(body.createEmployeeInformationDto),
+//                     createEmployeeJobInformationDto: parseNestedJson(body.createEmployeeJobInformationDto),
+//                     createEmployeeDocumentDto: parseNestedJson(body.createEmployeeDocumentDto),
+//                 };
+
+//                 expect(userService.create).toHaveBeenCalledWith(
+//                     request['tenantId'],
+//                     expectedBulkRequestDto,
+//                     files.find(file => file.fieldname === 'profileImage'),
+//                     files.find(file => file.fieldname === 'documentName')
+//                 );
+//             });
+
+//             it('should return the created user', () => {
+//                 expect(user).toEqual(userDataSave());
+//             });
+//         });
 //     });
-//   });
 
-//   describe('create', () => {
-//     describe('when create is called', () => {
-//       let users: User;
+//     describe('findAll', () => {
+//         describe('when findAll is called', () => {
+//             let request: Partial<Request>;
+//             let result: Pagination<User>;
 
-//       beforeEach(async () => {
-//         users = await usersController.create(userData());
-//       });
+//             beforeEach(async () => {
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.create).toHaveBeenCalledWith(userData());
-//       });
+//                 // Mock the findAll method
+//                 (userService.findAll as jest.Mock).mockResolvedValue(paginationResultUserData());
 
-//       test('then it should return a product', () => {
-//         expect(users).toEqual(userData());
-//       });
+//                 result = await userController.findAll(
+//                     request as Request,
+//                     paginationOptions(),
+//                     searchFilter(),
+//                 );
+//             });
+
+//             it('should call userService.findAll with correct parameters', () => {
+//                 expect(userService.findAll).toHaveBeenCalledWith(
+//                     paginationOptions(),
+//                     searchFilter(),
+//                     request['tenantId'],
+//                 );
+//             });
+
+//             it('should return a list of users', () => {
+//                 expect(result).toEqual(paginationResultUserData());
+//             });
+//         });
 //     });
-//   });
 
-//   describe('update', () => {
-//     describe('when update is called', () => {
-//       let users: User;
+//     describe('findOne', () => {
+//         describe('when findOne is called', () => {
+//             let user: User;
 
-//       beforeEach(async () => {
-//         users = await usersController.update(userData().id, userData() as any);
-//       });
+//             beforeEach(async () => {
+//                 // Mock the findOne method
+//                 (userService.findOne as jest.Mock).mockResolvedValue(userDataOnFindOne());
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.update).toHaveBeenCalledWith(
-//           userData().id,
-//           userData(),
-//         );
-//       });
+//                 user = await userController.findOne(userDataOnFindOne().id);
+//             });
 
-//       test('then it should return a users', () => {
-//         expect(users).toEqual(userData());
-//       });
+//             it('should call userService.findOne with the correct id', () => {
+//                 expect(userService.findOne).toHaveBeenCalledWith(userDataOnFindOne().id);
+//             });
+
+//             it('should return the user data', () => {
+//                 expect(user).toEqual(userDataOnFindOne());
+//             });
+//         });
 //     });
-//   });
 
-//   describe('remove', () => {
-//     describe('when remove is called', () => {
-//       // let users: Product;
+//     describe('update', () => {
+//         describe('when update is called', () => {
+//             let user: User;
 
-//       beforeEach(async () => {
-//         await usersController.remove(userData().id);
-//       });
+//             beforeEach(async () => {
+//                 // Mock the update method
+//                 (userService.update as jest.Mock).mockResolvedValue(updateUserData());
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.remove).toHaveBeenCalledWith(userData().id);
-//       });
+//                 user = await userController.update(userData().id, userData() as UpdateUserDto);
+//             });
 
-//       test('then it should return a users', async () => {
-//         expect(await usersController.remove(userData().id)).toEqual(
-//           'Promise resolves with void',
-//         );
-//       });
+//             it('should call userService.update with the correct id and data', () => {
+//                 expect(userService.update).toHaveBeenCalledWith(userData().id, userData() as UpdateUserDto);
+//             });
+
+//             it('should return the updated user data', () => {
+//                 expect(user).toEqual(updateUserData());
+//             });
+//         });
 //     });
-//   });
+
+//     describe('remove', () => {
+//         describe('when remove is called', () => {
+//             beforeEach(async () => {
+//                 // Mock the remove method
+//                 (userService.remove as jest.Mock).mockResolvedValue(deleteUserData());
+
+//                 await userController.remove(userData().id);
+//             });
+
+//             it('should call userService.remove with the correct id', () => {
+//                 expect(userService.remove).toHaveBeenCalledWith(userData().id);
+//             });
+
+//             it('should return void', async () => {
+//                 await expect(userController.remove(userData().id)).resolves.toBeUndefined();
+//             });
+//         });
+//     });
 // });

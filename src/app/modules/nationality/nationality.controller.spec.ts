@@ -1,120 +1,139 @@
-// import { Test } from '@nestjs/testing';
-// import { UsersController } from './users.controller';
-// import { UsersService } from './users.service';
-// import { paginationResultUserData, userData } from './tests/user.data';
-// import { User } from './entities/user.entity';
+import { Test } from '@nestjs/testing';
+import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { NationalitysController } from './nationality.controller';
+import { NationalityService } from './nationality.service';
+import { Nationality } from './entities/nationality.entity';
+import { createNationality, findAllNationalities, nationalityData } from './tests/nationality.data';
+import { UpdateNationalityDto } from './dto/update-nationality.dto';
 
-// jest.mock('./users.service');
+jest.mock('./nationality.service');
 
-// describe('UsersController', () => {
-//   let usersController: UsersController;
-//   let usersService: UsersService;
+describe('RoleController', () => {
+    let nationalitysController: NationalitysController;
+    let nationalityService: NationalityService;
 
-//   beforeEach(async () => {
-//     const moduleRef = await Test.createTestingModule({
-//       imports: [],
-//       controllers: [UsersController],
-//       providers: [UsersService],
-//     }).compile();
+    beforeEach(async () => {
+        const moduleRef = await Test.createTestingModule({
+            imports: [],
+            controllers: [NationalitysController],
+            providers: [NationalityService],
+        }).compile();
 
-//     usersController = moduleRef.get<UsersController>(UsersController);
-//     usersService = moduleRef.get<UsersService>(UsersService);
-//     jest.clearAllMocks();
-//   });
+        nationalitysController = moduleRef.get<NationalitysController>(NationalitysController);
+        nationalityService = moduleRef.get<NationalityService>(NationalityService);
+        jest.clearAllMocks();
+    });
 
-//   describe('findAll', () => {
-//     describe('when findAll is called', () => {
-//       const options = { page: 1, limit: 10 };
-//       beforeEach(async () => {
-//         await usersController.findAll(options);
-//       });
+    describe('create', () => {
+        describe('when create is called', () => {
+            let nationality: Nationality;
+            let request: Request;
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.findAll).toHaveBeenCalled();
-//       });
+            beforeEach(async () => {
+                request = {
+                    tenantId: 'tenantId',
+                } as any;
+                (nationalityService.create as jest.Mock).mockResolvedValue(nationalityData());
+                nationality = await nationalitysController.create(createNationality(), request as any);
+            });
 
-//       test('then is should return a userss', async () => {
-//         expect(await usersController.findAll(options)).toEqual(
-//           paginationResultUserData(),
-//         );
-//       });
-//     });
-//   });
+            test('then it should return a nationality', () => {
+                expect(nationality).toEqual(nationalityData());
+            });
+        });
+    });
 
-//   describe('findOne', () => {
-//     describe('when findOne is called', () => {
-//       let users: User;
+    describe('findAll', () => {
+        describe('when findAll is called', () => {
+            let request: Request;
 
-//       beforeEach(async () => {
-//         users = await usersController.findOne(userData().id);
-//       });
+            beforeEach(async () => {
+                request = {
+                    tenantId: 'tenantId', // Mock tenantId
+                } as any;
 
-//       test('then it should call userservice', () => {
-//         expect(usersService.findOne).toHaveBeenCalledWith(userData().id);
-//       });
+                (nationalityService.findAll as jest.Mock).mockResolvedValue(findAllNationalities());
 
-//       test('then it should return users', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+                await nationalitysController.findAll(paginationOptions());
+            });
 
-//   describe('create', () => {
-//     describe('when create is called', () => {
-//       let users: User;
+            test('then it should call nationalityService.findAll with correct parameters', () => {
+                expect(nationalityService.findAll).toHaveBeenCalledWith(
+                    paginationOptions());
+            });
 
-//       beforeEach(async () => {
-//         users = await usersController.create(userData());
-//       });
+            test('then it should return all natinalities', async () => {
+                const result = await nationalitysController.findAll(paginationOptions());
+                expect(result).toEqual(findAllNationalities());
+            });
+        });
+    });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.create).toHaveBeenCalledWith(userData());
-//       });
+    describe('findOne', () => {
+        describe('when findOne is called', () => {
+            let nationality: Nationality;
 
-//       test('then it should return a product', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            beforeEach(async () => {
+                nationality = await nationalitysController.findOne(nationalityData().id);
+            });
 
-//   describe('update', () => {
-//     describe('when update is called', () => {
-//       let users: User;
+            test('then it should call nationalityService', () => {
+                expect(nationalityService.findOne).toHaveBeenCalledWith(nationalityData().id);
+            });
 
-//       beforeEach(async () => {
-//         users = await usersController.update(userData().id, userData() as any);
-//       });
+            test('then it should return nationality', () => {
+                expect(nationality).toEqual(nationalityData());
+            });
+        });
+    });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.update).toHaveBeenCalledWith(
-//           userData().id,
-//           userData(),
-//         );
-//       });
+    describe('update', () => {
+        describe('when update is called', () => {
+            let nationality: Nationality;
+            let updateNationalityDto: UpdateNationalityDto;
+            let request: Request;
 
-//       test('then it should return a users', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            beforeEach(async () => {
+                request = {
+                    tenantId: 'tenantId',
+                } as any;
 
-//   describe('remove', () => {
-//     describe('when remove is called', () => {
-//       // let users: Product;
+                (nationalityService.update as jest.Mock).mockResolvedValue(nationalityData());
 
-//       beforeEach(async () => {
-//         await usersController.remove(userData().id);
-//       });
+                nationality = await nationalitysController.update(
+                    nationalityData().id,
+                    updateNationalityDto,
+                );
+            });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.remove).toHaveBeenCalledWith(userData().id);
-//       });
+            test('then it should call nationalityService.update with correct parameters', () => {
+                expect(nationalityService.update).toHaveBeenCalledWith(
+                    nationalityData().id,
+                    updateNationalityDto,
+                );
+            });
 
-//       test('then it should return a users', async () => {
-//         expect(await usersController.remove(userData().id)).toEqual(
-//           'Promise resolves with void',
-//         );
-//       });
-//     });
-//   });
-// });
+            test('then it should return the updated nationality', () => {
+                expect(nationality).toEqual(nationalityData());
+            });
+        });
+    });
+
+    describe('remove', () => {
+        describe('when remove is called', () => {
+            beforeEach(async () => {
+                await nationalitysController.remove(nationalityData().id);
+            });
+
+            test('then it should call remove', () => {
+                expect(nationalityService.remove).toHaveBeenCalledWith(nationalityData().id);
+            });
+
+            test('then it should return a nationality', async () => {
+                expect(await nationalitysController.remove(nationalityData().id)).toEqual(
+                    'Promise resolves with void',
+                );
+            });
+        });
+    });
+});

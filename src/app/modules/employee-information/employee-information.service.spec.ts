@@ -1,204 +1,147 @@
-// import { Test } from '@nestjs/testing';
-// import { getRepositoryToken } from '@nestjs/typeorm';
-// import { EmployeeInformation } from './entities/employee-information.entity';
-// import { UsersService } from './employee-information.service';
-// import {
-//   createUserData,
-//   deleteUserData,
-//   updateUserData,
-//   userData,
-//   userDataSave,
-// } from './tests/employee-information.data';
-// import * as applySearchFilterUtils from '../../../core/utils/search-filter.utils'; // Adjust the path to the correct module
+import { Test, TestingModule } from '@nestjs/testing';
+import { EmployeeInformationService } from './employee-information.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { EmployeeInformation } from './entities/employee-information.entity';
+import { Repository } from 'typeorm';
+import { PaginationService } from '../../../core/pagination/pagination.service';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
+import { mock, MockProxy } from 'jest-mock-extended';
+import {
+    createEmployeeInformationData,
+    employeeInformationData,
+    paginationResultEmployeeInformationData,
+    deleteEmployeeInformationData,
+} from './tests/employee-information.data';
+import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
+import { Pagination } from 'nestjs-typeorm-paginate';
 
-// import { MockProxy, mock } from 'jest-mock-extended';
-// import { Repository } from 'typeorm';
-// import { PaginationService } from '@root/src/core/pagination/pagination.service';
-// // import { UserPermission } from '../user-permission/entities/user-permission.entity';
-// // import { UserPermissionService } from '../user-permission/user-permission.service';
-// // import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
-// // import { Repository } from 'typeorm';
+describe('EmployeeInformationService', () => {
+    let employeeInformationService: EmployeeInformationService;
+    let repository: MockProxy<Repository<EmployeeInformation>>;
+    let paginationService: MockProxy<PaginationService>;
 
-// describe('usersService', () => {
-//   let usersService: UsersService;
-//   let usersRepository: MockProxy<Repository<EmployeeInformation>>;
-//   let paginationService: MockProxy<PaginationService>;
-//   // let userPermissionService: MockProxy<UserPermissionService>;
-//   const userToken = getRepositoryToken(EmployeeInformation);
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                EmployeeInformationService,
+                {
+                    provide: getRepositoryToken(EmployeeInformation),
+                    useValue: mock<Repository<EmployeeInformation>>(),
+                },
+                {
+                    provide: PaginationService,
+                    useValue: mock<PaginationService>(),
+                },
+            ],
+        }).compile();
 
-//   beforeEach(async () => {
-//     const moduleRef = await Test.createTestingModule({
-//       providers: [
-//         UsersService,
-//         {
-//           provide: PaginationService,
-//           useValue: mock<PaginationService>(), // Use mock for PaginationService
-//         },
+        employeeInformationService = module.get<EmployeeInformationService>(EmployeeInformationService);
+        repository = module.get(getRepositoryToken(EmployeeInformation));
+        paginationService = module.get(PaginationService);
+    });
 
-//         {
-//           provide: userToken,
-//           useValue: mock<Repository<EmployeeInformation>>(),
-//         },
-//       ],
-//     }).compile();
+    describe('create', () => {
+        it('should create and save a new employee information', async () => {
+            const tenantId = 'tenant-id';
+            const createDto = createEmployeeInformationData();
 
-//     usersService = moduleRef.get<UsersService>(UsersService);
-//     usersRepository = moduleRef.get(userToken);
-//     paginationService = moduleRef.get(PaginationService); // Get an instance of PaginationService
-//   });
+            repository.create.mockReturnValue({ ...createDto, tenantId } as EmployeeInformation);
+            repository.save.mockResolvedValue(employeeInformationData());
 
-//   describe('create', () => {
-//     describe('when createUser is called', () => {
-//       let user: EmployeeInformation;
-//       beforeEach(() => {
-//         usersRepository.create.mockReturnValue(createUserData() as any);
-//         usersRepository.save.mockResolvedValue(userDataSave() as any);
-//       });
+            const result = await employeeInformationService.create(createDto, tenantId);
 
-//       it('should call usersRepository.create', async () => {
-//         await usersService.create(createUserData());
-//         expect(usersRepository.create).toHaveBeenCalledWith(createUserData());
-//       });
+            expect(repository.create).toHaveBeenCalledWith({ ...createDto, tenantId });
+            expect(repository.save).toHaveBeenCalledWith({ ...createDto, tenantId });
+            expect(result).toEqual(employeeInformationData());
+        });
 
-//       it('should call usersRepository.save', async () => {
-//         await usersService.create(createUserData());
-//         expect(usersRepository.save).toHaveBeenCalledWith(createUserData());
-//       });
+        it('should throw ConflictException when save fails', async () => {
+            const tenantId = 'tenant-id';
+            const createDto = createEmployeeInformationData();
 
-//       it('should return the created user', async () => {
-//         user = await usersService.create(createUserData());
-//         expect(user).toEqual(userDataSave());
-//       });
-//     });
-//   });
+            repository.create.mockReturnValue({ ...createDto, tenantId } as EmployeeInformation);
+            repository.save.mockRejectedValue(new Error('Save error'));
 
-//   // describe('findOne', () => {
-//   //   describe('when findUserPermission is called', () => {
-//   //     let user: User;
+            await expect(employeeInformationService.create(createDto, tenantId)).rejects.toThrow(ConflictException);
+        });
+    });
 
-//   //     beforeEach(async () => {
-//   //       usersRepository.findOne.mockResolvedValue(userDataSave() as any);
-//   //       usersRepository.createQueryBuilder.mockReturnValue({
-//   //         leftJoinAndSelect: jest.fn().mockReturnThis(),
-//   //         where: jest.fn().mockReturnThis(),
-//   //         getOne: jest.fn().mockResolvedValue(userDataSave()),
-//   //       } as any);
-//   //       user = await usersService.findOne(userData().id);
-//   //     });
+    describe('findAll', () => {
+        it('should return paginated employee information', async () => {
+            const paginationOptions: PaginationDto = { page: 1, limit: 10 };
+            const searchFilterDTO: SearchFilterDTO = {};
+            const tenantId = 'tenant-id';
 
-//   //     it('should call usersRepository.findOne', async () => {
-//   //       await usersService.findOne(userData().id);
-//   //       expect(usersRepository.findOne).toHaveBeenCalledWith({
-//   //         where: { id: userData().id },
-//   //       });
-//   //     });
+            const queryBuilder = {
+                where: jest.fn().mockReturnThis(),
+                getMany: jest.fn().mockResolvedValue([employeeInformationData()]),
+            };
 
-//   //     it('should call usersRepository.createQueryBuilder methods', () => {
-//   //       expect(
-//   //         usersRepository.createQueryBuilder().leftJoinAndSelect,
-//   //       ).toHaveBeenCalledWith('user.role', 'role');
-//   //       expect(
-//   //         usersRepository.createQueryBuilder().leftJoinAndSelect,
-//   //       ).toHaveBeenCalledWith('role.rolePermissions', 'rolePermission');
-//   //       expect(
-//   //         usersRepository.createQueryBuilder().leftJoinAndSelect,
-//   //       ).toHaveBeenCalledWith('user.userPermissions', 'userPermission');
-//   //       expect(
-//   //         usersRepository.createQueryBuilder().leftJoinAndSelect,
-//   //       ).toHaveBeenCalledWith('userPermission.permission', 'permission');
-//   //       expect(usersRepository.createQueryBuilder().where).toHaveBeenCalledWith(
-//   //         'user.id = :id',
-//   //         { id: userData().id },
-//   //       );
-//   //     });
+            jest.spyOn(repository, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+            paginationService.paginate.mockResolvedValue(paginationResultEmployeeInformationData());
 
-//   //     it('should return the user', () => {
-//   //       expect(user).toEqual(userDataOnFindOne());
-//   //     });
-//   //   });
-//   // });
+            const result = await employeeInformationService.findAll(paginationOptions, searchFilterDTO, tenantId);
 
-//   describe('findAll', () => {
-//     it('should apply search filters correctly', async () => {
-//       const paginationOptions = { page: 1, limit: 10 };
+            expect(repository.createQueryBuilder).toHaveBeenCalledWith('employeeInformation');
+            expect(paginationService.paginate).toHaveBeenCalledWith(
+                repository,
+                'employeeInformation',
+                { page: paginationOptions.page, limit: paginationOptions.limit },
+                paginationOptions.orderBy,
+                paginationOptions.orderDirection,
+                { tenantId }
+            );
+            expect(result).toEqual(paginationResultEmployeeInformationData());
+        });
+    });
 
-//       const applySearchFiltersServiceSpy = jest
-//         .spyOn(applySearchFilterUtils, 'applySearchFilterUtils')
-//         .mockImplementation();
+    describe('findOne', () => {
+        it('should return employee information by ID', async () => {
+            const id = 'employee-id';
 
-//       const queryBuilderMock = {
-//         withDeleted: jest.fn().mockReturnThis(),
-//         leftJoinAndSelect: jest.fn().mockReturnThis(),
-//         orderBy: jest.fn().mockReturnThis(),
-//         andWhere: jest.fn().mockReturnThis(),
-//       };
-//       jest
-//         .spyOn(usersRepository, 'createQueryBuilder')
-//         .mockReturnValue(queryBuilderMock as any);
+            repository.createQueryBuilder.mockReturnValue({
+                where: jest.fn().mockReturnThis(),
+                getOne: jest.fn().mockResolvedValue(employeeInformationData()),
+            } as any);
 
-//       expect(usersRepository.createQueryBuilder).toHaveBeenCalled();
-//       expect(applySearchFiltersServiceSpy).toHaveBeenCalledWith(
-//         queryBuilderMock,
-//         usersRepository,
-//       );
-//       expect(paginationService.paginate).toHaveBeenCalledWith(
-//         expect.objectContaining({
-//           leftJoinAndSelect: expect.any(Function),
-//         }),
-//         {
-//           page: paginationOptions.page,
-//           limit: paginationOptions.limit,
-//         },
-//       );
-//     });
-//   });
+            const result = await employeeInformationService.findOne(id);
 
-//   describe('update', () => {
-//     describe('when updateUser is called', () => {
-//       let user: EmployeeInformation;
-//       beforeEach(async () => {
-//         usersRepository.findOneOrFail.mockResolvedValue(userDataSave() as any);
-//         usersRepository.update.mockResolvedValue(updateUserData());
-//         user = await usersService.update(userData().id, userDataSave());
-//       });
-//       it('should call usersRepository.update', async () => {
-//         expect(usersRepository.update).toHaveBeenCalledWith(
-//           { id: userDataSave().id },
-//           userDataSave(),
-//         );
-//       });
+            expect(repository.createQueryBuilder).toHaveBeenCalledWith('employee_information');
+            expect(result).toEqual(employeeInformationData());
+        });
+    });
 
-//       it('should return the updated user', () => {
-//         expect(user).toEqual(userDataSave());
-//       });
-//     });
-//   });
+    describe('update', () => {
+        it('should update and return employee information', async () => {
+            const id = 'employee-id';
+            const updateDto = createEmployeeInformationData();
 
-//   describe('remove', () => {
-//     describe('when remove users is called', () => {
-//       beforeEach(async () => {
-//         usersRepository.findOneOrFail.mockResolvedValue(userDataSave() as any);
-//         usersRepository.softDelete.mockResolvedValue(deleteUserData());
-//       });
+            repository.findOneOrFail.mockResolvedValue(employeeInformationData() as any);
+            repository.update.mockResolvedValue(undefined);
+            repository.findOneOrFail.mockResolvedValue(employeeInformationData() as any);
 
-//       it('should call userRepository.findOne', async () => {
-//         await usersService.remove(userDataSave().id);
-//         expect(usersRepository.findOneOrFail).toHaveBeenCalledWith({
-//           where: { id: userDataSave().id },
-//         });
-//       });
+            const result = await employeeInformationService.update(id, updateDto);
 
-//       it('should call userRepository.softdelete', async () => {
-//         await usersService.remove(userDataSave().id);
-//         expect(usersRepository.softDelete).toHaveBeenCalledWith({
-//           id: userDataSave().id,
-//         });
-//       });
+            expect(repository.findOneOrFail).toHaveBeenCalledWith({ where: { id } });
+            expect(repository.update).toHaveBeenCalledWith({ id }, updateDto);
+            expect(result).toEqual(employeeInformationData());
+        });
+    });
 
-//       it('should return void when the users is removed', async () => {
-//         const result = await usersService.remove(userDataSave().id);
-//         expect(result).toEqual(deleteUserData());
-//       });
-//     });
-//   });
-// });
+    describe('remove', () => {
+        it('should soft delete employee information', async () => {
+            const id = 'employee-id';
+
+            repository.findOneOrFail.mockResolvedValue(employeeInformationData() as any);
+            repository.softDelete.mockResolvedValue(deleteEmployeeInformationData());
+
+            const result = await employeeInformationService.remove(id);
+
+            expect(repository.findOneOrFail).toHaveBeenCalledWith({ where: { id } });
+            expect(repository.softDelete).toHaveBeenCalledWith({ id });
+            expect(result).toEqual(deleteEmployeeInformationData());
+        });
+    });
+});

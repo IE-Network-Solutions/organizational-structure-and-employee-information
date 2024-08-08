@@ -1,120 +1,136 @@
-// import { Test } from '@nestjs/testing';
-// import { UsersController } from './users.controller';
-// import { UsersService } from './users.service';
-// import { paginationResultUserData, userData } from './tests/user.data';
-// import { EmployeeInformation } from './entities/user.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import { EmployeeInformationController } from './employee-information.controller';
+import { EmployeeInformationService } from './employee-information.service';
+import { UpdateEmployeeInformationDto } from './dto/update-employee-information.dto';
+import { paginationResultEmployeeInformationData, createEmployeeInformationData, employeeInformationDataSave, employeeInformationData } from './tests/employee-information.data';
+import { EmployeeInformation } from './entities/employee-information.entity';
+import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 
-// jest.mock('./users.service');
+describe('EmployeeInformationController', () => {
+    let employeeInformationController: EmployeeInformationController;
+    let employeeInformationService: EmployeeInformationService;
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [EmployeeInformationController],
+            providers: [
+                {
+                    provide: EmployeeInformationService,
+                    useValue: EmployeeInformationService,
+                },
+            ],
+        }).compile();
 
-// describe('UsersController', () => {
-//   let usersController: UsersController;
-//   let usersService: UsersService;
+        employeeInformationController = module.get<EmployeeInformationController>(EmployeeInformationController);
+        employeeInformationService = module.get<EmployeeInformationService>(EmployeeInformationService);
+    });
+    describe('create', () => {
+        describe('when create is called', () => {
+            let employeeInformation: EmployeeInformation;
+            let request: Request;
 
-//   beforeEach(async () => {
-//     const moduleRef = await Test.createTestingModule({
-//       imports: [],
-//       controllers: [UsersController],
-//       providers: [UsersService],
-//     }).compile();
+            beforeEach(async () => {
+                request = {
+                    tenantId: 'tenantId',
+                } as any;
+                employeeInformation = await employeeInformationController.create(createEmployeeInformationData(), request['tenantId']);
+            });
 
-//     usersController = moduleRef.get<UsersController>(UsersController);
-//     usersService = moduleRef.get<UsersService>(UsersService);
-//     jest.clearAllMocks();
-//   });
+            test('then it should return a employeeInformation', () => {
+                expect(employeeInformation).toEqual(employeeInformationData());
+            });
+        });
+    });
 
-//   describe('findAll', () => {
-//     describe('when findAll is called', () => {
-//       const options = { page: 1, limit: 10 };
-//       beforeEach(async () => {
-//         await usersController.findAll(options);
-//       });
+    describe('findAll', () => {
+        describe('when findAll is called', () => {
+            let request: Request;
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.findAll).toHaveBeenCalled();
-//       });
+            beforeEach(async () => {
+                request = {
+                    tenantId: 'tenantId', // Mock tenantId
+                } as any;
 
-//       test('then is should return a userss', async () => {
-//         expect(await usersController.findAll(options)).toEqual(
-//           paginationResultUserData(),
-//         );
-//       });
-//     });
-//   });
+                await employeeInformationController.findAll(request['tenantId'], paginationOptions());
+            });
 
-//   describe('findOne', () => {
-//     describe('when findOne is called', () => {
-//       let users: User;
+            test('then it should call employeeInformationService.findAll with correct parameters', () => {
+                expect(employeeInformationService.findAll).toHaveBeenCalledWith(
+                    request['tenantId'],
+                    paginationOptions());
+            });
 
-//       beforeEach(async () => {
-//         users = await usersController.findOne(userData().id);
-//       });
+            test('then it should return all employeeInformation', async () => {
+                const result = await employeeInformationController.findAll(request['tenantId'], paginationOptions());
+                expect(result).toEqual(paginationResultEmployeeInformationData());
+            });
+        });
+    });
 
-//       test('then it should call userservice', () => {
-//         expect(usersService.findOne).toHaveBeenCalledWith(userData().id);
-//       });
+    describe('findOne', () => {
+        describe('when findOne is called', () => {
+            let employeeInformation: EmployeeInformation;
 
-//       test('then it should return users', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            beforeEach(async () => {
+                employeeInformation = await employeeInformationController.findOne(employeeInformationData().id);
+            });
 
-//   describe('create', () => {
-//     describe('when create is called', () => {
-//       let users: User;
+            test('then it should call employeeInformationService', () => {
+                expect(employeeInformationService.findOne).toHaveBeenCalledWith(employeeInformationData().id);
+            });
 
-//       beforeEach(async () => {
-//         users = await usersController.create(userData());
-//       });
+            test('then it should return employeeInformation', () => {
+                expect(employeeInformation).toEqual(employeeInformationData());
+            });
+        });
+    });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.create).toHaveBeenCalledWith(userData());
-//       });
+    describe('update', () => {
+        describe('when update is called', () => {
+            let employeeInformation: EmployeeInformation;
+            let updateEmployeeInformationDto: UpdateEmployeeInformationDto;
+            let request: Request;
 
-//       test('then it should return a product', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            beforeEach(async () => {
+                request = {
+                    tenantId: 'tenantId',
+                } as any;
 
-//   describe('update', () => {
-//     describe('when update is called', () => {
-//       let users: User;
+                (employeeInformationService.update as jest.Mock).mockResolvedValue(employeeInformationData());
 
-//       beforeEach(async () => {
-//         users = await usersController.update(userData().id, userData() as any);
-//       });
+                employeeInformation = await employeeInformationController.update(
+                    employeeInformationData().id,
+                    updateEmployeeInformationDto,
+                );
+            });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.update).toHaveBeenCalledWith(
-//           userData().id,
-//           userData(),
-//         );
-//       });
+            test('then it should call employeeInformationService.update with correct parameters', () => {
+                expect(employeeInformationService.update).toHaveBeenCalledWith(
+                    employeeInformationData().id,
+                    updateEmployeeInformationDto,
+                );
+            });
 
-//       test('then it should return a users', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            test('then it should return the updated employeeInformation', () => {
+                expect(employeeInformation).toEqual(employeeInformationData());
+            });
+        });
+    });
 
-//   describe('remove', () => {
-//     describe('when remove is called', () => {
-//       // let users: Product;
+    describe('remove', () => {
+        describe('when remove is called', () => {
+            beforeEach(async () => {
+                await employeeInformationController.remove(employeeInformationData().id);
+            });
 
-//       beforeEach(async () => {
-//         await usersController.remove(userData().id);
-//       });
+            test('then it should call remove', () => {
+                expect(employeeInformationService.remove).toHaveBeenCalledWith(employeeInformationData().id);
+            });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.remove).toHaveBeenCalledWith(userData().id);
-//       });
-
-//       test('then it should return a users', async () => {
-//         expect(await usersController.remove(userData().id)).toEqual(
-//           'Promise resolves with void',
-//         );
-//       });
-//     });
-//   });
-// });
+            test('then it should return a employeeInformation', async () => {
+                expect(await employeeInformationController.remove(employeeInformationData().id)).toEqual(
+                    'Promise resolves with void',
+                );
+            });
+        });
+    });
+});

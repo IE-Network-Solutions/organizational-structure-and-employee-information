@@ -1,114 +1,74 @@
-// import { Pagination } from 'nestjs-typeorm-paginate';
-// import { CreateUserDto } from '../dto/create-user.dto';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { EmployeeDocument } from '../entities/employee-documents.entity';
 
-// export const userData = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//   };
-// };
-// export const userDataSave = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//     role: null,
-//     userPermissions: [],
-//   };
-// };
-// export const userDataOnFindOne = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//     role: null,
-//     userPermissions: [],
-//     permissions: [],
-//   };
-// };
+// Employee Document Data
+export const employeeDocumentData = () => {
+    return {
+        id: 'document-1',
+        userId: 'user-1',
+        documentName: 'Employee Handbook',
+        documentLink: 'http://example.com/documents/employee-handbook.pdf',
+        createdAt: new Date('2023-01-01 00:00:00'),
+        updatedAt: new Date('2023-01-01 00:00:00'),
+        deletedAt: null,
+        user: null
+    }
+};
 
-// export const createUserData = (): CreateUserDto => {
-//   return {
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//   };
-// };
+// Employee Document Data when Saved
+export const employeeDocumentDataSave = () => {
+    return {
+        id: 'document-1',
+        userId: 'user-1',
+        documentName: 'Employee Handbook',
+        documentLink: 'http://example.com/documents/employee-handbook.pdf',
+        createdAt: new Date('2023-01-01 00:00:00'),
+        updatedAt: new Date('2023-01-01 00:00:00'),
+        deletedAt: null,
+    }
+};
 
-// export const deleteuserData = () => {
-//   return {
-//     raw: '',
-//     affected: 1,
-//     generatedMaps: [],
-//   };
-// };
+// Employee Document Data on FindOne
+export const employeeDocumentDataOnFindOne = () => {
+    return {
+        id: 'document-1',
+        userId: 'user-1',
+        documentName: 'Employee Handbook',
+        documentLink: 'http://example.com/documents/employee-handbook.pdf',
+        createdAt: new Date('2023-01-01 00:00:00'),
+        updatedAt: new Date('2023-01-01 00:00:00'),
+        deletedAt: null,
+    }
+};
 
-// export const paginationResultUserData = (): Pagination<CreateUserDto> => {
-//   return {
-//     items: [userData()],
-//     meta: {
-//       totalItems: 1,
-//       itemCount: 1,
-//       itemsPerPage: 10,
-//       totalPages: 1,
-//       currentPage: 1,
-//     },
-//   };
-// };
+// Create Data for Employee Document (if you have DTOs)
+export const createEmployeeDocumentData = () => ({
+    documentName: 'Employee Handbook',
+    documentLink: 'http://example.com/documents/employee-handbook.pdf',
+});
 
-// export const updateUserData = () => {
-//   return {
-//     raw: [],
-//     generatedMaps: [],
-//     affected: 1,
-//   };
-// };
+// Pagination Result for Employee Documents
+export const paginationResultEmployeeDocumentData = (): Pagination<EmployeeDocument> => ({
+    items: [employeeDocumentData()],
+    meta: {
+        totalItems: 1,
+        itemCount: 1,
+        itemsPerPage: 10,
+        totalPages: 1,
+        currentPage: 1,
+    },
+});
 
-// export const deleteUserData = () => {
-//   return {
-//     raw: [],
-//     affected: 1,
-//     generatedMaps: [],
-//   };
-// };
+// Update Result for Employee Document
+export const updateEmployeeDocumentData = () => ({
+    raw: [],
+    generatedMaps: [],
+    affected: 1,
+});
+
+// Delete Result for Employee Document
+export const deleteEmployeeDocumentData = () => ({
+    raw: [],
+    affected: 1,
+    generatedMaps: [],
+});

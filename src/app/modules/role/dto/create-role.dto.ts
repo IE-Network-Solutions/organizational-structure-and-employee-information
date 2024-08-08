@@ -13,4 +13,8 @@ export class CreateRoleDto {
   @IsArray()
   @IsString({ each: true })
   permission: string[];
+
+  @IsString()
+  @IsOptional()
+  tenantId: string;
 }

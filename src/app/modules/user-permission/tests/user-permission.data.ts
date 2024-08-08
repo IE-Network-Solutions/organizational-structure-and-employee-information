@@ -14,6 +14,7 @@ export const userPermissionDataSave = () => {
     updatedAt: new Date('2022-10-22 07:11:42'),
     user: null,
     permission: null,
+    tenantId: "1"
   };
 };
 
@@ -27,7 +28,6 @@ export const createUserPermissionData = () => {
 export const createUserPermission = () => {
   return {
     permission: { id: 'permissionId' },
-
     user: { id: 'userId' },
   };
 };

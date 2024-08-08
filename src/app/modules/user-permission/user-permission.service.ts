@@ -17,17 +17,18 @@ export class UserPermissionService {
   ) { }
 
   async assignPermissionToUser(
-    createUserPermissionDto: CreateUserPermissionDto,
+    createUserPermissionDto: CreateUserPermissionDto, tenantId: string
   ) {
-    // const assignedPermissions = createUserPermissionDto.permissionId.map(
-    //   (permissionId) => {
-    //     return this.userPermissionRepository.create({
-    //       user: { id: createUserPermissionDto.userId },
-    //       permission: { id: permissionId },
-    //     });
-    //   },
-    // );
-    // return await this.userPermissionRepository.save(assignedPermissions);
+    const assignedPermissions = createUserPermissionDto.permissionId.map(
+      (permissionId) => {
+        return this.userPermissionRepository.create({
+          user: { id: createUserPermissionDto.userId },
+          permission: { id: permissionId },
+          tenantId: tenantId
+        });
+      },
+    );
+    return await this.userPermissionRepository.save(assignedPermissions);
   }
 
   async findAll(

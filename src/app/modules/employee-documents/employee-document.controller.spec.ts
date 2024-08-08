@@ -1,120 +1,124 @@
-// import { Test } from '@nestjs/testing';
-// import { UsersController } from './users.controller';
-// import { UsersService } from './users.service';
-// import { paginationResultUserData, userData } from './tests/user.data';
-// import { User } from './entities/user.entity';
+import { Test } from '@nestjs/testing';
+import { EmployeeDocumentController } from './employee-document.controller';
+import { EmployeeDocumentService } from './employee-document.service';
+import { EmployeeDocument } from './entities/employee-documents.entity';
+import { Readable } from 'stream';
+import { createEmployeeDocumentData, employeeDocumentData } from './tests/employee-documents.data';
+import { paginationOptions } from '@root/dist/core/commonTestData/commonTest.data';
 
-// jest.mock('./users.service');
+jest.mock('./employee-document.service');
+describe('EmployeeDocumentController', () => {
+    let employeeDocumentController: EmployeeDocumentController;
+    let employeeDocumentService: EmployeeDocumentService;
 
-// describe('UsersController', () => {
-//   let usersController: UsersController;
-//   let usersService: UsersService;
+    beforeEach(async () => {
+        const moduleRef = await Test.createTestingModule({
+            controllers: [EmployeeDocumentController],
+            providers: [EmployeeDocumentService],
+        }).compile();
 
-//   beforeEach(async () => {
-//     const moduleRef = await Test.createTestingModule({
-//       imports: [],
-//       controllers: [UsersController],
-//       providers: [UsersService],
-//     }).compile();
+        employeeDocumentController = moduleRef.get<EmployeeDocumentController>(EmployeeDocumentController);
+        employeeDocumentService = moduleRef.get<EmployeeDocumentService>(EmployeeDocumentService);
+        jest.clearAllMocks();
+    });
 
-//     usersController = moduleRef.get<UsersController>(UsersController);
-//     usersService = moduleRef.get<UsersService>(UsersService);
-//     jest.clearAllMocks();
-//   });
+    describe('create', () => {
+        describe('when create is called', () => {
+            let employeeDocument: EmployeeDocument;
+            const file: Express.Multer.File = {
+                fieldname: 'documentName',
+                originalname: 'file.pdf',
+                encoding: '7bit',
+                mimetype: 'application/pdf',
+                size: 1024,
+                destination: '',
+                filename: 'file.pdf',
+                path: '',
+                buffer: Buffer.from(''),
+                stream: new Readable
+            };
 
-//   describe('findAll', () => {
-//     describe('when findAll is called', () => {
-//       const options = { page: 1, limit: 10 };
-//       beforeEach(async () => {
-//         await usersController.findAll(options);
-//       });
+            beforeEach(async () => {
+                employeeDocument = await employeeDocumentController.create(
+                    { tenantId: 'tenant-1' } as any,
+                    createEmployeeDocumentData(),
+                    file,
+                );
+            });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.findAll).toHaveBeenCalled();
-//       });
+            test('then it should call EmployeeDocumentService', () => {
+                expect(employeeDocumentService.create).toHaveBeenCalledWith(
+                    createEmployeeDocumentData(),
+                    file,
+                    'tenant-1',
+                );
+            });
+        });
+    });
 
-//       test('then is should return a userss', async () => {
-//         expect(await usersController.findAll(options)).toEqual(
-//           paginationResultUserData(),
-//         );
-//       });
-//     });
-//   });
+    describe('findAll', () => {
+        describe('when findAll is called', () => {
 
-//   describe('findOne', () => {
-//     describe('when findOne is called', () => {
-//       let users: User;
+            beforeEach(async () => {
+                await employeeDocumentController.findAll(paginationOptions());
+            });
 
-//       beforeEach(async () => {
-//         users = await usersController.findOne(userData().id);
-//       });
+            test('then it should call EmployeeDocumentService', () => {
+                expect(employeeDocumentService.findAll).toHaveBeenCalledWith(paginationOptions());
+            });
 
-//       test('then it should call userservice', () => {
-//         expect(usersService.findOne).toHaveBeenCalledWith(userData().id);
-//       });
+            // test('then it should return paginated employee documents', async () => {
+            //     expect(await employeeDocumentController.findAll(paginationOptions())).toEqual(
+            //         paginationResultEmployeeDocumentData(),
+            //     );
+            // });
+        });
+    });
 
-//       test('then it should return users', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+    describe('findOne', () => {
+        describe('when findOne is called', () => {
+            let employeeDocument: EmployeeDocument;
 
-//   describe('create', () => {
-//     describe('when create is called', () => {
-//       let users: User;
+            beforeEach(async () => {
+                employeeDocument = await employeeDocumentController.findOne(employeeDocumentData().id);
+            });
 
-//       beforeEach(async () => {
-//         users = await usersController.create(userData());
-//       });
+            test('then it should call EmployeeDocumentService', () => {
+                expect(employeeDocumentService.findOne).toHaveBeenCalledWith(employeeDocumentData().id);
+            })
+        })
+    });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.create).toHaveBeenCalledWith(userData());
-//       });
+    describe('update', () => {
+        describe('when update is called', () => {
+            let employeeDocument: EmployeeDocument;
 
-//       test('then it should return a product', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
+            beforeEach(async () => {
+                employeeDocument = await employeeDocumentController.update(employeeDocumentData().id, employeeDocumentData() as any);
+            });
 
-//   describe('update', () => {
-//     describe('when update is called', () => {
-//       let users: User;
+            test('then it should call EmployeeDocumentService', () => {
+                expect(employeeDocumentService.update).toHaveBeenCalledWith(
+                    employeeDocumentData().id,
+                    employeeDocumentData(),
+                );
+            });
+        });
+    });
 
-//       beforeEach(async () => {
-//         users = await usersController.update(userData().id, userData() as any);
-//       });
+    describe('remove', () => {
+        describe('when remove is called', () => {
+            beforeEach(async () => {
+                await employeeDocumentController.remove(employeeDocumentData().id);
+            });
 
-//       test('then it should call UsersService', () => {
-//         expect(usersService.update).toHaveBeenCalledWith(
-//           userData().id,
-//           userData(),
-//         );
-//       });
+            test('then it should call EmployeeDocumentService', () => {
+                expect(employeeDocumentService.remove).toHaveBeenCalledWith(employeeDocumentData().id);
+            });
 
-//       test('then it should return a users', () => {
-//         expect(users).toEqual(userData());
-//       });
-//     });
-//   });
-
-//   describe('remove', () => {
-//     describe('when remove is called', () => {
-//       // let users: Product;
-
-//       beforeEach(async () => {
-//         await usersController.remove(userData().id);
-//       });
-
-//       test('then it should call UsersService', () => {
-//         expect(usersService.remove).toHaveBeenCalledWith(userData().id);
-//       });
-
-//       test('then it should return a users', async () => {
-//         expect(await usersController.remove(userData().id)).toEqual(
-//           'Promise resolves with void',
-//         );
-//       });
-//     });
-//   });
-// });
+            test('then it should return a promise', async () => {
+                expect(await employeeDocumentController.remove(employeeDocumentData().id)).toBeUndefined();
+            });
+        });
+    });
+});

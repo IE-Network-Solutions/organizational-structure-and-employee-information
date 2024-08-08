@@ -1,26 +1,27 @@
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { CreateRoleDto } from '../dto/create-role.dto';
+import { Role } from '../entities/role.entity';
 
 export const roleData = () => {
   return {
     id: '1',
     name: 'Admin role',
     description: 'Description for admin role',
+    rolePermissions: [],
+    tenantId: 'tenantId',
+    user: [],
+    permission: [],
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
-    permission: ['List of permission ids'],
-    rolePermissions: [],
+    deletedAt: new Date('2022-10-22 07:11:42')
   };
 };
-export const roleDataSave = () => {
+export const roleDataSave = (): CreateRoleDto => {
   return {
-    id: '1',
     name: 'Admin role',
     description: 'Description for admin role',
-    createdAt: new Date('2022-10-22 07:11:42'),
-    updatedAt: new Date('2022-10-22 07:11:42'),
-    user: [],
-    rolePermissions: [],
+    permission: [],
+    tenantId: 'tenantId'
   };
 };
 
@@ -29,6 +30,7 @@ export const createRole = (): CreateRoleDto => {
     name: 'Admin role',
     description: 'Description for admin role',
     permission: ['List of permission ids'],
+    tenantId: 'tenantId'
   };
 };
 

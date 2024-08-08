@@ -28,12 +28,18 @@ describe('RoleController', () => {
   describe('create', () => {
     describe('when create is called', () => {
       let role: Role;
+      let request: Request;
+
       beforeEach(async () => {
-        role = await roleController.create(createRole());
+        request = {
+          tenantId: 'tenantId',
+        } as any;
+        (roleService.create as jest.Mock).mockResolvedValue(roleData());
+        role = await roleController.create(request, createRole());
       });
 
-      test('then it should call roleService', () => {
-        expect(roleService.create).toHaveBeenCalledWith(createRole());
+      test('then it should call roleService.create with correct parameters', () => {
+        expect(roleService.create).toHaveBeenCalledWith(request['tenantId'], createRole());
       });
 
       test('then it should return a role', () => {
@@ -44,19 +50,30 @@ describe('RoleController', () => {
 
   describe('findAll', () => {
     describe('when findAll is called', () => {
+      let request: Request;
+
       beforeEach(async () => {
-        await roleController.findAll(paginationOptions(), searchFilter());
+        // Mock request object with tenantId
+        request = {
+          tenantId: 'tenantId', // Mock tenantId
+        } as any;
+
+        (roleService.findAll as jest.Mock).mockResolvedValue(findAllRoles());
+
+        await roleController.findAll(request, paginationOptions(), searchFilter());
       });
 
-      test('then it should call RoleService class', () => {
+      test('then it should call roleService.findAll with correct parameters', () => {
         expect(roleService.findAll).toHaveBeenCalledWith(
           paginationOptions(),
           searchFilter(),
+          request['tenantId'],
         );
       });
 
-      test('then is should return all roles', async () => {
-        expect(await roleController.findAll()).toEqual(findAllRoles());
+      test('then it should return all roles', async () => {
+        const result = await roleController.findAll(request, paginationOptions(), searchFilter());
+        expect(result).toEqual(findAllRoles());
       });
     });
   });
@@ -83,23 +100,31 @@ describe('RoleController', () => {
     describe('when update is called', () => {
       let role: Role;
       let updateRoleDto: UpdateRoleDto;
+      let request: Request;
 
       beforeEach(async () => {
-        updateRoleDto = {
-          name: 'Admin role',
-          description: 'Description for update admin role',
-        };
-        role = await roleController.update(roleData().id, updateRoleDto);
-      });
+        request = {
+          tenantId: 'tenantId',
+        } as any;
 
-      test('then it should call roleService', () => {
-        expect(roleService.update).toHaveBeenCalledWith(
+        (roleService.update as jest.Mock).mockResolvedValue(roleData());
+
+        role = await roleController.update(
+          request,
           roleData().id,
           updateRoleDto,
         );
       });
 
-      test('then it should return a role', () => {
+      test('then it should call roleService.update with correct parameters', () => {
+        expect(roleService.update).toHaveBeenCalledWith(
+          roleData().id,
+          updateRoleDto,
+          request['tenantId'],
+        );
+      });
+
+      test('then it should return the updated role', () => {
         expect(role).toEqual(roleData());
       });
     });

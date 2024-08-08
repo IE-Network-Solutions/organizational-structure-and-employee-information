@@ -8,6 +8,9 @@ import * as cookieParser from 'cookie-parser';
 import { AllExceptionsFilter } from './core/exceptions/all-exceptions.filter';
 import { LoggerService } from './core/middlewares/logger.middleware';
 import * as bodyParser from 'body-parser';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

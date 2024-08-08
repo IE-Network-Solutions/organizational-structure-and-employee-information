@@ -13,7 +13,7 @@ export class WorkSchedule extends BaseModel {
   @Column({ type: 'int' })
   standardHours: number;
 
-  @Column({ type: 'uuid' })
+  @Column()
   tenantId: string;
   @OneToMany(() => Organization, (org) => org.workSchedule)
   organizations: Organization[];

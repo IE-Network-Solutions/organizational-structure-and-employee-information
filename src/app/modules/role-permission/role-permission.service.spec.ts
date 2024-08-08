@@ -50,7 +50,7 @@ describe('RolePermissionService', () => {
           createRolePermissionData() as any,
         );
         rolePermissionRepository.save.mockResolvedValue(
-          rolePermissionDataSave(),
+          rolePermissionDataSave() as any,
         );
       });
 
@@ -91,7 +91,7 @@ describe('RolePermissionService', () => {
           rolePermissionData().id,
         );
         rolePermissionRepository.findOneOrFail.mockResolvedValue(
-          rolePermissionDataSave(),
+          rolePermissionDataSave() as any,
         );
       });
 
@@ -147,7 +147,7 @@ describe('RolePermissionService', () => {
     describe('when remove is called', () => {
       beforeEach(async () => {
         rolePermissionRepository.findOneOrFail.mockResolvedValue(
-          rolePermissionDataSave(),
+          rolePermissionDataSave() as any,
         );
         rolePermissionRepository.softDelete.mockResolvedValue(
           deleteRolePermissionData(),

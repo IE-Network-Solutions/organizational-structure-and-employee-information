@@ -24,22 +24,24 @@ export class CreateEmployeeInformationDto {
   @IsString()
   nationalityId: string;
 
-  @IsOptional()
-  @IsString()
+
+  @Validate(IsJSON, {
+    message: 'address must be json',
+  })
   addresses: string;
 
   @Validate(IsJSON, {
-    message: 'emergency contact must be string',
+    message: 'emergency contact must be json',
   })
   emergencyContact: string;
 
   @Validate(IsJSON, {
-    message: 'Bank Information contact must be string',
+    message: 'Bank Information contact must be json',
   })
   bankInformation: string;
 
   @Validate(IsJSON, {
-    message: 'additional Information contact must be string',
+    message: 'additional Information contact must be json',
   })
   additionalInformation: string;
 }

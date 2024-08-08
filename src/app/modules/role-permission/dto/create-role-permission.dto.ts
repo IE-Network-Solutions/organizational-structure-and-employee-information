@@ -1,8 +1,8 @@
 // create-role-permission.dto.ts
-import { IsArray, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CreateRolePermissionDto {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   roleId: string;
 

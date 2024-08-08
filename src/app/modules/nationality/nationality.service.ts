@@ -11,7 +11,6 @@ import { PaginationService } from '../../../core/pagination/pagination.service';
 import { CreateNationalityDto } from './dto/create-nationality.dto';
 import { Nationality } from './entities/nationality.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 import { UpdateNationalityDto } from './dto/update-nationality.dto';
 
 @Injectable()
@@ -19,7 +18,7 @@ export class NationalityService {
   constructor(
     @InjectRepository(Nationality)
     private nationalityRepository: Repository<Nationality>,
-    private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
+    private readonly paginationService: PaginationService,
   ) { }
 
   async create(createNationalityDto: CreateNationalityDto, tenantId: string) {

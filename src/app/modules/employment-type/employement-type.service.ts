@@ -9,15 +9,15 @@ import { Repository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '../../../core/pagination/pagination.service';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { EmploymentType } from './entities/employement-type.entity';
+import { EmployementType } from './entities/employement-type.entity';
 import { CreateEmployementTypeDto } from './dto/create-employement-type.dto';
 import { UpdateEmployementTypeDto } from './dto/update-employement-type.dto';
 
 @Injectable()
 export class EmployementTypeService {
   constructor(
-    @InjectRepository(EmploymentType)
-    private EmployeeTypeRepository: Repository<EmploymentType>,
+    @InjectRepository(EmployementType)
+    private EmployeeTypeRepository: Repository<EmployementType>,
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
   ) { }
 
@@ -34,7 +34,7 @@ export class EmployementTypeService {
 
   async findAll(
     paginationOptions: PaginationDto,
-  ): Promise<Pagination<EmploymentType>> {
+  ): Promise<Pagination<EmployementType>> {
     try {
       const options: IPaginationOptions = {
         page: paginationOptions.page,
@@ -44,7 +44,7 @@ export class EmployementTypeService {
         'EmploymentType',
       ).orderBy('EmploymentType.createdAt', 'DESC');
 
-      return await this.paginationService.paginate<EmploymentType>(
+      return await this.paginationService.paginate<EmployementType>(
         queryBuilder,
         options,
       );

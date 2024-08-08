@@ -26,8 +26,8 @@ export class RoleService {
     private readonly rolePermissionService: RolePermissionService
   ) { }
 
-  async create(createRoleDto: CreateRoleDto): Promise<Role> {
-    const data = this.roleRepository.create(createRoleDto);
+  async create(tenantId: string, createRoleDto: CreateRoleDto): Promise<Role> {
+    const data = this.roleRepository.create({ tenantId, ...createRoleDto });
     const valuesToCheck = { name: data.name };
     try {
       await checkIfDataExists(valuesToCheck, this.roleRepository);
@@ -45,19 +45,32 @@ export class RoleService {
   async findAll(
     paginationOptions: PaginationDto,
     searchFilterDTO: SearchFilterDTO,
+    tenantId: string
   ): Promise<Pagination<Role>> {
     const options: IPaginationOptions = {
-      page: paginationOptions.page,
-      limit: paginationOptions.limit,
+      page: paginationOptions?.page,
+      limit: paginationOptions?.limit
     };
+
     try {
-      const queryBuilder = this.roleRepository.createQueryBuilder('role');
+      const queryBuilder = this.roleRepository.createQueryBuilder('role')
+
       await applySearchFilterUtils(
         queryBuilder,
         searchFilterDTO,
         this.roleRepository,
       );
-      return await this.paginationService.paginate<Role>(queryBuilder, options);
+
+      const paginatedData = await this.paginationService.paginate<Role>(
+        this.roleRepository,
+        'role',
+        options,
+        paginationOptions.orderBy,
+        paginationOptions.orderDirection,
+        { tenantId },
+      );
+      return paginatedData
+
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`Role not found.`);
@@ -79,7 +92,7 @@ export class RoleService {
     }
   }
 
-  async update(id: string, updateRoleDto: UpdateRoleDto): Promise<Role> {
+  async update(id: string, updateRoleDto: UpdateRoleDto, tenantId: string): Promise<Role> {
     try {
       await this.findOne(id);
       await this.roleRepository.update(id, {
@@ -89,6 +102,7 @@ export class RoleService {
       await this.rolePermissionService.updateRolePermissions(
         id,
         updateRoleDto['permission'],
+        tenantId
       );
       return await this.findOne(id);
     } catch (error) {
@@ -111,38 +125,38 @@ export class RoleService {
     }
   }
 
-  // async findAllRoleWithPermissions(paginationOptions: PaginationDto) {
-  //   const options: IPaginationOptions = {
-  //     page: paginationOptions.page,
-  //     limit: paginationOptions.limit,
-  //   };
-  //   try {
-  //     const roles = await this.roleRepository.find();
-  //     const rolePermissions = await this.roleRepository
-  //       .createQueryBuilder('role')
-  //       .leftJoinAndSelect('role.rolePermissions', 'rolePermissions')
-  //       .leftJoinAndSelect('rolePermissions.permissions', 'permissions')
-  //       .getMany();
+  async findAllRoleWithPermissions(paginationOptions: PaginationDto) {
+    const options: IPaginationOptions = {
+      page: paginationOptions.page,
+      limit: paginationOptions.limit,
+    };
+    try {
+      const roles = await this.roleRepository.find();
+      const rolePermissions = await this.roleRepository
+        .createQueryBuilder('role')
+        .leftJoinAndSelect('role.rolePermissions', 'rolePermissions')
+        .leftJoinAndSelect('rolePermissions.permissions', 'permissions')
+        .getMany();
 
-  //     const rolesWithPermissions = roles.map((role) => {
-  //       const permissions = rolePermissions
-  //         .filter((rolePermission) => rolePermission.id === role.id)
-  //         .flatMap((rolePermission) =>
-  //           rolePermission.rolePermissions.map(
-  //             (rolePermission) => rolePermission.permissions,
-  //           ),
-  //         );
-  //       return { ...role, permissions };
-  //     });
+      const rolesWithPermissions = roles.map((role) => {
+        const permissions = rolePermissions
+          .filter((rolePermission) => rolePermission.id === role.id)
+          .flatMap((rolePermission) =>
+            rolePermission.rolePermissions.map(
+              (rolePermission) => rolePermission.permissions,
+            ),
+          );
+        return { ...role, permissions };
+      });
 
-  //     return rolesWithPermissions;
-  //   } catch (error) {
-  //     if (error.name === 'EntityNotFoundError') {
-  //       throw new NotFoundException(`Role not found.`);
-  //     }
-  //     throw error;
-  //   }
-  // }
+      return rolesWithPermissions;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`Role not found.`);
+      }
+      throw error;
+    }
+  }
 
   async findOneRoleWithPermissions(id: string) {
     try {
@@ -173,17 +187,17 @@ export class RoleService {
     }
   }
 
-  // async deAttachPermissionsFromRole(roleId: string, permissionIds: string[]) {
-  //   try {
-  //     return await this.rolePermissionService.deAttachPermissionsFromRole(
-  //       roleId,
-  //       permissionIds,
-  //     );
-  //   } catch (error) {
-  //     if (error.name === 'EntityNotFoundError') {
-  //       throw new NotFoundException('Role-Permission not found.');
-  //     }
-  //     throw error;
-  //   }
-  // }
+  async deAttachPermissionsFromRole(roleId: string, permissionIds: string[]) {
+    try {
+      return await this.rolePermissionService.deAttachPermissionsFromRole(
+        roleId,
+        permissionIds,
+      );
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException('Role-Permission not found.');
+      }
+      throw error;
+    }
+  }
 }

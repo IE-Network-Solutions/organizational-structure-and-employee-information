@@ -7,7 +7,6 @@ export const rolePermissionData = () => {
 };
 export const rolePermissionDataSave = () => {
   return {
-    id: 'id',
     permissionIds: 'permissionId',
     roleId: 'roleId',
     role: null,

@@ -1,24 +1,9 @@
 import { diskStorage } from 'multer';
-import { extname, basename, join } from 'path';
-import * as fs from 'fs';
+import { extname, basename } from 'path';
 
-// Base directory for uploads
-const baseUploadDir = 'https://files.ienetworks.co/testUpload';
-
-// Create directories if they don't exist
-function createUploadDir(directory: string) {
-    if (!fs.existsSync(directory)) {
-        fs.mkdirSync(directory, { recursive: true });
-    }
-}
-
-// Utility function to create multer options
 export function createMulterOptions(allowedMimeTypes: string[], maxSize: number) {
-    createUploadDir(baseUploadDir);
-
     return {
         storage: diskStorage({
-            destination: baseUploadDir,
             filename: (req, file, cb) => {
                 const originalName = basename(file.originalname, extname(file.originalname));
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -47,6 +32,7 @@ export function createMulterOptions(allowedMimeTypes: string[], maxSize: number)
 export const imageUploadOptions = createMulterOptions(
     [
         'image/jpeg',
+        'image/jpg',
         'image/png',
         'image/gif',
         'image/bmp',
@@ -73,4 +59,4 @@ export const documentUploadOptions = createMulterOptions(
         'application/octet-stream',
     ],
     5 * 1024 * 1024
-);
+); 

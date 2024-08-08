@@ -19,7 +19,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) {}
+  ) { }
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -75,6 +75,14 @@ export class DepartmentsService {
     }
   }
 
+
+  async findAllDepartmentsByTenantId(tenantId: string): Promise<Department[]> {
+    try {
+      return await this.departmentRepository.find({ where: { tenantId: tenantId } });
+    } catch (error) {
+      throw new NotFoundException(`Department  not found`);
+    }
+  }
   async updateDepartment(
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
