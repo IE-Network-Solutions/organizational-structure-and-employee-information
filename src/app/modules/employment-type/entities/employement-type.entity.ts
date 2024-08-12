@@ -8,7 +8,10 @@ export class EmploymentType extends BaseModel {
   @Column({ length: 500, nullable: true })
   name: string;
 
-  @OneToMany(() => EmployeeJobInformation, employeeJobInformation => employeeJobInformation.employmentType)
+  @OneToMany(
+    () => EmployeeJobInformation,
+    (employeeJobInformation) => employeeJobInformation.employmentType,
+  )
   employeeJobInformation: EmployeeJobInformation;
 
   @Column({ nullable: true })

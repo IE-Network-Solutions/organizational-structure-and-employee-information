@@ -1,7 +1,13 @@
 // import { MaritalStatus } from '@root/dist/core/enum/marital-status.tenum';
 import { Gender } from '@root/src/core/enum/gender.enum';
 import { MaritalStatus } from '@root/src/core/enum/marital-status.enum';
-import { IsEnum, IsJSON, IsOptional, IsString, Validate } from 'class-validator';
+import {
+  IsEnum,
+  IsJSON,
+  IsOptional,
+  IsString,
+  Validate,
+} from 'class-validator';
 
 export class CreateEmployeeInformationDto {
   @IsOptional()

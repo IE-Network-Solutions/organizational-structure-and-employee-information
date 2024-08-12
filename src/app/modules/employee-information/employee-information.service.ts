@@ -18,10 +18,16 @@ export class EmployeeInformationService {
     @InjectRepository(EmployeeInformation)
     private userRepository: Repository<EmployeeInformation>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
 
-  async create(createEmployeeInformationDto: CreateEmployeeInformationDto, tenantId: string): Promise<EmployeeInformation> {
-    const user = await this.userRepository.create({ ...createEmployeeInformationDto, tenantId });
+  async create(
+    createEmployeeInformationDto: CreateEmployeeInformationDto,
+    tenantId: string,
+  ): Promise<EmployeeInformation> {
+    const user = await this.userRepository.create({
+      ...createEmployeeInformationDto,
+      tenantId,
+    });
     try {
       return await this.userRepository.save(user);
     } catch (error) {
@@ -70,11 +76,11 @@ export class EmployeeInformationService {
 
   async update(
     id: string,
-    UpdateEmployeeInformationDto: UpdateEmployeeInformationDto,
+    updateEmployeeInformationDto: UpdateEmployeeInformationDto,
   ) {
     try {
       await this.userRepository.findOneOrFail({ where: { id: id } });
-      await this.userRepository.update({ id }, UpdateEmployeeInformationDto);
+      await this.userRepository.update({ id }, updateEmployeeInformationDto);
       return await this.userRepository.findOneOrFail({ where: { id: id } });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {

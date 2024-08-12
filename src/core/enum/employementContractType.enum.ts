@@ -1,4 +1,4 @@
 export enum EmployementContractType {
-    PERMANENT = 'Permanent',
-    CONTRACTUAL = 'Contractual',
+  PERMANENT = 'Permanent',
+  CONTRACTUAL = 'Contractual',
 }

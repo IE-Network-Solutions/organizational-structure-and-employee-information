@@ -21,7 +21,7 @@ import { PermissionGroup } from './entities/permission-group.entity';
 export class PermissionGroupController {
   constructor(
     private readonly permissionGroupService: PermissionGroupService,
-  ) { }
+  ) {}
 
   @Post()
   create(

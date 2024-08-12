@@ -21,11 +21,17 @@ import { EmployeeInformationService } from './employee-information.service';
 export class EmployeeInformationController {
   constructor(
     private readonly employeeInformationService: EmployeeInformationService,
-  ) { }
+  ) {}
 
   @Post()
-  create(@Body() createEmployeeInformationDto: CreateEmployeeInformationDto, tenantId: string) {
-    return this.employeeInformationService.create(createEmployeeInformationDto, tenantId);
+  create(
+    @Body() createEmployeeInformationDto: CreateEmployeeInformationDto,
+    tenantId: string,
+  ) {
+    return this.employeeInformationService.create(
+      createEmployeeInformationDto,
+      tenantId,
+    );
   }
 
   @Get()

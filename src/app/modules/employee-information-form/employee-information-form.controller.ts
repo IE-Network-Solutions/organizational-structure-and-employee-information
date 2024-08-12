@@ -19,16 +19,17 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 @ApiTags('Employee Information Form')
 export class EmployeeInformationFormsController {
   constructor(
-    private readonly EmployeeInformationFormService: EmployeeInformationFormService,
-  ) { }
+    private readonly employeeInformationFormService: EmployeeInformationFormService,
+  ) {}
 
   @Post()
   create(
-    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto, tenantId: string
+    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
+    tenantId: string,
   ) {
-    return this.EmployeeInformationFormService.create(
+    return this.employeeInformationFormService.create(
       createEmployeeInformationFormDto,
-      tenantId
+      tenantId,
     );
   }
 
@@ -36,18 +37,19 @@ export class EmployeeInformationFormsController {
   async findAll(
     @Query() paginationOptions?: PaginationDto,
   ): Promise<Pagination<EmployeeInformationForm>> {
-    return await this.EmployeeInformationFormService.findAll(paginationOptions);
+    return await this.employeeInformationFormService.findAll(paginationOptions);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.EmployeeInformationFormService.findOne(id);
+    return this.employeeInformationFormService.findOne(id);
   }
-
 
   @Get('/tenant/:tenantId')
   findFormFieldsByTenantId(@Param('tenantId') tenantId: string) {
-    return this.EmployeeInformationFormService.findFormFieldsByTenantId(tenantId);
+    return this.employeeInformationFormService.findFormFieldsByTenantId(
+      tenantId,
+    );
   }
 
   // @Patch(':id')
@@ -55,7 +57,7 @@ export class EmployeeInformationFormsController {
   //   @Param('id') id: string,
   //   @Body() UpdateEmployeeJobInformationDto: UpdateEmployeeInformationFormDto,
   // ) {
-  //   return this.EmployeeInformationFormService.update(
+  //   return this.employeeInformationFormService.update(
   //     id,
   //     UpdateEmployeeJobInformationDto,
   //   );
@@ -63,6 +65,6 @@ export class EmployeeInformationFormsController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.EmployeeInformationFormService.remove(id);
+    return this.employeeInformationFormService.remove(id);
   }
 }

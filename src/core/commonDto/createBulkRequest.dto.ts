@@ -1,4 +1,3 @@
-
 import { IsObject, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateUserDto } from '@root/src/app/modules/users/dto/create-user.dto';
@@ -9,33 +8,33 @@ import { CreateNationalityDto } from '@root/src/app/modules/nationality/dto/crea
 import { CreateEmployementTypeDto } from '@root/src/app/modules/employment-type/dto/create-employement-type.dto';
 
 export class CreateBulkRequestDto {
-    @IsObject()
-    @ValidateNested()
-    @Type(() => CreateUserDto)
-    createUserDto: CreateUserDto;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CreateUserDto)
+  createUserDto: CreateUserDto;
 
-    @IsObject()
-    @ValidateNested()
-    @Type(() => CreateEmployeeInformationDto)
-    createEmployeeInformationDto: CreateEmployeeInformationDto;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CreateEmployeeInformationDto)
+  createEmployeeInformationDto: CreateEmployeeInformationDto;
 
-    @IsObject()
-    @ValidateNested()
-    @Type(() => CreateEmployeeJobInformationDto)
-    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CreateEmployeeJobInformationDto)
+  createEmployeeJobInformationDto: CreateEmployeeJobInformationDto;
 
-    @IsObject()
-    @ValidateNested()
-    @Type(() => CreateEmployeeInformationFormDto)
-    createEmployeeInformationFormDto: CreateEmployeeInformationFormDto;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CreateEmployeeInformationFormDto)
+  createEmployeeInformationFormDto: CreateEmployeeInformationFormDto;
 
-    @IsObject()
-    @ValidateNested()
-    @Type(() => CreateNationalityDto)
-    createNationalityDto: CreateNationalityDto;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CreateNationalityDto)
+  createNationalityDto: CreateNationalityDto;
 
-    @IsObject()
-    @ValidateNested()
-    @Type(() => CreateEmployementTypeDto)
-    createEmployementTypeDto: CreateEmployementTypeDto;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CreateEmployementTypeDto)
+  createEmployementTypeDto: CreateEmployementTypeDto;
 }

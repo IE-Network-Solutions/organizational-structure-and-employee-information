@@ -8,6 +8,7 @@ import {
   Param,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { EmployeeJobInformationService } from './employee-job-information.service';
 import { CreateEmployeeJobInformationDto } from './dto/create-employee-job-information.dto';
@@ -21,16 +22,17 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 @ApiTags('EmployeeJobInformation')
 export class EmployeeJobInformationsController {
   constructor(
-    private readonly EmployeeJobInformationService: EmployeeJobInformationService,
-  ) { }
+    private readonly employeeJobInformationService: EmployeeJobInformationService,
+  ) {}
 
   @Post()
   create(
-    @Body() CreateEmployeeJobInformationDto: CreateEmployeeJobInformationDto, tenantId: string
+    @Body() createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+    tenantId: string,
   ) {
-    return this.EmployeeJobInformationService.create(
-      CreateEmployeeJobInformationDto,
-      tenantId
+    return this.employeeJobInformationService.create(
+      createEmployeeJobInformationDto,
+      tenantId,
     );
   }
 
@@ -38,27 +40,27 @@ export class EmployeeJobInformationsController {
   async findAll(
     @Query() paginationOptions?: PaginationDto,
   ): Promise<Pagination<EmployeeJobInformation>> {
-    return await this.EmployeeJobInformationService.findAll(paginationOptions);
+    return await this.employeeJobInformationService.findAll(paginationOptions);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.EmployeeJobInformationService.findOne(id);
+    return this.employeeJobInformationService.findOne(id);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() UpdateEmployeeJobInformationDto: UpdateEmployeeJobInformationDto,
+    @Body() updateEmployeeJobInformationDto: UpdateEmployeeJobInformationDto,
   ) {
-    return this.EmployeeJobInformationService.update(
+    return this.employeeJobInformationService.update(
       id,
-      UpdateEmployeeJobInformationDto,
+      updateEmployeeJobInformationDto,
     );
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.EmployeeJobInformationService.remove(id);
+    return this.employeeJobInformationService.remove(id);
   }
 }

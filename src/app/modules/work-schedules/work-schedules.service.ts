@@ -22,13 +22,15 @@ export class WorkSchedulesService {
     private workScheduleRepository: Repository<WorkSchedule>,
     private paginationService: PaginationService,
     private organizationsService: OrganizationsService,
-  ) { }
+  ) {}
   async createWorkSchedule(
     createWorkScheduleDto: CreateWorkScheduleDto,
     tenantId: string,
   ): Promise<WorkSchedule> {
     try {
-      const workSchedules = await this.workScheduleRepository.find({ where: { tenantId } })
+      const workSchedules = await this.workScheduleRepository.find({
+        where: { tenantId },
+      });
       if (workSchedules.length === 0) {
         const createWorkSchedule = await this.workScheduleRepository.create({
           ...createWorkScheduleDto,
@@ -45,9 +47,7 @@ export class WorkSchedulesService {
           tenantId,
         );
         return WorkSchedule;
-
-      }
-      else {
+      } else {
         const createWorkSchedule = await this.workScheduleRepository.create({
           ...createWorkScheduleDto,
           tenantId: tenantId,
@@ -55,12 +55,8 @@ export class WorkSchedulesService {
         const WorkSchedule = await this.workScheduleRepository.save(
           createWorkSchedule,
         );
-        return WorkSchedule
-
+        return WorkSchedule;
       }
-
-
-
     } catch (error) {
       throw new BadRequestException(error);
     }

@@ -58,12 +58,10 @@ describe('DepartmentsController', () => {
   });
 
   it('should find all departments', async () => {
-    const paginationOptions = { page: 1, limit: 10 };
     const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
-    const result = await controller.findAllDepartments(req, paginationOptions);
+    const result = await controller.findAllDepartments(req);
     expect(result).toEqual(paginationResultdepartmentData().items);
     expect(service.findAllDepartments).toHaveBeenCalledWith(
-      paginationOptions,
       req.tenantId,
     );
   });

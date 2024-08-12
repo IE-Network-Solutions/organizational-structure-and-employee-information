@@ -20,12 +20,12 @@ export class EmployeeDocumentService {
     @InjectRepository(EmployeeDocument)
     private employeejobinformationRepository: Repository<EmployeeDocument>,
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) { }
+  ) {}
 
-  async create(
-    createEmployeeDocumentsDto: CreateEmployeeDocumentsDto,
-  ) {
-    const user = this.employeejobinformationRepository.create(createEmployeeDocumentsDto);
+  async create(createEmployeeDocumentsDto: CreateEmployeeDocumentsDto) {
+    const user = this.employeejobinformationRepository.create(
+      createEmployeeDocumentsDto,
+    );
     try {
       return await this.employeejobinformationRepository.save(user);
     } catch (error) {

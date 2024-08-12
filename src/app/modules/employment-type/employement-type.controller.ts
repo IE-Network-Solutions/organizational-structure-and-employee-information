@@ -20,11 +20,19 @@ import { UpdateEmployementTypeDto } from './dto/update-employement-type.dto';
 @Controller('employement-type')
 @ApiTags('Employement Type')
 export class EmployementTypesController {
-  constructor(private readonly employementTypeService: EmployementTypeService) { }
+  constructor(
+    private readonly employementTypeService: EmployementTypeService,
+  ) {}
 
   @Post()
-  create(@Body() createEmployementTypeDto: CreateEmployementTypeDto, tenantId: string) {
-    return this.employementTypeService.create(createEmployementTypeDto, tenantId);
+  create(
+    @Body() createEmployementTypeDto: CreateEmployementTypeDto,
+    tenantId: string,
+  ) {
+    return this.employementTypeService.create(
+      createEmployementTypeDto,
+      tenantId,
+    );
   }
 
   @Get()

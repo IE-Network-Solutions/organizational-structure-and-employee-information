@@ -9,6 +9,4 @@ export class CreateWorkScheduleDto {
   @ValidateNested({ each: true })
   @Type(() => CreateWorkScheduleDetailDto)
   detail: CreateWorkScheduleDetailDto[];
-  @IsNumber()
-  standardHours: number;
 }

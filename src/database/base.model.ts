@@ -22,8 +22,8 @@ export class BaseModel {
   deletedAt?: Date;
 
   @Column({ nullable: true })
-  createdBy?: string
+  createdBy?: string;
 
   @Column({ nullable: true })
-  updatedBy?: string
+  updatedBy?: string;
 }

@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Branch } from '../../branchs/entities/branch.entity';
 import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
+import { boolean } from 'joi';
 
 @Entity()
 @Tree('closure-table')
@@ -38,6 +39,9 @@ export class Department extends BaseModel {
   })
   branch: Branch;
 
-  @OneToMany(() => EmployeeJobInformation, employeeJobInformation => employeeJobInformation.branch)
+  @OneToMany(
+    () => EmployeeJobInformation,
+    (employeeJobInformation) => employeeJobInformation.branch,
+  )
   employeeJobInformation: EmployeeJobInformation;
 }

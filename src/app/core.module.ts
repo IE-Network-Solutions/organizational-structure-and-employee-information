@@ -41,7 +41,6 @@ import { EmployementTypeModule } from './modules/employment-type/employement-typ
     CalendarsModule,
     DepartmentsModule,
     BranchesModule,
-  ]
-
+  ],
 })
-export class CoreModule { }
+export class CoreModule {}

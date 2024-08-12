@@ -2,7 +2,14 @@
 import { Gender } from '@root/src/core/enum/gender.enum';
 import { BaseModel } from '../../../../database/base.model';
 import { MaritalStatus } from '@root/src/core/enum/marital-status.enum';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { Nationality } from '../../nationality/entities/nationality.entity';
 import { EmployeeDocument } from '../../employee-documents/entities/employee-documents.entity';
 import { User } from '../../users/entities/user.entity';
@@ -42,10 +49,14 @@ export class EmployeeInformation extends BaseModel {
   @Column({ nullable: true })
   tenantId: string;
 
-  @ManyToOne(() => Nationality, (nationality) => nationality.employeeInformation, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => Nationality,
+    (nationality) => nationality.employeeInformation,
+    {
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    },
+  )
   nationality: Nationality;
 
   // @ManyToOne(() => Tenant, (tenant) => tenant.user, {
@@ -54,9 +65,13 @@ export class EmployeeInformation extends BaseModel {
   // })
   // tenant: Tenant;
 
-  @OneToMany(() => EmployeeDocument, employeeDocument => employeeDocument.user)
+  @OneToMany(
+    () => EmployeeDocument,
+    (employeeDocument) => employeeDocument.user,
+  )
   employeeDocument: EmployeeDocument;
 
-  @ManyToOne(() => User, user => user.employeeInformation)
+  @OneToOne(() => User, (user) => user.employeeInformation)
+  @JoinColumn()
   user: User;
 }

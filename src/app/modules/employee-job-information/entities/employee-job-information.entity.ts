@@ -46,20 +46,29 @@ export class EmployeeJobInformation extends BaseModel {
   @Column({ nullable: true })
   tenantId: string;
 
-  @ManyToOne(() => User, user => user.employeeJobInformation)
+  @ManyToOne(() => User, (user) => user.employeeJobInformation)
   user: User;
 
-  @ManyToOne(() => Branch, branch => branch.employeeJobInformation)
+  @ManyToOne(() => Branch, (branch) => branch.employeeJobInformation)
   branch: Branch;
 
-  @ManyToOne(() => EmploymentType, employmentType => employmentType.employeeJobInformation)
-  employmentType: EmploymentType
+  @ManyToOne(
+    () => EmploymentType,
+    (employmentType) => employmentType.employeeJobInformation,
+  )
+  employmentType: EmploymentType;
 
-  @ManyToOne(() => Department, department => department.employeeJobInformation)
+  @ManyToOne(
+    () => Department,
+    (department) => department.employeeJobInformation,
+  )
   department: Department;
 
-  @ManyToOne(() => WorkSchedule, workSchedule => workSchedule.employeeJobInformation)
-  workSchedule: WorkSchedule
+  @ManyToOne(
+    () => WorkSchedule,
+    (workSchedule) => workSchedule.employeeJobInformation,
+  )
+  workSchedule: WorkSchedule;
 
   // @ManyToOne(() => Tenant, tenant => tenant.employeeJobInformation)
   // tenant: Tenant;

@@ -27,19 +27,18 @@ import { join } from 'path';
 export class EmployeeDocumentController {
   constructor(
     private readonly employeeDocumentService: EmployeeDocumentService,
-  ) { }
+  ) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('documentLink', documentUploadOptions))
   async create(
-    @Body() createEmployeeDocumentsDto: CreateEmployeeDocumentsDto, @UploadedFile() file: Express.Multer.File,
+    @Body() createEmployeeDocumentsDto: CreateEmployeeDocumentsDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     // const uploadedFilePath = await this.fileUploadService.uploadFileToServer(createEmployeeDocumentsDto.tenantId, file);
     // createEmployeeDocumentsDto.documentLink = uploadedFilePath['viewImage']
     // createEmployeeDocumentsDto.profileImageDownload = uploadedFilePath['image']
-    return this.employeeDocumentService.create(
-      createEmployeeDocumentsDto,
-    );
+    return this.employeeDocumentService.create(createEmployeeDocumentsDto);
   }
 
   @Get()
@@ -59,10 +58,7 @@ export class EmployeeDocumentController {
     @Param('id') id: string,
     @Body() updateEmployeeDocumentsDto: UpdateEmployeeDocumentsDto,
   ) {
-    return this.employeeDocumentService.update(
-      id,
-      updateEmployeeDocumentsDto,
-    );
+    return this.employeeDocumentService.update(id, updateEmployeeDocumentsDto);
   }
 
   @Delete(':id')

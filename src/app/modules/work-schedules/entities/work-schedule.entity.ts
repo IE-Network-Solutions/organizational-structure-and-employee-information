@@ -10,14 +10,15 @@ export class WorkSchedule extends BaseModel {
   name: string;
   @Column({ type: 'json' })
   detail: CreateWorkScheduleDetailDto[];
-  @Column({ type: 'int' })
-  standardHours: number;
 
   @Column({ type: 'uuid' })
   tenantId: string;
   @OneToMany(() => Organization, (org) => org.workSchedule)
   organizations: Organization[];
 
-  @OneToMany(() => EmployeeJobInformation, employeeJobInformation => employeeJobInformation.branch)
+  @OneToMany(
+    () => EmployeeJobInformation,
+    (employeeJobInformation) => employeeJobInformation.branch,
+  )
   employeeJobInformation: EmployeeJobInformation;
 }

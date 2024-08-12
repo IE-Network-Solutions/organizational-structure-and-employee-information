@@ -13,9 +13,12 @@ import { PermissionModule } from '../permission/permission.module';
 import { PermissionGroupModule } from '../permission-group/permission-group.module';
 import { RoleModule } from '../role/role.module';
 import { EmployementTypeModule } from '../employment-type/employement-type.module';
+import { DepartmentsService } from '../departments/departments.service';
+import { Department } from '../departments/entities/department.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]),
+  imports: [
+    TypeOrmModule.forFeature([User, Department]),
     EmployeeInformationModule,
     EmployeeJobInformationModule,
     EmployeeInformationFormModule,
@@ -24,10 +27,10 @@ import { EmployementTypeModule } from '../employment-type/employement-type.modul
     PermissionGroupModule,
     RoleModule,
     EmployementTypeModule,
-    FileUploadModule
+    FileUploadModule,
   ],
   controllers: [UsersController],
-  providers: [UserService, PaginationService],
+  providers: [UserService, PaginationService, DepartmentsService],
   exports: [UserService],
 })
-export class UserModule { }
+export class UserModule {}

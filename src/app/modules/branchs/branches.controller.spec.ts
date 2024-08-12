@@ -15,8 +15,7 @@ import {
   paginationResultbranchData,
   updatebranchData,
 } from './tests/branch.data';
-// Adjust the path as necessary
-
+jest.mock('./branches.service');
 describe('BranchesController', () => {
   let controller: BranchesController;
   let service: BranchesService;

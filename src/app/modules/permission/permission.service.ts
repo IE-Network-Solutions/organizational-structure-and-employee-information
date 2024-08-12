@@ -22,7 +22,7 @@ export class PermissionService {
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
   async create(createPermissionDto: CreatePermissionDto) {
     try {
       const permission = this.permissionRepository.create(createPermissionDto);

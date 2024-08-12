@@ -17,16 +17,20 @@ import { UpdateEmployementTypeDto } from './dto/update-employement-type.dto';
 export class EmployementTypeService {
   constructor(
     @InjectRepository(EmploymentType)
-    private EmployeeTypeRepository: Repository<EmploymentType>,
+    private employeeTypeRepository: Repository<EmploymentType>,
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) { }
+  ) {}
 
-  async create(createEmployementTypeDto: CreateEmployementTypeDto, tenantId: string) {
-    const employeeType = this.EmployeeTypeRepository.create({
-      ...createEmployementTypeDto, tenantId
+  async create(
+    createEmployementTypeDto: CreateEmployementTypeDto,
+    tenantId: string,
+  ) {
+    const employeeType = this.employeeTypeRepository.create({
+      ...createEmployementTypeDto,
+      tenantId,
     });
     try {
-      return await this.EmployeeTypeRepository.save(employeeType);
+      return await this.employeeTypeRepository.save(employeeType);
     } catch (error) {
       throw new ConflictException(error.message);
     }
@@ -40,9 +44,9 @@ export class EmployementTypeService {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      const queryBuilder = await this.EmployeeTypeRepository.createQueryBuilder(
-        'EmploymentType',
-      ).orderBy('EmploymentType.createdAt', 'DESC');
+      const queryBuilder = await this.employeeTypeRepository
+        .createQueryBuilder('EmploymentType')
+        .orderBy('EmploymentType.createdAt', 'DESC');
 
       return await this.paginationService.paginate<EmploymentType>(
         queryBuilder,
@@ -58,9 +62,8 @@ export class EmployementTypeService {
 
   async findOne(id: string) {
     try {
-      const EmployeeType = await this.EmployeeTypeRepository.createQueryBuilder(
-        'EmployeeType',
-      )
+      const EmployeeType = await this.employeeTypeRepository
+        .createQueryBuilder('EmployeeType')
         .where('EmployeeType.id = :id', { id })
         .getOne();
 
@@ -75,9 +78,12 @@ export class EmployementTypeService {
 
   async update(id: string, updateEmployementTypeDto: UpdateEmployementTypeDto) {
     try {
-      await this.EmployeeTypeRepository.findOneOrFail({ where: { id: id } });
-      await this.EmployeeTypeRepository.update({ id }, updateEmployementTypeDto);
-      return await this.EmployeeTypeRepository.findOneOrFail({
+      await this.employeeTypeRepository.findOneOrFail({ where: { id: id } });
+      await this.employeeTypeRepository.update(
+        { id },
+        updateEmployementTypeDto,
+      );
+      return await this.employeeTypeRepository.findOneOrFail({
         where: { id: id },
       });
     } catch (error) {
@@ -90,8 +96,8 @@ export class EmployementTypeService {
 
   async remove(id: string) {
     try {
-      await this.EmployeeTypeRepository.findOneOrFail({ where: { id: id } });
-      return await this.EmployeeTypeRepository.softDelete({ id });
+      await this.employeeTypeRepository.findOneOrFail({ where: { id: id } });
+      return await this.employeeTypeRepository.softDelete({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`EmployeeType with id ${id} not found.`);

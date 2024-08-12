@@ -18,7 +18,7 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 @Controller('roles')
 @ApiTags('Roles')
 export class RoleController {
-  constructor(private readonly roleService: RoleService) { }
+  constructor(private readonly roleService: RoleService) {}
 
   @Post()
   create(@Body() createRoleDto: CreateRoleDto) {

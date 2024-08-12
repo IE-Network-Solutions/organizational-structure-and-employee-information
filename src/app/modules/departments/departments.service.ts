@@ -12,6 +12,7 @@ import { Department } from './entities/department.entity';
 import { Repository, TreeRepository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { level } from 'winston';
 
 @Injectable()
 export class DepartmentsService {
@@ -19,7 +20,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -27,12 +28,21 @@ export class DepartmentsService {
     level = 0,
   ): Promise<Department> {
     try {
+      const department = await this.departmentRepository.findOne({
+        where: { name: createDepartmentDto.name, tenantId: tenantId },
+      });
+      if (department) {
+        throw new NotFoundException(
+          `Department with Name ${department.name} Already exist`,
+        );
+      }
       const newDepartment = new Department();
       newDepartment.name = createDepartmentDto.name;
       newDepartment.description = createDepartmentDto.description;
       (newDepartment.branchId = createDepartmentDto.branchId),
         (newDepartment.tenantId = tenantId);
       newDepartment.level = level;
+
       if (parentDepartment) {
         newDepartment.parent = parentDepartment;
       }
@@ -47,18 +57,14 @@ export class DepartmentsService {
           await this.createDepartment(dep, tenantId, newDepartment, level + 1);
         }
       }
-      return await this.findAllDepartments(tenantId)
+      return await this.findAllDepartments(tenantId);
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
-  async findAllDepartments(
-
-    tenantId: string,
-  ): Promise<Department> {
-
+  async findAllDepartments(tenantId: string): Promise<Department> {
     const departments = await this.departmentRepository.findTrees();
-    return departments[0]
+    return departments[0];
   }
 
   async findOneDepartment(id: string): Promise<Department> {
@@ -115,6 +121,30 @@ export class DepartmentsService {
     }
     await this.departmentRepository.softDelete(id);
     return Department;
+  }
+
+  async findAllDepartmentsByTenantId(tenantId: string): Promise<Department[]> {
+    try {
+      return await this.departmentRepository.find({
+        where: { tenantId: tenantId },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Department  not found`);
+    }
+  }
+
+  async findAncestor(id: string) {
+    try {
+      const department = await this.departmentRepository.findOneByOrFail({
+        id,
+      });
+      const ancestors = await this.departmentRepository.findAncestorsTree(
+        department,
+      );
+      return ancestors.parent;
+    } catch (error) {
+      throw new NotFoundException(`Department not found`);
+    }
   }
 
   // async saveDepartmentTrees(createDepartmentDto: CreateDepartmentDto[]): Promise<void> {

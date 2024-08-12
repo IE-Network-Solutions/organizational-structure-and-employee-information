@@ -21,6 +21,9 @@ export class Branch extends BaseModel {
   @OneToMany(() => Department, (dep) => dep.department)
   departments: Department[];
 
-  @OneToMany(() => EmployeeJobInformation, employeeJobInformation => employeeJobInformation.branch)
+  @OneToMany(
+    () => EmployeeJobInformation,
+    (employeeJobInformation) => employeeJobInformation.branch,
+  )
   employeeJobInformation: EmployeeJobInformation;
 }

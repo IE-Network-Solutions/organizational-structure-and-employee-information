@@ -83,7 +83,7 @@ describe('PermissionService', () => {
         await permissionService.findOne(permissionData().id);
         expect(permissionRepository.findOneOrFail).toHaveBeenCalledWith({
           where: { id: permissionData().id },
-          relations: 'roles'
+          relations: 'roles',
         });
       });
 

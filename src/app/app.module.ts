@@ -47,11 +47,11 @@ configuration values obtained from a ConfigService. */
     // TypeOrmModule.forRootAsync(dataSource),
     HealthModule,
   ],
-  // providers: [
-  //   {
-  //     provide: APP_GUARD,
-  //     useClass: TenantGuard,
-  //   },
-  // ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: TenantGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}

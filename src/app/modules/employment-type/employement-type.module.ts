@@ -11,4 +11,4 @@ import { EmployementTypeService } from './employement-type.service';
   providers: [EmployementTypeService, PaginationService],
   exports: [EmployementTypeService],
 })
-export class EmployementTypeModule { }
+export class EmployementTypeModule {}

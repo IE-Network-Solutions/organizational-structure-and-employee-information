@@ -1,154 +1,261 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { BranchesService } from './branches.service';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Branch } from './entities/branch.entity';
-import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { Repository } from 'typeorm';
-import { CreateBranchDto } from './dto/create-branch.dto';
-import { UpdateBranchDto } from './dto/update-branch.dto';
-import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-// Adjust the path as necessary
-import {
-  NotFoundException,
-  BadRequestException,
-  HttpException,
-} from '@nestjs/common';
-import {
-  branchData,
-  createbranchData,
-  deletebranchData,
-  paginationResultbranchData,
-  updatebranchData,
-  UpdatebranchDataReturned,
-} from './tests/branch.data';
+import { NotFoundException } from '@nestjs/common';
+import { mock, MockProxy } from 'jest-mock-extended';
+
+import { PaginationService } from '@root/src/core/pagination/pagination.service';
+import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { BranchesService } from './branches.service';
+import { Branch } from './entities/branch.entity';
+import { branchData, createbranchData, createbranchDataOnCreate, createbranchDataOnSave, deletebranchData, paginationResultbranchData, updatebranchData, UpdatebranchDataReturned } from './tests/branch.data';
+
 
 describe('BranchesService', () => {
-  let service: BranchesService;
-  let branchRepository: Repository<Branch>;
-  let paginationService: PaginationService;
-
-  const mockBranchRepository = {
-    create: jest.fn().mockImplementation((dto) => branchData()),
-    save: jest.fn().mockResolvedValue(branchData()),
-    findOneByOrFail: jest.fn().mockImplementation(({ id }) => {
-      if (id === '4567') {
-        throw new NotFoundException(`Branch with Id ${id} not found`);
-      }
-      return branchData();
-    }),
-    update: jest.fn().mockResolvedValue(UpdatebranchDataReturned()),
-    softRemove: jest.fn().mockResolvedValue(deletebranchData()),
-  };
-
-  const mockPaginationService = {
-    paginate: jest.fn().mockResolvedValue(paginationResultbranchData()),
-  };
+  let branchesService: BranchesService;
+  let branchRepository: MockProxy<Repository<Branch>>;
+  let paginationService: MockProxy<PaginationService>;
+  const branchToken = getRepositoryToken(Branch);
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       providers: [
         BranchesService,
-        { provide: getRepositoryToken(Branch), useValue: mockBranchRepository },
-        { provide: PaginationService, useValue: mockPaginationService },
+        {
+          provide: PaginationService,
+          useValue: mock<PaginationService>(), // Use mock for PaginationService
+        },
+        {
+          provide: branchToken,
+          useValue: mock<Repository<Branch>>(),
+        },
       ],
     }).compile();
 
-    service = module.get<BranchesService>(BranchesService);
-    branchRepository = module.get<Repository<Branch>>(
-      getRepositoryToken(Branch),
-    );
-    paginationService = module.get<PaginationService>(PaginationService);
+    branchesService = moduleRef.get<BranchesService>(BranchesService);
+    branchRepository = moduleRef.get(branchToken);
+    paginationService = moduleRef.get(PaginationService); // Get an instance of PaginationService
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  describe('create', () => {
+    describe('when createBranch is called', () => {
+      let branch: Branch;
+      let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c'
+      beforeEach(() => {
+        branchRepository.create.mockReturnValue(createbranchData() as any);
+        branchRepository.save.mockResolvedValue(branchData());
+      });
+      it('should call branchRepository.findone wiht email address ', async () => {
+        await branchesService.createBranch(createbranchData(), tenantId);
+        expect(branchRepository.findOne).toHaveBeenCalledWith({
+          where: {
+            contactEmail: createbranchData().contactEmail,
+            tenantId: tenantId,
+          },
+        });
+      });
 
-  it('should create a branch', async () => {
-    const createBranchDto: CreateBranchDto = createbranchData();
-    const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
-    const result = await service.createBranch(createBranchDto, tenantId);
-    expect(result).toEqual(branchData());
-    expect(branchRepository.create).toHaveBeenCalledWith({
-      ...createBranchDto,
-      tenantId,
-    });
-    expect(branchRepository.save).toHaveBeenCalledWith(branchData());
-  });
+      it('should call branchRepository.create', async () => {
+        await branchesService.createBranch(createbranchData(), tenantId);
+        expect(branchRepository.create).toHaveBeenCalledWith(
+          {
+            ...createbranchData(),
+            tenantId: tenantId
+          }
+        );
+      });
 
-  it('should find all branches', async () => {
-    const paginationOptions: PaginationDto = {
-      page: 1,
-      limit: 10,
-      orderBy: 'name',
-      orderDirection: 'ASC',
-    };
-    const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
-    const result = await service.findAllBranchs(paginationOptions, tenantId);
-    expect(result).toEqual(paginationResultbranchData());
-    expect(paginationService.paginate).toHaveBeenCalledWith(
-      branchRepository,
-      'p',
-      { page: 1, limit: 10 },
-      'name',
-      'ASC',
-      { tenantId },
-    );
-  });
+      it('should call branchRepository.save', async () => {
+        await branchesService.createBranch(createbranchData(), tenantId);
+        expect(branchRepository.save).toHaveBeenCalledWith(createbranchData());
+      });
 
-  it('should find one branch', async () => {
-    const result = await service.findOneBranch(
-      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-    );
-    expect(result).toEqual(branchData());
-    expect(branchRepository.findOneByOrFail).toHaveBeenCalledWith({
-      id: 'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      it('should return the created Branch', async () => {
+        branch = await branchesService.createBranch(createbranchData(), tenantId);
+        expect(branch).toEqual(branchData());
+      });
     });
   });
 
-  it('should throw not found exception for non-existent branch', async () => {
-    await expect(service.findOneBranch('4567')).rejects.toThrow(
-      NotFoundException,
-    );
-    expect(branchRepository.findOneByOrFail).toHaveBeenCalledWith({
-      id: '4567',
+  describe('findOne', () => {
+    describe('when findOneBranch is called', () => {
+      let branch: Branch;
+
+      beforeEach(async () => {
+        branchRepository.findOneByOrFail.mockResolvedValue(branchData());
+        branch = await branchesService.findOneBranch(branchData().id);
+      });
+
+      it('should call branchRepository.findOne', async () => {
+        await branchesService.findOneBranch(branchData().id);
+        expect(branchRepository.findOneByOrFail).toHaveBeenCalledWith({
+          id: branchData().id,
+        });
+      });
+
+      it('should return the Branch', () => {
+        expect(branch).toEqual(branchData());
+      });
+
+      it('should throw NotFoundException if id is not found', async () => {
+        const wrongId = '4567';
+        branchRepository.findOneByOrFail.mockRejectedValue(
+          new Error('Branch not found'),
+        );
+
+        await expect(branchesService.findOneBranch(wrongId)).rejects.toThrow(
+          NotFoundException,
+        );
+        await expect(branchesService.findOneBranch(wrongId)).rejects.toThrow(
+          `Branch with Id ${wrongId} not found`,
+        );
+      });
     });
   });
 
-  it('should update a branch', async () => {
-    const updateBranchDto: UpdateBranchDto = updatebranchData();
-    const result = await service.updateBranch(
-      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-      updateBranchDto,
-    );
-    expect(result).toEqual(branchData());
-    expect(branchRepository.update).toHaveBeenCalledWith(
-      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-      updateBranchDto,
-    );
-    expect(branchRepository.findOneByOrFail).toHaveBeenCalledWith({
-      id: 'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+  describe('findAll', () => {
+    describe('when findAllBranchs is called', () => {
+      let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c'
+      beforeEach(async () => {
+        paginationService.paginate.mockResolvedValue(
+          paginationResultbranchData(),
+        );
+      });
+
+      it('should call paginationService.paginate with correct parameters', async () => {
+        await branchesService.findAllBranchs(paginationOptions(), tenantId);
+        expect(paginationService.paginate).toHaveBeenCalledWith(
+          branchRepository,
+          'p',
+          {
+            page: paginationOptions().page,
+            limit: paginationOptions().limit,
+          },
+          paginationOptions().orderBy,
+          paginationOptions().orderDirection,
+          { tenantId },
+        );
+      });
+
+      it('should return paginated Branchs', async () => {
+        const branchs = await branchesService.findAllBranchs(paginationOptions(), tenantId);
+        expect(branchs).toEqual(paginationResultbranchData());
+      });
     });
   });
 
-  it('should throw not found exception for update of non-existent branch', async () => {
-    await expect(
-      service.updateBranch('4567', updatebranchData()),
-    ).rejects.toThrow(NotFoundException);
+  describe('update', () => {
+    describe('when updatebranch is called', () => {
+      let branch: Branch;
+      let companyProfileImage: Express.Multer.File;
+      beforeEach(async () => {
+        jest
+          .spyOn(branchesService, 'findOneBranch')
+          .mockResolvedValue(branchData());
+        branchRepository.update.mockResolvedValue(UpdatebranchDataReturned());
+      });
+
+      it('should call branchService.findOneBranch', async () => {
+        await branchesService.updateBranch(
+          branchData().id,
+          createbranchData(),
+        );
+        expect(branchesService.findOneBranch).toHaveBeenCalledWith(
+          branchData().id,
+        );
+      });
+
+      it('should call branchRepository.update', async () => {
+        await branchesService.updateBranch(
+          branchData().id,
+          updatebranchData(),
+        );
+        expect(branchRepository.update).toHaveBeenCalledWith(
+          branchData().id,
+          updatebranchData(),
+        );
+      });
+
+      it('should return the updated branch', async () => {
+        branch = await branchesService.updateBranch(
+          branchData().id,
+          updatebranchData(),
+        );
+        expect(branch).toEqual(branchData());
+      });
+
+      it('should throw NotFoundException if id is not found', async () => {
+        const wrongId = '4567';
+        jest
+          .spyOn(branchesService, 'findOneBranch')
+          .mockRejectedValue(
+            new NotFoundException(`Branch with Id ${wrongId} not found`),
+          );
+        await expect(
+          branchesService.updateBranch(
+            wrongId,
+            createbranchData(),
+          ),
+        ).rejects.toThrow(NotFoundException);
+        await expect(
+          branchesService.updateBranch(
+            wrongId,
+            createbranchData(),
+          ),
+        ).rejects.toThrow(`Branch with Id ${wrongId} not found`);
+      });
+    });
   });
 
-  it('should remove a branch', async () => {
-    const id = 'be21f28b-4651-4d6f-8f08-d8128da64ee5';
-    const result = await service.removeBranch(
-      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-    );
-    expect(result).toEqual(branchData());
-    expect(branchRepository.softRemove).toHaveBeenCalledWith({ id });
-  });
+  describe('remove', () => {
+    describe('when removeBranch is called', () => {
+      beforeEach(async () => {
+        jest
+          .spyOn(branchesService, 'findOneBranch')
+          .mockResolvedValue(branchData());
+        branchRepository.delete.mockResolvedValue(deletebranchData());
+      });
 
-  it('should throw not found exception for remove of non-existent branch', async () => {
-    await expect(service.removeBranch('4567')).rejects.toThrow(
-      NotFoundException,
-    );
+      it('should call branchService.findOneBranch', async () => {
+        await branchesService.removeBranch(
+          branchData().id,
+        );
+        expect(branchesService.findOneBranch).toHaveBeenCalledWith(
+          branchData().id,
+        );
+      });
+
+      it('should call branchRepository.delete', async () => {
+        await branchesService.removeBranch(branchData().id);
+        expect(branchRepository.softRemove).toHaveBeenCalledWith(
+          { id: branchData().id },
+        );
+      });
+
+      it('should throw NotFoundException if id is not found', async () => {
+        const wrongId = '4567';
+        jest
+          .spyOn(branchesService, 'findOneBranch')
+          .mockRejectedValue(
+            new NotFoundException(`Branch with Id ${wrongId} not found`),
+          );
+        await expect(
+          branchesService.removeBranch(
+            wrongId,
+
+          ),
+        ).rejects.toThrow(NotFoundException);
+        await expect(
+          branchesService.removeBranch(
+            wrongId,
+          ),
+        ).rejects.toThrow(`Branch with Id ${wrongId} not found`);
+      });
+
+      it('should return void when the Branch is removed', async () => {
+        const result = await branchesService.removeBranch(branchData().id);
+        expect(result).toEqual(branchData());
+      });
+    });
   });
 });

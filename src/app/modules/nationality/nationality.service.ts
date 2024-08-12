@@ -20,10 +20,13 @@ export class NationalityService {
     @InjectRepository(Nationality)
     private nationalityRepository: Repository<Nationality>,
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) { }
+  ) {}
 
   async create(createNationalityDto: CreateNationalityDto, tenantId: string) {
-    const user = this.nationalityRepository.create({ ...createNationalityDto, tenantId });
+    const user = this.nationalityRepository.create({
+      ...createNationalityDto,
+      tenantId,
+    });
     try {
       return await this.nationalityRepository.save(user);
     } catch (error) {
@@ -71,10 +74,10 @@ export class NationalityService {
     }
   }
 
-  async update(id: string, UpdateNationalityDto: UpdateNationalityDto) {
+  async update(id: string, updateNationalityDto: UpdateNationalityDto) {
     try {
       await this.nationalityRepository.findOneOrFail({ where: { id: id } });
-      await this.nationalityRepository.update({ id }, UpdateNationalityDto);
+      await this.nationalityRepository.update({ id }, updateNationalityDto);
       return await this.nationalityRepository.findOneOrFail({
         where: { id: id },
       });
