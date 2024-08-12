@@ -56,10 +56,7 @@ export class EmployeeDocumentController {
     @Param('id') id: string,
     @Body() updateEmployeeDocumentsDto: UpdateEmployeeDocumentDto,
   ) {
-    return this.employeeDocumentService.update(
-      id,
-      updateEmployeeDocumentsDto,
-    );
+    return this.employeeDocumentService.update(id, updateEmployeeDocumentsDto);
   }
 
   @Delete(':id')

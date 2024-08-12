@@ -1,6 +1,6 @@
 // import { BaseModel } from '@root/src/database/base.entity';
 import { BaseModel } from '../../../../database/base.model';
-import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne, OneToOne } from 'typeorm';
 import { Role } from '../../role/entities/role.entity';
 import { UserPermission } from '../../user-permission/entities/user-permission.entity';
 import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
@@ -17,7 +17,7 @@ export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
   lastName: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   profileImage: string;
 
   @Column({ nullable: true })
@@ -41,7 +41,7 @@ export class User extends BaseModel {
   // @ManyToOne(() => Tenant, (tenant) => tenant.user, {
   //   onDelete: 'SET NULL',
   //   onUpdate: 'CASCADE',
-  // })  
+  // })
   // tenant: Tenant;
 
   @OneToMany(() => UserPermission, (userPermissions) => userPermissions.user, {
@@ -50,14 +50,21 @@ export class User extends BaseModel {
   })
   userPermissions: UserPermission[];
 
-  @OneToMany(() => EmployeeJobInformation, employeeJobInformation => employeeJobInformation.user)
+  @OneToMany(
+    () => EmployeeJobInformation,
+    (employeeJobInformation) => employeeJobInformation.user,
+  )
   employeeJobInformation: EmployeeJobInformation;
 
-  @OneToMany(() => EmployeeDocument, employeeDocument => employeeDocument.user)
+  @OneToMany(
+    () => EmployeeDocument,
+    (employeeDocument) => employeeDocument.user,
+  )
   employeeDocument: EmployeeDocument;
 
-  @OneToMany(() => EmployeeInformation, employeeInformation => employeeInformation.user)
+  @OneToOne(
+    () => EmployeeInformation,
+    (employeeInformation) => employeeInformation.user,
+  )
   employeeInformation: EmployeeInformation;
-
-
 }

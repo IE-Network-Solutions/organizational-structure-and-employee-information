@@ -14,7 +14,7 @@ export class UserPermissionService {
     @InjectRepository(UserPermission)
     private readonly userPermissionRepository: Repository<UserPermission>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
 
   async assignPermissionToUser(
     createUserPermissionDto: CreateUserPermissionDto, tenantId: string
@@ -108,7 +108,6 @@ export class UserPermissionService {
       //     permission: { id: permissionId },
       //   },
       // });
-
       // await this.userPermissionRepository.delete({ id: userPermission.id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {

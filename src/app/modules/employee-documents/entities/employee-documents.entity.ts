@@ -14,6 +14,12 @@ export class EmployeeDocument extends BaseModel {
   @Column({ nullable: true })
   documentLink: string;
 
-  @ManyToOne(() => User, user => user.employeeDocument)
-  user: User
+  @ManyToOne(() => User, (user) => user.employeeDocument)
+  user: User;
+
+  @ManyToOne(
+    () => EmployeeInformation,
+    (employeeInformation) => employeeInformation,
+  )
+  employeeInformation: EmployeeInformation;
 }

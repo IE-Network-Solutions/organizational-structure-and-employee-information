@@ -42,10 +42,14 @@ export class EmployeeInformation extends BaseModel {
   @Column({ nullable: true })
   tenantId: string;
 
-  @ManyToOne(() => Nationality, (nationality) => nationality.employeeInformation, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => Nationality,
+    (nationality) => nationality.employeeInformation,
+    {
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    },
+  )
   nationality: Nationality;
 
   // @ManyToOne(() => Tenant, (tenant) => tenant.user, {
@@ -54,7 +58,10 @@ export class EmployeeInformation extends BaseModel {
   // })
   // tenant: Tenant;
 
-  @OneToMany(() => EmployeeDocument, employeeDocument => employeeDocument.user)
+  @OneToMany(
+    () => EmployeeDocument,
+    (employeeDocument) => employeeDocument.user,
+  )
   employeeDocument: EmployeeDocument;
 
   @OneToOne(() => User, user => user.employeeInformation)

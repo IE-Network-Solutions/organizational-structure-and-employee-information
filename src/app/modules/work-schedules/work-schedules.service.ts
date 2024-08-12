@@ -28,20 +28,35 @@ export class WorkSchedulesService {
     tenantId: string,
   ): Promise<WorkSchedule> {
     try {
-      const createWorkSchedule = await this.workScheduleRepository.create({
-        ...createWorkScheduleDto,
-        tenantId: tenantId,
+      const workSchedules = await this.workScheduleRepository.find({
+        where: { tenantId },
       });
-      const WorkSchedule = await this.workScheduleRepository.save(
-        createWorkSchedule,
-      );
-      const organizationData = new CreateOrganizationDto();
-      organizationData.workScheduleId = WorkSchedule.id;
-      await this.organizationsService.createOrganiztion(
-        organizationData,
-        tenantId,
-      );
-      return WorkSchedule;
+      if (workSchedules.length === 0) {
+        const createWorkSchedule = await this.workScheduleRepository.create({
+          ...createWorkScheduleDto,
+          tenantId: tenantId,
+        });
+        const WorkSchedule = await this.workScheduleRepository.save(
+          createWorkSchedule,
+        );
+
+        const organizationData = new CreateOrganizationDto();
+        organizationData.workScheduleId = WorkSchedule.id;
+        await this.organizationsService.createOrganiztion(
+          organizationData,
+          tenantId,
+        );
+        return WorkSchedule;
+      } else {
+        const createWorkSchedule = await this.workScheduleRepository.create({
+          ...createWorkScheduleDto,
+          tenantId: tenantId,
+        });
+        const WorkSchedule = await this.workScheduleRepository.save(
+          createWorkSchedule,
+        );
+        return WorkSchedule;
+      }
     } catch (error) {
       throw new BadRequestException(error);
     }

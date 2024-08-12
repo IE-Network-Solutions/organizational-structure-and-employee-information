@@ -19,7 +19,7 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 @Controller('permissions')
 @ApiTags('Permissions')
 export class PermissionController {
-  constructor(private readonly permissionService: PermissionService) { }
+  constructor(private readonly permissionService: PermissionService) {}
 
   @Post()
   create(@Body() createPermissionDto: CreatePermissionDto) {

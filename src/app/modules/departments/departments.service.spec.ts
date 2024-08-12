@@ -74,12 +74,9 @@ describe('DepartmentsService', () => {
       const departments = [departmentData()];
       jest.spyOn(repository, 'findTrees').mockResolvedValue(departments as any);
 
-      const result = await service.findAllDepartments(
-        { page: 1, limit: 10 },
-        'tenant1',
-      );
+      const result = await service.findAllDepartments('tenant1');
 
-      expect(result).toEqual(departments);
+      expect(result).toEqual(departments[0]);
     });
   });
 

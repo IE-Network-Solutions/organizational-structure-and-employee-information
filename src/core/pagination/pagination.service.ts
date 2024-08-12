@@ -8,7 +8,7 @@ import {
 
 @Injectable()
 export class PaginationService {
-  private readonly defaultLimit = Number.MAX_SAFE_INTEGER; // No limit by default
+  private readonly defaultLimit = Number.MAX_SAFE_INTEGER; // Or use a specific high number
   private readonly defaultPage = 1;
 
   // Overload signatures
@@ -46,7 +46,9 @@ export class PaginationService {
       qb.orderBy(`${alias}.${orderBy}`, orderDirection);
     } else {
       qb = repositoryOrQueryBuilder as SelectQueryBuilder<Entity>;
-      opts = this.applyDefaultPaginationOptions(aliasOrOptions as IPaginationOptions);
+      opts = this.applyDefaultPaginationOptions(
+        aliasOrOptions as IPaginationOptions,
+      );
     }
 
     // Apply filter if provided

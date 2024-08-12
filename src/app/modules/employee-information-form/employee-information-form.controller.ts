@@ -22,12 +22,16 @@ export class EmployeeInformationFormsController {
   constructor(
     private readonly employeeInformationFormService: EmployeeInformationFormService,
   ) { }
+
   @Post()
   create(
-    @Req() request: Request,
-    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto
+    @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
+    tenantId: string,
   ) {
-    return this.employeeInformationFormService.create(createEmployeeInformationFormDto, request['tenantId']);
+    return this.employeeInformationFormService.create(
+      createEmployeeInformationFormDto,
+      tenantId,
+    );
   }
 
   @Get()
@@ -42,10 +46,11 @@ export class EmployeeInformationFormsController {
     return this.employeeInformationFormService.findOne(id);
   }
 
-
-  @Get('/tenant/find-form-fields-by-tenant-id')
-  findFormFieldsByTenantId(@Req() request: Request) {
-    return this.employeeInformationFormService.findFormFieldsByTenantId(request['tenantId']);
+  @Get('/tenant/:tenantId')
+  findFormFieldsByTenantId(@Param('tenantId') tenantId: string) {
+    return this.employeeInformationFormService.findFormFieldsByTenantId(
+      tenantId,
+    );
   }
 
   // @Patch(':id')
@@ -53,7 +58,7 @@ export class EmployeeInformationFormsController {
   //   @Param('id') id: string,
   //   @Body() UpdateEmployeeJobInformationDto: UpdateEmployeeInformationFormDto,
   // ) {
-  //   return this.EmployeeInformationFormService.update(
+  //   return this.employeeInformationFormService.update(
   //     id,
   //     UpdateEmployeeJobInformationDto,
   //   );

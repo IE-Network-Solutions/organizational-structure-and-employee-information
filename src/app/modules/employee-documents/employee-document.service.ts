@@ -9,10 +9,10 @@ import { Repository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '../../../core/pagination/pagination.service';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { UpdateEmployeeDocumentDto } from './dto/update-employee-documents.dto';
 import { EmployeeDocument } from './entities/employee-documents.entity';
 import { CreateEmployeeDocumentDto } from './dto/create-employee-documents.dto';
 import { FileUploadService } from '@root/src/core/commonServices/upload.service';
+import { UpdateEmployeeDocumentDto } from './dto/update-employee-documents.dto';
 
 @Injectable()
 export class EmployeeDocumentService {
@@ -22,7 +22,7 @@ export class EmployeeDocumentService {
     private readonly paginationService: PaginationService,
     private readonly fileUploadService: FileUploadService,
   ) { }
-
+  UpdateEmployeeDocumentDto
   async create(
     createEmployeeDocumentsDto: CreateEmployeeDocumentDto, documentName: Express.Multer.File, tenantId: string
   ) {

@@ -54,4 +54,4 @@ configuration values obtained from a ConfigService. */
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

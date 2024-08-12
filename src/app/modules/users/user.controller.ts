@@ -1,3 +1,4 @@
+import { tenantId } from './../branchs/tests/branch.data';
 import { UserService } from './user.service';
 import { SearchFilterDTO } from './../../../core/commonDto/search-filter-dto';
 import {
@@ -29,6 +30,8 @@ import { CreateEmployeeDocumentDto } from '../employee-documents/dto/create-empl
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { parseNestedJson } from '@root/src/core/utils/parseNestedJson.utils';
+import { FilterUsertDto } from './dto/filter-user.dto';
+import { FilterStatusDto } from './dto/filter-status-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -89,9 +92,9 @@ export class UserController {
   async findAll(
     @Req() request: Request,
     @Query() paginationOptions?: PaginationDto,
-    @Query() searchFilterDTO?: SearchFilterDTO
   ): Promise<Pagination<User>> {
-    return await this.userService.findAll(paginationOptions, searchFilterDTO, request['tenantId']);
+    const tenantId = request['tenantId']
+    return await this.userService.findAll(paginationOptions, tenantId);
   }
 
   @Get(':id')
@@ -109,13 +112,65 @@ export class UserController {
     return this.userService.remove(id);
   }
 
-  @Post('/assign-permission-to-user')
-  assignPermissionToRole(
-    @Req() request: Request,
-    @Body() createUserPermissionDto: CreateUserPermissionDto,
-  ) {
-    return this.userService.assignPermissionToUser(createUserPermissionDto, request['tenantId']);
+  @Post('/search/users')
+  searchUsers(
+    @Req() req: Request,
+    @Body() filterUsertDto?: FilterUsertDto,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = req['tenantId'];
+    return this.userService.searchUsers(
+      filterUsertDto,
+      paginationOptions,
+      tenantId,
+    );
   }
+  @Get('/branch/:branchId')
+  getAllBranchEmployees(
+    @Req() req: Request,
+    @Param('branchId') id: string,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = req['tenantId'];
+    return this.userService.getAllBranchEmployees(
+      id,
+      tenantId,
+      paginationOptions,
+    );
+  }
+
+  @Get('/department/:departmentId')
+  getAllDepartmentEmployees(
+    @Req() req: Request,
+    @Param('departmentId') id: string,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = req['tenantId'];
+    return this.userService.getAllDepartmentEmployees(
+      id,
+      tenantId,
+      paginationOptions,
+    );
+  }
+  @Post('/employementStatus/status')
+  getAllActiveEmployees(
+    @Req() req: Request,
+    @Body() filterStatusDto: FilterStatusDto,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = req['tenantId'];
+    return this.userService.getAllActiveEmployees(
+      tenantId,
+      filterStatusDto,
+      paginationOptions,
+    );
+  }
+  // @Post('/assign-permission-to-user')
+  // assignPermissionToRole(
+  //   @Body() createUserPermissionDto: CreateUserPermissionDto,
+  // ) {
+  //   return this.usersService.assignPermissionToUser(createUserPermissionDto);
+  // }
 
   @Get('/permissions/:userId')
   findPermissionsByUserId(@Param('userId') id: string) {

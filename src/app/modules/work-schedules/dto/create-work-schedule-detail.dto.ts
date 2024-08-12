@@ -1,21 +1,28 @@
-import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { DayOfWeek } from '../enum/work-schedule-dayofweek.enum';
 
 export class CreateWorkScheduleDetailDto {
   @IsString()
   id: string;
+  @IsOptional()
   @IsString()
-  dayOfWeek: DayOfWeek;
+  dayOfWeek?: DayOfWeek;
+  @IsOptional()
   @IsString()
-  startTime: string;
+  startTime?: string;
+  @IsOptional()
   @IsString()
-  breakStartTime: string;
-  @IsString()
-  breakEndTime: string;
-  @IsString()
-  endTime: string;
+  endTime?: string;
+  @IsOptional()
   @IsNumber()
-  hours: number;
+  hours?: number;
+  @IsOptional()
   @IsBoolean()
-  status: boolean;
+  status?: boolean;
 }

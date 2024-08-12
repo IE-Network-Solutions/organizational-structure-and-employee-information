@@ -9,7 +9,12 @@ export class EmployeeInformationForm extends BaseModel {
   formTitle: string;
 
   @Column('json', { nullable: true })
-  form: Array<{ id: string; fieldName: string; fieldType: string; isActive: boolean }>;
+  form: Array<{
+    id: string;
+    fieldName: string;
+    fieldType: string;
+    isActive: boolean;
+  }>;
 
   @Column({ nullable: true })
   tenantId: string;
@@ -17,4 +22,3 @@ export class EmployeeInformationForm extends BaseModel {
   //   @ManyToOne(() => Tenant, tenant => tenant.employeeInformationForm)
   //   tenant: Tenant;
 }
-

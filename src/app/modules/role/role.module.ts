@@ -12,4 +12,4 @@ import { RolePermissionModule } from '../role-permission/role-permission.module'
   providers: [RoleService, PaginationService],
   exports: [RoleService],
 })
-export class RoleModule { }
+export class RoleModule {}

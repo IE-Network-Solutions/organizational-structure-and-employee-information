@@ -20,23 +20,23 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 @Controller('nationality')
 @ApiTags('Nationality')
 export class NationalitysController {
-  constructor(private readonly NationalityService: NationalityService) { }
+  constructor(private readonly nationalityService: NationalityService) {}
 
   @Post()
   create(@Body() createNationalityDto: CreateNationalityDto, tenantId: string) {
-    return this.NationalityService.create(createNationalityDto, tenantId);
+    return this.nationalityService.create(createNationalityDto, tenantId);
   }
 
   @Get()
   async findAll(
     @Query() paginationOptions?: PaginationDto,
   ): Promise<Pagination<Nationality>> {
-    return await this.NationalityService.findAll(paginationOptions);
+    return await this.nationalityService.findAll(paginationOptions);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.NationalityService.findOne(id);
+    return this.nationalityService.findOne(id);
   }
 
   @Patch(':id')
@@ -44,11 +44,11 @@ export class NationalitysController {
     @Param('id') id: string,
     @Body() updateNationalityDto: UpdateNationalityDto,
   ) {
-    return this.NationalityService.update(id, updateNationalityDto);
+    return this.nationalityService.update(id, updateNationalityDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.NationalityService.remove(id);
+    return this.nationalityService.remove(id);
   }
 }

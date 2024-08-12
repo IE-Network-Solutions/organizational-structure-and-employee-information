@@ -1,6 +1,13 @@
 // create-employee-information-form.dto.ts
 
-import { IsString, IsArray, ValidateNested, IsBoolean, IsUUID, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  ValidateNested,
+  IsBoolean,
+  IsUUID,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class FormField {

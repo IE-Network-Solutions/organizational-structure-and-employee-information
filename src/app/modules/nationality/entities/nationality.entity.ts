@@ -14,6 +14,9 @@ export class Nationality extends BaseModel {
   //   @ManyToOne(() => Tenant, tenant => tenant.employeeInformationForm)
   //   tenant: Tenant;
 
-  @OneToMany(() => EmployeeInformation, (employeeInformation) => employeeInformation.nationality)
+  @OneToMany(
+    () => EmployeeInformation,
+    (employeeInformation) => employeeInformation.nationality,
+  )
   employeeInformation: EmployeeInformation[];
 }

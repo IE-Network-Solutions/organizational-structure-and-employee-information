@@ -22,8 +22,14 @@ export class EmployeeInformationService {
     private readonly paginationService: PaginationService,
   ) { }
 
-  async create(createEmployeeInformationDto: CreateEmployeeInformationDto, tenantId: string): Promise<EmployeeInformation> {
-    const user = await this.employeeInformationRepository.create({ ...createEmployeeInformationDto, tenantId });
+  async create(
+    createEmployeeInformationDto: CreateEmployeeInformationDto,
+    tenantId: string,
+  ): Promise<EmployeeInformation> {
+    const user = await this.employeeInformationRepository.create({
+      ...createEmployeeInformationDto,
+      tenantId,
+    });
     try {
       return await this.employeeInformationRepository.save(user);
     } catch (error) {
@@ -87,11 +93,11 @@ export class EmployeeInformationService {
 
   async update(
     id: string,
-    UpdateEmployeeInformationDto: UpdateEmployeeInformationDto,
+    updateEmployeeInformationDto: UpdateEmployeeInformationDto,
   ) {
     try {
       await this.employeeInformationRepository.findOneOrFail({ where: { id: id } });
-      await this.employeeInformationRepository.update({ id }, UpdateEmployeeInformationDto);
+      await this.employeeInformationRepository.update({ id }, updateEmployeeInformationDto);
       return await this.employeeInformationRepository.findOneOrFail({ where: { id: id } });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {

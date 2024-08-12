@@ -13,18 +13,24 @@ import { CreateEmployeeJobInformationDto } from './dto/create-employee-job-infor
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { UpdateEmployeeJobInformationDto } from './dto/update-employee-job-information.dto';
 import { EmployeeJobInformation } from './entities/employee-job-information.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class EmployeeJobInformationService {
   constructor(
     @InjectRepository(EmployeeJobInformation)
     private employeeJobInformationRepository: Repository<EmployeeJobInformation>,
+    // private userRepository: Repository<User>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
   async create(
-    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto, tenantId: string
+    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+    tenantId: string,
   ) {
-    const user = this.employeeJobInformationRepository.create({ ...createEmployeeJobInformationDto, tenantId });
+    const user = this.employeeJobInformationRepository.create({
+      ...createEmployeeJobInformationDto,
+      tenantId,
+    });
     try {
       return await this.employeeJobInformationRepository.save(user);
     } catch (error) {

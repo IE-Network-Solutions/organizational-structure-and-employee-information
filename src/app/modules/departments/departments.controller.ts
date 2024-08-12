@@ -35,16 +35,9 @@ export class DepartmentsController {
   }
 
   @Get()
-  async findAllDepartments(
-    @Req() req: Request,
-    @Query()
-    paginationOptions?: PaginationDto,
-  ): Promise<Department[]> {
+  async findAllDepartments(@Req() req: Request): Promise<Department> {
     const tenantId = req['tenantId'];
-    return await this.departmentsService.findAllDepartments(
-      paginationOptions,
-      tenantId,
-    );
+    return await this.departmentsService.findAllDepartments(tenantId);
   }
 
   @Get(':id')
