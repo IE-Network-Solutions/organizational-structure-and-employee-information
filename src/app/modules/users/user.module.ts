@@ -18,6 +18,7 @@ import { Department } from '../departments/entities/department.entity';
 import { EmployeeDocumentModule } from '../employee-documents/employee-document.module';
 import { RolePermissionModule } from '../role-permission/role-permission.module';
 import { UserPermissionModule } from '../user-permission/user-permission.module';
+import { DepartmentsModule } from '../departments/departments.module';
 
 @Module({
   imports: [
@@ -34,7 +35,6 @@ import { UserPermissionModule } from '../user-permission/user-permission.module'
     EmployeeDocumentModule,
     RolePermissionModule,
     UserPermissionModule
-
   ],
   controllers: [UserController],
   providers: [UserService, PaginationService, DepartmentsService],

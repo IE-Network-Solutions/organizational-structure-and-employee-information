@@ -22,7 +22,7 @@ export class EmployeeDocumentService {
     private readonly paginationService: PaginationService,
     private readonly fileUploadService: FileUploadService,
   ) { }
-  UpdateEmployeeDocumentDto
+
   async create(
     createEmployeeDocumentsDto: CreateEmployeeDocumentDto, documentName: Express.Multer.File, tenantId: string
   ) {
@@ -36,9 +36,7 @@ export class EmployeeDocumentService {
     const employeeDocument = this.employeeDocumentRepository.create(createEmployeeDocumentsDto);
     try {
       return await this.employeeDocumentRepository.save(employeeDocument);
-
     } catch (error) {
-
       throw new ConflictException(error.message);
     }
   }
@@ -89,9 +87,7 @@ export class EmployeeDocumentService {
     updateEmployeeDocumentsDto: UpdateEmployeeDocumentDto,
   ) {
     try {
-      await this.employeeDocumentRepository.findOneOrFail({
-        where: { id: id },
-      });
+      await this.employeeDocumentRepository.findOneOrFail({ where: { id } });
       await this.employeeDocumentRepository.update(
         { id },
         updateEmployeeDocumentsDto,

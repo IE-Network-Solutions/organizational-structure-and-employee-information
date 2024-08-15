@@ -8,6 +8,7 @@ import {
   Param,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { EmployementTypeService } from './employement-type.service';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -22,13 +23,14 @@ import { EmployementType } from './entities/employement-type.entity';
 export class EmployementTypesController {
   constructor(
     private readonly employementTypeService: EmployementTypeService,
-  ) {}
+  ) { }
 
   @Post()
   create(
     @Body() createEmployementTypeDto: CreateEmployementTypeDto,
-    tenantId: string,
+    @Req() request: Request,
   ) {
+    const tenantId = request['tenantId']
     return this.employementTypeService.create(
       createEmployementTypeDto,
       tenantId,

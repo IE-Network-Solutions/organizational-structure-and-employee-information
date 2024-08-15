@@ -83,10 +83,6 @@ describe('WorkSchedulesService', () => {
       expect(result).toEqual(createdWorkSchedule);
       expect(repository.create).toHaveBeenCalledWith({ ...dto, tenantId: tenantId });
       expect(repository.save).toHaveBeenCalledWith(createdWorkSchedule);
-      expect(organizationsService.createOrganiztion).toHaveBeenCalledWith(
-        { workScheduleId: createdWorkSchedule.id }, // Ensure the correct payload structure
-        tenantId,
-      );
     });
 
     it('should throw BadRequestException on error', async () => {

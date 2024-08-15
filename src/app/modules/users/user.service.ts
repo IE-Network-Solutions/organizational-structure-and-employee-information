@@ -127,16 +127,17 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .where('user.tenantId = :tenantId', { tenantId });
 
-      const users = await queryBuilder.getMany();
-
       const paginatedData = await this.paginationService.paginate<User>(
         queryBuilder,
-
         options,
       );
+
       for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
+        if (user.employeeJobInformation && user.employeeJobInformation.length > 0) {
+          user.employeeJobInformation[0] = user.employeeJobInformation[0];
+        }
       }
+
       return paginatedData;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
@@ -145,6 +146,7 @@ export class UserService {
       throw error;
     }
   }
+
 
   async findOne(id: string) {
     try {
@@ -252,7 +254,7 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
+        user.employeeJobInformation[0] = user.employeeJobInformation[0];
       }
 
       return paginatedData;
@@ -276,27 +278,26 @@ export class UserService {
         )
         .leftJoinAndSelect('user.role', 'role')
         .where('user.id = :id', { id });
+
       const user = await queryBuilder.getOne();
 
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
-      if (user.employeeJobInformation[0].departmentLeadOrNot === true) {
-        const department = await this.departmentService.findAncestor(
-          user.employeeJobInformation[0].departmentId,
-        );
-        if (department) {
-          return await this.findTeamLeadOrNot(department.id);
-        }
-      }
 
-      return await this.findTeamLeadOrNot(
-        user.employeeJobInformation[0].departmentId,
-      );
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`User with id ${id} not found.`);
+      // Check if employeeJobInformation exists and has elements
+      if (user.employeeJobInformation && user.employeeJobInformation.length > 0) {
+        const jobInfo = user.employeeJobInformation[0];
+
+        if (jobInfo.departmentLeadOrNot === true) {
+          const department = await this.departmentService.findAncestor(jobInfo.departmentId);
+          if (department) {
+            return await this.findTeamLeadOrNot(department.id);
+          }
+        }
+        return await this.findTeamLeadOrNot(jobInfo.departmentId);
       }
+    } catch (error) {
       throw error;
     }
   }
@@ -374,7 +375,7 @@ export class UserService {
         options,
       );
       for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
+        user.employeeJobInformation[0] = user.employeeJobInformation[0];
       }
       return paginatedData;
     } catch (error) {
@@ -425,7 +426,7 @@ export class UserService {
         options,
       );
       for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
+        user.employeeJobInformation[0] = user.employeeJobInformation[0];
       }
       return paginatedData;
     } catch (error) {
@@ -482,7 +483,7 @@ export class UserService {
         options,
       );
       for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
+        user.employeeJobInformation[0] = user.employeeJobInformation[0];
       }
       return paginatedData;
     } catch (error) {

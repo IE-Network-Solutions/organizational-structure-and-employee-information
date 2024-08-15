@@ -1,6 +1,7 @@
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
+import { employeeJobInformationDataSave } from '../../employee-job-information/tests/employee-job-information.data';
 
 export const userData = (): User => {
     return {
@@ -17,7 +18,7 @@ export const userData = (): User => {
         updatedAt: new Date('2022-10-22T07:11:42Z'),
         role: null, // Adjust based on actual role data
         userPermissions: [], // Adjust based on actual permissions
-        employeeJobInformation: undefined,
+        employeeJobInformation: [],
         employeeDocument: undefined,
         employeeInformation: undefined
     };

@@ -1,6 +1,4 @@
-import { tenantId } from './../branchs/tests/branch.data';
 import { UserService } from './user.service';
-import { SearchFilterDTO } from './../../../core/commonDto/search-filter-dto';
 import {
   Controller,
   Get,

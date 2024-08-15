@@ -7,5 +7,9 @@ export class CreateEmployeeDocumentDto {
   @IsString()
   @IsOptional()
   documentLink: string;
+
+  @IsOptional()
+  userId: any;
+
 }
 

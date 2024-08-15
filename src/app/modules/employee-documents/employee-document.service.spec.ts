@@ -93,7 +93,7 @@ describe('EmployeeDocumentService', () => {
     describe('findAll', () => {
         describe('when findAll is called', () => {
             const paginationOptions: PaginationDto = { page: 1, limit: 10 };
-
+            let request: Request;
             beforeEach(() => {
                 const paginationResult = paginationResultEmployeeDocumentData();
                 paginationService.paginate.mockResolvedValue(paginationResult);

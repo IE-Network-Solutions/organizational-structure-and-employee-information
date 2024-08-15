@@ -22,7 +22,7 @@ export class EmployeeJobInformationService {
     private employeeJobInformationRepository: Repository<EmployeeJobInformation>,
     // private userRepository: Repository<User>,
     private readonly paginationService: PaginationService,
-  ) {}
+  ) { }
   async create(
     createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
     tenantId: string,
@@ -47,8 +47,7 @@ export class EmployeeJobInformationService {
         limit: paginationOptions.limit,
       };
       const queryBuilder = await this.employeeJobInformationRepository
-        .createQueryBuilder('employee-job-information')
-        .orderBy('employee-job-information.createdAt', 'DESC');
+        .createQueryBuilder('employeeJobInformation')
 
       return await this.paginationService.paginate<EmployeeJobInformation>(
         queryBuilder,
@@ -85,9 +84,7 @@ export class EmployeeJobInformationService {
     updateEmployeeJobInformationDto: UpdateEmployeeJobInformationDto,
   ) {
     try {
-      await this.employeeJobInformationRepository.findOneOrFail({
-        where: { id: id },
-      });
+      await this.employeeJobInformationRepository.findOneOrFail({ where: { id: id } });
       await this.employeeJobInformationRepository.update(
         { id },
         updateEmployeeJobInformationDto,
@@ -107,9 +104,7 @@ export class EmployeeJobInformationService {
 
   async remove(id: string) {
     try {
-      await this.employeeJobInformationRepository.findOneOrFail({
-        where: { id: id },
-      });
+      await this.employeeJobInformationRepository.findOneOrFail({ where: { id: id } });
       return await this.employeeJobInformationRepository.softDelete({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {

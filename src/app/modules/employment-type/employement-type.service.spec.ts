@@ -23,10 +23,6 @@ describe('EmployementTypeService', () => {
                     useValue: mock<PaginationService>(),
                 },
                 {
-                    provide: EmployementTypeService,
-                    useValue: mock<EmployementTypeService>(),
-                },
-                {
                     provide: employementTypeToken,
                     useValue: mock<Repository<EmployementType>>(),
                 },
@@ -42,25 +38,25 @@ describe('EmployementTypeService', () => {
 
     describe('create', () => {
         describe('when create is called', () => {
-            let request: Request
+            let request: { tenantId: string };
 
             beforeEach(() => {
                 employementTypeRepository.create.mockReturnValue(employementTypeData());
                 employementTypeRepository.save.mockResolvedValue(employementTypeData());
+                request = { tenantId: '9fdb9540-607e-4cc5-aebf-0879400d1f69' };
             });
 
-            it('should call employementTypeRepository.create', async () => {
-                await employementTypeService.create(createEmployementTypeData(), request['tenantId']);
-                expect(employementTypeRepository.create).toHaveBeenCalledWith(
-                    createEmployementTypeData(), request['tenantId'],
-                );
+            it('should call employementTypeRepository.create with correct parameters', async () => {
+                await employementTypeService.create(createEmployementTypeData(), request.tenantId);
+                expect(employementTypeRepository.create).toHaveBeenCalledWith({
+                    ...createEmployementTypeData(),
+                    tenantId: request.tenantId,
+                });
             });
 
-            it('should call employementTypeRepository.save', async () => {
-                await employementTypeService.create(createEmployementTypeData(), request['tenantId']);
-                expect(employementTypeRepository.save).toHaveBeenCalledWith(
-                    employementTypeData(),
-                );
+            it('should call employementTypeRepository.save with created employementType', async () => {
+                await employementTypeService.create(createEmployementTypeData(), request.tenantId);
+                expect(employementTypeRepository.save).toHaveBeenCalledWith(employementTypeData());
             });
         });
     });
@@ -68,20 +64,23 @@ describe('EmployementTypeService', () => {
     describe('findOne', () => {
         describe('when findOne is called', () => {
             let employementType: EmployementType;
+            let mockQueryBuilder: any;
+
             beforeEach(async () => {
-                employementTypeRepository.findOneOrFail.mockResolvedValue(
-                    employementTypeData() as any,
-                );
-                employementType = await employementTypeService.findOne(
-                    employementTypeData().id,
-                );
+                mockQueryBuilder = {
+                    where: jest.fn().mockReturnThis(),
+                    getOne: jest.fn().mockResolvedValue(employementTypeData()),
+                };
+
+                employementTypeRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+
+                employementType = await employementTypeService.findOne(employementTypeData().id);
             });
 
-            it('should call permissionGroupRepository.findOne', async () => {
-                await employementTypeService.findOne(employementTypeData().id);
-                expect(employementTypeRepository.findOneOrFail).toHaveBeenCalledWith({
-                    where: { id: employementTypeData().id }
-                });
+            it('should call employementTypeRepository.createQueryBuilder and chain methods correctly', async () => {
+                expect(employementTypeRepository.createQueryBuilder).toHaveBeenCalledWith('EmployeeType');
+                expect(mockQueryBuilder.where).toHaveBeenCalledWith('EmployeeType.id = :id', { id: employementTypeData().id });
+                expect(mockQueryBuilder.getOne).toHaveBeenCalled();
             });
 
             it('should return the employementType', () => {
@@ -93,37 +92,42 @@ describe('EmployementTypeService', () => {
     describe('findAll', () => {
         describe('when findAll is called', () => {
             let mockQueryBuilder: any;
+            let result: any;
 
-            beforeEach(() => {
+            beforeEach(async () => {
                 mockQueryBuilder = {
-                    leftJoinAndSelect: jest.fn().mockReturnThis(),
-                    getMany: jest.fn().mockReturnValue(paginationResultEmploymentTypeData()),
+                    orderBy: jest.fn().mockReturnThis(),
                 };
 
-                employementTypeRepository.createQueryBuilder.mockReturnValue(
-                    mockQueryBuilder,
-                );
+                employementTypeRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+                paginationService.paginate.mockResolvedValue(paginationResultEmploymentTypeData());
+
+                result = await employementTypeService.findAll(paginationOptions());
+            });
+
+            it('should call employementTypeRepository.createQueryBuilder and chain methods correctly', async () => {
+                expect(employementTypeRepository.createQueryBuilder).toHaveBeenCalledWith('EmploymentType');
+                expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('EmploymentType.createdAt', 'DESC');
             });
 
             it('should call paginationService.paginate with correct parameters', async () => {
-                await employementTypeService.findAll(
-                    paginationOptions(),
-                );
+                expect(paginationService.paginate).toHaveBeenCalledWith(mockQueryBuilder, {
+                    page: paginationOptions().page,
+                    limit: paginationOptions().limit,
+                });
             });
 
             it('should return paginated employementType', async () => {
-                const result = await employementTypeService.findAll(
-                    paginationOptions());
-
                 expect(result).toEqual(paginationResultEmploymentTypeData());
             });
         });
     });
 
+
     describe('update', () => {
         describe('when update is called', () => {
             let employementType: EmployementType;
-            let request: Request
+
             beforeEach(async () => {
                 employementTypeRepository.findOneOrFail.mockResolvedValue(
                     employementTypeData(),
@@ -135,24 +139,35 @@ describe('EmployementTypeService', () => {
                 );
             });
 
-            it('should call employementTypeRepository.findOne initially', async () => {
+            it('should call employementTypeRepository.findOneOrFail initially', async () => {
                 expect(employementTypeRepository.findOneOrFail).toHaveBeenCalledWith({
-                    where: { id: employementTypeData().id }
+                    where: { id: employementTypeData().id },
                 });
             });
 
-            it('should call employementTypeRepository.findOne again to return the update employeeType', async () => {
+            it('should call employementTypeRepository.update with correct parameters', async () => {
                 await employementTypeService.update(
                     employementTypeData().id,
                     createEmployementTypeData(),
                 );
 
-                expect(employementTypeRepository.findOneOrFail).toHaveBeenCalledWith({
-                    where: { id: employementTypeData().id },
-                });
+                expect(employementTypeRepository.update).toHaveBeenCalledWith(
+                    { id: employementTypeData().id },
+                    createEmployementTypeData(),
+                );
+            });
+
+            it('should return the updated employementType', async () => {
+                const result = await employementTypeService.update(
+                    employementTypeData().id,
+                    createEmployementTypeData(),
+                );
+
+                expect(result).toEqual(employementTypeData());
             });
         });
     });
+
     describe('remove', () => {
         describe('when remove is called', () => {
             beforeEach(async () => {
@@ -164,13 +179,17 @@ describe('EmployementTypeService', () => {
                 );
             });
 
-            it('should call employementTypeRepository.delete', async () => {
+            it('should call employementTypeRepository.findOneOrFail and softDelete', async () => {
                 await employementTypeService.remove(employementTypeData().id);
+                expect(employementTypeRepository.findOneOrFail).toHaveBeenCalledWith({
+                    where: { id: employementTypeData().id },
+                });
                 expect(employementTypeRepository.softDelete).toHaveBeenCalledWith(
-                    employementTypeData().id,
+                    { id: employementTypeData().id },
                 );
             });
-            it('should return void when the employementType is removed', async () => {
+
+            it('should return the delete result', async () => {
                 const result = await employementTypeService.remove(
                     employementTypeData().id,
                 );

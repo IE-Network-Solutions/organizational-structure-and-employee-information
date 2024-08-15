@@ -1,114 +1,62 @@
-// import { Pagination } from 'nestjs-typeorm-paginate';
-// import { CreateUserDto } from '../dto/create-user.dto';
+// employee-information-form.data.ts
 
-// export const userData = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//   };
-// };
-// export const userDataSave = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//     role: null,
-//     userPermissions: [],
-//   };
-// };
-// export const userDataOnFindOne = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//     role: null,
-//     userPermissions: [],
-//     permissions: [],
-//   };
-// };
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { EmployeeInformationForm } from '../entities/employee-information-form.entity';
 
-// export const createUserData = (): CreateUserDto => {
-//   return {
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//   };
-// };
+export const employeeInformationFormData = (): EmployeeInformationForm => ({
+    id: '1234567890',
+    formTitle: 'Employee Details',
+    form: [
+        { id: '1', fieldName: 'First Name', fieldType: 'text', isActive: true },
+        { id: '2', fieldName: 'Last Name', fieldType: 'text', isActive: true },
+        { id: '3', fieldName: 'Date of Birth', fieldType: 'date', isActive: false },
+    ],
+    tenantId: 'tenant-1',
+    createdAt: new Date('2023-01-01T06:00:00.000Z'),
+    updatedAt: new Date('2023-01-01T06:00:00.000Z'),
+    deletedAt: null,
+});
 
-// export const deleteuserData = () => {
-//   return {
-//     raw: '',
-//     affected: 1,
-//     generatedMaps: [],
-//   };
-// };
+export const createEmployeeInformationForm = (): Partial<EmployeeInformationForm> => ({
+    formTitle: 'Employee Details',
+    form: [
+        { id: '1', fieldName: 'First Name', fieldType: 'text', isActive: true },
+        { id: '2', fieldName: 'Last Name', fieldType: 'text', isActive: true },
+        { id: '3', fieldName: 'Date of Birth', fieldType: 'date', isActive: false },
+    ],
+    tenantId: 'tenant-1',
+});
 
-// export const paginationResultUserData = (): Pagination<CreateUserDto> => {
-//   return {
-//     items: [userData()],
-//     meta: {
-//       totalItems: 1,
-//       itemCount: 1,
-//       itemsPerPage: 10,
-//       totalPages: 1,
-//       currentPage: 1,
-//     },
-//   };
-// };
+export const paginatedEmployeeInformationForms = (): Pagination<EmployeeInformationForm> => ({
+    items: [employeeInformationFormData()],
+    meta: {
+        itemCount: 2,
+        totalItems: 2,
+        itemsPerPage: 1,
+        totalPages: 2,
+        currentPage: 1,
+    },
+});
+export const updateEmployeeInformationFormData = (): Partial<EmployeeInformationForm> => ({
+    formTitle: 'Updated Employee Details',
+    form: [
+        { id: '1', fieldName: 'First Name', fieldType: 'text', isActive: true },
+        { id: '2', fieldName: 'Last Name', fieldType: 'text', isActive: true },
+        { id: '3', fieldName: 'Date of Birth', fieldType: 'date', isActive: true },
+    ],
+    tenantId: 'tenant-1',
+});
 
-// export const updateUserData = () => {
-//   return {
-//     raw: [],
-//     generatedMaps: [],
-//     affected: 1,
-//   };
-// };
-
-// export const deleteUserData = () => {
-//   return {
-//     raw: [],
-//     affected: 1,
-//     generatedMaps: [],
-//   };
-// };
+export const deleteEmployeeInformationFormData = (): EmployeeInformationForm => ({
+    id: '1234567890',
+    formTitle: 'Employee Details',
+    form: [
+        { id: '1', fieldName: 'First Name', fieldType: 'text', isActive: true },
+        { id: '2', fieldName: 'Last Name', fieldType: 'text', isActive: true },
+        { id: '3', fieldName: 'Date of Birth', fieldType: 'date', isActive: false },
+    ],
+    tenantId: 'tenant-1',
+    createdAt: new Date('2023-01-01T06:00:00.000Z'),
+    updatedAt: new Date('2023-01-01T06:00:00.000Z'),
+    deletedAt: new Date('2023-01-01T06:00:00.000Z'), // Mark as deleted
+});

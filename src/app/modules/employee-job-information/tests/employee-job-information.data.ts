@@ -1,114 +1,82 @@
-// import { Pagination } from 'nestjs-typeorm-paginate';
-// import { CreateUserDto } from '../dto/create-user.dto';
+import { EmployementContractType } from '@root/src/core/enum/employementContractType.enum';
+import { EmployeeJobInformation } from '../entities/employee-job-information.entity';
 
-// export const userData = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//   };
-// };
-// export const userDataSave = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//     role: null,
-//     userPermissions: [],
-//   };
-// };
-// export const userDataOnFindOne = () => {
-//   return {
-//     id: '1',
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//     createdAt: new Date('2022-10-22 07:11:42'),
-//     updatedAt: new Date('2022-10-22 07:11:42'),
-//     role: null,
-//     userPermissions: [],
-//     permissions: [],
-//   };
-// };
+export const employeeJobInformationData = (): EmployeeJobInformation => {
+    return {
+        id: 'a7c8a8b3-1f4a-4f91-a8d2-5f2a9a1b8d2c',
+        jobTitle: 'Software Engineer',
+        userId: '1',
+        branchId: '1',
+        isPositionActive: true,
+        effectiveStartDate: new Date('2023-01-01'),
+        effectiveEndDate: new Date('2024-01-01'),
+        employmentTypeId: '1',
+        departmentId: '1',
+        departmentLeadOrNot: false,
+        employmentContractType: EmployementContractType.CONTRACTUAL,
+        workScheduleId: '1',
+        tenantId: '1',
+        createdAt: new Date('2023-01-01'),
+        updatedAt: new Date('2023-01-01'),
 
-// export const createUserData = (): CreateUserDto => {
-//   return {
-//     name: 'Product 1',
-//     email: 's@s.com',
-//     roleId: '1',
-//     contactInformation: JSON.stringify({
-//       phone: '123-456-7890',
-//       address: {
-//         street: '123 Main St',
-//         city: 'Anytown',
-//         postalCode: '12345',
-//       },
-//     }),
-//   };
-// };
+        // Mocks for relationships
+        user: { id: '1', name: 'John Doe', email: 'john.doe@example.com' } as any, // mock as needed
+        branch: { id: '1', name: 'Main Branch' } as any, // mock as needed
+        employmentType: { id: '1', name: 'Full-Time' } as any, // mock as needed
+        department: { id: '1', name: 'Engineering' } as any, // mock as needed
+        workSchedule: { id: '1', name: '9-5' } as any, // mock as needed
+    };
+};
 
-// export const deleteuserData = () => {
-//   return {
-//     raw: '',
-//     affected: 1,
-//     generatedMaps: [],
-//   };
-// };
+export const employeeJobInformationDataSave = () => {
+    return {
+        branch: null,
+        branchId: '1',
+        createdAt: new Date('2023-01-01T06:00:00.000Z'),
+        department: null,
+        departmentId: '1',
+        departmentLeadOrNot: false,
+        effectiveEndDate: new Date('2024-01-01T06:00:00.000Z'),
+        effectiveStartDate: new Date('2023-01-01T06:00:00.000Z'),
+        employmentContractType: 'Contractual',
+        employmentType: null,
+        employmentTypeId: '1',
+        isPositionActive: true,
+        jobTitle: 'Software Engineer',
+        tenantId: '1',
+        updatedAt: new Date('2023-01-01T06:00:00.000Z'),
+        user: null,
+        userId: '1',
+        workSchedule: null,
+        workScheduleId: '1',
+    }
+};
 
-// export const paginationResultUserData = (): Pagination<CreateUserDto> => {
-//   return {
-//     items: [userData()],
-//     meta: {
-//       totalItems: 1,
-//       itemCount: 1,
-//       itemsPerPage: 10,
-//       totalPages: 1,
-//       currentPage: 1,
-//     },
-//   };
-// };
+export const deleteEmployeeJobInformationData = () => {
+    return {
+        raw: '',
+        affected: 1,
+        generatedMaps: [],
+    };
+};
 
-// export const updateUserData = () => {
-//   return {
-//     raw: [],
-//     generatedMaps: [],
-//     affected: 1,
-//   };
-// };
+export const paginationResultEmployeeJobInformationData = () => {
+    return {
+        items: [employeeJobInformationData()],
+        meta: {
+            totalItems: 1,
+            itemCount: 1,
+            itemsPerPage: 10,
+            totalPages: 1,
+            currentPage: 1,
+        },
+    };
+};
 
-// export const deleteUserData = () => {
-//   return {
-//     raw: [],
-//     affected: 1,
-//     generatedMaps: [],
-//   };
-// };
+export const updateEmployeeJobInformationData = () => {
+    return {
+        raw: [],
+        generatedMaps: [],
+        affected: 1,
+    }
+};
