@@ -1,4 +1,3 @@
-// import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import {
   Controller,
   Get,
@@ -23,16 +22,16 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 export class EmployeeJobInformationsController {
   constructor(
     private readonly employeeJobInformationService: EmployeeJobInformationService,
-  ) {}
+  ) { }
 
   @Post()
   create(
     @Body() createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
-    tenantId: string,
+    @Req() request: Request,
   ) {
     return this.employeeJobInformationService.create(
       createEmployeeJobInformationDto,
-      tenantId,
+      request['tenantId'],
     );
   }
 

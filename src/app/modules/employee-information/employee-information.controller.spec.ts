@@ -1,28 +1,34 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { EmployeeInformationController } from './employee-information.controller';
 import { EmployeeInformationService } from './employee-information.service';
-import { UpdateEmployeeInformationDto } from './dto/update-employee-information.dto';
-import { paginationResultEmployeeInformationData, createEmployeeInformationData, employeeInformationDataSave, employeeInformationData } from './tests/employee-information.data';
 import { EmployeeInformation } from './entities/employee-information.entity';
+import { UpdateEmployeeInformationDto } from './dto/update-employee-information.dto';
+import {
+    createEmployeeInformationData,
+    employeeInformationData,
+    paginationResultEmployeeInformationData,
+} from './tests/employee-information.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { searchFilter } from '@root/src/core/commonTestData/search-filter.data';
+
+jest.mock('./employee-information.service');
 
 describe('EmployeeInformationController', () => {
     let employeeInformationController: EmployeeInformationController;
     let employeeInformationService: EmployeeInformationService;
+
     beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
+        const moduleRef = await Test.createTestingModule({
+            imports: [],
             controllers: [EmployeeInformationController],
-            providers: [
-                {
-                    provide: EmployeeInformationService,
-                    useValue: EmployeeInformationService,
-                },
-            ],
+            providers: [EmployeeInformationService],
         }).compile();
 
-        employeeInformationController = module.get<EmployeeInformationController>(EmployeeInformationController);
-        employeeInformationService = module.get<EmployeeInformationService>(EmployeeInformationService);
+        employeeInformationController = moduleRef.get<EmployeeInformationController>(EmployeeInformationController);
+        employeeInformationService = moduleRef.get<EmployeeInformationService>(EmployeeInformationService);
+        jest.clearAllMocks();
     });
+
     describe('create', () => {
         describe('when create is called', () => {
             let employeeInformation: EmployeeInformation;
@@ -32,10 +38,21 @@ describe('EmployeeInformationController', () => {
                 request = {
                     tenantId: 'tenantId',
                 } as any;
-                employeeInformation = await employeeInformationController.create(createEmployeeInformationData(), request['tenantId']);
+                (employeeInformationService.create as jest.Mock).mockResolvedValue(employeeInformationData());
+                employeeInformation = await employeeInformationController.create(
+                    createEmployeeInformationData(),
+                    request['tenantId'],
+                );
             });
 
-            test('then it should return a employeeInformation', () => {
+            test('then it should call employeeInformationService.create with correct parameters', () => {
+                expect(employeeInformationService.create).toHaveBeenCalledWith(
+                    createEmployeeInformationData(),
+                    request['tenantId'],
+                );
+            });
+
+            test('then it should return the created employee information', () => {
                 expect(employeeInformation).toEqual(employeeInformationData());
             });
         });
@@ -47,20 +64,28 @@ describe('EmployeeInformationController', () => {
 
             beforeEach(async () => {
                 request = {
-                    tenantId: 'tenantId', // Mock tenantId
+                    tenantId: 'tenantId',
                 } as any;
 
-                await employeeInformationController.findAll(request['tenantId'], paginationOptions());
+                (employeeInformationService.findAll as jest.Mock).mockResolvedValue(paginationResultEmployeeInformationData());
+
+                await employeeInformationController.findAll(request, paginationOptions(), searchFilter());
             });
 
             test('then it should call employeeInformationService.findAll with correct parameters', () => {
                 expect(employeeInformationService.findAll).toHaveBeenCalledWith(
+                    paginationOptions(),
+                    searchFilter(),
                     request['tenantId'],
-                    paginationOptions());
+                );
             });
 
-            test('then it should return all employeeInformation', async () => {
-                const result = await employeeInformationController.findAll(request['tenantId'], paginationOptions());
+            test('then it should return all employee information with pagination', async () => {
+                const result = await employeeInformationController.findAll(
+                    request,
+                    paginationOptions(),
+                    searchFilter(),
+                );
                 expect(result).toEqual(paginationResultEmployeeInformationData());
             });
         });
@@ -71,14 +96,15 @@ describe('EmployeeInformationController', () => {
             let employeeInformation: EmployeeInformation;
 
             beforeEach(async () => {
+                (employeeInformationService.findOne as jest.Mock).mockResolvedValue(employeeInformationData());
                 employeeInformation = await employeeInformationController.findOne(employeeInformationData().id);
             });
 
-            test('then it should call employeeInformationService', () => {
+            test('then it should call employeeInformationService.findOne with correct parameters', () => {
                 expect(employeeInformationService.findOne).toHaveBeenCalledWith(employeeInformationData().id);
             });
 
-            test('then it should return employeeInformation', () => {
+            test('then it should return the employee information', () => {
                 expect(employeeInformation).toEqual(employeeInformationData());
             });
         });
@@ -95,22 +121,26 @@ describe('EmployeeInformationController', () => {
                     tenantId: 'tenantId',
                 } as any;
 
+                updateEmployeeInformationDto = {
+                    ...employeeInformationData(),
+                };
+
                 (employeeInformationService.update as jest.Mock).mockResolvedValue(employeeInformationData());
 
                 employeeInformation = await employeeInformationController.update(
                     employeeInformationData().id,
-                    updateEmployeeInformationDto,
+                    createEmployeeInformationData(),
                 );
             });
 
             test('then it should call employeeInformationService.update with correct parameters', () => {
                 expect(employeeInformationService.update).toHaveBeenCalledWith(
                     employeeInformationData().id,
-                    updateEmployeeInformationDto,
+                    createEmployeeInformationData(),
                 );
             });
 
-            test('then it should return the updated employeeInformation', () => {
+            test('then it should return the updated employee information', () => {
                 expect(employeeInformation).toEqual(employeeInformationData());
             });
         });
@@ -122,14 +152,12 @@ describe('EmployeeInformationController', () => {
                 await employeeInformationController.remove(employeeInformationData().id);
             });
 
-            test('then it should call remove', () => {
+            test('then it should call employeeInformationService.remove with correct parameters', () => {
                 expect(employeeInformationService.remove).toHaveBeenCalledWith(employeeInformationData().id);
             });
 
-            test('then it should return a employeeInformation', async () => {
-                expect(await employeeInformationController.remove(employeeInformationData().id)).toEqual(
-                    'Promise resolves with void',
-                );
+            test('then it should resolve with void', async () => {
+                expect(await employeeInformationController.remove(employeeInformationData().id)).toEqual("Promise resolves with void");
             });
         });
     });

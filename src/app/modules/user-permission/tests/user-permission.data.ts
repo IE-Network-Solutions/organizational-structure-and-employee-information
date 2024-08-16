@@ -1,14 +1,14 @@
 export const userPermissionData = () => {
   return {
     id: 'id',
-    permissionIds: ['permissionId'],
+    permissionId: ['1f980a35-bece-4d6e-aa9d-85e808bfdfcb'],
     userId: 'userId',
   };
 };
 export const userPermissionDataSave = () => {
   return {
     id: 'id',
-    permissionIds: ['permissionId'],
+    permissionId: ['1f980a35-bece-4d6e-aa9d-85e808bfdfcb'],
     userId: 'userId',
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
@@ -20,7 +20,7 @@ export const userPermissionDataSave = () => {
 
 export const createUserPermissionData = () => {
   return {
-    permissionId: ['permissionId'],
+    permissionId: ['1f980a35-bece-4d6e-aa9d-85e808bfdfcb'],
     userId: 'userId',
   };
 };

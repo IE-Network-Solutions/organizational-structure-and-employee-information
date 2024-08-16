@@ -23,7 +23,7 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 export class EmployeeInformationController {
   constructor(
     private readonly employeeInformationService: EmployeeInformationService,
-  ) {}
+  ) { }
 
   @Post()
   create(

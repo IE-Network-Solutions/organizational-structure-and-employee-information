@@ -66,9 +66,11 @@ export const paginationResultEmploymentTypeData = () => {
             totalItems: 1,
             itemCount: 1,
             itemsPerPage: 10,
+            currentPage: 1, // Add this property
         }
-    }
-}
+    };
+};
+
 export const updateUserData = () => {
     return {
         raw: [],

@@ -3,7 +3,7 @@ import { employementTypeData, paginationResultEmploymentTypeData } from '../test
 
 // import { paginationResultUserData, userData } from '../tests/user.data';
 
-export const UsersService = jest.fn().mockReturnValue({
+export const EmployementTypeService = jest.fn().mockReturnValue({
     create: jest.fn().mockResolvedValue(employementTypeData()),
     findAll: jest.fn().mockResolvedValue(paginationResultEmploymentTypeData()),
     findOne: jest

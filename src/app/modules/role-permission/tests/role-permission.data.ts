@@ -1,14 +1,14 @@
 export const rolePermissionData = () => {
   return {
     id: 'id',
-    permissionIds: 'permissionId',
-    roleId: 'roleId',
+    permissionId: ['1f980a35-bece-4d6e-aa9d-85e808bfdfcb'],
+    roleId: 'bc80dfd2-1e02-4f3c-ad42-b39648ff2ecf',
   };
 };
 export const rolePermissionDataSave = () => {
   return {
-    permissionIds: 'permissionId',
-    roleId: 'roleId',
+    permissionId: ['1f980a35-bece-4d6e-aa9d-85e808bfdfcb'],
+    roleId: 'bc80dfd2-1e02-4f3c-ad42-b39648ff2ecf',
     role: null,
     permissions: null,
     createdAt: new Date('2022-10-22 07:11:42'),
@@ -19,8 +19,8 @@ export const rolePermissionDataSave = () => {
 export const rolePermissionReturnedData = () => {
   return {
     id: 'id',
-    permissionIds: 'permissionId',
-    roleId: 'roleId',
+    permissionIds: ['1f980a35-bece-4d6e-aa9d-85e808bfdfcb'],
+    roleId: 'bc80dfd2-1e02-4f3c-ad42-b39648ff2ecf',
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
     role: null,
@@ -30,16 +30,17 @@ export const rolePermissionReturnedData = () => {
 
 export const createRolePermissionData = () => {
   return {
-    permissionId: ['permissionId'],
-    roleId: 'roleId',
+    permissionId: ['1f980a35-bece-4d6e-aa9d-85e808bfdfcb'],
+    roleId: 'bc80dfd2-1e02-4f3c-ad42-b39648ff2ecf',
   };
 };
+
 export const createRolePermissionDataForRolePermission = () => {
   return {
     permission: {
-      id: 'permissionId',
+      id: '1f980a35-bece-4d6e-aa9d-85e808bfdfcb',
     },
-    role: { id: 'roleId' },
+    role: { id: 'bc80dfd2-1e02-4f3c-ad42-b39648ff2ecf' },
   };
 };
 

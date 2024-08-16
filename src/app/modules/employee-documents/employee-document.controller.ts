@@ -19,7 +19,7 @@ import { UpdateEmployeeDocumentDto } from './dto/update-employee-documents.dto';
 import { EmployeeDocument } from './entities/employee-documents.entity';
 import { EmployeeDocumentService } from './employee-document.service';
 import { CreateEmployeeDocumentDto } from './dto/create-employee-documents.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 @Controller('employee-document')
 @ApiTags('Employee Document')
 export class EmployeeDocumentController {
@@ -28,10 +28,11 @@ export class EmployeeDocumentController {
   ) { }
 
   @Post()
-  @UseInterceptors(FileInterceptor('documentName', documentUploadOptions))
+  @UseInterceptors(AnyFilesInterceptor())
   async create(
     @Req() request: Request,
     @Body() createEmployeeDocumentsDto: CreateEmployeeDocumentDto, @UploadedFile() documentName: Express.Multer.File) {
+
     return this.employeeDocumentService.create(
       createEmployeeDocumentsDto,
       documentName,

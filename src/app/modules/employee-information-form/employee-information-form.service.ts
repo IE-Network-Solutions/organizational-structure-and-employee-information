@@ -11,6 +11,7 @@ import { PaginationService } from '../../../core/pagination/pagination.service';
 import { CreateEmployeeInformationFormDto } from './dto/create-employee-information-form.dto';
 import { EmployeeInformationForm } from './entities/employee-information-form.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { UpdateEmployeeInformationFormDto } from './dto/update-employee-information-form.dto';
 
 @Injectable()
 export class EmployeeInformationFormService {
@@ -139,41 +140,35 @@ export class EmployeeInformationFormService {
     }
   }
 
-  // async update(
-  //   id: string,
-  //   updateEmployeeJobInformationDto: UpdateEmployeeInformationFormDto,
-  // ) {
-  //   try {
-  //     await this.employeeinformationFormRepository.findOneOrFail({
-  //       where: { id: id },
-  //     });
-  //     await this.employeeinformationFormRepository.update(
-  //       { id },
-  //       updateEmployeeJobInformationDto,
-  //     );
-  //     return await this.employeeinformationFormRepository.findOneOrFail({
-  //       where: { id: id },
-  //     });
-  //   } catch (error) {
-  //     if (error.name === 'EntityNotFoundError') {
-  //       throw new NotFoundException(
-  //         `EmployeeJobInformation with id ${id} not found.`,
-  //       );
-  //     }
-  //     throw error;
-  //   }
-  // }
+  async update(
+    id: string,
+    updateEmployeeJobInformationDto: UpdateEmployeeInformationFormDto,
+  ) {
+    try {
+      await this.findOne(id);
+      await this.employeeInformationFormRepository.update(
+        { id },
+        updateEmployeeJobInformationDto,
+      );
+      return await this.findOne(id);
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(
+          `employeeInformationForm with id ${id} not found.`,
+        );
+      }
+      throw error;
+    }
+  }
 
   async remove(id: string) {
     try {
-      await this.employeeInformationFormRepository.findOneOrFail({
-        where: { id: id },
-      });
+      await this.findOne(id);
       return await this.employeeInformationFormRepository.softDelete({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(
-          `EmployeeJobInformation with id ${id} not found.`,
+          `employeeInformationForm with id ${id} not found.`,
         );
       }
       throw error;

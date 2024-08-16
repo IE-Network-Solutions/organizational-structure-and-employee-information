@@ -53,7 +53,7 @@ describe('EmployeeDocumentService', () => {
             const createEmployeeDocumentDto = createEmployeeDocumentData();
             const documentName = { originalname: 'doc.pdf', buffer: Buffer.from('') } as Express.Multer.File;
             const tenantId = 'tenant-id';
-            const uploadedDocumentPath = { viewImage: 'path/to/view', image: 'path/to/image' };
+            const uploadedDocumentPath = { viewImage: 'http://example.com/documents/employee-handbook.pdf', image: 'Employee Handbook' };
 
             beforeEach(() => {
                 fileUploadService.uploadFileToServer.mockResolvedValue(uploadedDocumentPath);
@@ -93,7 +93,7 @@ describe('EmployeeDocumentService', () => {
     describe('findAll', () => {
         describe('when findAll is called', () => {
             const paginationOptions: PaginationDto = { page: 1, limit: 10 };
-
+            let request: Request;
             beforeEach(() => {
                 const paginationResult = paginationResultEmployeeDocumentData();
                 paginationService.paginate.mockResolvedValue(paginationResult);

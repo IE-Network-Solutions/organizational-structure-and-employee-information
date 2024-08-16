@@ -57,7 +57,7 @@ export class User extends BaseModel {
     () => EmployeeJobInformation,
     (employeeJobInformation) => employeeJobInformation.user,
   )
-  employeeJobInformation: EmployeeJobInformation;
+  employeeJobInformation: EmployeeJobInformation[];
 
   @OneToMany(
     () => EmployeeDocument,

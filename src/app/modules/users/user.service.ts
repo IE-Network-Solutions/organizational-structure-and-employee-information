@@ -66,16 +66,14 @@ export class UserService {
       const password = createUserDto.email + generateRandom4DigitNumber();
 
       const userRecord = await admin.auth().createUser({
-        email: createUserDto.email,
+        // email: createUserDto.email,
         // password: "123456789",
-        // displayName: tenantId
+        //  displayName: tenantId
       })
       const updatedUserRecord = await admin.auth().updateUser(userRecord.uid, {
         displayName: tenantId
       });
 
-
-      console.log(updatedUserRecord, "updatedUserRecord")
 
       user.firebaseId = userRecord.uid;
 
@@ -133,9 +131,6 @@ export class UserService {
         'searchString': filterDto.searchString
       };
 
-
-
-      //userFilters['deletedAt'] = null
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
@@ -165,9 +160,15 @@ export class UserService {
         queryBuilder,
         options,
       );
+
       for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
+        if (user.employeeJobInformation && user.employeeJobInformation.length > 0) {
+          let data = [];
+
+          user.employeeJobInformation[0] = user.employeeJobInformation[0];
+        }
       }
+
       return paginatedData;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
@@ -237,80 +238,6 @@ export class UserService {
       throw error;
     }
   }
-  async searchUsers(
-    filterUsertDto: FilterUsertDto,
-    paginationOptions: PaginationDto,
-    tenantId: string,
-  ): Promise<Pagination<User>> {
-    try {
-      const filterableFields = ['fullname', 'firstName', 'middleName', 'lastName', 'email'];
-      const queryBuilder = this.userRepository
-        .createQueryBuilder('user')
-        .leftJoinAndSelect(
-          'user.employeeJobInformation',
-          'employeeJobInformation',
-          'employeeJobInformation.isPositionActive = :isPositionActive',
-          { isPositionActive: true },
-        )
-        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
-        .leftJoinAndSelect('user.role', 'role')
-        .leftJoinAndSelect('employeeJobInformation.employementType', 'employementType')
-        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
-        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
-        .leftJoinAndSelect('employeeJobInformation.department', 'department')
-        .where('user.tenantId = :tenantId', { tenantId });
-
-      const { searchString } = filterUsertDto;
-      if (searchString) {
-        const lowerCaseSearchString = searchString.toLowerCase();
-
-        const searchConditions = filterableFields
-          .map((field) => {
-            if (field === 'fullname') {
-              // Concatenate first name, middle name, and last name
-              if (field === 'fullname') {
-                return `LOWER(user.firstName || ' ' || user.middleName || ' ' || user.lastName) LIKE :searchString`;
-              }
-
-            } else {
-              return `LOWER(user.${field}) LIKE :searchString`;
-            }
-          })
-          .join(' OR ');
-
-        queryBuilder.andWhere(`(${searchConditions})`, {
-          searchString: `%${lowerCaseSearchString}%`,
-        });
-      }
-
-      const options: IPaginationOptions = {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
-      };
-
-      const paginatedData = await this.paginationService.paginate<User>(
-        queryBuilder,
-        options,
-      );
-
-      for (const user of paginatedData.items) {
-        if (Array.isArray(user.employeeJobInformation) && user.employeeJobInformation.length > 0) {
-          user.employeeJobInformation = user.employeeJobInformation[0];
-        } else {
-          user.employeeJobInformation = null; // Handle cases where there is no active job information
-        }
-      }
-
-      return paginatedData;
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException('User not found.');
-      }
-      throw error;
-    }
-  }
-
-
   async findReportingToUser(id: string) {
     try {
       const queryBuilder = this.userRepository
@@ -323,27 +250,26 @@ export class UserService {
         )
         .leftJoinAndSelect('user.role', 'role')
         .where('user.id = :id', { id });
+
       const user = await queryBuilder.getOne();
 
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
-      if (user.employeeJobInformation[0].departmentLeadOrNot === true) {
-        const department = await this.departmentService.findAncestor(
-          user.employeeJobInformation[0].departmentId,
-        );
-        if (department) {
-          return await this.findTeamLeadOrNot(department.id);
-        }
-      }
 
-      return await this.findTeamLeadOrNot(
-        user.employeeJobInformation[0].departmentId,
-      );
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`User with id ${id} not found.`);
+      // Check if employeeJobInformation exists and has elements
+      if (user.employeeJobInformation && user.employeeJobInformation.length > 0) {
+        const jobInfo = user.employeeJobInformation[0];
+
+        if (jobInfo.departmentLeadOrNot === true) {
+          const department = await this.departmentService.findAncestor(jobInfo.departmentId);
+          if (department) {
+            return await this.findTeamLeadOrNot(department.id);
+          }
+        }
+        return await this.findTeamLeadOrNot(jobInfo.departmentId);
       }
+    } catch (error) {
       throw error;
     }
   }

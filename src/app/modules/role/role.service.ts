@@ -24,7 +24,7 @@ export class RoleService {
     private readonly roleRepository: Repository<Role>,
     private readonly paginationService: PaginationService, // private readonly rolePermissionService: RolePermissionService,
     private readonly rolePermissionService: RolePermissionService,
-  ) {}
+  ) { }
 
   async create(tenantId: string, createRoleDto: CreateRoleDto): Promise<Role> {
     const data = this.roleRepository.create({ tenantId, ...createRoleDto });
@@ -38,7 +38,7 @@ export class RoleService {
       );
       return role;
     } catch (error) {
-      throw new ConflictException(error.message);
+      throw new ConflictException(error);
     }
   }
 

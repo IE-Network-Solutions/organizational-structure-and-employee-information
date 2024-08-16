@@ -1,6 +1,4 @@
-import { tenantId } from './../branchs/tests/branch.data';
 import { UserService } from './user.service';
-import { SearchFilterDTO } from './../../../core/commonDto/search-filter-dto';
 import {
   Controller,
   Get,
@@ -138,19 +136,6 @@ export class UserController {
     return this.userService.remove(id);
   }
 
-  @Post('/search/users')
-  searchUsers(
-    @Req() req: Request,
-    @Body() filterUsertDto?: FilterUsertDto,
-    @Query() paginationOptions?: PaginationDto,
-  ): Promise<Pagination<User>> {
-    const tenantId = req['tenantId'];
-    return this.userService.searchUsers(
-      filterUsertDto,
-      paginationOptions,
-      tenantId,
-    );
-  }
   // @Post('/assign-permission-to-user')
   // assignPermissionToRole(
   //   @Body() createUserPermissionDto: CreateUserPermissionDto,

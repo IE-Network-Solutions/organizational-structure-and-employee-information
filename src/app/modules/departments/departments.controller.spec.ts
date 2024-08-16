@@ -10,6 +10,7 @@ import {
   paginationResultdepartmentData,
   updatedepartmentData,
 } from './tests/department.data';
+import { tenantId } from '../branchs/tests/branch.data';
 
 describe('DepartmentsController', () => {
   let controller: DepartmentsController;
@@ -84,8 +85,10 @@ describe('DepartmentsController', () => {
   });
 
   it('should update a department', async () => {
+    const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
     const updateDepartmentDto: UpdateDepartmentDto = updatedepartmentData();
     const result = await controller.updateDepartment(
+      req.tenantId,
       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
       updateDepartmentDto,
     );
