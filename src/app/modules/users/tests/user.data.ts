@@ -19,7 +19,8 @@ export const userData = (): User => {
         userPermissions: [], // Adjust based on actual permissions
         employeeJobInformation: undefined,
         employeeDocument: undefined,
-        employeeInformation: undefined
+        employeeInformation: undefined,
+        firebaseId: "gh"
     };
 };
 

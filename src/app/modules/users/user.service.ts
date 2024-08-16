@@ -17,13 +17,18 @@ import { EmployeeInformationService } from '../employee-information/employee-inf
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 import { QueryRunner, Repository } from 'typeorm';
 import { RolePermissionService } from '../role-permission/role-permission.service';
-import { FileUploadService } from '@root/src/core/commonServices/upload.service';
+import { FileUploadService } from '@root/src/core/upload/upload.service';
 import { CreateUserPermissionDto } from '../user-permission/dto/create-user-permission.dto';
 import { UserPermissionService } from '../user-permission/user-permission.service';
 import { FilterUsertDto } from './dto/filter-user.dto';
 import { DepartmentsService } from '../departments/departments.service';
-import { FilterStatusDto } from './dto/filter-status-user.dto';
-import { CreateBulkRequestDto } from './createBulkRequest.dto';
+// import { FilterStatusDto } from './dto/filter-status-user.dto';
+import { CreateBulkRequestDto } from './dto/createBulkRequest.dto';
+import admin from '@root/src/config/firebase-admin';
+import { generateRandom4DigitNumber } from '@root/src/core/utils/generateRandomNumbers';
+import filterEntities from '@root/src/core/utils/filters.utils';
+import { FilterDto } from './dto/filter-status-user.dto';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -41,6 +46,7 @@ export class UserService {
 
   async create(tenantId: string, createBulkRequestDto: CreateBulkRequestDto, profileImage: Express.Multer.File, documentName: Express.Multer.File) {
 
+
     const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -52,12 +58,26 @@ export class UserService {
       const { createUserDto, createRolePermissionDto, createUserPermissionDto, createEmployeeInformationDto, createEmployeeJobInformationDto, createEmployeeDocumentDto } = createBulkRequestDto;
 
       const uploadedImagePath = await this.fileUploadService.uploadFileToServer(tenantId, profileImage);
-
+      // console.log(profileImage, documentName, "lu")
       createUserDto['profileImage'] = uploadedImagePath['viewImage'];
 
       createUserDto['profileImageDownload'] = uploadedImagePath['image'];
-
       const user = this.userRepository.create({ ...createUserDto, tenantId });
+      const password = createUserDto.email + generateRandom4DigitNumber();
+
+      const userRecord = await admin.auth().createUser({
+        email: createUserDto.email,
+        // password: "123456789",
+        // displayName: tenantId
+      })
+      const updatedUserRecord = await admin.auth().updateUser(userRecord.uid, {
+        displayName: tenantId
+      });
+
+
+      console.log(updatedUserRecord, "updatedUserRecord")
+
+      user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
 
@@ -103,13 +123,24 @@ export class UserService {
     }
   }
 
-  async findAll(paginationOptions: PaginationDto, tenantId: string) {
+  async findAll(filterDto: FilterDto, paginationOptions: PaginationDto, tenantId: string) {
     try {
+      const filterableFields = ['firstName', 'middleName', 'lastName', 'email'];
+      const userFilters = {
+        'employeeJobInformation.branchId': filterDto.branchId === "" ? undefined : filterDto.branchId,
+        'employeeJobInformation.departmentId': filterDto.departmentId === "" ? undefined : filterDto.departmentId,
+        'deletedAt': filterDto.deletedAt === "" || filterDto.deletedAt === "null" ? null : filterDto.deletedAt,
+        'searchString': filterDto.searchString
+      };
+
+
+
+      //userFilters['deletedAt'] = null
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      const queryBuilder = this.userRepository
+      let queryBuilder = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect(
           'user.employeeJobInformation',
@@ -117,21 +148,21 @@ export class UserService {
           'employeeJobInformation.isPositionActive = :isPositionActive',
           { isPositionActive: true },
         )
-        .leftJoinAndSelect(
-          'employeeJobInformation.employmentType',
-          'employmentType',
-        )
-        .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
-        .where('user.tenantId = :tenantId', { tenantId });
-
-      const users = await queryBuilder.getMany();
+        .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId });
+      queryBuilder.withDeleted();
+      queryBuilder = await filterEntities(queryBuilder, userFilters, this.userRepository, filterableFields);
 
       const paginatedData = await this.paginationService.paginate<User>(
         queryBuilder,
-
         options,
       );
       for (const user of paginatedData.items) {
@@ -146,7 +177,7 @@ export class UserService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<User> {
     try {
       const user = await this.userRepository
         .createQueryBuilder('user')
@@ -155,8 +186,8 @@ export class UserService {
           'employeeJobInformation',
         )
         .leftJoinAndSelect(
-          'employeeJobInformation.employmentType',
-          'employmentType',
+          'employeeJobInformation.employementType',
+          'employementType',
         )
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
@@ -170,7 +201,9 @@ export class UserService {
         .leftJoinAndSelect('user.role', 'role')
         .where('user.id = :id', { id })
         .getOne();
+      console.log(await this.findReportingToUser(id), "log")
       user['reportingTo'] = await this.findReportingToUser(id);
+
       return { ...user };
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
@@ -210,7 +243,7 @@ export class UserService {
     tenantId: string,
   ): Promise<Pagination<User>> {
     try {
-      const filterableFields = ['firstName', 'middleName', 'lastName', 'email'];
+      const filterableFields = ['fullname', 'firstName', 'middleName', 'lastName', 'email'];
       const queryBuilder = this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect(
@@ -221,10 +254,7 @@ export class UserService {
         )
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
-        .leftJoinAndSelect(
-          'employeeJobInformation.employmentType',
-          'employmentType',
-        )
+        .leftJoinAndSelect('employeeJobInformation.employementType', 'employementType')
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
@@ -235,12 +265,24 @@ export class UserService {
         const lowerCaseSearchString = searchString.toLowerCase();
 
         const searchConditions = filterableFields
-          .map((field) => `LOWER(user.${field}) LIKE :searchString`)
+          .map((field) => {
+            if (field === 'fullname') {
+              // Concatenate first name, middle name, and last name
+              if (field === 'fullname') {
+                return `LOWER(user.firstName || ' ' || user.middleName || ' ' || user.lastName) LIKE :searchString`;
+              }
+
+            } else {
+              return `LOWER(user.${field}) LIKE :searchString`;
+            }
+          })
           .join(' OR ');
+
         queryBuilder.andWhere(`(${searchConditions})`, {
           searchString: `%${lowerCaseSearchString}%`,
         });
       }
+
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
@@ -252,17 +294,22 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
+        if (Array.isArray(user.employeeJobInformation) && user.employeeJobInformation.length > 0) {
+          user.employeeJobInformation = user.employeeJobInformation[0];
+        } else {
+          user.employeeJobInformation = null; // Handle cases where there is no active job information
+        }
       }
 
       return paginatedData;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`User not found.`);
+        throw new NotFoundException('User not found.');
       }
       throw error;
     }
   }
+
 
   async findReportingToUser(id: string) {
     try {
@@ -329,169 +376,14 @@ export class UserService {
         if (department && department.id) {
           return this.findTeamLeadOrNot(department.id);
         } else {
-          throw new NotFoundException(
-            `No team lead found for department with id ${departmentId}`,
-          );
+          return null
         }
       }
     } catch (error) {
-      throw new NotFoundException(`No Team Lead Found`);
+      return null
     }
   }
 
-  async getAllBranchEmployees(
-    branchId: string,
-    tenantId: string,
-    paginationOptions: PaginationDto,
-  ): Promise<Pagination<User>> {
-    try {
-      const options: IPaginationOptions = {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
-      };
-      const queryBuilder = await this.userRepository
-        .createQueryBuilder('user')
-        .leftJoinAndSelect(
-          'user.employeeJobInformation',
-          'employeeJobInformation',
-          'employeeJobInformation.isPositionActive = :isPositionActive',
-          { isPositionActive: true },
-        )
-        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
-        .leftJoinAndSelect('user.role', 'role')
-        .leftJoinAndSelect(
-          'employeeJobInformation.employmentType',
-          'employmentType',
-        )
-        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
-        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
-        .leftJoinAndSelect('employeeJobInformation.department', 'department')
-        .where('employeeJobInformation.branchId = :branchId', { branchId })
-        .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId });
-      const users = await queryBuilder.getMany();
-      const paginatedData = await this.paginationService.paginate<User>(
-        queryBuilder,
-        options,
-      );
-      for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
-      }
-      return paginatedData;
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(
-          `EmployeeJobInformation with branch ${branchId} not found.`,
-        );
-      }
-      throw error;
-    }
-  }
-
-  async getAllDepartmentEmployees(
-    departmentId: string,
-    tenantId: string,
-    paginationOptions: PaginationDto,
-  ): Promise<Pagination<User>> {
-    try {
-      const options: IPaginationOptions = {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
-      };
-      const queryBuilder = this.userRepository
-        .createQueryBuilder('user')
-        .leftJoinAndSelect(
-          'user.employeeJobInformation',
-          'employeeJobInformation',
-          'employeeJobInformation.isPositionActive = :isPositionActive',
-          { isPositionActive: true },
-        )
-        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
-        .leftJoinAndSelect('user.role', 'role')
-        .leftJoinAndSelect(
-          'employeeJobInformation.employmentType',
-          'employmentType',
-        )
-        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
-        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
-        .leftJoinAndSelect('employeeJobInformation.department', 'department')
-        .where('employeeJobInformation.departmentId = :departmentId', {
-          departmentId,
-        })
-        .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId });
-
-      const paginatedData = await this.paginationService.paginate<User>(
-        queryBuilder,
-
-        options,
-      );
-      for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
-      }
-      return paginatedData;
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(
-          `EmployeeJobInformation with branch ${departmentId} not found.`,
-        );
-      }
-      throw error;
-    }
-  }
-
-  async getAllActiveEmployees(
-    tenantId: string,
-    filterStatusDto: FilterStatusDto,
-    paginationOptions: PaginationDto,
-  ): Promise<Pagination<User>> {
-    try {
-      const options: IPaginationOptions = {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
-      };
-      const queryBuilder = this.userRepository
-        .createQueryBuilder('user')
-        .leftJoinAndSelect(
-          'user.employeeJobInformation',
-          'employeeJobInformation',
-          'employeeJobInformation.isPositionActive = :isPositionActive',
-          { isPositionActive: true },
-        )
-        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
-        .leftJoinAndSelect('user.role', 'role')
-        .leftJoinAndSelect(
-          'employeeJobInformation.employmentType',
-          'employmentType',
-        )
-        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
-        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
-        .leftJoinAndSelect('employeeJobInformation.department', 'department')
-        .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId });
-      if (filterStatusDto.status === false) {
-        queryBuilder.andWhere('user.deletedAt IS NOT NULL');
-      } else if (filterStatusDto.status === true) {
-        queryBuilder.andWhere('user.deletedAt IS NULL');
-      } else {
-        queryBuilder.andWhere(
-          'user.deletedAt IS NOT NULL OR user.deletedAt IS NULL',
-        );
-      }
-      queryBuilder.getQuery();
-      const paginatedData = await this.paginationService.paginate<User>(
-        queryBuilder,
-
-        options,
-      );
-      for (const user of paginatedData.items) {
-        user.employeeJobInformation = user.employeeJobInformation[0];
-      }
-      return paginatedData;
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`EmployeeJobInformation  Not Found.`);
-      }
-      throw new BadRequestException(error);
-    }
-  }
 
   async assignPermissionToUser(
     createUserPermissionDto: CreateUserPermissionDto, tenantId: string
@@ -540,5 +432,11 @@ export class UserService {
       userId,
       permissionId,
     );
+  }
+
+
+  async findUserByFirbaseId(firbaseId: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { firebaseId: firbaseId } })
+    return user;
   }
 }

@@ -11,7 +11,7 @@ export class WorkSchedule extends BaseModel {
   @Column({ type: 'json' })
   detail: CreateWorkScheduleDetailDto[];
 
-  @Column()
+  @Column({ type: 'uuid', nullable: true })
   tenantId: string;
   @OneToMany(() => Organization, (org) => org.workSchedule)
   organizations: Organization[];

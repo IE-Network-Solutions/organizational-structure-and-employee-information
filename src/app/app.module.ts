@@ -13,6 +13,7 @@ import { CalendarSubscriber } from './modules/calendars/subscribers/calendar.sub
 import { BranchSubscriber } from './modules/branchs/subscribers/branch.subscriber';
 import { WorkScheduleSubscriber } from './modules/work-schedules/subscribers/work-schedules.subscribers';
 import { HealthModule } from './modules/health/health.module';
+import { AuthGuard } from '../core/guards/auth.guard';
 
 /** This is a TypeScript module that imports various modules and sets up a TypeORM connection using
 configuration values obtained from a ConfigService. */
@@ -51,7 +52,13 @@ configuration values obtained from a ConfigService. */
     {
       provide: APP_GUARD,
       useClass: TenantGuard,
+
     },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: AuthGuard,
+
+    // },
   ],
 })
 export class AppModule { }

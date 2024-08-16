@@ -28,6 +28,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
           .replace(/\n/g, '')
           .replace(/"/g, "'"),
         error: 'Database Error',
+        status: exception.stack
       });
     } else {
       super.catch(exception, host);

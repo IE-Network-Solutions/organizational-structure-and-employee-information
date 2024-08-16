@@ -5,7 +5,7 @@ import { PaginationService } from '../../../core/pagination/pagination.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UserController } from './user.controller';
-import { FileUploadModule } from '@root/src/core/commonServices/upload.module';
+import { FileUploadModule } from '@root/src/core/upload/upload.module';
 import { EmployeeJobInformationModule } from '../employee-job-information/employee-job-information.module';
 import { EmployeeInformationFormModule } from '../employee-information-form/employee-information-form.module';
 import { NationalityModule } from '../nationality/nationality.module';

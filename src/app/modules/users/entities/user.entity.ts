@@ -38,6 +38,9 @@ export class User extends BaseModel {
   })
   role: Role;
 
+  @Column({ type: 'varchar', nullable: true })
+  firebaseId: string;
+
   // @ManyToOne(() => Tenant, (tenant) => tenant.user, {
   //   onDelete: 'SET NULL',
   //   onUpdate: 'CASCADE',

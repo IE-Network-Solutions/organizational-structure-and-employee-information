@@ -10,7 +10,7 @@ export class EmployementType extends BaseModel {
 
   @OneToMany(
     () => EmployeeJobInformation,
-    (employeeJobInformation) => employeeJobInformation.employmentType,
+    (employeeJobInformation) => employeeJobInformation.employementType,
   )
   employeeJobInformation: EmployeeJobInformation;
 

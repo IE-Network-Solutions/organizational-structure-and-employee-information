@@ -8,9 +8,13 @@ import * as cookieParser from 'cookie-parser';
 import { AllExceptionsFilter } from './core/exceptions/all-exceptions.filter';
 import { LoggerService } from './core/middlewares/logger.middleware';
 import * as bodyParser from 'body-parser';
-import * as dotenv from 'dotenv';
 
-dotenv.config();
+//import admin from './config/firebase-admin';
+//import { serviceAccount } from './config/serviceAccount';
+
+import { serviceAccount } from './config/serviceAccount';
+import admin from './config/firebase-admin';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,8 +33,17 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors();
+
+  if (admin.apps.length === 0) {
+    admin.initializeApp({
+      credential: admin.credential.cert(
+        serviceAccount as admin.ServiceAccount,
+      ),
+    });
+  }
   setupSwagger(app);
   app.use(cookieParser());
+
 
   const port = configService.get<number>('app.port');
   await app.listen(port);

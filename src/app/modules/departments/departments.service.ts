@@ -28,14 +28,18 @@ export class DepartmentsService {
     level = 0,
   ): Promise<Department> {
     try {
+      console.log(level, "abe")
       const department = await this.departmentRepository.findOne({
         where: { name: createDepartmentDto.name, tenantId: tenantId },
       });
+      console.log(department, "is it")
       if (department) {
         throw new NotFoundException(
           `Department with Name ${department.name} Already exist`,
         );
       }
+      console.log(createDepartmentDto, "createDepartmentDto")
+
       const newDepartment = new Department();
       newDepartment.name = createDepartmentDto.name;
       newDepartment.description = createDepartmentDto.description;
@@ -44,6 +48,7 @@ export class DepartmentsService {
       newDepartment.level = level;
 
       if (parentDepartment) {
+        console.log(parentDepartment, "parentDepartment")
         newDepartment.parent = parentDepartment;
       }
 
@@ -87,40 +92,141 @@ export class DepartmentsService {
       throw new NotFoundException(`Department  not found`);
     }
   }
+  // async updateDepartment(
+  //   id: string,
+  //   updateDepartmentDto: UpdateDepartmentDto,
+  //   tenantId: string,
+  //   parentDepartment?: Department,
+
+  //   level?: number,
+  // ): Promise<Department> {
+  //   try {
+  //     // if (id = '') {
+  //     //   console.log("id", "klklk")
+  //     //   const level = parentDepartment.level + 1
+  //     //   await this.createDepartment(
+  //     //     updateDepartmentDto,
+  //     //     tenantId,
+  //     //     parentDepartment,
+  //     //     level,
+  //     //   )
+  //     // }
+  //     const department = await this.findOneDepartment(id);
+  //     console.log(department, "l")
+  //     if (department && !parentDepartment) {
+  //       console.log("ceo")
+  //       if (department.level !== 0) {
+  //         const parent = await this.departmentRepository.findAncestorsTree(
+  //           department,
+  //         );
+  //         parentDepartment = parent.parent
+  //       }
+  //     }
+  //     console.log("anbesa", parentDepartment, level)
+  //     // if (!department) {
+  //     //   const level = parentDepartment.level + 1
+  //     //   await this.createDepartment(
+  //     //     updateDepartmentDto,
+  //     //     tenantId,
+  //     //     parentDepartment,
+  //     //     level,
+  //     //   )
+  //     //   // throw new NotFoundException(`Department with Id ${id} not found`);
+  //     // }
+
+  //     department.name = updateDepartmentDto.name;
+  //     department.branchId = updateDepartmentDto.branchId;
+  //     department.description = updateDepartmentDto.description;
+  //     department.parent = parentDepartment || null;
+  //     department.level = level || parentDepartment.level + 1 || 0;
+  //     console.log(department, "depeeeeeeerrrrrdepeeeeeeerrrrr")
+  //     await this.departmentRepository.save(department);
+  //     if (
+  //       updateDepartmentDto.department &&
+  //       updateDepartmentDto.department.length > 0
+  //     ) {
+  //       console.log("iam hindu")
+  //       for (const dep of updateDepartmentDto.department) {
+  //         console.log(department.level, "iam hindu")
+  //         await this.updateDepartment(dep.id, dep, tenantId, department, department.level + 1);
+  //       }
+  //     }
+  //     return await this.findOneDepartment(id);
+  //   } catch (error) {
+  //     if (error instanceof NotFoundException) {
+  //       console.log(parentDepartment, "op")
+  //       const level = parentDepartment.level + 1
+  //       console.log(level, "op")
+  //       await this.createDepartment(
+  //         updateDepartmentDto,
+  //         tenantId,
+  //         parentDepartment,
+  //         level,
+  //       )
+  //     }
+  //     else {
+  //       throw new BadRequestException(error);
+  //     }
+  //   }
+  // }
+
   async updateDepartment(
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
+    tenantId: string,
     parentDepartment?: Department,
-    level = 0,
+    level?: number,
   ): Promise<Department> {
     try {
       const department = await this.findOneDepartment(id);
-      if (!department) {
-        throw new NotFoundException(`Department with Id ${id} not found`);
+
+      if (department && !parentDepartment) {
+
+        if (department.level !== 0) {
+          const parent = await this.departmentRepository.findAncestorsTree(department);
+          parentDepartment = parent.parent;
+        }
       }
+
+
 
       department.name = updateDepartmentDto.name;
       department.branchId = updateDepartmentDto.branchId;
       department.description = updateDepartmentDto.description;
       department.parent = parentDepartment || null;
-      department.level = level;
+      department.level = level ?? (parentDepartment ? parentDepartment.level + 1 : 0);
+
       await this.departmentRepository.save(department);
-      if (
-        updateDepartmentDto.department &&
-        updateDepartmentDto.department.length > 0
-      ) {
+
+      if (updateDepartmentDto.department && updateDepartmentDto.department.length > 0) {
+
         for (const dep of updateDepartmentDto.department) {
-          await this.updateDepartment(dep.id, dep, department, level + 1);
+
+          await this.updateDepartment(dep.id, dep, tenantId, department, department.level + 1);
         }
       }
+
       return await this.findOneDepartment(id);
     } catch (error) {
+      console.error("Error updating department:", error);
+
       if (error instanceof NotFoundException) {
-        throw error;
+        console.log(parentDepartment, "Handling NotFoundException");
+        const newLevel = parentDepartment ? parentDepartment.level + 1 : 0;
+        console.log(newLevel, "Creating new department with calculated level");
+
+        return await this.createDepartment(
+          updateDepartmentDto,
+          tenantId,
+          parentDepartment,
+          newLevel,
+        );
+      } else {
+        throw new BadRequestException(error);
       }
-      throw new BadRequestException(error);
     }
   }
+
 
   async removeDepartment(id: string): Promise<Department> {
     const Department = await this.findOneDepartment(id);

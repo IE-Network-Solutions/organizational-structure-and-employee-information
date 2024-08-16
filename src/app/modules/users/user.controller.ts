@@ -31,13 +31,30 @@ import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { parseNestedJson } from '@root/src/core/utils/parseNestedJson.utils';
 import { FilterUsertDto } from './dto/filter-user.dto';
-import { FilterStatusDto } from './dto/filter-status-user.dto';
+//import { FilterStatusDto } from './dto/filter-status-user.dto';
+import { ExcludeTenantGuard } from '@root/src/core/guards/excludetenant.guard';
+import { FilterDto } from './dto/filter-status-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
   constructor(private readonly userService: UserService,
   ) { }
+
+
+  // @Post()
+  // async usercre() {
+  //   const data = {
+  //     "firstName": "John",
+  //     "middleName": " A.",
+  //     "lastName": "Doe",
+  //     "email": "john.doe22223@example.com",
+  //     "roleId": " bc80dfd2-1e02-4f3c-ad42-b39648ff2ecf"
+  //   }
+
+  //   return await this.userService.createeee(data, "tenantId");
+  // }
+
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
@@ -47,9 +64,11 @@ export class UserController {
     @Req() request: Request,
   ) {
 
+
     const profileImage = files.find(file => file.fieldname === 'profileImage');
 
     const documentName = files.find(file => file.fieldname === 'documentName');
+    console.log(profileImage, documentName, "l")
 
     const { createUserDto, createRolePermissionDto, createUserPermissionDto, createEmployeeInformationDto, createEmployeeJobInformationDto, createEmployeeDocumentDto } = body;
 
@@ -91,16 +110,23 @@ export class UserController {
   @Get()
   async findAll(
     @Req() request: Request,
+    @Query() filterDto?: FilterDto,
     @Query() paginationOptions?: PaginationDto,
   ): Promise<Pagination<User>> {
     const tenantId = request['tenantId']
-    return await this.userService.findAll(paginationOptions, tenantId);
+    return await this.userService.findAll(filterDto, paginationOptions, tenantId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(id);
   }
+
+
+  // @Get('many')
+  // findBulkUsers(@Body() user: any): Promise<User[]> {
+  //   return this.userService.findOne(id);
+  // }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -125,46 +151,6 @@ export class UserController {
       tenantId,
     );
   }
-  @Get('/branch/:branchId')
-  getAllBranchEmployees(
-    @Req() req: Request,
-    @Param('branchId') id: string,
-    @Query() paginationOptions?: PaginationDto,
-  ): Promise<Pagination<User>> {
-    const tenantId = req['tenantId'];
-    return this.userService.getAllBranchEmployees(
-      id,
-      tenantId,
-      paginationOptions,
-    );
-  }
-
-  @Get('/department/:departmentId')
-  getAllDepartmentEmployees(
-    @Req() req: Request,
-    @Param('departmentId') id: string,
-    @Query() paginationOptions?: PaginationDto,
-  ): Promise<Pagination<User>> {
-    const tenantId = req['tenantId'];
-    return this.userService.getAllDepartmentEmployees(
-      id,
-      tenantId,
-      paginationOptions,
-    );
-  }
-  @Post('/employementStatus/status')
-  getAllActiveEmployees(
-    @Req() req: Request,
-    @Body() filterStatusDto: FilterStatusDto,
-    @Query() paginationOptions?: PaginationDto,
-  ): Promise<Pagination<User>> {
-    const tenantId = req['tenantId'];
-    return this.userService.getAllActiveEmployees(
-      tenantId,
-      filterStatusDto,
-      paginationOptions,
-    );
-  }
   // @Post('/assign-permission-to-user')
   // assignPermissionToRole(
   //   @Body() createUserPermissionDto: CreateUserPermissionDto,
@@ -186,5 +172,11 @@ export class UserController {
       userId,
       permissionId,
     );
+  }
+
+  @Get('/firebase/:firebaseId')
+  @ExcludeTenantGuard()
+  async findUserByFirbaseId(@Param('firebaseId') firebaseId: string): Promise<User> {
+    return await this.userService.findUserByFirbaseId(firebaseId)
   }
 }

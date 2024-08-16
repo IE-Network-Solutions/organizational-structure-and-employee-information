@@ -11,7 +11,7 @@ import { PaginationService } from '../../../core/pagination/pagination.service';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { EmployeeDocument } from './entities/employee-documents.entity';
 import { CreateEmployeeDocumentDto } from './dto/create-employee-documents.dto';
-import { FileUploadService } from '@root/src/core/commonServices/upload.service';
+import { FileUploadService } from '@root/src/core/upload/upload.service';
 import { UpdateEmployeeDocumentDto } from './dto/update-employee-documents.dto';
 
 @Injectable()
@@ -27,11 +27,11 @@ export class EmployeeDocumentService {
     createEmployeeDocumentsDto: CreateEmployeeDocumentDto, documentName: Express.Multer.File, tenantId: string
   ) {
 
-    const uploadedDocumentPath = await this.fileUploadService.uploadFileToServer(tenantId, documentName);
+    //  const uploadedDocumentPath = await this.fileUploadService.uploadFileToServer(tenantId, documentName);
 
-    createEmployeeDocumentsDto['documentName'] = uploadedDocumentPath['viewImage'];
+    // createEmployeeDocumentsDto['documentName'] = uploadedDocumentPath['viewImage'];
 
-    createEmployeeDocumentsDto['documentLink'] = uploadedDocumentPath['image'];
+    // createEmployeeDocumentsDto['documentLink'] = uploadedDocumentPath['image'];
 
     const employeeDocument = this.employeeDocumentRepository.create(createEmployeeDocumentsDto);
     try {

@@ -1,7 +1,16 @@
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
-export class FilterStatusDto {
+export class FilterDto {
   @IsOptional()
-  @IsBoolean()
-  status?: boolean;
+  deletedAt?: any;
+  @IsOptional()
+  @IsString()
+  departmentId?: string;
+  @IsOptional()
+  @IsString()
+  branchId?: string;
+  @IsOptional()
+  @IsString()
+  searchString?: string;
+
 }

@@ -47,12 +47,15 @@ export class DepartmentsController {
 
   @Patch(':id')
   async updateDepartment(
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<Department> {
+    const tenantId = req['tenantId'];
     return await this.departmentsService.updateDepartment(
       id,
       updateDepartmentDto,
+      tenantId
     );
   }
 

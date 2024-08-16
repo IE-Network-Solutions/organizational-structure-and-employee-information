@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { EmployeeDocument } from './entities/employee-documents.entity';
 import { EmployeeDocumentService } from './employee-document.service';
 import { PaginationService } from '../../../core/pagination/pagination.service';
-import { FileUploadService } from '@root/src/core/commonServices/upload.service';
+import { FileUploadService } from '@root/src/core/upload/upload.service';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { MockProxy, mock } from 'jest-mock-extended';
 import { Repository } from 'typeorm';
