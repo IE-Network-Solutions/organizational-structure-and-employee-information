@@ -1,10 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { UserService } from '@root/src/app/modules/users/user.service';
-import admin from '@root/src/config/firebase-admin';
+import * as admin from 'firebase-admin';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  //constructor(private usersService: UserService) { }
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
@@ -17,7 +15,6 @@ export class AuthGuard implements CanActivate {
 
     try {
       const decodedToken = await admin.auth().verifyIdToken(newToken);
-      // const oneUSer = await this.usersService.findOne(decodedToken.id);
       request.user = decodedToken;
 
       return true;
