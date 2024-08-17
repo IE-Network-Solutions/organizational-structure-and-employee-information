@@ -36,7 +36,7 @@ import { FilterDto } from './dto/filter-status-user.dto';
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())

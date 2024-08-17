@@ -42,7 +42,7 @@ export class UserService {
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
-  ) { }
+  ) {}
 
   async create(
     tenantId: string,
@@ -79,7 +79,7 @@ export class UserService {
 
       const userRecord = await admin.auth().createUser({
         email: createUserDto.email,
-        password: password
+        password: password,
       });
 
       await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });

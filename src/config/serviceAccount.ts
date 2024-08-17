@@ -1,8 +1,8 @@
 import { config } from 'dotenv';
 config();
 
-export default function serviceAccount(): Object {
-  let envFilesData = {
+export default function serviceAccount(): Promise<any> {
+  const envFilesData = {
     type: process.env.TYPE,
     project_id: process.env.PROJECT_ID,
     client_id: process.env.CLIENT_ID,
@@ -14,6 +14,6 @@ export default function serviceAccount(): Object {
     private_key_id: process.env.PRIVATE_KEY_ID,
     private_key: process.env.PRIVATE_KEY,
     client_email: process.env.CLIENT_EMAIL,
-  }
-  return JSON.parse(JSON.stringify(envFilesData))
-};
+  };
+  return JSON.parse(JSON.stringify(envFilesData));
+}
