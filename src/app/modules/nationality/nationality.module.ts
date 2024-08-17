@@ -11,4 +11,4 @@ import { NationalitysController } from './nationality.controller';
   providers: [NationalityService, PaginationService],
   exports: [NationalityService],
 })
-export class NationalityModule { }
+export class NationalityModule {}

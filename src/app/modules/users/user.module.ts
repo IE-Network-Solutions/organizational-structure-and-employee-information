@@ -34,10 +34,10 @@ import { DepartmentsModule } from '../departments/departments.module';
     FileUploadModule,
     EmployeeDocumentModule,
     RolePermissionModule,
-    UserPermissionModule
+    UserPermissionModule,
   ],
   controllers: [UserController],
   providers: [UserService, PaginationService, DepartmentsService],
   exports: [UserService],
 })
-export class UserModule { }
+export class UserModule {}

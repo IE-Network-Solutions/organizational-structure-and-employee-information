@@ -23,7 +23,7 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 export class EmployeeInformationController {
   constructor(
     private readonly employeeInformationService: EmployeeInformationService,
-  ) { }
+  ) {}
 
   @Post()
   create(
@@ -40,9 +40,13 @@ export class EmployeeInformationController {
   async findAll(
     @Req() request: Request,
     @Query() paginationOptions?: PaginationDto,
-    @Query() searchFilterDTO?: SearchFilterDTO
+    @Query() searchFilterDTO?: SearchFilterDTO,
   ): Promise<Pagination<EmployeeInformation>> {
-    return await this.employeeInformationService.findAll(paginationOptions, searchFilterDTO, request['tenantId']);
+    return await this.employeeInformationService.findAll(
+      paginationOptions,
+      searchFilterDTO,
+      request['tenantId'],
+    );
   }
 
   @Get(':id')

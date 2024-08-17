@@ -19,7 +19,7 @@ export class EmployementTypeService {
     @InjectRepository(EmployementType)
     private employeeTypeRepository: Repository<EmployementType>,
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) { }
+  ) {}
 
   async create(
     createEmployementTypeDto: CreateEmployementTypeDto,

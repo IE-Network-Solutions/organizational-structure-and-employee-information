@@ -81,7 +81,10 @@ describe('WorkSchedulesService', () => {
       const result = await service.createWorkSchedule(dto, tenantId);
 
       expect(result).toEqual(createdWorkSchedule);
-      expect(repository.create).toHaveBeenCalledWith({ ...dto, tenantId: tenantId });
+      expect(repository.create).toHaveBeenCalledWith({
+        ...dto,
+        tenantId: tenantId,
+      });
       expect(repository.save).toHaveBeenCalledWith(createdWorkSchedule);
     });
 
@@ -98,7 +101,6 @@ describe('WorkSchedulesService', () => {
       );
     });
   });
-
 
   describe('findAllWorkSchedules', () => {
     it('should return paginated work schedules', async () => {

@@ -7,11 +7,9 @@ import { EmployeeInformation } from './entities/employee-information.entity';
 import { EmployeeInformationService } from './employee-information.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([EmployeeInformation]),
-  ],
+  imports: [TypeOrmModule.forFeature([EmployeeInformation])],
   controllers: [EmployeeInformationController],
   providers: [EmployeeInformationService, PaginationService],
   exports: [EmployeeInformationService],
 })
-export class EmployeeInformationModule { }
+export class EmployeeInformationModule {}

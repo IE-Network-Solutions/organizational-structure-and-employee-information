@@ -19,7 +19,7 @@ export class EmployeeInformationFormService {
     @InjectRepository(EmployeeInformationForm)
     private employeeInformationFormRepository: Repository<EmployeeInformationForm>,
     private readonly paginationService: PaginationService, // private readonly userPermissionService: UserPermissionService,
-  ) { }
+  ) {}
 
   async create(
     createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
@@ -88,8 +88,10 @@ export class EmployeeInformationFormService {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      const queryBuilder = await this.employeeInformationFormRepository
-        .createQueryBuilder('employee_information_form');
+      const queryBuilder =
+        await this.employeeInformationFormRepository.createQueryBuilder(
+          'employee_information_form',
+        );
       return await this.paginationService.paginate<EmployeeInformationForm>(
         queryBuilder,
         options,

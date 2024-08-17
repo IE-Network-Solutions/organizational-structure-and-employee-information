@@ -39,7 +39,10 @@ describe('RoleController', () => {
       });
 
       test('then it should call roleService.create with correct parameters', () => {
-        expect(roleService.create).toHaveBeenCalledWith(request['tenantId'], createRole());
+        expect(roleService.create).toHaveBeenCalledWith(
+          request['tenantId'],
+          createRole(),
+        );
       });
 
       test('then it should return a role', () => {
@@ -60,7 +63,11 @@ describe('RoleController', () => {
 
         (roleService.findAll as jest.Mock).mockResolvedValue(findAllRoles());
 
-        await roleController.findAll(request, paginationOptions(), searchFilter());
+        await roleController.findAll(
+          request,
+          paginationOptions(),
+          searchFilter(),
+        );
       });
 
       test('then it should call roleService.findAll with correct parameters', () => {
@@ -72,7 +79,11 @@ describe('RoleController', () => {
       });
 
       test('then it should return all roles', async () => {
-        const result = await roleController.findAll(request, paginationOptions(), searchFilter());
+        const result = await roleController.findAll(
+          request,
+          paginationOptions(),
+          searchFilter(),
+        );
         expect(result).toEqual(findAllRoles());
       });
     });

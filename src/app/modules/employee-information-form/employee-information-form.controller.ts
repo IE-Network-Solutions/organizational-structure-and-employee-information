@@ -21,7 +21,7 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 export class EmployeeInformationFormsController {
   constructor(
     private readonly employeeInformationFormService: EmployeeInformationFormService,
-  ) { }
+  ) {}
 
   @Post()
   create(

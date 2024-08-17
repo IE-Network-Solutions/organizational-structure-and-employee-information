@@ -99,5 +99,5 @@ export const findOneNotFoundReturnValue = () => {
 export const tenantId = () => {
   return {
     tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
-  }
-}
+  };
+};

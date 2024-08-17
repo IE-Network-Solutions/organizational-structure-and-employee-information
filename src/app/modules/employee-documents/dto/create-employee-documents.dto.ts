@@ -10,6 +10,4 @@ export class CreateEmployeeDocumentDto {
 
   @IsOptional()
   userId: any;
-
 }
-

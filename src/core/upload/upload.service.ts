@@ -19,8 +19,6 @@ export class FileUploadService {
     file: Express.Multer.File,
   ): Promise<any> {
     try {
-      console.log('Uploading file:', file.originalname);
-
       const form = new FormData();
       form.append('tenantId', tenantId);
       form.append('file', file.buffer, {
@@ -37,10 +35,8 @@ export class FileUploadService {
         .post(this.fileServerUrl, form, { headers })
         .toPromise();
 
-      console.log('Response from file server:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Upload failed:', error.message);
       throw new HttpException(
         `Failed to upload file. Please try again later. ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,

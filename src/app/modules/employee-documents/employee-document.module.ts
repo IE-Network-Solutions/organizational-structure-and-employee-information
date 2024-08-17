@@ -12,4 +12,4 @@ import { FileUploadModule } from '@root/src/core/upload/upload.module';
   providers: [EmployeeDocumentService, PaginationService],
   exports: [EmployeeDocumentService],
 })
-export class EmployeeDocumentModule { }
+export class EmployeeDocumentModule {}

@@ -17,14 +17,15 @@ export class UserPermissionService {
   ) {}
 
   async assignPermissionToUser(
-    createUserPermissionDto: CreateUserPermissionDto, tenantId: string
+    createUserPermissionDto: CreateUserPermissionDto,
+    tenantId: string,
   ) {
     const assignedPermissions = createUserPermissionDto.permissionId.map(
       (permissionId) => {
         return this.userPermissionRepository.create({
           user: { id: createUserPermissionDto.userId },
           permission: { id: permissionId },
-          tenantId: tenantId
+          tenantId: tenantId,
         });
       },
     );

@@ -61,7 +61,9 @@ describe('RoleService', () => {
 
         roleRepository.create.mockReturnValue(roleData() as any);
         roleRepository.save.mockResolvedValue(roleData() as any);
-        rolePermissionService.createRoleWithPermissions.mockResolvedValue(undefined);
+        rolePermissionService.createRoleWithPermissions.mockResolvedValue(
+          undefined,
+        );
       });
 
       it('should call roleRepository.create', async () => {
@@ -79,10 +81,9 @@ describe('RoleService', () => {
 
       it('should call rolePermissionService.createRoleWithPermissions', async () => {
         await roleService.create(roleData().tenantId, createRoleDto);
-        expect(rolePermissionService.createRoleWithPermissions).toHaveBeenCalledWith(
-          roleData().id,
-          createRoleDto.permission,
-        );
+        expect(
+          rolePermissionService.createRoleWithPermissions,
+        ).toHaveBeenCalledWith(roleData().id, createRoleDto.permission);
       });
 
       it('should return the created role', async () => {
@@ -115,14 +116,18 @@ describe('RoleService', () => {
       });
 
       it('should call paginationService.paginate with correct parameters', async () => {
-        await roleService.findAll(paginationOptions(), searchFilter(), roleData().tenantId);
+        await roleService.findAll(
+          paginationOptions(),
+          searchFilter(),
+          roleData().tenantId,
+        );
       });
 
       it('should return paginated roles', async () => {
         const permissions = await roleService.findAll(
           paginationOptions(),
           searchFilter(),
-          roleData().tenantId
+          roleData().tenantId,
         );
         expect(permissions).toEqual(findAllRoles());
       });
@@ -140,7 +145,11 @@ describe('RoleService', () => {
         }); // Mock the update
         roleRepository.findOneOrFail.mockResolvedValue(roleData() as any); // Mock the final find
 
-        await roleService.update(roleData().id, roleData(), roleData().tenantId);
+        await roleService.update(
+          roleData().id,
+          roleData(),
+          roleData().tenantId,
+        );
       });
 
       it('should call roleRepository.findOneOrFail initially', async () => {
@@ -164,7 +173,11 @@ describe('RoleService', () => {
       });
 
       it('should return the updated role', async () => {
-        const result = await roleService.update(roleData().id, roleData(), roleData().tenantId);
+        const result = await roleService.update(
+          roleData().id,
+          roleData(),
+          roleData().tenantId,
+        );
         expect(result).toEqual(roleData());
       });
     });

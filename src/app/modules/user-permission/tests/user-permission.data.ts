@@ -14,7 +14,7 @@ export const userPermissionDataSave = () => {
     updatedAt: new Date('2022-10-22 07:11:42'),
     user: null,
     permission: null,
-    tenantId: "1"
+    tenantId: '1',
   };
 };
 

@@ -11,4 +11,4 @@ import { EmployementType } from './entities/employement-type.entity';
   providers: [EmployementTypeService, PaginationService],
   exports: [EmployementTypeService],
 })
-export class EmployementTypeModule { }
+export class EmployementTypeModule {}

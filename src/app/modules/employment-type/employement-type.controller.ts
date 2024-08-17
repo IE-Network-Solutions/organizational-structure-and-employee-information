@@ -23,14 +23,14 @@ import { EmployementType } from './entities/employement-type.entity';
 export class EmployementTypesController {
   constructor(
     private readonly employementTypeService: EmployementTypeService,
-  ) { }
+  ) {}
 
   @Post()
   create(
     @Body() createEmployementTypeDto: CreateEmployementTypeDto,
     @Req() request: Request,
   ) {
-    const tenantId = request['tenantId']
+    const tenantId = request['tenantId'];
     return this.employementTypeService.create(
       createEmployementTypeDto,
       tenantId,

@@ -82,7 +82,7 @@ describe('PermissionService', () => {
       it('should call permissionRepository.findOne', async () => {
         await permissionService.findOne(permissionData().id);
         expect(permissionRepository.findOneOrFail).toHaveBeenCalledWith({
-          where: { id: permissionData().id }
+          where: { id: permissionData().id },
         });
       });
 

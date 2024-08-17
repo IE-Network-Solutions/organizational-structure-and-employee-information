@@ -24,10 +24,10 @@ import { FilterUsertDto } from './dto/filter-user.dto';
 import { DepartmentsService } from '../departments/departments.service';
 // import { FilterStatusDto } from './dto/filter-status-user.dto';
 import { CreateBulkRequestDto } from './dto/createBulkRequest.dto';
-import admin from '@root/src/config/firebase-admin';
 import { generateRandom4DigitNumber } from '@root/src/core/utils/generateRandomNumbers';
 import filterEntities from '@root/src/core/utils/filters.utils';
 import { FilterDto } from './dto/filter-status-user.dto';
+import * as admin from 'firebase-admin';
 
 @Injectable()
 export class UserService {
@@ -44,21 +44,33 @@ export class UserService {
     private readonly departmentService: DepartmentsService,
   ) { }
 
-  async create(tenantId: string, createBulkRequestDto: CreateBulkRequestDto, profileImage: Express.Multer.File, documentName: Express.Multer.File) {
-
-
+  async create(
+    tenantId: string,
+    createBulkRequestDto: CreateBulkRequestDto,
+    profileImage: Express.Multer.File,
+    documentName: Express.Multer.File,
+  ) {
     const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
 
-    await queryRunner.startTransaction()
+    await queryRunner.startTransaction();
 
     try {
+      const {
+        createUserDto,
+        createRolePermissionDto,
+        createUserPermissionDto,
+        createEmployeeInformationDto,
+        createEmployeeJobInformationDto,
+        createEmployeeDocumentDto,
+      } = createBulkRequestDto;
 
-      const { createUserDto, createRolePermissionDto, createUserPermissionDto, createEmployeeInformationDto, createEmployeeJobInformationDto, createEmployeeDocumentDto } = createBulkRequestDto;
+      const uploadedImagePath = await this.fileUploadService.uploadFileToServer(
+        tenantId,
+        profileImage,
+      );
 
-      const uploadedImagePath = await this.fileUploadService.uploadFileToServer(tenantId, profileImage);
-      // console.log(profileImage, documentName, "lu")
       createUserDto['profileImage'] = uploadedImagePath['viewImage'];
 
       createUserDto['profileImageDownload'] = uploadedImagePath['image'];
@@ -66,14 +78,11 @@ export class UserService {
       const password = createUserDto.email + generateRandom4DigitNumber();
 
       const userRecord = await admin.auth().createUser({
-        // email: createUserDto.email,
-        // password: "123456789",
-        //  displayName: tenantId
-      })
-      const updatedUserRecord = await admin.auth().updateUser(userRecord.uid, {
-        displayName: tenantId
+        email: createUserDto.email,
+        password: password
       });
 
+      await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
 
       user.firebaseId = userRecord.uid;
 
@@ -83,52 +92,73 @@ export class UserService {
 
       const result = await this.userRepository.save(user);
 
-      await this.rolePermissionService.updateRolePermissions(createRolePermissionDto['roleId'], createRolePermissionDto['permissionId'], tenantId)
+      await this.rolePermissionService.updateRolePermissions(
+        createRolePermissionDto['roleId'],
+        createRolePermissionDto['permissionId'],
+        tenantId,
+      );
 
       createUserPermissionDto['userId'] = result.id;
 
-      createUserPermissionDto['permissionId'] = createUserPermissionDto.permissionId;
+      createUserPermissionDto['permissionId'] =
+        createUserPermissionDto.permissionId;
 
       await this.assignPermissionToUser(createUserPermissionDto, tenantId);
 
       createEmployeeInformationDto['userId'] = result.id;
 
-      const employeeInformation = await this.employeeInformationService.create(createEmployeeInformationDto, tenantId);
+      const employeeInformation = await this.employeeInformationService.create(
+        createEmployeeInformationDto,
+        tenantId,
+      );
 
       createEmployeeJobInformationDto['userId'] = result.id;
 
-      await this.employeeJobInformationService.create(createEmployeeJobInformationDto, tenantId);
+      await this.employeeJobInformationService.create(
+        createEmployeeJobInformationDto,
+        tenantId,
+      );
 
       createEmployeeDocumentDto['userId'] = result.id;
 
-      createEmployeeDocumentDto['employeeInformationId'] = employeeInformation.id;
+      createEmployeeDocumentDto['employeeInformationId'] =
+        employeeInformation.id;
 
-      await this.employeeDocumentService.create(createEmployeeDocumentDto, documentName, tenantId);
+      await this.employeeDocumentService.create(
+        createEmployeeDocumentDto,
+        documentName,
+        tenantId,
+      );
 
       await queryRunner.commitTransaction();
 
       return await this.findOne(result.id);
-
     } catch (error) {
-
       await queryRunner.rollbackTransaction();
 
       throw new ConflictException(error);
-
     } finally {
-
       await queryRunner.release();
     }
   }
 
-  async findAll(filterDto: FilterDto, paginationOptions: PaginationDto, tenantId: string) {
+  async findAll(
+    filterDto: FilterDto,
+    paginationOptions: PaginationDto,
+    tenantId: string,
+  ) {
     try {
       const filterableFields = ['firstName', 'middleName', 'lastName', 'email'];
       const userFilters = {
-        'employeeJobInformation.branchId': filterDto.branchId === "" ? undefined : filterDto.branchId,
-        'employeeJobInformation.departmentId': filterDto.departmentId === "" ? undefined : filterDto.departmentId,
-        'deletedAt': filterDto.deletedAt === "" || filterDto.deletedAt === "null" ? null : filterDto.deletedAt,
-        'searchString': filterDto.searchString
+        'employeeJobInformation.branchId':
+          filterDto.branchId === '' ? undefined : filterDto.branchId,
+        'employeeJobInformation.departmentId':
+          filterDto.departmentId === '' ? undefined : filterDto.departmentId,
+        deletedAt:
+          filterDto.deletedAt === '' || filterDto.deletedAt === 'null'
+            ? null
+            : filterDto.deletedAt,
+        searchString: filterDto.searchString,
       };
 
       const options: IPaginationOptions = {
@@ -154,7 +184,12 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId });
       queryBuilder.withDeleted();
-      queryBuilder = await filterEntities(queryBuilder, userFilters, this.userRepository, filterableFields);
+      queryBuilder = await filterEntities(
+        queryBuilder,
+        userFilters,
+        this.userRepository,
+        filterableFields,
+      );
 
       const paginatedData = await this.paginationService.paginate<User>(
         queryBuilder,
@@ -162,8 +197,11 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-        if (user.employeeJobInformation && user.employeeJobInformation.length > 0) {
-          let data = [];
+        if (
+          user.employeeJobInformation &&
+          user.employeeJobInformation.length > 0
+        ) {
+          const data = [];
 
           user.employeeJobInformation[0] = user.employeeJobInformation[0];
         }
@@ -202,7 +240,6 @@ export class UserService {
         .leftJoinAndSelect('user.role', 'role')
         .where('user.id = :id', { id })
         .getOne();
-      console.log(await this.findReportingToUser(id), "log")
       user['reportingTo'] = await this.findReportingToUser(id);
 
       return { ...user };
@@ -258,11 +295,16 @@ export class UserService {
       }
 
       // Check if employeeJobInformation exists and has elements
-      if (user.employeeJobInformation && user.employeeJobInformation.length > 0) {
+      if (
+        user.employeeJobInformation &&
+        user.employeeJobInformation.length > 0
+      ) {
         const jobInfo = user.employeeJobInformation[0];
 
         if (jobInfo.departmentLeadOrNot === true) {
-          const department = await this.departmentService.findAncestor(jobInfo.departmentId);
+          const department = await this.departmentService.findAncestor(
+            jobInfo.departmentId,
+          );
           if (department) {
             return await this.findTeamLeadOrNot(department.id);
           }
@@ -302,20 +344,21 @@ export class UserService {
         if (department && department.id) {
           return this.findTeamLeadOrNot(department.id);
         } else {
-          return null
+          return null;
         }
       }
     } catch (error) {
-      return null
+      return null;
     }
   }
 
-
   async assignPermissionToUser(
-    createUserPermissionDto: CreateUserPermissionDto, tenantId: string
+    createUserPermissionDto: CreateUserPermissionDto,
+    tenantId: string,
   ) {
     return await this.userPermissionService.assignPermissionToUser(
-      createUserPermissionDto, tenantId
+      createUserPermissionDto,
+      tenantId,
     );
   }
 
@@ -360,9 +403,10 @@ export class UserService {
     );
   }
 
-
   async findUserByFirbaseId(firbaseId: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { firebaseId: firbaseId } })
+    const user = await this.userRepository.findOne({
+      where: { firebaseId: firbaseId },
+    });
     return user;
   }
 }

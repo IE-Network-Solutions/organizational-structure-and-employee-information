@@ -52,7 +52,6 @@ configuration values obtained from a ConfigService. */
     {
       provide: APP_GUARD,
       useClass: TenantGuard,
-
     },
     // {
     //   provide: APP_GUARD,
@@ -61,4 +60,4 @@ configuration values obtained from a ConfigService. */
     // },
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -21,19 +21,24 @@ export class EmployeeDocumentService {
     private readonly employeeDocumentRepository: Repository<EmployeeDocument>,
     private readonly paginationService: PaginationService,
     private readonly fileUploadService: FileUploadService,
-  ) { }
+  ) {}
 
   async create(
-    createEmployeeDocumentsDto: CreateEmployeeDocumentDto, documentName: Express.Multer.File, tenantId: string
+    createEmployeeDocumentsDto: CreateEmployeeDocumentDto,
+    documentName: Express.Multer.File,
+    tenantId: string,
   ) {
+    const uploadedDocumentPath =
+      await this.fileUploadService.uploadFileToServer(tenantId, documentName);
 
-    const uploadedDocumentPath = await this.fileUploadService.uploadFileToServer(tenantId, documentName);
-
-    createEmployeeDocumentsDto['documentName'] = uploadedDocumentPath['viewImage'];
+    createEmployeeDocumentsDto['documentName'] =
+      uploadedDocumentPath['viewImage'];
 
     createEmployeeDocumentsDto['documentLink'] = uploadedDocumentPath['image'];
 
-    const employeeDocument = this.employeeDocumentRepository.create(createEmployeeDocumentsDto);
+    const employeeDocument = this.employeeDocumentRepository.create(
+      createEmployeeDocumentsDto,
+    );
     try {
       return await this.employeeDocumentRepository.save(employeeDocument);
     } catch (error) {

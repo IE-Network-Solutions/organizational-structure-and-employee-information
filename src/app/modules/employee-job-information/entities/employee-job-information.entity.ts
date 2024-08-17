@@ -52,8 +52,11 @@ export class EmployeeJobInformation extends BaseModel {
   @ManyToOne(() => Branch, (branch) => branch.employeeJobInformation)
   branch: Branch;
 
-  @ManyToOne(() => EmployementType, employementType => employementType.employeeJobInformation)
-  employementType: EmployementType
+  @ManyToOne(
+    () => EmployementType,
+    (employementType) => employementType.employeeJobInformation,
+  )
+  employementType: EmployementType;
 
   @ManyToOne(
     () => Department,
@@ -66,8 +69,6 @@ export class EmployeeJobInformation extends BaseModel {
     (workSchedule) => workSchedule.employeeJobInformation,
   )
   workSchedule: WorkSchedule;
-
-
 
   // @ManyToOne(() => Tenant, tenant => tenant.employeeJobInformation)
   // tenant: Tenant;

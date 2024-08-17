@@ -36,23 +36,7 @@ import { FilterDto } from './dto/filter-status-user.dto';
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
-  constructor(private readonly userService: UserService,
-  ) { }
-
-
-  // @Post()
-  // async usercre() {
-  //   const data = {
-  //     "firstName": "John",
-  //     "middleName": " A.",
-  //     "lastName": "Doe",
-  //     "email": "john.doe22223@example.com",
-  //     "roleId": " bc80dfd2-1e02-4f3c-ad42-b39648ff2ecf"
-  //   }
-
-  //   return await this.userService.createeee(data, "tenantId");
-  // }
-
+  constructor(private readonly userService: UserService) { }
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
@@ -61,48 +45,97 @@ export class UserController {
     @Body() body: any,
     @Req() request: Request,
   ) {
+    const profileImage = files.find(
+      (file) => file.fieldname === 'profileImage',
+    );
 
+    const documentName = files.find(
+      (file) => file.fieldname === 'documentName',
+    );
 
-    const profileImage = files.find(file => file.fieldname === 'profileImage');
+    const {
+      createUserDto,
+      createRolePermissionDto,
+      createUserPermissionDto,
+      createEmployeeInformationDto,
+      createEmployeeJobInformationDto,
+      createEmployeeDocumentDto,
+    } = body;
 
-    const documentName = files.find(file => file.fieldname === 'documentName');
-    console.log(profileImage, documentName, "l")
+    const createUser = plainToInstance(
+      CreateUserDto,
+      createUserDto ? JSON.parse(createUserDto) : {},
+    );
 
-    const { createUserDto, createRolePermissionDto, createUserPermissionDto, createEmployeeInformationDto, createEmployeeJobInformationDto, createEmployeeDocumentDto } = body;
+    const createRolePermission = plainToInstance(
+      CreateRolePermissionDto,
+      createRolePermissionDto ? JSON.parse(createRolePermissionDto) : {},
+    );
 
-    const createUser = plainToInstance(CreateUserDto, createUserDto ? JSON.parse(createUserDto) : {});
+    const createUserPermission = plainToInstance(
+      CreateUserPermissionDto,
+      createUserPermissionDto ? JSON.parse(createUserPermissionDto) : {},
+    );
 
-    const createRolePermission = plainToInstance(CreateRolePermissionDto, createRolePermissionDto ? JSON.parse(createRolePermissionDto) : {});
+    const createEmployeeInfo = plainToInstance(
+      CreateEmployeeInformationDto,
+      createEmployeeInformationDto
+        ? JSON.parse(createEmployeeInformationDto)
+        : {},
+    );
 
-    const createUserPermission = plainToInstance(CreateUserPermissionDto, createUserPermissionDto ? JSON.parse(createUserPermissionDto) : {});
+    const createEmployeeJob = plainToInstance(
+      CreateEmployeeJobInformationDto,
+      createEmployeeJobInformationDto
+        ? JSON.parse(createEmployeeJobInformationDto)
+        : {},
+    );
 
-    const createEmployeeInfo = plainToInstance(CreateEmployeeInformationDto, createEmployeeInformationDto ? JSON.parse(createEmployeeInformationDto) : {});
+    const createEmployeeDoc = plainToInstance(
+      CreateEmployeeDocumentDto,
+      createEmployeeDocumentDto ? JSON.parse(createEmployeeDocumentDto) : {},
+    );
 
-    const createEmployeeJob = plainToInstance(CreateEmployeeJobInformationDto, createEmployeeJobInformationDto ? JSON.parse(createEmployeeJobInformationDto) : {});
-
-    const createEmployeeDoc = plainToInstance(CreateEmployeeDocumentDto, createEmployeeDocumentDto ? JSON.parse(createEmployeeDocumentDto) : {});
-
-    for (const dto of [createUser, createRolePermission, createUserPermission, createEmployeeInfo, createEmployeeJob, createEmployeeDoc]) {
-
+    for (const dto of [
+      createUser,
+      createRolePermission,
+      createUserPermission,
+      createEmployeeInfo,
+      createEmployeeJob,
+      createEmployeeDoc,
+    ]) {
       const errors = await validate(dto);
 
       if (errors.length > 0) {
-        throw new BadRequestException(`Validation failed: ${errors.map(err => Object.values(err.constraints || {}).join(', ')).join(', ')}`);
+        throw new BadRequestException(
+          `Validation failed: ${errors
+            .map((err) => Object.values(err.constraints || {}).join(', '))
+            .join(', ')}`,
+        );
       }
     }
 
-    let createBulkRequestDto = {
+    const createBulkRequestDto = {
       createUserDto: parseNestedJson(createUserDto),
       createRolePermissionDto: parseNestedJson(createRolePermissionDto),
       createUserPermissionDto: parseNestedJson(createUserPermissionDto),
-      createEmployeeInformationDto: parseNestedJson(createEmployeeInformationDto),
-      createEmployeeJobInformationDto: parseNestedJson(createEmployeeJobInformationDto),
+      createEmployeeInformationDto: parseNestedJson(
+        createEmployeeInformationDto,
+      ),
+      createEmployeeJobInformationDto: parseNestedJson(
+        createEmployeeJobInformationDto,
+      ),
       createEmployeeDocumentDto: parseNestedJson(createEmployeeDocumentDto),
-    }
+    };
 
     const tenantId = request['tenantId'];
 
-    return await this.userService.create(tenantId, createBulkRequestDto, profileImage, documentName);
+    return await this.userService.create(
+      tenantId,
+      createBulkRequestDto,
+      profileImage,
+      documentName,
+    );
   }
 
   @Get()
@@ -111,15 +144,18 @@ export class UserController {
     @Query() filterDto?: FilterDto,
     @Query() paginationOptions?: PaginationDto,
   ): Promise<Pagination<User>> {
-    const tenantId = request['tenantId']
-    return await this.userService.findAll(filterDto, paginationOptions, tenantId);
+    const tenantId = request['tenantId'];
+    return await this.userService.findAll(
+      filterDto,
+      paginationOptions,
+      tenantId,
+    );
   }
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(id);
   }
-
 
   // @Get('many')
   // findBulkUsers(@Body() user: any): Promise<User[]> {
@@ -161,7 +197,9 @@ export class UserController {
 
   @Get('/firebase/:firebaseId')
   @ExcludeTenantGuard()
-  async findUserByFirbaseId(@Param('firebaseId') firebaseId: string): Promise<User> {
-    return await this.userService.findUserByFirbaseId(firebaseId)
+  async findUserByFirbaseId(
+    @Param('firebaseId') firebaseId: string,
+  ): Promise<User> {
+    return await this.userService.findUserByFirbaseId(firebaseId);
   }
 }

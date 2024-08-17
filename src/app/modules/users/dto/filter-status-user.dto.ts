@@ -12,5 +12,4 @@ export class FilterDto {
   @IsOptional()
   @IsString()
   searchString?: string;
-
 }

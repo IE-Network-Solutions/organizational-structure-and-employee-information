@@ -19,7 +19,7 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 @Controller('roles')
 @ApiTags('Roles')
 export class RoleController {
-  constructor(private readonly roleService: RoleService) { }
+  constructor(private readonly roleService: RoleService) {}
 
   @Post()
   create(@Req() request: Request, @Body() createRoleDto: CreateRoleDto) {
@@ -28,10 +28,17 @@ export class RoleController {
   }
 
   @Get()
-  findAll(@Req() request: Request, @Query() paginationOptions?: PaginationDto, @Query() searchFilterDTO?: SearchFilterDTO) {
-    return this.roleService.findAll(paginationOptions, searchFilterDTO, request['tenantId']);
+  findAll(
+    @Req() request: Request,
+    @Query() paginationOptions?: PaginationDto,
+    @Query() searchFilterDTO?: SearchFilterDTO,
+  ) {
+    return this.roleService.findAll(
+      paginationOptions,
+      searchFilterDTO,
+      request['tenantId'],
+    );
   }
-
 
   @Get(':roleId')
   findOne(@Param('roleId') id: string) {
@@ -39,8 +46,12 @@ export class RoleController {
   }
 
   @Patch(':roleId')
-  update(@Req() request: Request, @Param('roleId') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    const tenantId = request['tenantId']
+  update(
+    @Req() request: Request,
+    @Param('roleId') id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ) {
+    const tenantId = request['tenantId'];
     return this.roleService.update(id, updateRoleDto, tenantId);
   }
 

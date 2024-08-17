@@ -18,7 +18,7 @@ export class BranchesService {
   constructor(
     @InjectRepository(Branch) private branchRepository: Repository<Branch>,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
   async createBranch(
     createBranchDto: CreateBranchDto,
     tenantId: string,
@@ -90,7 +90,7 @@ export class BranchesService {
       return await this.findOneBranch(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw error
+        throw error;
       }
       throw new BadRequestException(error);
     }
@@ -104,10 +104,9 @@ export class BranchesService {
       }
       await this.branchRepository.softRemove({ id });
       return branch;
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof NotFoundException) {
-        throw error
+        throw error;
       }
       throw new BadRequestException(error);
     }

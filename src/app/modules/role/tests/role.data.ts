@@ -13,7 +13,7 @@ export const roleData = () => {
     permission: [],
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
-    deletedAt: new Date('2022-10-22 07:11:42')
+    deletedAt: new Date('2022-10-22 07:11:42'),
   };
 };
 export const roleDataSave = (): CreateRoleDto => {
@@ -21,7 +21,7 @@ export const roleDataSave = (): CreateRoleDto => {
     name: 'Admin role',
     description: 'Description for admin role',
     permission: [],
-    tenantId: 'tenantId'
+    tenantId: 'tenantId',
   };
 };
 
@@ -30,7 +30,7 @@ export const createRole = (): CreateRoleDto => {
     name: 'Admin role',
     description: 'Description for admin role',
     permission: ['List of permission ids'],
-    tenantId: 'tenantId'
+    tenantId: 'tenantId',
   };
 };
 

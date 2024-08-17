@@ -3,4 +3,4 @@ import { CreateEmployeeDocumentDto } from './create-employee-documents.dto';
 
 export class UpdateEmployeeDocumentDto extends PartialType(
   CreateEmployeeDocumentDto,
-) { }
+) {}

@@ -8,8 +8,16 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 import { BranchesService } from './branches.service';
 import { Branch } from './entities/branch.entity';
-import { branchData, createbranchData, createbranchDataOnCreate, createbranchDataOnSave, deletebranchData, paginationResultbranchData, updatebranchData, UpdatebranchDataReturned } from './tests/branch.data';
-
+import {
+  branchData,
+  createbranchData,
+  createbranchDataOnCreate,
+  createbranchDataOnSave,
+  deletebranchData,
+  paginationResultbranchData,
+  updatebranchData,
+  UpdatebranchDataReturned,
+} from './tests/branch.data';
 
 describe('BranchesService', () => {
   let branchesService: BranchesService;
@@ -40,7 +48,7 @@ describe('BranchesService', () => {
   describe('create', () => {
     describe('when createBranch is called', () => {
       let branch: Branch;
-      let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c'
+      let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       beforeEach(() => {
         branchRepository.create.mockReturnValue(createbranchData() as any);
         branchRepository.save.mockResolvedValue(branchData());
@@ -57,12 +65,10 @@ describe('BranchesService', () => {
 
       it('should call branchRepository.create', async () => {
         await branchesService.createBranch(createbranchData(), tenantId);
-        expect(branchRepository.create).toHaveBeenCalledWith(
-          {
-            ...createbranchData(),
-            tenantId: tenantId
-          }
-        );
+        expect(branchRepository.create).toHaveBeenCalledWith({
+          ...createbranchData(),
+          tenantId: tenantId,
+        });
       });
 
       it('should call branchRepository.save', async () => {
@@ -71,7 +77,10 @@ describe('BranchesService', () => {
       });
 
       it('should return the created Branch', async () => {
-        branch = await branchesService.createBranch(createbranchData(), tenantId);
+        branch = await branchesService.createBranch(
+          createbranchData(),
+          tenantId,
+        );
         expect(branch).toEqual(branchData());
       });
     });
@@ -115,7 +124,7 @@ describe('BranchesService', () => {
 
   describe('findAll', () => {
     describe('when findAllBranchs is called', () => {
-      let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c'
+      let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       beforeEach(async () => {
         paginationService.paginate.mockResolvedValue(
           paginationResultbranchData(),
@@ -138,7 +147,10 @@ describe('BranchesService', () => {
       });
 
       it('should return paginated Branchs', async () => {
-        const branchs = await branchesService.findAllBranchs(paginationOptions(), tenantId);
+        const branchs = await branchesService.findAllBranchs(
+          paginationOptions(),
+          tenantId,
+        );
         expect(branchs).toEqual(paginationResultbranchData());
       });
     });
@@ -156,20 +168,14 @@ describe('BranchesService', () => {
       });
 
       it('should call branchService.findOneBranch', async () => {
-        await branchesService.updateBranch(
-          branchData().id,
-          createbranchData(),
-        );
+        await branchesService.updateBranch(branchData().id, createbranchData());
         expect(branchesService.findOneBranch).toHaveBeenCalledWith(
           branchData().id,
         );
       });
 
       it('should call branchRepository.update', async () => {
-        await branchesService.updateBranch(
-          branchData().id,
-          updatebranchData(),
-        );
+        await branchesService.updateBranch(branchData().id, updatebranchData());
         expect(branchRepository.update).toHaveBeenCalledWith(
           branchData().id,
           updatebranchData(),
@@ -192,16 +198,10 @@ describe('BranchesService', () => {
             new NotFoundException(`Branch with Id ${wrongId} not found`),
           );
         await expect(
-          branchesService.updateBranch(
-            wrongId,
-            createbranchData(),
-          ),
+          branchesService.updateBranch(wrongId, createbranchData()),
         ).rejects.toThrow(NotFoundException);
         await expect(
-          branchesService.updateBranch(
-            wrongId,
-            createbranchData(),
-          ),
+          branchesService.updateBranch(wrongId, createbranchData()),
         ).rejects.toThrow(`Branch with Id ${wrongId} not found`);
       });
     });
@@ -217,9 +217,7 @@ describe('BranchesService', () => {
       });
 
       it('should call branchService.findOneBranch', async () => {
-        await branchesService.removeBranch(
-          branchData().id,
-        );
+        await branchesService.removeBranch(branchData().id);
         expect(branchesService.findOneBranch).toHaveBeenCalledWith(
           branchData().id,
         );
@@ -227,9 +225,9 @@ describe('BranchesService', () => {
 
       it('should call branchRepository.delete', async () => {
         await branchesService.removeBranch(branchData().id);
-        expect(branchRepository.softRemove).toHaveBeenCalledWith(
-          { id: branchData().id },
-        );
+        expect(branchRepository.softRemove).toHaveBeenCalledWith({
+          id: branchData().id,
+        });
       });
 
       it('should throw NotFoundException if id is not found', async () => {
@@ -239,17 +237,12 @@ describe('BranchesService', () => {
           .mockRejectedValue(
             new NotFoundException(`Branch with Id ${wrongId} not found`),
           );
-        await expect(
-          branchesService.removeBranch(
-            wrongId,
-
-          ),
-        ).rejects.toThrow(NotFoundException);
-        await expect(
-          branchesService.removeBranch(
-            wrongId,
-          ),
-        ).rejects.toThrow(`Branch with Id ${wrongId} not found`);
+        await expect(branchesService.removeBranch(wrongId)).rejects.toThrow(
+          NotFoundException,
+        );
+        await expect(branchesService.removeBranch(wrongId)).rejects.toThrow(
+          `Branch with Id ${wrongId} not found`,
+        );
       });
 
       it('should return void when the Branch is removed', async () => {

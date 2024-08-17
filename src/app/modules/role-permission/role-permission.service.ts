@@ -12,7 +12,7 @@ export class RolePermissionService {
     @InjectRepository(RolePermission)
     private readonly rolePermissionRepository: Repository<RolePermission>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
   async createRoleWithPermissions(roleId: string, permissionIds: string[]) {
     const assignedPermissions = permissionIds.map((permissionId) => {
       return this.rolePermissionRepository.create({
@@ -60,14 +60,18 @@ export class RolePermissionService {
     }
   }
 
-  async updateRolePermissions(roleId: string, permissionIds: string[], tenantId: string) {
+  async updateRolePermissions(
+    roleId: string,
+    permissionIds: string[],
+    tenantId: string,
+  ) {
     try {
       await this.rolePermissionRepository.delete({ role: { id: roleId } });
       const assignedPermissions = permissionIds.map((permissionId) => {
         return this.rolePermissionRepository.create({
           role: { id: roleId },
           permissions: { id: permissionId },
-          tenantId: tenantId
+          tenantId: tenantId,
         });
       });
       return await this.rolePermissionRepository.save(assignedPermissions);

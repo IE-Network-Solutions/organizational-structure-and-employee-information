@@ -1,16 +1,5 @@
 import { diskStorage } from 'multer';
 import { extname, basename, join } from 'path';
-import * as fs from 'fs';
-
-// Base directory for uploads
-//const baseUploadDir = 'https://files.ienetworks.co/testUpload';
-
-// Create directories if they don't exist
-function createUploadDir(directory: string) {
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true });
-  }
-}
 
 // Utility function to create multer options
 export function createMulterOptions(

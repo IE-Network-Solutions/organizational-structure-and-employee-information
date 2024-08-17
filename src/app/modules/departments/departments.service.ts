@@ -20,7 +20,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -28,18 +28,14 @@ export class DepartmentsService {
     level = 0,
   ): Promise<Department> {
     try {
-      console.log(level, "abe")
       const department = await this.departmentRepository.findOne({
         where: { name: createDepartmentDto.name, tenantId: tenantId },
       });
-      console.log(department, "is it")
       if (department) {
         throw new NotFoundException(
           `Department with Name ${department.name} Already exist`,
         );
       }
-      console.log(createDepartmentDto, "createDepartmentDto")
-
       const newDepartment = new Department();
       newDepartment.name = createDepartmentDto.name;
       newDepartment.description = createDepartmentDto.description;
@@ -48,7 +44,6 @@ export class DepartmentsService {
       newDepartment.level = level;
 
       if (parentDepartment) {
-        console.log(parentDepartment, "parentDepartment")
         newDepartment.parent = parentDepartment;
       }
 
@@ -84,10 +79,11 @@ export class DepartmentsService {
     }
   }
 
-
   async findAllDepartmentsByTenantId(tenantId: string): Promise<Department[]> {
     try {
-      return await this.departmentRepository.find({ where: { tenantId: tenantId } });
+      return await this.departmentRepository.find({
+        where: { tenantId: tenantId },
+      });
     } catch (error) {
       throw new NotFoundException(`Department  not found`);
     }
@@ -181,9 +177,10 @@ export class DepartmentsService {
       const department = await this.findOneDepartment(id);
 
       if (department && !parentDepartment) {
-
         if (department.level !== 0) {
-          const parent = await this.departmentRepository.findAncestorsTree(department);
+          const parent = await this.departmentRepository.findAncestorsTree(
+            department,
+          );
           parentDepartment = parent.parent;
         }
       }
@@ -191,26 +188,30 @@ export class DepartmentsService {
       department.branchId = updateDepartmentDto.branchId;
       department.description = updateDepartmentDto.description;
       department.parent = parentDepartment || null;
-      department.level = level ?? (parentDepartment ? parentDepartment.level + 1 : 0);
+      department.level =
+        level ?? (parentDepartment ? parentDepartment.level + 1 : 0);
 
       await this.departmentRepository.save(department);
 
-      if (updateDepartmentDto.department && updateDepartmentDto.department.length > 0) {
-
+      if (
+        updateDepartmentDto.department &&
+        updateDepartmentDto.department.length > 0
+      ) {
         for (const dep of updateDepartmentDto.department) {
-
-          await this.updateDepartment(dep.id, dep, tenantId, department, department.level + 1);
+          await this.updateDepartment(
+            dep.id,
+            dep,
+            tenantId,
+            department,
+            department.level + 1,
+          );
         }
       }
 
       return await this.findOneDepartment(id);
     } catch (error) {
-      console.error("Error updating department:", error);
-
       if (error instanceof NotFoundException) {
-        console.log(parentDepartment, "Handling NotFoundException");
         const newLevel = parentDepartment ? parentDepartment.level + 1 : 0;
-        console.log(newLevel, "Creating new department with calculated level");
 
         return await this.createDepartment(
           updateDepartmentDto,
@@ -223,7 +224,6 @@ export class DepartmentsService {
       }
     }
   }
-
 
   async removeDepartment(id: string): Promise<Department> {
     const Department = await this.findOneDepartment(id);

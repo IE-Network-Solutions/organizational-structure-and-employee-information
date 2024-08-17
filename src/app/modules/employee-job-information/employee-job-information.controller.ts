@@ -22,7 +22,7 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 export class EmployeeJobInformationsController {
   constructor(
     private readonly employeeJobInformationService: EmployeeJobInformationService,
-  ) { }
+  ) {}
 
   @Post()
   create(

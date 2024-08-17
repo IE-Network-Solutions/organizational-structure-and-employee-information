@@ -13,7 +13,8 @@ import { WorkSchedule } from '../entities/work-schedule.entity';
 @EventSubscriber()
 @Injectable()
 export class WorkScheduleSubscriber
-  implements EntitySubscriberInterface<WorkSchedule> {
+  implements EntitySubscriberInterface<WorkSchedule>
+{
   listenTo() {
     return WorkSchedule;
   }

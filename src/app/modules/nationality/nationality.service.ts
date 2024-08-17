@@ -19,7 +19,7 @@ export class NationalityService {
     @InjectRepository(Nationality)
     private nationalityRepository: Repository<Nationality>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
 
   async create(createNationalityDto: CreateNationalityDto, tenantId: string) {
     const user = this.nationalityRepository.create({

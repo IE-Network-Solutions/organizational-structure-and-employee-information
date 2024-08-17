@@ -24,7 +24,7 @@ export class RoleService {
     private readonly roleRepository: Repository<Role>,
     private readonly paginationService: PaginationService, // private readonly rolePermissionService: RolePermissionService,
     private readonly rolePermissionService: RolePermissionService,
-  ) { }
+  ) {}
 
   async create(tenantId: string, createRoleDto: CreateRoleDto): Promise<Role> {
     const data = this.roleRepository.create({ tenantId, ...createRoleDto });
@@ -45,15 +45,15 @@ export class RoleService {
   async findAll(
     paginationOptions: PaginationDto,
     searchFilterDTO: SearchFilterDTO,
-    tenantId: string
+    tenantId: string,
   ): Promise<Pagination<Role>> {
     const options: IPaginationOptions = {
       page: paginationOptions?.page,
-      limit: paginationOptions?.limit
+      limit: paginationOptions?.limit,
     };
 
     try {
-      const queryBuilder = this.roleRepository.createQueryBuilder('role')
+      const queryBuilder = this.roleRepository.createQueryBuilder('role');
 
       await applySearchFilterUtils(
         queryBuilder,
@@ -69,8 +69,7 @@ export class RoleService {
         paginationOptions.orderDirection,
         { tenantId },
       );
-      return paginatedData
-
+      return paginatedData;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`Role not found.`);
@@ -92,7 +91,11 @@ export class RoleService {
     }
   }
 
-  async update(id: string, updateRoleDto: UpdateRoleDto, tenantId: string): Promise<Role> {
+  async update(
+    id: string,
+    updateRoleDto: UpdateRoleDto,
+    tenantId: string,
+  ): Promise<Role> {
     try {
       await this.findOne(id);
       await this.roleRepository.update(id, {
@@ -102,7 +105,7 @@ export class RoleService {
       await this.rolePermissionService.updateRolePermissions(
         id,
         updateRoleDto['permission'],
-        tenantId
+        tenantId,
       );
       return await this.findOne(id);
     } catch (error) {

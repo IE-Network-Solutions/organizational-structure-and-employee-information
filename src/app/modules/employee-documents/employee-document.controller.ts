@@ -1,4 +1,3 @@
-import { documentUploadOptions } from './../../../core/utils/upload-file.utils';
 import {
   Controller,
   Get,
@@ -25,18 +24,19 @@ import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 export class EmployeeDocumentController {
   constructor(
     private readonly employeeDocumentService: EmployeeDocumentService,
-  ) { }
+  ) {}
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
   async create(
     @Req() request: Request,
-    @Body() createEmployeeDocumentsDto: CreateEmployeeDocumentDto, @UploadedFile() documentName: Express.Multer.File) {
-
+    @Body() createEmployeeDocumentsDto: CreateEmployeeDocumentDto,
+    @UploadedFile() documentName: Express.Multer.File,
+  ) {
     return this.employeeDocumentService.create(
       createEmployeeDocumentsDto,
       documentName,
-      request['tenantId']
+      request['tenantId'],
     );
   }
 

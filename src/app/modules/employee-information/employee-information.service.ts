@@ -20,7 +20,7 @@ export class EmployeeInformationService {
     @InjectRepository(EmployeeInformation)
     private employeeInformationRepository: Repository<EmployeeInformation>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
 
   async create(
     createEmployeeInformationDto: CreateEmployeeInformationDto,
@@ -35,20 +35,22 @@ export class EmployeeInformationService {
     } catch (error) {
       throw new ConflictException(error.message);
     }
-
   }
   async findAll(
     paginationOptions: PaginationDto,
     searchFilterDTO: SearchFilterDTO,
-    tenantId: string
+    tenantId: string,
   ): Promise<Pagination<EmployeeInformation>> {
     const options: IPaginationOptions = {
       page: paginationOptions?.page,
-      limit: paginationOptions?.limit
+      limit: paginationOptions?.limit,
     };
 
     try {
-      const queryBuilder = this.employeeInformationRepository.createQueryBuilder('employeeInformation');
+      const queryBuilder =
+        this.employeeInformationRepository.createQueryBuilder(
+          'employeeInformation',
+        );
 
       await applySearchFilterUtils(
         queryBuilder,
@@ -56,16 +58,16 @@ export class EmployeeInformationService {
         this.employeeInformationRepository,
       );
 
-      const paginatedData = await this.paginationService.paginate<EmployeeInformation>(
-        this.employeeInformationRepository,
-        'employeeInformation',
-        options,
-        paginationOptions.orderBy,
-        paginationOptions.orderDirection,
-        { tenantId },
-      );
-      return paginatedData
-
+      const paginatedData =
+        await this.paginationService.paginate<EmployeeInformation>(
+          this.employeeInformationRepository,
+          'employeeInformation',
+          options,
+          paginationOptions.orderBy,
+          paginationOptions.orderDirection,
+          { tenantId },
+        );
+      return paginatedData;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`Role not found.`);
@@ -73,7 +75,6 @@ export class EmployeeInformationService {
       throw error;
     }
   }
-
 
   async findOne(id: string) {
     try {
@@ -96,9 +97,16 @@ export class EmployeeInformationService {
     updateEmployeeInformationDto: UpdateEmployeeInformationDto,
   ) {
     try {
-      await this.employeeInformationRepository.findOneOrFail({ where: { id: id } });
-      await this.employeeInformationRepository.update({ id }, updateEmployeeInformationDto);
-      return await this.employeeInformationRepository.findOneOrFail({ where: { id: id } });
+      await this.employeeInformationRepository.findOneOrFail({
+        where: { id: id },
+      });
+      await this.employeeInformationRepository.update(
+        { id },
+        updateEmployeeInformationDto,
+      );
+      return await this.employeeInformationRepository.findOneOrFail({
+        where: { id: id },
+      });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);
@@ -109,7 +117,9 @@ export class EmployeeInformationService {
 
   async remove(id: string) {
     try {
-      await this.employeeInformationRepository.findOneOrFail({ where: { id: id } });
+      await this.employeeInformationRepository.findOneOrFail({
+        where: { id: id },
+      });
       return await this.employeeInformationRepository.softDelete({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
