@@ -16,6 +16,7 @@ export const departmentData = (): Department => {
     createdAt: new Date('2022-10-22T04:11:42.000Z'),
     updatedAt: new Date('2022-10-22T04:11:42.000Z'),
     branch: null,
+    employeeJobInformation: null,
   };
 };
 

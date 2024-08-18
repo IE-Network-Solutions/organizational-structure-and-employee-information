@@ -1,0 +1,131 @@
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { PaginationService } from '../../../core/pagination/pagination.service';
+import { CreateEmployeeInformationDto } from './dto/create-employee-information.dto';
+import { EmployeeInformation } from './entities/employee-information.entity';
+import { UpdateEmployeeInformationDto } from './dto/update-employee-information.dto';
+import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
+import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
+
+@Injectable()
+export class EmployeeInformationService {
+  constructor(
+    @InjectRepository(EmployeeInformation)
+    private employeeInformationRepository: Repository<EmployeeInformation>,
+    private readonly paginationService: PaginationService,
+  ) {}
+
+  async create(
+    createEmployeeInformationDto: CreateEmployeeInformationDto,
+    tenantId: string,
+  ): Promise<EmployeeInformation> {
+    const user = await this.employeeInformationRepository.create({
+      ...createEmployeeInformationDto,
+      tenantId,
+    });
+    try {
+      return await this.employeeInformationRepository.save(user);
+    } catch (error) {
+      throw new ConflictException(error.message);
+    }
+  }
+  async findAll(
+    paginationOptions: PaginationDto,
+    searchFilterDTO: SearchFilterDTO,
+    tenantId: string,
+  ): Promise<Pagination<EmployeeInformation>> {
+    const options: IPaginationOptions = {
+      page: paginationOptions?.page,
+      limit: paginationOptions?.limit,
+    };
+
+    try {
+      const queryBuilder =
+        this.employeeInformationRepository.createQueryBuilder(
+          'employeeInformation',
+        );
+
+      await applySearchFilterUtils(
+        queryBuilder,
+        searchFilterDTO,
+        this.employeeInformationRepository,
+      );
+
+      const paginatedData =
+        await this.paginationService.paginate<EmployeeInformation>(
+          this.employeeInformationRepository,
+          'employeeInformation',
+          options,
+          paginationOptions.orderBy,
+          paginationOptions.orderDirection,
+          { tenantId },
+        );
+      return paginatedData;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`Role not found.`);
+      }
+      throw error;
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      const user = await this.employeeInformationRepository
+        .createQueryBuilder('employee_information')
+        .where('employee_information.id = :id', { id })
+        .getOne();
+
+      return { ...user };
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User with id ${id} not found.`);
+      }
+      throw error;
+    }
+  }
+
+  async update(
+    id: string,
+    updateEmployeeInformationDto: UpdateEmployeeInformationDto,
+  ) {
+    try {
+      await this.employeeInformationRepository.findOneOrFail({
+        where: { id: id },
+      });
+      await this.employeeInformationRepository.update(
+        { id },
+        updateEmployeeInformationDto,
+      );
+      return await this.employeeInformationRepository.findOneOrFail({
+        where: { id: id },
+      });
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User with id ${id} not found.`);
+      }
+      throw error;
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      await this.employeeInformationRepository.findOneOrFail({
+        where: { id: id },
+      });
+      return await this.employeeInformationRepository.softDelete({ id });
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User with id ${id} not found.`);
+      }
+      throw error;
+    }
+  }
+}

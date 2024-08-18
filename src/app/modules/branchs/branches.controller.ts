@@ -16,7 +16,6 @@ import { Branch } from './entities/branch.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { ApiTags } from '@nestjs/swagger';
-
 @Controller('branchs')
 @ApiTags('Branchs')
 export class BranchesController {

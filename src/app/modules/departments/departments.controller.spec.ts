@@ -10,6 +10,7 @@ import {
   paginationResultdepartmentData,
   updatedepartmentData,
 } from './tests/department.data';
+import { tenantId } from '../branchs/tests/branch.data';
 
 describe('DepartmentsController', () => {
   let controller: DepartmentsController;
@@ -58,14 +59,10 @@ describe('DepartmentsController', () => {
   });
 
   it('should find all departments', async () => {
-    const paginationOptions = { page: 1, limit: 10 };
     const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
-    const result = await controller.findAllDepartments(req, paginationOptions);
+    const result = await controller.findAllDepartments(req);
     expect(result).toEqual(paginationResultdepartmentData().items);
-    expect(service.findAllDepartments).toHaveBeenCalledWith(
-      paginationOptions,
-      req.tenantId,
-    );
+    expect(service.findAllDepartments).toHaveBeenCalledWith(req.tenantId);
   });
 
   it('should find one department', async () => {
@@ -86,8 +83,10 @@ describe('DepartmentsController', () => {
   });
 
   it('should update a department', async () => {
+    const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
     const updateDepartmentDto: UpdateDepartmentDto = updatedepartmentData();
     const result = await controller.updateDepartment(
+      req,
       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
       updateDepartmentDto,
     );
@@ -95,6 +94,7 @@ describe('DepartmentsController', () => {
     expect(service.updateDepartment).toHaveBeenCalledWith(
       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
       updateDepartmentDto,
+      req.tenantId, // Ensure tenantId is passed here
     );
   });
 

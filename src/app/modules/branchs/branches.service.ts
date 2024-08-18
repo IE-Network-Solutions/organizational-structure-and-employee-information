@@ -24,6 +24,18 @@ export class BranchesService {
     tenantId: string,
   ): Promise<Branch> {
     try {
+      const branchExist = await this.branchRepository.findOne({
+        where: { name: createBranchDto.name, tenantId: tenantId },
+      });
+      const branchEmail = await this.branchRepository.findOne({
+        where: {
+          contactEmail: createBranchDto.contactEmail,
+          tenantId: tenantId,
+        },
+      });
+      if (branchEmail || branchExist) {
+        throw new NotFoundException(`Branch with Email Or Name Already exist`);
+      }
       const createBranch = await this.branchRepository.create({
         ...createBranchDto,
         tenantId: tenantId,
@@ -51,7 +63,6 @@ export class BranchesService {
       paginationOptions.orderDirection,
       { tenantId },
     );
-
     return paginatedData;
   }
 
@@ -68,8 +79,8 @@ export class BranchesService {
     updateBranchDto: UpdateBranchDto,
   ): Promise<Branch> {
     try {
-      const Branch = await this.findOneBranch(id);
-      if (!Branch) {
+      const branch = await this.findOneBranch(id);
+      if (!branch) {
         throw new NotFoundException(`Branch with Id ${id} not found`);
       }
       const updatedBranch = await this.branchRepository.update(
@@ -86,11 +97,18 @@ export class BranchesService {
   }
 
   async removeBranch(id: string): Promise<Branch> {
-    const Branch = await this.findOneBranch(id);
-    if (!Branch) {
-      throw new NotFoundException(`Client with Id ${id} not found`);
+    try {
+      const branch = await this.findOneBranch(id);
+      if (!branch) {
+        throw new NotFoundException(`Branch with Id ${id} not found`);
+      }
+      await this.branchRepository.softRemove({ id });
+      return branch;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
     }
-    await this.branchRepository.softRemove({ id });
-    return Branch;
   }
 }

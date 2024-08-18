@@ -35,16 +35,9 @@ export class DepartmentsController {
   }
 
   @Get()
-  async findAllDepartments(
-    @Req() req: Request,
-    @Query()
-    paginationOptions?: PaginationDto,
-  ): Promise<Department[]> {
+  async findAllDepartments(@Req() req: Request): Promise<Department> {
     const tenantId = req['tenantId'];
-    return await this.departmentsService.findAllDepartments(
-      paginationOptions,
-      tenantId,
-    );
+    return await this.departmentsService.findAllDepartments(tenantId);
   }
 
   @Get(':id')
@@ -54,17 +47,27 @@ export class DepartmentsController {
 
   @Patch(':id')
   async updateDepartment(
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<Department> {
+    const tenantId = req['tenantId'];
     return await this.departmentsService.updateDepartment(
       id,
       updateDepartmentDto,
+      tenantId,
     );
   }
 
   @Delete(':id')
   async removeDepartment(@Param('id') id: string): Promise<Department> {
     return await this.departmentsService.removeDepartment(id);
+  }
+  @Get('/tenant/departments')
+  async findAllDepartmentsByTenantId(
+    @Req() req: Request,
+  ): Promise<Department[]> {
+    const tenantId = req['tenantId'];
+    return await this.departmentsService.findAllDepartmentsByTenantId(tenantId);
   }
 }

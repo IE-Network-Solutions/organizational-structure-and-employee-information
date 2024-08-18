@@ -12,6 +12,7 @@ import { Department } from './entities/department.entity';
 import { Repository, TreeRepository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { level } from 'winston';
 
 @Injectable()
 export class DepartmentsService {
@@ -27,12 +28,21 @@ export class DepartmentsService {
     level = 0,
   ): Promise<Department> {
     try {
+      const department = await this.departmentRepository.findOne({
+        where: { name: createDepartmentDto.name, tenantId: tenantId },
+      });
+      if (department) {
+        throw new NotFoundException(
+          `Department with Name ${department.name} Already exist`,
+        );
+      }
       const newDepartment = new Department();
       newDepartment.name = createDepartmentDto.name;
       newDepartment.description = createDepartmentDto.description;
       (newDepartment.branchId = createDepartmentDto.branchId),
         (newDepartment.tenantId = tenantId);
       newDepartment.level = level;
+
       if (parentDepartment) {
         newDepartment.parent = parentDepartment;
       }
@@ -47,20 +57,14 @@ export class DepartmentsService {
           await this.createDepartment(dep, tenantId, newDepartment, level + 1);
         }
       }
-      return newDepartment;
+      return await this.findAllDepartments(tenantId);
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
-  async findAllDepartments(
-    paginationOptions: PaginationDto,
-    tenantId: string,
-  ): Promise<Department[]> {
-    const options: IPaginationOptions = {
-      page: paginationOptions.page,
-      limit: paginationOptions.limit,
-    };
-    return await this.departmentRepository.findTrees();
+  async findAllDepartments(tenantId: string): Promise<Department> {
+    const departments = await this.departmentRepository.findTrees();
+    return departments[0];
   }
 
   async findOneDepartment(id: string): Promise<Department> {
@@ -75,38 +79,149 @@ export class DepartmentsService {
     }
   }
 
+  async findAllDepartmentsByTenantId(tenantId: string): Promise<Department[]> {
+    try {
+      return await this.departmentRepository.find({
+        where: { tenantId: tenantId },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Department  not found`);
+    }
+  }
+  // async updateDepartment(
+  //   id: string,
+  //   updateDepartmentDto: UpdateDepartmentDto,
+  //   tenantId: string,
+  //   parentDepartment?: Department,
+
+  //   level?: number,
+  // ): Promise<Department> {
+  //   try {
+  //     // if (id = '') {
+  //     //   console.log("id", "klklk")
+  //     //   const level = parentDepartment.level + 1
+  //     //   await this.createDepartment(
+  //     //     updateDepartmentDto,
+  //     //     tenantId,
+  //     //     parentDepartment,
+  //     //     level,
+  //     //   )
+  //     // }
+  //     const department = await this.findOneDepartment(id);
+  //     console.log(department, "l")
+  //     if (department && !parentDepartment) {
+  //       console.log("ceo")
+  //       if (department.level !== 0) {
+  //         const parent = await this.departmentRepository.findAncestorsTree(
+  //           department,
+  //         );
+  //         parentDepartment = parent.parent
+  //       }
+  //     }
+  //     console.log("anbesa", parentDepartment, level)
+  //     // if (!department) {
+  //     //   const level = parentDepartment.level + 1
+  //     //   await this.createDepartment(
+  //     //     updateDepartmentDto,
+  //     //     tenantId,
+  //     //     parentDepartment,
+  //     //     level,
+  //     //   )
+  //     //   // throw new NotFoundException(`Department with Id ${id} not found`);
+  //     // }
+
+  //     department.name = updateDepartmentDto.name;
+  //     department.branchId = updateDepartmentDto.branchId;
+  //     department.description = updateDepartmentDto.description;
+  //     department.parent = parentDepartment || null;
+  //     department.level = level || parentDepartment.level + 1 || 0;
+  //     console.log(department, "depeeeeeeerrrrrdepeeeeeeerrrrr")
+  //     await this.departmentRepository.save(department);
+  //     if (
+  //       updateDepartmentDto.department &&
+  //       updateDepartmentDto.department.length > 0
+  //     ) {
+  //       console.log("iam hindu")
+  //       for (const dep of updateDepartmentDto.department) {
+  //         console.log(department.level, "iam hindu")
+  //         await this.updateDepartment(dep.id, dep, tenantId, department, department.level + 1);
+  //       }
+  //     }
+  //     return await this.findOneDepartment(id);
+  //   } catch (error) {
+  //     if (error instanceof NotFoundException) {
+  //       console.log(parentDepartment, "op")
+  //       const level = parentDepartment.level + 1
+  //       console.log(level, "op")
+  //       await this.createDepartment(
+  //         updateDepartmentDto,
+  //         tenantId,
+  //         parentDepartment,
+  //         level,
+  //       )
+  //     }
+  //     else {
+  //       throw new BadRequestException(error);
+  //     }
+  //   }
+  // }
+
   async updateDepartment(
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
+    tenantId: string,
     parentDepartment?: Department,
-    level = 0,
+    level?: number,
   ): Promise<Department> {
     try {
       const department = await this.findOneDepartment(id);
-      if (!department) {
-        throw new NotFoundException(`Department with Id ${id} not found`);
-      }
 
+      if (department && !parentDepartment) {
+        if (department.level !== 0) {
+          const parent = await this.departmentRepository.findAncestorsTree(
+            department,
+          );
+          parentDepartment = parent.parent;
+        }
+      }
       department.name = updateDepartmentDto.name;
       department.branchId = updateDepartmentDto.branchId;
       department.description = updateDepartmentDto.description;
       department.parent = parentDepartment || null;
-      department.level = level;
+      department.level =
+        level ?? (parentDepartment ? parentDepartment.level + 1 : 0);
+
       await this.departmentRepository.save(department);
+
       if (
         updateDepartmentDto.department &&
         updateDepartmentDto.department.length > 0
       ) {
         for (const dep of updateDepartmentDto.department) {
-          await this.updateDepartment(dep.id, dep, department, level + 1);
+          await this.updateDepartment(
+            dep.id,
+            dep,
+            tenantId,
+            department,
+            department.level + 1,
+          );
         }
       }
+
       return await this.findOneDepartment(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw error;
+        const newLevel = parentDepartment ? parentDepartment.level + 1 : 0;
+
+        return await this.createDepartment(
+          updateDepartmentDto,
+          tenantId,
+          parentDepartment,
+          newLevel,
+        );
+      } else {
+        throw new BadRequestException(error);
       }
-      throw new BadRequestException(error);
     }
   }
 
@@ -117,6 +232,20 @@ export class DepartmentsService {
     }
     await this.departmentRepository.softDelete(id);
     return Department;
+  }
+
+  async findAncestor(id: string) {
+    try {
+      const department = await this.departmentRepository.findOneByOrFail({
+        id,
+      });
+      const ancestors = await this.departmentRepository.findAncestorsTree(
+        department,
+      );
+      return ancestors.parent;
+    } catch (error) {
+      throw new NotFoundException(`Department not found`);
+    }
   }
 
   // async saveDepartmentTrees(createDepartmentDto: CreateDepartmentDto[]): Promise<void> {

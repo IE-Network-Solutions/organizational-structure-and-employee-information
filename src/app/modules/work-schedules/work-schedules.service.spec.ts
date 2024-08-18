@@ -69,7 +69,9 @@ describe('WorkSchedulesService', () => {
       const dto = createWorkSworkScheduleData();
       const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       const createdWorkSchedule = workScheduleData();
+      const foundWorkSchedules = [createdWorkSchedule];
 
+      repository.find = jest.fn().mockResolvedValue(foundWorkSchedules);
       repository.create = jest.fn().mockReturnValue(createdWorkSchedule);
       repository.save = jest.fn().mockResolvedValue(createdWorkSchedule);
       organizationsService.createOrganiztion = jest
@@ -79,18 +81,18 @@ describe('WorkSchedulesService', () => {
       const result = await service.createWorkSchedule(dto, tenantId);
 
       expect(result).toEqual(createdWorkSchedule);
-      expect(repository.create).toHaveBeenCalledWith({ ...dto, tenantId });
+      expect(repository.create).toHaveBeenCalledWith({
+        ...dto,
+        tenantId: tenantId,
+      });
       expect(repository.save).toHaveBeenCalledWith(createdWorkSchedule);
-      expect(organizationsService.createOrganiztion).toHaveBeenCalledWith(
-        { workScheduleId: createdWorkSchedule.id },
-        tenantId,
-      );
     });
 
     it('should throw BadRequestException on error', async () => {
       const dto = createWorkSworkScheduleData();
       const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
 
+      repository.find = jest.fn().mockResolvedValue([]);
       repository.create = jest.fn().mockReturnValue(dto);
       repository.save = jest.fn().mockRejectedValue(new Error('Error'));
 

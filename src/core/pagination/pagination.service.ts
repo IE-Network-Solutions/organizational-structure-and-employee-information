@@ -37,17 +37,16 @@ export class PaginationService {
     filter?: Partial<Entity>, // Add filter parameter
   ): Promise<Pagination<Entity>> {
     let qb: SelectQueryBuilder<Entity>;
+    let opts: IPaginationOptions;
 
     if (repositoryOrQueryBuilder instanceof Repository) {
       const alias = aliasOrOptions as string;
-      const opts = this.applyDefaultPaginationOptions(
-        options as IPaginationOptions,
-      );
+      opts = this.applyDefaultPaginationOptions(options as IPaginationOptions);
       qb = repositoryOrQueryBuilder.createQueryBuilder(alias);
       qb.orderBy(`${alias}.${orderBy}`, orderDirection);
     } else {
       qb = repositoryOrQueryBuilder as SelectQueryBuilder<Entity>;
-      const opts = this.applyDefaultPaginationOptions(
+      opts = this.applyDefaultPaginationOptions(
         aliasOrOptions as IPaginationOptions,
       );
     }
@@ -59,7 +58,7 @@ export class PaginationService {
       });
     }
 
-    return paginate<Entity>(qb, options);
+    return paginate<Entity>(qb, opts);
   }
 
   private applyDefaultPaginationOptions(

@@ -22,6 +22,7 @@ export class CreateCalendarDto {
   @ValidateNested({ each: true })
   @Type(() => CreateClosedDatesDto)
   closedDates?: CreateClosedDatesDto[];
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 }
