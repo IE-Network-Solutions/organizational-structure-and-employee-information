@@ -21,7 +21,7 @@ export class EmployeeInformationSubscriber implements EntitySubscriberInterface<
     if (event.entity.deletedAt) {
       await employeeInformationRepository.update(
         { employeeInformationId: event.entity.id },
-        { userId: null },
+        { employeeInformationId: null },
       );
     }
   }
