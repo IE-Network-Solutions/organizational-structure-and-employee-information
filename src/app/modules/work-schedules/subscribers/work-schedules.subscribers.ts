@@ -9,12 +9,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Injectable } from '@nestjs/common';
 import { WorkSchedule } from '../entities/work-schedule.entity';
+import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
 
 @EventSubscriber()
 @Injectable()
 export class WorkScheduleSubscriber
-  implements EntitySubscriberInterface<WorkSchedule>
-{
+  implements EntitySubscriberInterface<WorkSchedule> {
   listenTo() {
     return WorkSchedule;
   }
@@ -23,6 +23,17 @@ export class WorkScheduleSubscriber
       event.connection.getRepository(Organization);
     if (event.entity.deletedAt) {
       await organizationRepository.update(
+        { workScheduleId: event.entity.id },
+        { workScheduleId: null },
+      );
+    }
+  }
+
+  async afterWorkscheduleSoftRemoveFromEmployeeJobInformation(event: SoftRemoveEvent<WorkSchedule>) {
+    const employeeJobInformationRepository: Repository<EmployeeJobInformation> =
+      event.connection.getRepository(EmployeeJobInformation);
+    if (event.entity.deletedAt) {
+      await employeeJobInformationRepository.update(
         { workScheduleId: event.entity.id },
         { workScheduleId: null },
       );
