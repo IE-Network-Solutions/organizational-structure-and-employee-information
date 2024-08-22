@@ -12,6 +12,8 @@ import {
   deleteUserData,
   paginationResultUserData,
   updateUserData,
+  userData,
+  userDataOnFindOne,
   userDataSave,
 } from './tests/user.data';
 import { EmployeeInformationService } from '../employee-information/employee-information.service';
@@ -296,22 +298,38 @@ describe('UserService', () => {
 
   describe('update', () => {
     it('should update the user and return the updated data', async () => {
-      const user = userDataSave() as any;
-      usersRepository.findOneOrFail.mockResolvedValue(user);
-      usersRepository.update.mockResolvedValue(updateUserData());
+      const request = {
+        tenantId: 'some-tenant-id', // Mock tenantId
+      } as unknown as Request;
 
+      // Mock user data before update
+      const user = userDataSave() as any;
+
+      // Mock updated user data
+      const updatedUser = updateUserData() as any;
+
+      // Mock the interactions with the repository and service
+      usersRepository.findOneOrFail.mockResolvedValueOnce(user);
+      usersRepository.update.mockResolvedValueOnce(undefined); // Update returns void/undefined
+      usersRepository.findOneOrFail.mockResolvedValueOnce(updatedUser); // After update, return the updated user
+      // Call the update method
       const result = await userService.update(
         user.id,
-        userDataSave() as UpdateUserDto,
+        request['tenantId'],
+        userData(),
       );
 
+      // Assert the repository update was called correctly
       expect(usersRepository.update).toHaveBeenCalledWith(
-        { id: user.id },
-        userDataSave(),
+        user.id,
+        userData(),
       );
-      expect(result).toEqual(userDataSave());
+
+      // Assert the final result is the updated user data
+      expect(result).toEqual(updatedUser);
     });
   });
+
 
   describe('remove', () => {
     it('should remove the user and return void', async () => {

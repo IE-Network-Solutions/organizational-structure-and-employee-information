@@ -42,7 +42,7 @@ export class UserService {
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
-  ) {}
+  ) { }
 
   async create(
     tenantId: string,
@@ -79,7 +79,7 @@ export class UserService {
 
       const userRecord = await admin.auth().createUser({
         email: createUserDto.email,
-        password: password,
+        password: '123456789',
       });
 
       await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
@@ -238,6 +238,7 @@ export class UserService {
           'workSchedule',
         )
         .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect('user.userPermissions', 'userPermissions')
         .where('user.id = :id', { id })
         .getOne();
       user['reportingTo'] = await this.findReportingToUser(id);
@@ -251,10 +252,15 @@ export class UserService {
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, tenantId: string, updateUserDto: UpdateUserDto) {
     try {
+      const createPremission = new CreateUserPermissionDto();
+      createPremission.permissionId = updateUserDto.permission;
+      createPremission.userId = id;
+      delete updateUserDto.permission;
       await this.userRepository.findOneOrFail({ where: { id: id } });
       await this.userRepository.update({ id }, updateUserDto);
+      await this.userPermissionService.update(id, createPremission, tenantId);
       return await this.userRepository.findOneOrFail({ where: { id: id } });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
@@ -362,6 +368,15 @@ export class UserService {
     );
   }
 
+  async assignPermissionToUser1(
+    createUserPermissionDto: CreateUserPermissionDto,
+    tenantId: string,
+  ) {
+    return await this.userPermissionService.assignPermissionToUser(
+      createUserPermissionDto,
+      tenantId,
+    );
+  }
   async findPermissionsByUserId(id: string) {
     try {
       const user = await this.userRepository
@@ -406,6 +421,7 @@ export class UserService {
   async findUserByFirbaseId(firbaseId: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { firebaseId: firbaseId },
+      relations: ['role', 'userPermissions'],
     });
     return user;
   }

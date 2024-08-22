@@ -3,7 +3,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 import { employeeJobInformationDataSave } from '../../employee-job-information/tests/employee-job-information.data';
 
-export const userData = (): User => {
+export const userData = () => {
   return {
     id: '1',
     firstName: 'John',
@@ -22,6 +22,7 @@ export const userData = (): User => {
     employeeDocument: undefined,
     employeeInformation: undefined,
     firebaseId: 'gh',
+    permission: []
   };
 };
 
