@@ -163,8 +163,13 @@ export class UserController {
   // }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  update(
+    @Req() request: Request,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const tenantId = request['tenantId'];
+    return this.userService.update(id, tenantId, updateUserDto);
   }
 
   @Delete(':id')
