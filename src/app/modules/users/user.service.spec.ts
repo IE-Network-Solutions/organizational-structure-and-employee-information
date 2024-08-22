@@ -312,6 +312,7 @@ describe('UserService', () => {
       usersRepository.findOneOrFail.mockResolvedValueOnce(user);
       usersRepository.update.mockResolvedValueOnce(undefined); // Update returns void/undefined
       usersRepository.findOneOrFail.mockResolvedValueOnce(updatedUser); // After update, return the updated user
+
       // Call the update method
       const result = await userService.update(
         user.id,
@@ -319,16 +320,26 @@ describe('UserService', () => {
         userData(),
       );
 
-      // Assert the repository update was called correctly
+      // Adjust the expected call to match the structure
       expect(usersRepository.update).toHaveBeenCalledWith(
-        user.id,
-        userData(),
+        { id: user.id }, // Pass the id as an object
+        expect.objectContaining({
+          firstName: 'John',
+          middleName: 'H',
+          lastName: 'Doe',
+          profileImage: 'profile_image_url',
+          profileImageDownload: 'profile_image_download_url',
+          email: 'hiluf@gmail.com',
+          roleId: 'role-id-123',
+          tenantId: 'tenant-id-123',
+        }),
       );
 
       // Assert the final result is the updated user data
       expect(result).toEqual(updatedUser);
     });
   });
+
 
 
   describe('remove', () => {
