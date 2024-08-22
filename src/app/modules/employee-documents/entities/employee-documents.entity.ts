@@ -14,6 +14,9 @@ export class EmployeeDocument extends BaseModel {
   @Column({ nullable: true })
   documentLink: string;
 
+  @Column({ nullable: true })
+  employeeInformationId: string;
+
   @ManyToOne(() => User, (user) => user.employeeDocument)
   user: User;
 

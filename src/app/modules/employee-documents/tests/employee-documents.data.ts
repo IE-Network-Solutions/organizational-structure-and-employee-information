@@ -13,6 +13,7 @@ export const employeeDocumentData = (): EmployeeDocument => {
     deletedAt: null,
     user: null,
     employeeInformation: null,
+    employeeInformationId: null
   };
 };
 
