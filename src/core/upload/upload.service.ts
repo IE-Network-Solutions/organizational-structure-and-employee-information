@@ -12,7 +12,7 @@ export class FileUploadService {
     private readonly configService: ConfigService,
   ) {
     this.fileServerUrl = this.configService.get<string>(
-      'server.file_server_url',
+      'FILE_SERVER_URL',
     );
   }
 
