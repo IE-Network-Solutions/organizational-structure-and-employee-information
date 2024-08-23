@@ -1,19 +1,14 @@
-import { config } from 'dotenv';
-config();
+import { ConfigService } from '@nestjs/config';
 
-export default function serviceAccount(): Promise<any> {
-  const envFilesData = {
-    type: process.env.TYPE,
-    project_id: process.env.PROJECT_ID,
-    client_id: process.env.CLIENT_ID,
-    auth_uri: process.env.AUTH_URI,
-    token_uri: process.env.TOKEN_URI,
-    auth_provider_x509_cert_url: process.env.AUTH_PROVIDER_X509_CERT_URL,
-    client_x509_cert_url: process.env.CLIENT_X509_CERT_URL,
-    universe_domain: process.env.UNIVERSE_DOMAIN,
-    private_key_id: process.env.PRIVATE_KEY_ID,
-    private_key: process.env.PRIVATE_KEY,
-    client_email: process.env.CLIENT_EMAIL,
+export default function serviceAccount(configService: ConfigService): any {
+  return {
+    type: configService.get<string>('firebase.type'),
+    project_id: configService.get<string>('firebase.project_id'),
+    private_key: configService.get<string>('firebase.private_key')?.replace(/\\n/g, '\n'),
+    client_email: configService.get<string>('firebase.client_email'),
   };
-  return JSON.parse(JSON.stringify(envFilesData));
 }
+
+
+
+

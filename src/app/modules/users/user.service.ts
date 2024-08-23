@@ -28,6 +28,8 @@ import { generateRandom4DigitNumber } from '@root/src/core/utils/generateRandomN
 import filterEntities from '@root/src/core/utils/filters.utils';
 import { FilterDto } from './dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
+import { error } from 'console';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -47,8 +49,8 @@ export class UserService {
   async create(
     tenantId: string,
     createBulkRequestDto: CreateBulkRequestDto,
-    profileImage: Express.Multer.File,
-    documentName: Express.Multer.File,
+    profileImage?: Express.Multer.File,
+    documentName?: Express.Multer.File,
   ) {
     const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
 
@@ -419,10 +421,40 @@ export class UserService {
   }
 
   async findUserByFirbaseId(firbaseId: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { firebaseId: firbaseId },
-      relations: ['role', 'userPermissions'],
+    try {
+      const user = await this.userRepository.findOne({
+        where: { firebaseId: firbaseId },
+        relations: ['role', 'userPermissions'],
+      });
+      if (!user) {
+        throw new NotFoundException('user not found')
+      }
+
+      return user;
+    }
+    catch (error) {
+      throw error
+    }
+
+  }
+  async createFromTenant(createUserDto: CreateUserDto, tenantId) {
+    const user = this.userRepository.create({ ...createUserDto, tenantId });
+    const password = createUserDto.email + generateRandom4DigitNumber();
+
+    const userRecord = await admin.auth().createUser({
+      email: createUserDto.email,
+      password: '123456789',
     });
-    return user;
+
+    await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
+
+    user.firebaseId = userRecord.uid;
+
+    const valuesToCheck = { email: user.email };
+
+    await checkIfDataExists(valuesToCheck, this.userRepository);
+
+    return await this.userRepository.save(user);
+
   }
 }

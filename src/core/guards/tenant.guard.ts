@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class TenantGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
@@ -19,7 +19,7 @@ export class TenantGuard implements CanActivate {
     if (isExcluded) {
       return true;
     }
-
+    console.log(request.headers, "lkekuiashd")
     const tenantId = request.headers.tenantid;
 
     if (!tenantId) {

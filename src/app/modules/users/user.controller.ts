@@ -36,7 +36,7 @@ import { FilterDto } from './dto/filter-status-user.dto';
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
@@ -163,11 +163,7 @@ export class UserController {
   // }
 
   @Patch(':id')
-  update(
-    @Req() request: Request,
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  update(@Req() request: Request, @Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const tenantId = request['tenantId'];
     return this.userService.update(id, tenantId, updateUserDto);
   }
@@ -206,5 +202,25 @@ export class UserController {
     @Param('firebaseId') firebaseId: string,
   ): Promise<User> {
     return await this.userService.findUserByFirbaseId(firebaseId);
+  }
+
+  @Post('/fromtenant')
+  async createFromTenant(
+    @Body() body: any,
+    @Req() request: Request,
+  ) {
+    const {
+      createUserDto,
+      createRolePermissionDto,
+      createUserPermissionDto,
+      createEmployeeInformationDto,
+      createEmployeeJobInformationDto,
+      createEmployeeDocumentDto,
+    } = body;
+
+    const tenantId = request['tenantId'];
+    console.log(createUserDto, "lll")
+    //  return await this.userService.create(tenantId, createUserDto)
+    return await this.userService.createFromTenant(createUserDto, tenantId)
   }
 }
