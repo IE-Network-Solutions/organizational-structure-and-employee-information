@@ -44,7 +44,7 @@ export class UserService {
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
-  ) {}
+  ) { }
 
   async create(
     tenantId: string,
@@ -79,12 +79,8 @@ export class UserService {
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const password = createUserDto.email + generateRandom4DigitNumber();
 
-      const userRecord = await admin.auth().createUser({
-        email: createUserDto.email,
-        password: '123456789',
-      });
 
-      await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
+      const userRecord = await this.createUserToFirebase(createUserDto.email, tenantId)
 
       user.firebaseId = userRecord.uid;
 
@@ -439,12 +435,7 @@ export class UserService {
     const user = this.userRepository.create({ ...createUserDto, tenantId });
     const password = createUserDto.email + generateRandom4DigitNumber();
 
-    const userRecord = await admin.auth().createUser({
-      email: createUserDto.email,
-      password: '123456789',
-    });
-
-    await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
+    const userRecord = await this.createUserToFirebase(createUserDto.email, tenantId)
 
     user.firebaseId = userRecord.uid;
 
@@ -453,5 +444,17 @@ export class UserService {
     await checkIfDataExists(valuesToCheck, this.userRepository);
 
     return await this.userRepository.save(user);
+  }
+
+  async createUserToFirebase(email: string, tenantId: string) {
+    const userRecord = await admin.auth().createUser({
+      email: email,
+      password: '123456789',
+    });
+
+    await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
+    return userRecord
+
+
   }
 }

@@ -208,15 +208,10 @@ export class UserController {
     return await this.userService.findUserByFirbaseId(firebaseId);
   }
 
-  @Post('/fromtenant')
+  @Post('/create-first-user-for-tenant')
   async createFromTenant(@Body() body: any, @Req() request: Request) {
     const {
       createUserDto,
-      createRolePermissionDto,
-      createUserPermissionDto,
-      createEmployeeInformationDto,
-      createEmployeeJobInformationDto,
-      createEmployeeDocumentDto,
     } = body;
 
     const tenantId = request['tenantId'];
