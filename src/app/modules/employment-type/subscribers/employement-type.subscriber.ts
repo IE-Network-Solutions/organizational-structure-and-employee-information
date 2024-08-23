@@ -11,11 +11,15 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 
 @EventSubscriber()
 @Injectable()
-export class EmployeeTypeSubscriber implements EntitySubscriberInterface<EmployementType> {
+export class EmployeeTypeSubscriber
+  implements EntitySubscriberInterface<EmployementType>
+{
   listenTo() {
     return EmployementType;
   }
-  async afterEmployementTypeSoftRemoveFromEmployeeJobInformation(event: SoftRemoveEvent<EmployementType>) {
+  async afterEmployementTypeSoftRemoveFromEmployeeJobInformation(
+    event: SoftRemoveEvent<EmployementType>,
+  ) {
     const employeeJobInformationRepository: Repository<EmployeeJobInformation> =
       event.connection.getRepository(EmployeeJobInformation);
     if (event.entity.deletedAt) {

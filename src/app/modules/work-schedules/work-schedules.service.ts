@@ -111,7 +111,7 @@ export class WorkSchedulesService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 

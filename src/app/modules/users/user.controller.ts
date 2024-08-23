@@ -163,8 +163,13 @@ export class UserController {
   // }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  update(
+    @Req() request: Request,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const tenantId = request['tenantId'];
+    return this.userService.update(id, tenantId, updateUserDto);
   }
 
   @Delete(':id')
@@ -201,5 +206,15 @@ export class UserController {
     @Param('firebaseId') firebaseId: string,
   ): Promise<User> {
     return await this.userService.findUserByFirbaseId(firebaseId);
+  }
+
+  @Post('/create-first-user-for-tenant')
+  async createFromTenant(@Body() body: any, @Req() request: Request) {
+    const {
+      createUserDto,
+    } = body;
+
+    const tenantId = request['tenantId'];
+    return await this.userService.createFromTenant(createUserDto, tenantId);
   }
 }
