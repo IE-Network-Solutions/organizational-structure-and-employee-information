@@ -24,10 +24,14 @@ export class RoleService {
     private readonly roleRepository: Repository<Role>,
     private readonly paginationService: PaginationService, // private readonly rolePermissionService: RolePermissionService,
     private readonly rolePermissionService: RolePermissionService,
-  ) {}
+  ) { }
 
   async create(tenantId: string, createRoleDto: CreateRoleDto): Promise<Role> {
+    const slug = createRoleDto.name.toLowerCase()              // Convert all letters to lowercase
+      .replace(/\s+/g, '_');
+    createRoleDto["slug"] = slug
     const data = this.roleRepository.create({ tenantId, ...createRoleDto });
+
     const valuesToCheck = { name: data.name };
     try {
       await checkIfDataExists(valuesToCheck, this.roleRepository);
@@ -202,5 +206,15 @@ export class RoleService {
       }
       throw error;
     }
+  }
+
+
+
+  async createFirstRole(createRoleDto: CreateRoleDto, tenantId) {
+    const slug = createRoleDto.name.toLowerCase()              // Convert all letters to lowercase
+      .replace(/\s+/g, '_');
+    createRoleDto["slug"] = slug
+    const createRole = await this.roleRepository.create({ tenantId, ...createRoleDto })
+    return await this.roleRepository.save(createRole)
   }
 }

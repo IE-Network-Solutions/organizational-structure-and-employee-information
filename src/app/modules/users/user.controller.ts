@@ -213,8 +213,9 @@ export class UserController {
     const {
       createUserDto,
     } = body;
-
+    let role = createUserDto.role
+    delete createUserDto.role
     const tenantId = request['tenantId'];
-    return await this.userService.createFromTenant(createUserDto, tenantId);
+    return await this.userService.createFromTenant(createUserDto, tenantId, role);
   }
 }

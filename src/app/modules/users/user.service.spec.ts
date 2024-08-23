@@ -26,6 +26,7 @@ import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data
 import { FileUploadService } from '@root/src/core/upload/upload.service';
 import { FilterDto } from './dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
+import { RoleService } from '../role/role.service';
 
 jest.mock('firebase-admin', () => {
   return {
@@ -46,6 +47,7 @@ describe('UserService', () => {
   let employeeDocumentService: EmployeeDocumentService;
   let rolePermissionService: RolePermissionService;
   let fileUploadService: FileUploadService;
+  let rolesService: RoleService;
   let queryRunner: QueryRunner;
 
   beforeEach(async () => {
@@ -100,6 +102,10 @@ describe('UserService', () => {
           provide: DepartmentsService,
           useValue: mock<DepartmentsService>(),
         },
+        {
+          provide: RoleService,
+          useValue: mock<RoleService>(),
+        },
       ],
     }).compile();
 
@@ -118,6 +124,9 @@ describe('UserService', () => {
     );
     rolePermissionService = moduleRef.get<RolePermissionService>(
       RolePermissionService,
+    );
+    rolesService = moduleRef.get<RoleService>(
+      RoleService,
     );
     fileUploadService = moduleRef.get<FileUploadService>(FileUploadService);
     queryRunner = moduleRef.get<DataSource>(DataSource).createQueryRunner();
