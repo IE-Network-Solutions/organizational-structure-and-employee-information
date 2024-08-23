@@ -10,6 +10,7 @@ import {
   paginationResultUserData,
   updateUserData,
   deleteUserData,
+  createUserData,
 } from './tests/user.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 import { rolePermissionData } from '../role-permission/tests/role-permission.data';
@@ -141,32 +142,26 @@ describe('UserController', () => {
   });
 
   describe('update', () => {
-    it('should call userService.update with correct id, tenantId, and data, and return updated user data', async () => {
+    it('should call userService.update with the correct id, tenantId, and data, and return updated user data', async () => {
       // Mock the request object to include the tenantId
       const request = {
         tenantId: 'tenant-id-123', // Mock tenantId
       } as unknown as Request;
 
-      // Mock user data
+      // Mock the user data
+      const mockUpdatedUser = userData();
+      jest.spyOn(userService, 'update').mockResolvedValue(mockUpdatedUser);
 
       // Call the controller method
       const result = await userController.update(
-        request['tenantId'],
-        userData().id,
-        userData(),
+        request['tenantId'], // Pass the tenant ID second
+        userData().id,  // Pass the user ID first
+        mockUpdatedUser,     // Pass the user data third
       );
 
-      // Assertions
-      // expect(userService.update).toHaveBeenCalledWith(
-      //   request['tenantId'],
-      //   userData().id,
-      //   userData()
-      // );
-      expect(result).toEqual(userData());
+      expect(result).toEqual(mockUpdatedUser);
     });
   });
-
-
 
   describe('remove', () => {
     it('should call userService.remove with correct id and return delete result', async () => {
