@@ -22,7 +22,7 @@ export const userData = () => {
     employeeDocument: undefined,
     employeeInformation: undefined,
     firebaseId: 'gh',
-    permission: []
+    permission: [],
   };
 };
 

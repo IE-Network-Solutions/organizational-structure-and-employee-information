@@ -29,7 +29,9 @@ export class BranchSubscriber implements EntitySubscriberInterface<Branch> {
     }
   }
 
-  async afterBranchSoftRemoveFromEmployeeJobInformation(event: SoftRemoveEvent<Branch>) {
+  async afterBranchSoftRemoveFromEmployeeJobInformation(
+    event: SoftRemoveEvent<Branch>,
+  ) {
     const employeeJobInformationRepository: Repository<EmployeeJobInformation> =
       event.connection.getRepository(EmployeeJobInformation);
     if (event.entity.deletedAt) {

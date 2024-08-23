@@ -163,7 +163,11 @@ export class UserController {
   // }
 
   @Patch(':id')
-  update(@Req() request: Request, @Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Req() request: Request,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     const tenantId = request['tenantId'];
     return this.userService.update(id, tenantId, updateUserDto);
   }
@@ -205,10 +209,7 @@ export class UserController {
   }
 
   @Post('/fromtenant')
-  async createFromTenant(
-    @Body() body: any,
-    @Req() request: Request,
-  ) {
+  async createFromTenant(@Body() body: any, @Req() request: Request) {
     const {
       createUserDto,
       createRolePermissionDto,
@@ -219,8 +220,6 @@ export class UserController {
     } = body;
 
     const tenantId = request['tenantId'];
-    console.log(createUserDto, "lll")
-    //  return await this.userService.create(tenantId, createUserDto)
-    return await this.userService.createFromTenant(createUserDto, tenantId)
+    return await this.userService.createFromTenant(createUserDto, tenantId);
   }
 }

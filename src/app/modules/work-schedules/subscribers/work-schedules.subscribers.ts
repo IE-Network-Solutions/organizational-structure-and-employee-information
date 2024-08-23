@@ -14,7 +14,8 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 @EventSubscriber()
 @Injectable()
 export class WorkScheduleSubscriber
-  implements EntitySubscriberInterface<WorkSchedule> {
+  implements EntitySubscriberInterface<WorkSchedule>
+{
   listenTo() {
     return WorkSchedule;
   }
@@ -29,7 +30,9 @@ export class WorkScheduleSubscriber
     }
   }
 
-  async afterWorkscheduleSoftRemoveFromEmployeeJobInformation(event: SoftRemoveEvent<WorkSchedule>) {
+  async afterWorkscheduleSoftRemoveFromEmployeeJobInformation(
+    event: SoftRemoveEvent<WorkSchedule>,
+  ) {
     const employeeJobInformationRepository: Repository<EmployeeJobInformation> =
       event.connection.getRepository(EmployeeJobInformation);
     if (event.entity.deletedAt) {

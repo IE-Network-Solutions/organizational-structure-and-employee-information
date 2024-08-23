@@ -17,7 +17,9 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
   listenTo() {
     return User;
   }
-  async afterUserSoftRemoveFromEmployeeInformation(event: SoftRemoveEvent<User>) {
+  async afterUserSoftRemoveFromEmployeeInformation(
+    event: SoftRemoveEvent<User>,
+  ) {
     const employeeInformationRepository: Repository<EmployeeInformation> =
       event.connection.getRepository(EmployeeInformation);
     if (event.entity.deletedAt) {
@@ -39,7 +41,9 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     }
   }
 
-  async afterUserSoftRemoveFromEmployeeJobInformation(event: SoftRemoveEvent<User>) {
+  async afterUserSoftRemoveFromEmployeeJobInformation(
+    event: SoftRemoveEvent<User>,
+  ) {
     const employeeJobInformationRepository: Repository<EmployeeJobInformation> =
       event.connection.getRepository(EmployeeJobInformation);
     if (event.entity.deletedAt) {

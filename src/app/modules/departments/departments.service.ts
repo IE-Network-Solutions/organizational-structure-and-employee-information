@@ -20,7 +20,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,

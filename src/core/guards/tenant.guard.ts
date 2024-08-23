@@ -19,7 +19,6 @@ export class TenantGuard implements CanActivate {
     if (isExcluded) {
       return true;
     }
-    console.log(request.headers, "lkekuiashd")
     const tenantId = request.headers.tenantid;
 
     if (!tenantId) {

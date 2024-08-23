@@ -340,8 +340,6 @@ describe('UserService', () => {
     });
   });
 
-
-
   describe('remove', () => {
     it('should remove the user and return void', async () => {
       usersRepository.findOneOrFail.mockResolvedValue(userDataSave() as any);

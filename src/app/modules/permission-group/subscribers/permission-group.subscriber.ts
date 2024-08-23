@@ -11,11 +11,15 @@ import { Permission } from '../../permission/entities/permission.entity';
 
 @EventSubscriber()
 @Injectable()
-export class PermissionGroupSubscriber implements EntitySubscriberInterface<PermissionGroup> {
+export class PermissionGroupSubscriber
+  implements EntitySubscriberInterface<PermissionGroup>
+{
   listenTo() {
     return PermissionGroup;
   }
-  async afterPermissionGroupFromPermissionSoftRemove(event: SoftRemoveEvent<PermissionGroup>) {
+  async afterPermissionGroupFromPermissionSoftRemove(
+    event: SoftRemoveEvent<PermissionGroup>,
+  ) {
     const permissionRepository: Repository<Permission> =
       event.connection.getRepository(Permission);
     if (event.entity.deletedAt) {

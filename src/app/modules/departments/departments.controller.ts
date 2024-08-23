@@ -20,7 +20,7 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('departments')
 @ApiTags('departments')
 export class DepartmentsController {
-  constructor(private readonly departmentsService: DepartmentsService) { }
+  constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Post()
   async createDepartment(

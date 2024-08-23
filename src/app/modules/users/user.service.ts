@@ -44,7 +44,7 @@ export class UserService {
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
-  ) { }
+  ) {}
 
   async create(
     tenantId: string,
@@ -427,15 +427,13 @@ export class UserService {
         relations: ['role', 'userPermissions'],
       });
       if (!user) {
-        throw new NotFoundException('user not found')
+        throw new NotFoundException('user not found');
       }
 
       return user;
+    } catch (error) {
+      throw error;
     }
-    catch (error) {
-      throw error
-    }
-
   }
   async createFromTenant(createUserDto: CreateUserDto, tenantId) {
     const user = this.userRepository.create({ ...createUserDto, tenantId });
@@ -455,6 +453,5 @@ export class UserService {
     await checkIfDataExists(valuesToCheck, this.userRepository);
 
     return await this.userRepository.save(user);
-
   }
 }
