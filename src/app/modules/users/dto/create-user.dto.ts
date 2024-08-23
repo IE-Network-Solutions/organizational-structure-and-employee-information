@@ -26,7 +26,4 @@ export class CreateUserDto {
   @IsString()
   roleId?: string;
 
-  // @IsOptional()
-  // @IsString()
-  // role?: string;
 }
