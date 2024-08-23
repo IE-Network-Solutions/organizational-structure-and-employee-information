@@ -30,6 +30,8 @@ import { FilterDto } from './dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
 import { error } from 'console';
 import { CreateUserDto } from './dto/create-user.dto';
+import { RoleService } from '../role/role.service';
+import { CreateRoleDto } from '../role/dto/create-role.dto';
 
 @Injectable()
 export class UserService {
@@ -44,6 +46,7 @@ export class UserService {
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
+    private readonly rolesService: RoleService
   ) { }
 
   async create(
@@ -431,19 +434,29 @@ export class UserService {
       throw error;
     }
   }
-  async createFromTenant(createUserDto: CreateUserDto, tenantId) {
-    const user = this.userRepository.create({ ...createUserDto, tenantId });
-    const password = createUserDto.email + generateRandom4DigitNumber();
+  async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
+    let createRoleDto = new CreateRoleDto
+    createRoleDto.name = role
+    createRoleDto.description = role
+    let createRole = await this.rolesService.createFirstRole(createRoleDto, tenantId)
+    if (createRole) {
+      createUserDto.roleId = createRole.id
+      const user = this.userRepository.create({ ...createUserDto, tenantId });
+      const password = createUserDto.email + generateRandom4DigitNumber();
 
-    const userRecord = await this.createUserToFirebase(createUserDto.email, tenantId)
+      const userRecord = await this.createUserToFirebase(createUserDto.email, tenantId)
 
-    user.firebaseId = userRecord.uid;
+      user.firebaseId = userRecord.uid;
 
-    const valuesToCheck = { email: user.email };
+      const valuesToCheck = { email: user.email };
 
-    await checkIfDataExists(valuesToCheck, this.userRepository);
+      await checkIfDataExists(valuesToCheck, this.userRepository);
 
-    return await this.userRepository.save(user);
+      return await this.userRepository.save(user);
+    }
+    else {
+      throw new NotFoundException('Role Not Found')
+    }
   }
 
   async createUserToFirebase(email: string, tenantId: string) {
