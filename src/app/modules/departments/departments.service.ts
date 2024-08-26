@@ -20,7 +20,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) {}
+  ) { }
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -63,8 +63,56 @@ export class DepartmentsService {
     }
   }
   async findAllDepartments(tenantId: string): Promise<Department> {
-    const departments = await this.departmentRepository.findTrees();
-    return departments[0];
+    try {
+      const departments = await this.departmentRepository.find({
+        where: {
+          tenantId: tenantId,
+        },
+      });
+      if (departments?.length > 0) {
+        const departmentTrees = await Promise.all(
+          departments.map(department => this.departmentRepository.findDescendantsTree(department)
+          )
+        );
+        return departmentTrees[0]
+      }
+      else {
+        throw new NotFoundException('No Department was created.')
+      }
+    }
+    catch (error) {
+      throw new BadRequestException(error)
+    }
+  }
+
+  async findUserTree(tenantId: string): Promise<Department> {
+    try {
+      const departments = await this.departmentRepository.find({
+        where: { tenantId: tenantId },
+        relations: ['employeeJobInformation']
+      });
+      if (departments?.length > 0) {
+        const departmentTrees = await Promise.all(
+          departments.map(async department => {
+            const departmentTree = await this.departmentRepository.findDescendantsTree(department, {
+              relations: ['employeeJobInformation', 'employeeJobInformation.user']
+            });
+            departmentTree.employeeJobInformation = departmentTree.employeeJobInformation.filter(
+              info => info.departmentLeadOrNot === true
+            );
+            return departmentTree;
+          })
+        );
+        return departmentTrees[0]
+      }
+      else {
+        throw new NotFoundException('No Department Was Created.')
+      }
+    }
+
+    catch (error) {
+      throw new BadRequestException(error)
+    }
   }
 
   async findOneDepartment(id: string): Promise<Department> {
