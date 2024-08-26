@@ -20,7 +20,7 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('departments')
 @ApiTags('departments')
 export class DepartmentsController {
-  constructor(private readonly departmentsService: DepartmentsService) {}
+  constructor(private readonly departmentsService: DepartmentsService) { }
 
   @Post()
   async createDepartment(
@@ -69,5 +69,13 @@ export class DepartmentsController {
   ): Promise<Department[]> {
     const tenantId = req['tenantId'];
     return await this.departmentsService.findAllDepartmentsByTenantId(tenantId);
+  }
+
+  @Get('/user/user-tree')
+  async findUserThree(
+    @Req() req: Request,
+  ): Promise<Department> {
+    const tenantId = req['tenantId'];
+    return await this.departmentsService.findUserTree(tenantId);
   }
 }
