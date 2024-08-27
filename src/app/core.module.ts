@@ -20,6 +20,7 @@ import { NationalityModule } from './modules/nationality/nationality.module';
 import { RolePermissionModule } from './modules/role-permission/role-permission.module';
 import { UserPermissionModule } from './modules/user-permission/user-permission.module';
 import { EmployementTypeModule } from './modules/employment-type/employement-type.module';
+import { EmployeeTerminationModule } from './modules/employee-termination/employee-termination.module';
 @Global()
 @Module({
   imports: [
@@ -41,6 +42,8 @@ import { EmployementTypeModule } from './modules/employment-type/employement-typ
     CalendarsModule,
     DepartmentsModule,
     BranchesModule,
+
+    EmployeeTerminationModule,
   ],
 })
 export class CoreModule {}

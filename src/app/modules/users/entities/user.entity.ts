@@ -6,6 +6,7 @@ import { UserPermission } from '../../user-permission/entities/user-permission.e
 import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
 import { EmployeeDocument } from '../../employee-documents/entities/employee-documents.entity';
 import { EmployeeInformation } from '../../employee-information/entities/employee-information.entity';
+import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
 @Entity()
 export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
@@ -53,6 +54,7 @@ export class User extends BaseModel {
   })
   userPermissions: UserPermission[];
 
+
   @OneToMany(
     () => EmployeeJobInformation,
     (employeeJobInformation) => employeeJobInformation.user,
@@ -70,4 +72,13 @@ export class User extends BaseModel {
     (employeeInformation) => employeeInformation.user,
   )
   employeeInformation: EmployeeInformation;
+
+  @OneToMany(() => EmployeeTermination, (employeeTermination) => employeeTermination.user, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  employeeTermination: EmployeeTermination[];
+
+
+
 }

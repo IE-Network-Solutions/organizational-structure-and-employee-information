@@ -1,12 +1,13 @@
-import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
 import { IsEnum } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
-import { EmployementContractType } from '@root/src/core/enum/employementContractType.enum';
 import { Branch } from '../../branchs/entities/branch.entity';
 import { Department } from '../../departments/entities/department.entity';
 import { WorkSchedule } from '../../work-schedules/entities/work-schedule.entity';
 import { EmployementType } from '../../employment-type/entities/employement-type.entity';
+import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
+import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
 
 @Entity()
 export class EmployeeJobInformation extends BaseModel {
@@ -69,6 +70,10 @@ export class EmployeeJobInformation extends BaseModel {
     (workSchedule) => workSchedule.employeeJobInformation,
   )
   workSchedule: WorkSchedule;
+
+
+  @OneToOne(() => EmployeeTermination, (employeeTermination) => employeeTermination.jobInformation)
+  employeeTermination: EmployeeTermination;
 
   // @ManyToOne(() => Tenant, tenant => tenant.employeeJobInformation)
   // tenant: Tenant;
