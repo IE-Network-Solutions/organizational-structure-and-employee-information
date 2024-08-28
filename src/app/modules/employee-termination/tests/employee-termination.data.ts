@@ -1,90 +1,100 @@
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { Branch } from '../../branchs/entities/branch.entity';
 import { CreateBranchDto } from '../../branchs/dto/create-branch.dto';
+import { EmployeeTermination } from '../entities/employee-termination.entity';
+import { TerminationType } from '@root/src/core/enum/termination-type.dto';
+import { EligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
+import { CreateEmployeeTerminationDto } from '../dto/create-employee-termination.dto';
+import { UpdateEmployeeTerminationDto } from '../dto/update-employee-termination.dto';
 
-export const EmployeeTerminationData = (): any => {
-  return {
-    id: 'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-    // name: 'hq',
-    // description: 'hq',
-    // location: 'addis ababa',
-    // contactNumber: '34567890',
-    // contactEmail: 's@s.com',
-    // tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
-    // departments: null,
-    // employeeJobInformation: null,
-    updatedAt: new Date('2022-10-22 07:11:42'),
-    createdAt: new Date('2022-10-22 07:11:42'),
-  };
-};
+export const employeeTerminationData = (): EmployeeTermination => ({
+  id: '1',
+  reason: 'Performance issues',
+  type: TerminationType.Resignation,
+  eligibleForRehire: EligibleForRehire.mayBe,
+  comment: 'Repeated performance issues',
+  jobInformationId: 'job-info-1',
+  userId: 'user-1',
+  effectiveDate: new Date('2023-01-01T00:00:00.000Z'),
+  tenantId: 'tenant-1',
+  jobInformation: null,
+  user: null,
+  createdAt: new Date('2024-08-28T06:03:27.088Z'),
+  updatedAt: new Date('2024-08-28T06:03:27.088Z'),
+});
 
-export const createEmployeeTerminationData = (): CreateBranchDto => {
-  return {
-    name: 'hq',
-    description: 'hq',
-    location: 'addis ababa',
-    contactNumber: '34567890',
-    contactEmail: 's@s.com',
+export const createEmployeeTerminationData =
+  (): CreateEmployeeTerminationDto => ({
+    reason: 'Performance issues',
+    type: TerminationType.Resignation,
+    eligibleForRehire: EligibleForRehire.mayBe,
+    comment: 'Repeated performance issues',
+    jobInformationId: 'job-info-1',
+    userId: 'user-1',
+    effectiveDate: new Date('2023-01-01T00:00:00.000Z'),
+  });
 
-    //   tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
-  };
-};
+export const updateEmployeeTerminationData =
+  (): UpdateEmployeeTerminationDto => ({
+    reason: 'Updated reason',
+    type: TerminationType.Resignation,
+    eligibleForRehire: EligibleForRehire.mayBe,
+    comment: 'Company downsizing',
+    jobInformationId: 'job-info-3',
+    userId: 'user-3',
+    effectiveDate: new Date('2023-03-01'),
+  });
+
 export const deleteEmployeeTerminationData = () => {
   return {
-    raw: '',
-    affected: 1,
-    generatedMaps: [],
-  };
-};
-
-export const UpdateEmployeeTerminationDataReturned = () => {
-  return {
-    generatedMaps: [],
     raw: [],
     affected: 1,
+    generatedMaps: [],
   };
 };
 
-export const paginationResultbranchData = (): Pagination<Branch> => {
-  return {
-    items: [EmployeeTerminationData()],
-    meta: {
-      totalItems: 1,
-      itemCount: 1,
-      itemsPerPage: 10,
-      totalPages: 1,
-      currentPage: 1,
-    },
+export const paginationResultEmployeeTerminationData =
+  (): Pagination<EmployeeTermination> => {
+    return {
+      items: [employeeTerminationData()],
+      meta: {
+        totalItems: 1,
+        itemCount: 1,
+        itemsPerPage: 10,
+        totalPages: 1,
+        currentPage: 1,
+      },
+    };
   };
-};
 
-export const updateEmployeeTerminationData = () => {
-  return {
-    id: 'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-    name: 'hq',
-    description: 'hq',
-    location: 'addis ababa',
-    contactNumber: '34567890',
-    contactEmail: 's@s.com',
+export const createEmployeeTerminationDataOnCreate =
+  (): CreateEmployeeTerminationDto => {
+    return {
+      reason: 'Resignation',
+      type: TerminationType.Resignation,
+      eligibleForRehire: EligibleForRehire.yes,
+      comment: 'Left for a better opportunity',
+      jobInformationId: 'job-info-2',
+      userId: 'user-2',
+      effectiveDate: new Date('2023-02-01T00:00:00.000Z'),
+    };
   };
-};
-export const createEmployeeTerminationDataOnCreate = () => {
+
+export const createEmployeeTerminationDataOnSave = (): EmployeeTermination => {
   return {
-    name: 'hq',
-    description: 'hq',
-    location: 'addis ababa',
-    contactNumber: '34567890',
-    contactEmail: 's@s.com',
-  };
-};
-export const createEmployeeTerminationDataOnSave = () => {
-  return {
-    name: 'hq',
-    description: 'hq',
-    location: 'addis ababa',
-    contactNumber: '34567890',
-    contactEmail: 's@s.com',
+    id: '2',
+    reason: 'Resignation',
+    type: TerminationType.Resignation,
+    eligibleForRehire: EligibleForRehire.yes,
+    comment: 'Left for a better opportunity',
+    jobInformationId: 'job-info-2',
+    userId: 'user-2',
+    effectiveDate: new Date('2023-02-01T00:00:00.000Z'),
     tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
+    jobInformation: null, // Assuming this is populated elsewhere
+    user: null, // Assuming this is populated elsewhere
+    createdAt: new Date('2024-08-28T06:46:58.237Z'),
+    updatedAt: new Date('2024-08-28T06:46:58.237Z'),
   };
 };
 

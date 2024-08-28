@@ -54,7 +54,6 @@ export class User extends BaseModel {
   })
   userPermissions: UserPermission[];
 
-
   @OneToMany(
     () => EmployeeJobInformation,
     (employeeJobInformation) => employeeJobInformation.user,
@@ -73,12 +72,13 @@ export class User extends BaseModel {
   )
   employeeInformation: EmployeeInformation;
 
-  @OneToMany(() => EmployeeTermination, (employeeTermination) => employeeTermination.user, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
+  @OneToMany(
+    () => EmployeeTermination,
+    (employeeTermination) => employeeTermination.user,
+    {
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    },
+  )
   employeeTermination: EmployeeTermination[];
-
-
-
 }

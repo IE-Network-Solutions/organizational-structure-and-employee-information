@@ -14,7 +14,9 @@ import { EmployeeTermination } from '../entities/employee-termination.entity';
 
 @EventSubscriber()
 @Injectable()
-export class BranchSubscriber implements EntitySubscriberInterface<EmployeeTermination> {
+export class BranchSubscriber
+  implements EntitySubscriberInterface<EmployeeTermination>
+{
   listenTo() {
     return EmployeeTermination;
   }
@@ -29,7 +31,9 @@ export class BranchSubscriber implements EntitySubscriberInterface<EmployeeTermi
     }
   }
 
-  async afterBranchSoftRemoveFromEmployeeJobInformation(event: SoftRemoveEvent<EmployeeTermination>) {
+  async afterBranchSoftRemoveFromEmployeeJobInformation(
+    event: SoftRemoveEvent<EmployeeTermination>,
+  ) {
     const employeeJobInformationRepository: Repository<EmployeeJobInformation> =
       event.connection.getRepository(EmployeeJobInformation);
     if (event.entity.deletedAt) {

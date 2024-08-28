@@ -1,130 +1,109 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { BranchesController } from './employee-termination.controller';
-// import { BranchesService } from './employee-termination.service';
-// import { CreateBranchDto } from './dto/create-employee-termination.dto';
-// import { UpdateBranchDto } from './dto/update-employee-termination.dto';
-// import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-// import { Pagination } from 'nestjs-typeorm-paginate';
-// import {
-//   branchData,
-//   createbranchData,
-//   createbranchDataOnCreate,
-//   deletebranchData,
-//   findOneNotFoundReturnValue,
-//   paginationResultbranchData,
-//   updatebranchData,
-// } from './tests/employee-termination.data';
-// jest.mock('./branches.service');
-// describe('BranchesController', () => {
-//   let controller: BranchesController;
-//   let service: BranchesService;
+import { Test, TestingModule } from '@nestjs/testing';
+import { EmployeeTerminationController } from './employee-termination.controller';
+import { EmployeeTerminationService } from './employee-termination.service';
+import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.dto';
+import { UpdateEmployeeTerminationDto } from './dto/update-employee-termination.dto';
+import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import {
+  createEmployeeTerminationData,
+  employeeTerminationData,
+  paginationResultEmployeeTerminationData,
+  updateEmployeeTerminationData,
+} from './tests/employee-termination.data';
+import { TerminationType } from '@root/src/core/enum/termination-type.dto';
+import { EligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
 
-//   const mockBranchesService = {
-//     createBranch: jest
-//       .fn()
-//       .mockImplementation((dto: CreateBranchDto, tenantId: string) => {
-//         return Promise.resolve(createbranchDataOnCreate());
-//       }),
-//     findAllBranchs: jest
-//       .fn()
-//       .mockImplementation(
-//         (paginationOptions: PaginationDto, tenantId: string) => {
-//           return Promise.resolve(paginationResultbranchData());
-//         },
-//       ),
-//     findOneBranch: jest.fn().mockImplementation((id: string) => {
-//       if (id === '4567') {
-//         return Promise.resolve(findOneNotFoundReturnValue());
-//       }
-//       return Promise.resolve(branchData());
-//     }),
-//     updateBranch: jest
-//       .fn()
-//       .mockImplementation((id: string, dto: UpdateBranchDto) => {
-//         return Promise.resolve(updatebranchData());
-//       }),
-//     removeBranch: jest.fn().mockImplementation((id: string) => {
-//       return Promise.resolve(deletebranchData());
-//     }),
-//   };
+describe('EmployeeTerminationController', () => {
+  let controller: EmployeeTerminationController;
+  let service: EmployeeTerminationService;
 
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       controllers: [BranchesController],
-//       providers: [
-//         {
-//           provide: BranchesService,
-//           useValue: mockBranchesService,
-//         },
-//       ],
-//     }).compile();
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [EmployeeTerminationController],
+      providers: [
+        {
+          provide: EmployeeTerminationService,
+          useValue: {
+            create: jest.fn().mockResolvedValue(employeeTerminationData()),
+            findAll: jest
+              .fn()
+              .mockResolvedValue(paginationResultEmployeeTerminationData()),
+            findOne: jest.fn().mockResolvedValue(employeeTerminationData()),
+            update: jest.fn().mockResolvedValue(employeeTerminationData()),
+            remove: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+      ],
+    }).compile();
 
-//     controller = module.get<BranchesController>(BranchesController);
-//     service = module.get<BranchesService>(BranchesService);
-//   });
+    controller = module.get<EmployeeTerminationController>(
+      EmployeeTerminationController,
+    );
+    service = module.get<EmployeeTerminationService>(
+      EmployeeTerminationService,
+    );
+  });
 
-//   it('should be defined', () => {
-//     expect(controller).toBeDefined();
-//   });
+  describe('create', () => {
+    it('should create a new employee termination', async () => {
+      const createDto: CreateEmployeeTerminationDto = {
+        reason: 'Resignation',
+        type: TerminationType.Resignation,
+        eligibleForRehire: EligibleForRehire.mayBe,
+        comment: 'Left for a better opportunity',
+        jobInformationId: 'job-info-2',
+        userId: 'user-2',
+        effectiveDate: new Date('2023-02-01'),
+      };
+      const result = await controller.createEmployeeTermination(
+        { tenantId: 'tenant-1' } as any,
+        createDto,
+      );
+      expect(result).toEqual(employeeTerminationData());
+    });
+  });
 
-//   it('should create a branch', async () => {
-//     const createBranchDto: CreateBranchDto = createbranchData();
-//     const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
-//     const result = await controller.createBranch(req, createBranchDto);
-//     expect(result).toEqual(createbranchDataOnCreate());
-//     expect(service.createBranch).toHaveBeenCalledWith(
-//       createBranchDto,
-//       '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
-//     );
-//   });
+  describe('findAll', () => {
+    it('should return all employee terminations', async () => {
+      const paginationDto: PaginationDto = { page: 1, limit: 10 };
+      const result = await controller.findAll(
+        { tenantId: 'tenant-1' } as any,
+        paginationDto,
+      );
+      expect(result).toEqual(paginationResultEmployeeTerminationData());
+    });
+  });
 
-//   it('should find all branches', async () => {
-//     const paginationOptions: PaginationDto = { page: 1, limit: 10 };
-//     const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
-//     const result = await controller.findAllBranch(req, paginationOptions);
-//     expect(result).toEqual(paginationResultbranchData());
-//     expect(service.findAllBranchs).toHaveBeenCalledWith(
-//       paginationOptions,
-//       '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
-//     );
-//   });
+  describe('findOne', () => {
+    it('should return a single employee termination', async () => {
+      const result = await controller.findOne('1');
+      expect(result).toEqual(employeeTerminationData());
+    });
+  });
 
-//   it('should find one branch', async () => {
-//     const result = await controller.findOneBranch(
-//       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-//     );
-//     expect(result).toEqual(branchData());
-//     expect(service.findOneBranch).toHaveBeenCalledWith(
-//       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-//     );
-//   });
+  describe('update', () => {
+    it('should update an employee termination', async () => {
+      const updateDto: UpdateEmployeeTerminationDto = {
+        reason: 'Updated reason',
+        type: TerminationType.Resignation,
+        eligibleForRehire: EligibleForRehire.mayBe,
+        comment: 'Company downsizing',
+        jobInformationId: 'job-info-3',
+        userId: 'user-3',
+        effectiveDate: new Date('2023-03-01'),
+      };
+      const result = await controller.update('1', updateDto);
+      expect(result).toEqual(employeeTerminationData());
+    });
+  });
 
-//   it('should return not found for non-existent branch', async () => {
-//     const result = await controller.findOneBranch('4567');
-//     expect(result).toEqual(findOneNotFoundReturnValue());
-//     expect(service.findOneBranch).toHaveBeenCalledWith('4567');
-//   });
-
-//   it('should update a branch', async () => {
-//     const updateBranchDto: UpdateBranchDto = updatebranchData();
-//     const result = await controller.updateBranch(
-//       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-//       updateBranchDto,
-//     );
-//     expect(result).toEqual(updatebranchData());
-//     expect(service.updateBranch).toHaveBeenCalledWith(
-//       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-//       updateBranchDto,
-//     );
-//   });
-
-//   it('should remove a branch', async () => {
-//     const result = await controller.removeBranch(
-//       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-//     );
-//     expect(result).toEqual(deletebranchData());
-//     expect(service.removeBranch).toHaveBeenCalledWith(
-//       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-//     );
-//   });
-// });
+  describe('remove', () => {
+    it('should remove an employee termination', async () => {
+      const result = await controller.removeEmployeeTermination(
+        employeeTerminationData().id,
+      );
+      expect(result).toBeUndefined();
+    });
+  });
+});

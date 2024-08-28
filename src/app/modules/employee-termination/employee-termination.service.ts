@@ -14,58 +14,74 @@ import { EmployeeTermination } from './entities/employee-termination.entity';
 import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.dto';
 import { UpdateEmployeeTerminationDto } from './dto/update-employee-termination.dto';
+import { UserService } from '../users/user.service';
 
 @Injectable()
 export class EmployeeTerminationService {
   constructor(
-    @InjectRepository(EmployeeTermination) 
+    @InjectRepository(EmployeeTermination)
     private employeeTerminationRepository: Repository<EmployeeTermination>,
     private paginationService: PaginationService,
+    private userService: UserService,
   ) {}
   async create(
     createEmployeeTerminationDto: CreateEmployeeTerminationDto,
     tenantId: string,
   ): Promise<EmployeeTermination> {
-    
     try {
-      const createEmployeeTermination = await this.employeeTerminationRepository.create({
-        ...createEmployeeTerminationDto,
-        tenantId: tenantId,
-      });
-      const valuesToCheck = { reason:createEmployeeTerminationDto.reason}
-      await checkIfDataExists(valuesToCheck,this.employeeTerminationRepository)
-      return await this.employeeTerminationRepository.save(createEmployeeTermination);
+      const createEmployeeTermination =
+        await this.employeeTerminationRepository.create({
+          ...createEmployeeTerminationDto,
+          tenantId: tenantId,
+        });
+      const valuesToCheck = { reason: createEmployeeTerminationDto.reason };
+      await checkIfDataExists(
+        valuesToCheck,
+        this.employeeTerminationRepository,
+      );
+      const check = await this.employeeTerminationRepository.save(
+        createEmployeeTermination,
+      );
+      if (check) {
+        await this.userService.remove(createEmployeeTerminationDto?.userId);
+        return check;
+      }
     } catch (error) {
       throw new ConflictException(error.message);
     }
   }
 
   async findAll(
-    paginationOptions: PaginationDto,
     tenantId: string,
+    paginationOptions: PaginationDto,
   ): Promise<Pagination<EmployeeTermination>> {
     const options: IPaginationOptions = {
       page: paginationOptions.page,
       limit: paginationOptions.limit,
     };
 
-    const paginatedData = await this.paginationService.paginate<EmployeeTermination>(
-      this.employeeTerminationRepository,
-      'p',
-      options,
-      paginationOptions.orderBy,
-      paginationOptions.orderDirection,
-      { tenantId },
-    );
+    const paginatedData =
+      await this.paginationService.paginate<EmployeeTermination>(
+        this.employeeTerminationRepository,
+        'p',
+        options,
+        paginationOptions.orderBy,
+        paginationOptions.orderDirection,
+        { tenantId },
+      );
     return paginatedData;
   }
 
   async findOne(id: string): Promise<EmployeeTermination> {
     try {
-      const client = await this.employeeTerminationRepository.findOneOrFail({ where:{id:id} });
+      const client = await this.employeeTerminationRepository.findOneOrFail({
+        where: { id: id },
+      });
       return client;
     } catch (error) {
-      throw new NotFoundException(`Employee Termination with Id ${id} not found`);
+      throw new NotFoundException(
+        `Employee Termination with Id ${id} not found`,
+      );
     }
   }
   async update(
@@ -73,8 +89,11 @@ export class EmployeeTerminationService {
     updateEmployeeTerminationDto: UpdateEmployeeTerminationDto,
   ): Promise<any> {
     try {
-       await this.findOne(id);
-       await this.employeeTerminationRepository.update(id , updateEmployeeTerminationDto);
+      await this.findOne(id);
+      await this.employeeTerminationRepository.update(
+        id,
+        updateEmployeeTerminationDto,
+      );
       return await this.findOne(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -88,7 +107,9 @@ export class EmployeeTerminationService {
     try {
       const employeeTermination = await this.findOne(id);
       if (!employeeTermination) {
-        throw new NotFoundException(`Employee Termination with Id ${id} not found`);
+        throw new NotFoundException(
+          `Employee Termination with Id ${id} not found`,
+        );
       }
       await this.employeeTerminationRepository.softRemove({ id });
       return employeeTermination;

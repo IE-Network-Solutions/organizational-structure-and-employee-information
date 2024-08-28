@@ -1,42 +1,37 @@
-import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { NotFoundException } from '@nestjs/common';
 import {
-
-  deleteEmployeeTerminationData,
-  EmployeeTerminationData,
-  findOneNotFoundReturnValue,
-  paginationResultbranchData,
-  updateEmployeeTerminationData,
-
+  employeeTerminationData,
+  paginationResultEmployeeTerminationData,
 } from '../tests/employee-termination.data';
-import { CreateEmployeeTerminationDto } from '../dto/create-employee-termination.dto';
-import { UpdateEmployeeTerminationDto } from '../dto/update-employee-termination.dto';
-import { createbranchDataOnCreate } from '../../branchs/tests/branch.data';
 
-export const BranchesService = jest.fn().mockReturnValue({
-  createBranch: jest
+export const EmployeeTerminationService = jest.fn().mockReturnValue({
+  create: jest.fn().mockResolvedValue(employeeTerminationData()),
+  findAll: jest
     .fn()
-    .mockImplementation((dto: CreateEmployeeTerminationDto, tenantId: string) => {
-      return Promise.resolve(createbranchDataOnCreate());
-    }),
-  findAllBranchs: jest
+    .mockResolvedValue(paginationResultEmployeeTerminationData()),
+  findOne: jest
     .fn()
-    .mockImplementation(
-      (paginationOptions: PaginationDto, tenantId: string) => {
-        return Promise.resolve(paginationResultbranchData());
-      },
+    .mockImplementation((id) =>
+      id === employeeTerminationData().id
+        ? Promise.resolve(employeeTerminationData())
+        : Promise.reject(new NotFoundException()),
     ),
-  findOneBranch: jest.fn().mockImplementation((id: string) => {
-    if (id === '4567') {
-      return Promise.resolve(findOneNotFoundReturnValue());
-    }
-    return Promise.resolve(EmployeeTerminationData());
-  }),
-  updateBranch: jest
+  update: jest
     .fn()
-    .mockImplementation((id: string, dto: UpdateEmployeeTerminationDto) => {
-      return Promise.resolve(updateEmployeeTerminationData());
-    }),
-  removeBranch: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve(deleteEmployeeTerminationData());
-  }),
+    .mockImplementation((id) =>
+      id === employeeTerminationData().id
+        ? Promise.resolve(employeeTerminationData())
+        : Promise.reject(
+            new Error(`EmployeeTerminationData with id ${id} not found.`),
+          ),
+    ),
+  remove: jest
+    .fn()
+    .mockImplementation((id) =>
+      id === employeeTerminationData().id
+        ? Promise.resolve('Promise resolves with void')
+        : Promise.reject(
+            new Error(`EmployeeTerminationData with id ${id} not found.`),
+          ),
+    ),
 });

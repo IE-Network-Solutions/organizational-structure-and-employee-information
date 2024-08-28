@@ -1,254 +1,218 @@
-// import { Test } from '@nestjs/testing';
-// import { getRepositoryToken } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { NotFoundException } from '@nestjs/common';
-// import { mock, MockProxy } from 'jest-mock-extended';
+import { Test } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { mock, MockProxy } from 'jest-mock-extended';
 
-// import { PaginationService } from '@root/src/core/pagination/pagination.service';
-// import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
-// import { BranchesService } from './employee-termination.service';
-// import { Branch } from './entities/employee-termination.entity';
-// import {
-//   branchData,
-//   createbranchData,
-//   createbranchDataOnCreate,
-//   createbranchDataOnSave,
-//   deletebranchData,
-//   paginationResultbranchData,
-//   updatebranchData,
-//   UpdatebranchDataReturned,
-// } from './tests/employee-termination.data';
+import { PaginationService } from '@root/src/core/pagination/pagination.service';
 
-// describe('BranchesService', () => {
-//   let branchesService: BranchesService;
-//   let branchRepository: MockProxy<Repository<Branch>>;
-//   let paginationService: MockProxy<PaginationService>;
-//   const branchToken = getRepositoryToken(Branch);
+import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { EmployeeTerminationService } from './employee-termination.service';
+import { EmployeeTermination } from './entities/employee-termination.entity';
+import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.dto';
+import {
+  deleteEmployeeTerminationData,
+  employeeTerminationData,
+  paginationResultEmployeeTerminationData,
+} from './tests/employee-termination.data';
+import { UserService } from '../users/user.service';
 
-//   beforeEach(async () => {
-//     const moduleRef = await Test.createTestingModule({
-//       providers: [
-//         BranchesService,
-//         {
-//           provide: PaginationService,
-//           useValue: mock<PaginationService>(), // Use mock for PaginationService
-//         },
-//         {
-//           provide: branchToken,
-//           useValue: mock<Repository<Branch>>(),
-//         },
-//       ],
-//     }).compile();
+describe('EmployeeTerminationService', () => {
+  let employeeTerminationService: EmployeeTerminationService;
+  let userService: UserService;
+  let employeeTerminationRepository: MockProxy<Repository<EmployeeTermination>>;
+  let paginationService: MockProxy<PaginationService>;
+  const employeeTerminationToken = getRepositoryToken(EmployeeTermination);
 
-//     branchesService = moduleRef.get<BranchesService>(BranchesService);
-//     branchRepository = moduleRef.get(branchToken);
-//     paginationService = moduleRef.get(PaginationService); // Get an instance of PaginationService
-//   });
+  beforeEach(async () => {
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        EmployeeTerminationService,
+        {
+          provide: PaginationService,
+          useValue: mock<PaginationService>(),
+        },
+        {
+          provide: UserService,
+          useValue: mock<UserService>(),
+        },
+        {
+          provide: employeeTerminationToken,
+          useValue: mock<Repository<EmployeeTermination>>(),
+        },
+      ],
+    }).compile();
 
-//   describe('create', () => {
-//     describe('when createBranch is called', () => {
-//       let branch: Branch;
-//       let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
-//       beforeEach(() => {
-//         branchRepository.create.mockReturnValue(createbranchData() as any);
-//         branchRepository.save.mockResolvedValue(branchData());
-//       });
-//       it('should call branchRepository.findone wiht email address ', async () => {
-//         await branchesService.createBranch(createbranchData(), tenantId);
-//         expect(branchRepository.findOne).toHaveBeenCalledWith({
-//           where: {
-//             contactEmail: createbranchData().contactEmail,
-//             tenantId: tenantId,
-//           },
-//         });
-//       });
+    employeeTerminationService = moduleRef.get<EmployeeTerminationService>(
+      EmployeeTerminationService,
+    );
+    employeeTerminationRepository = moduleRef.get(employeeTerminationToken);
+    paginationService = moduleRef.get(PaginationService);
+  });
 
-//       it('should call branchRepository.create', async () => {
-//         await branchesService.createBranch(createbranchData(), tenantId);
-//         expect(branchRepository.create).toHaveBeenCalledWith({
-//           ...createbranchData(),
-//           tenantId: tenantId,
-//         });
-//       });
+  describe('create', () => {
+    describe('when create is called', () => {
+      let employeeTermination: EmployeeTermination;
+      let createEmployeeTerminationDto: CreateEmployeeTerminationDto;
 
-//       it('should call branchRepository.save', async () => {
-//         await branchesService.createBranch(createbranchData(), tenantId);
-//         expect(branchRepository.save).toHaveBeenCalledWith(createbranchData());
-//       });
+      beforeEach(async () => {
+        createEmployeeTerminationDto = employeeTerminationData();
 
-//       it('should return the created Branch', async () => {
-//         branch = await branchesService.createBranch(
-//           createbranchData(),
-//           tenantId,
-//         );
-//         expect(branch).toEqual(branchData());
-//       });
-//     });
-//   });
+        employeeTerminationRepository.create.mockReturnValue(
+          employeeTerminationData() as any,
+        );
+        employeeTerminationRepository.save.mockResolvedValue(
+          employeeTerminationData() as any,
+        );
+      });
 
-//   describe('findOne', () => {
-//     describe('when findOneBranch is called', () => {
-//       let branch: Branch;
+      it('should call roleRepository.create', async () => {
+        await employeeTerminationService.create(
+          employeeTerminationData(),
+          employeeTerminationData().tenantId,
+        );
+        expect(employeeTerminationRepository.create).toHaveBeenCalledWith({
+          tenantId: employeeTerminationData().tenantId,
+          ...createEmployeeTerminationDto,
+        });
+      });
 
-//       beforeEach(async () => {
-//         branchRepository.findOneByOrFail.mockResolvedValue(branchData());
-//         branch = await branchesService.findOneBranch(branchData().id);
-//       });
+      it('should call roleRepository.save', async () => {
+        await employeeTerminationService.create(
+          createEmployeeTerminationDto,
+          employeeTerminationData().tenantId,
+        );
+        expect(employeeTerminationRepository.save).toHaveBeenCalledWith(
+          employeeTerminationData(),
+        );
+      });
 
-//       it('should call branchRepository.findOne', async () => {
-//         await branchesService.findOneBranch(branchData().id);
-//         expect(branchRepository.findOneByOrFail).toHaveBeenCalledWith({
-//           id: branchData().id,
-//         });
-//       });
+      it('should return the created role', async () => {
+        employeeTermination = await employeeTerminationService.create(
+          createEmployeeTerminationDto,
+          employeeTerminationData().tenantId,
+        );
+        expect(employeeTermination).toEqual(employeeTerminationData());
+      });
+    });
+  });
+  describe('findOne', () => {
+    describe('when findOne is called', () => {
+      let employeeData: CreateEmployeeTerminationDto; // Declare the variable here
 
-//       it('should return the Branch', () => {
-//         expect(branch).toEqual(branchData());
-//       });
+      beforeEach(async () => {
+        employeeData = await employeeTerminationService.findOne(
+          employeeTerminationData().id,
+        );
+        employeeTerminationRepository.findOne.mockResolvedValue(
+          employeeTerminationData().id as any,
+        );
+      });
 
-//       it('should throw NotFoundException if id is not found', async () => {
-//         const wrongId = '4567';
-//         branchRepository.findOneByOrFail.mockRejectedValue(
-//           new Error('Branch not found'),
-//         );
+      it('should call roleRepository.findOne', async () => {
+        await employeeTerminationService.findOne(employeeTerminationData().id);
+        expect(
+          employeeTerminationRepository.findOneOrFail,
+        ).toHaveBeenCalledWith({
+          where: { id: employeeTerminationData().id },
+        });
+      });
+    });
+  });
 
-//         await expect(branchesService.findOneBranch(wrongId)).rejects.toThrow(
-//           NotFoundException,
-//         );
-//         await expect(branchesService.findOneBranch(wrongId)).rejects.toThrow(
-//           `Branch with Id ${wrongId} not found`,
-//         );
-//       });
-//     });
-//   });
+  describe('findAll', () => {
+    describe('when findAll is called', () => {
+      beforeEach(async () => {
+        paginationService.paginate.mockResolvedValue(
+          paginationResultEmployeeTerminationData(),
+        );
+      });
 
-//   describe('findAll', () => {
-//     describe('when findAllBranchs is called', () => {
-//       let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
-//       beforeEach(async () => {
-//         paginationService.paginate.mockResolvedValue(
-//           paginationResultbranchData(),
-//         );
-//       });
+      it('should call paginationService.paginate with correct parameters', async () => {
+        await employeeTerminationService.findAll(
+          employeeTerminationData().tenantId,
+          paginationOptions(),
+        );
+      });
 
-//       it('should call paginationService.paginate with correct parameters', async () => {
-//         await branchesService.findAllBranchs(paginationOptions(), tenantId);
-//         expect(paginationService.paginate).toHaveBeenCalledWith(
-//           branchRepository,
-//           'p',
-//           {
-//             page: paginationOptions().page,
-//             limit: paginationOptions().limit,
-//           },
-//           paginationOptions().orderBy,
-//           paginationOptions().orderDirection,
-//           { tenantId },
-//         );
-//       });
+      it('should return paginated roles', async () => {
+        const employeeTermination = await employeeTerminationService.findAll(
+          employeeTerminationData().tenantId,
+          paginationOptions(),
+        );
+        expect(employeeTermination).toEqual(
+          paginationResultEmployeeTerminationData(),
+        );
+      });
+    });
+  });
 
-//       it('should return paginated Branchs', async () => {
-//         const branchs = await branchesService.findAllBranchs(
-//           paginationOptions(),
-//           tenantId,
-//         );
-//         expect(branchs).toEqual(paginationResultbranchData());
-//       });
-//     });
-//   });
+  describe('update', () => {
+    describe('when update employee termination is called', () => {
+      let employeeTermination: EmployeeTermination;
+      beforeEach(async () => {
+        jest
+          .spyOn(employeeTerminationService, 'findOne')
+          .mockResolvedValue(employeeTerminationData());
+        employeeTerminationRepository.update.mockResolvedValue(
+          deleteEmployeeTerminationData(),
+        );
+      });
 
-//   describe('update', () => {
-//     describe('when updatebranch is called', () => {
-//       let branch: Branch;
-//       let companyProfileImage: Express.Multer.File;
-//       beforeEach(async () => {
-//         jest
-//           .spyOn(branchesService, 'findOneBranch')
-//           .mockResolvedValue(branchData());
-//         branchRepository.update.mockResolvedValue(UpdatebranchDataReturned());
-//       });
+      it('should call employeeTerminationService.findOne', async () => {
+        await employeeTerminationService.update(
+          employeeTerminationData().id,
+          employeeTerminationData(),
+        );
+        expect(employeeTerminationService.findOne).toHaveBeenCalledWith(
+          employeeTerminationData().id,
+        );
+      });
 
-//       it('should call branchService.findOneBranch', async () => {
-//         await branchesService.updateBranch(branchData().id, createbranchData());
-//         expect(branchesService.findOneBranch).toHaveBeenCalledWith(
-//           branchData().id,
-//         );
-//       });
+      it('should call employeeTerminationService.update', async () => {
+        await employeeTerminationService.update(
+          employeeTerminationData().id,
+          employeeTerminationData(),
+        );
+        expect(employeeTerminationRepository.update).toHaveBeenCalledWith(
+          employeeTerminationData().id,
+          employeeTerminationData(),
+        );
+      });
 
-//       it('should call branchRepository.update', async () => {
-//         await branchesService.updateBranch(branchData().id, updatebranchData());
-//         expect(branchRepository.update).toHaveBeenCalledWith(
-//           branchData().id,
-//           updatebranchData(),
-//         );
-//       });
+      it('should return the updated employee Termination', async () => {
+        employeeTermination = await employeeTerminationService.update(
+          employeeTerminationData().id,
+          employeeTerminationData(),
+        );
+        expect(employeeTermination).toEqual(employeeTerminationData());
+      });
+    });
+  });
 
-//       it('should return the updated branch', async () => {
-//         branch = await branchesService.updateBranch(
-//           branchData().id,
-//           updatebranchData(),
-//         );
-//         expect(branch).toEqual(branchData());
-//       });
+  describe('remove', () => {
+    describe('when removeClient is called', () => {
+      beforeEach(async () => {
+        jest
+          .spyOn(employeeTerminationService, 'findOne')
+          .mockResolvedValue(employeeTerminationData());
+        employeeTerminationRepository.softRemove.mockResolvedValue(
+          employeeTerminationData(),
+        );
+      });
 
-//       it('should throw NotFoundException if id is not found', async () => {
-//         const wrongId = '4567';
-//         jest
-//           .spyOn(branchesService, 'findOneBranch')
-//           .mockRejectedValue(
-//             new NotFoundException(`Branch with Id ${wrongId} not found`),
-//           );
-//         await expect(
-//           branchesService.updateBranch(wrongId, createbranchData()),
-//         ).rejects.toThrow(NotFoundException);
-//         await expect(
-//           branchesService.updateBranch(wrongId, createbranchData()),
-//         ).rejects.toThrow(`Branch with Id ${wrongId} not found`);
-//       });
-//     });
-//   });
+      it('should call employeeTerminationRepository.delete', async () => {
+        await employeeTerminationService.remove(employeeTerminationData().id);
+        expect(employeeTerminationRepository.softRemove).toHaveBeenCalledWith({
+          id: employeeTerminationData().id,
+        });
+      });
 
-//   describe('remove', () => {
-//     describe('when removeBranch is called', () => {
-//       beforeEach(async () => {
-//         jest
-//           .spyOn(branchesService, 'findOneBranch')
-//           .mockResolvedValue(branchData());
-//         branchRepository.delete.mockResolvedValue(deletebranchData());
-//       });
-
-//       it('should call branchService.findOneBranch', async () => {
-//         await branchesService.removeBranch(branchData().id);
-//         expect(branchesService.findOneBranch).toHaveBeenCalledWith(
-//           branchData().id,
-//         );
-//       });
-
-//       it('should call branchRepository.delete', async () => {
-//         await branchesService.removeBranch(branchData().id);
-//         expect(branchRepository.softRemove).toHaveBeenCalledWith({
-//           id: branchData().id,
-//         });
-//       });
-
-//       it('should throw NotFoundException if id is not found', async () => {
-//         const wrongId = '4567';
-//         jest
-//           .spyOn(branchesService, 'findOneBranch')
-//           .mockRejectedValue(
-//             new NotFoundException(`Branch with Id ${wrongId} not found`),
-//           );
-//         await expect(branchesService.removeBranch(wrongId)).rejects.toThrow(
-//           NotFoundException,
-//         );
-//         await expect(branchesService.removeBranch(wrongId)).rejects.toThrow(
-//           `Branch with Id ${wrongId} not found`,
-//         );
-//       });
-
-//       it('should return void when the Branch is removed', async () => {
-//         const result = await branchesService.removeBranch(branchData().id);
-//         expect(result).toEqual(branchData());
-//       });
-//     });
-//   });
-// });
+      it('should return void when the client is removed', async () => {
+        const result = await employeeTerminationService.remove(
+          employeeTerminationData().id,
+        );
+        expect(result).toEqual(employeeTerminationData());
+      });
+    });
+  });
+});

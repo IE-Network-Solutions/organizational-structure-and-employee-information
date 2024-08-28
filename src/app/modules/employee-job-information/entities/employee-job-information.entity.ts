@@ -1,4 +1,10 @@
-import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  OneToOne,
+} from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
 import { IsEnum } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
@@ -71,8 +77,10 @@ export class EmployeeJobInformation extends BaseModel {
   )
   workSchedule: WorkSchedule;
 
-
-  @OneToOne(() => EmployeeTermination, (employeeTermination) => employeeTermination.jobInformation)
+  @OneToOne(
+    () => EmployeeTermination,
+    (employeeTermination) => employeeTermination.jobInformation,
+  )
   employeeTermination: EmployeeTermination;
 
   // @ManyToOne(() => Tenant, tenant => tenant.employeeJobInformation)

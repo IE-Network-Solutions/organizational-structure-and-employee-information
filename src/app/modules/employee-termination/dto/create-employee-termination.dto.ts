@@ -1,5 +1,5 @@
-import { eligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
-import { terminationType } from '@root/src/core/enum/termination-type.dto';
+import { EligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
+import { TerminationType } from '@root/src/core/enum/termination-type.dto';
 import { IsOptional, IsString } from 'class-validator';
 
 export class CreateEmployeeTerminationDto {
@@ -7,10 +7,10 @@ export class CreateEmployeeTerminationDto {
   reason: string;
 
   @IsString()
-  type: terminationType;
+  type: TerminationType;
 
   @IsString()
-  eligibleForRehire: eligibleForRehire;
+  eligibleForRehire: EligibleForRehire;
 
   @IsOptional()
   @IsString()
@@ -26,4 +26,3 @@ export class CreateEmployeeTerminationDto {
   @IsString()
   userId: string;
 }
-
