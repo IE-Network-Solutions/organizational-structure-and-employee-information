@@ -1,4 +1,4 @@
-export enum terminationType{
+export enum TerminationType{
     Resignation="Resignation",
     Termination="Termination",
     Death="Death",

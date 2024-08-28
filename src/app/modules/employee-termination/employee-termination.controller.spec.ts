@@ -11,8 +11,8 @@ import {
   paginationResultEmployeeTerminationData,
   updateEmployeeTerminationData,
 } from './tests/employee-termination.data';
-import { TerminationType } from '@root/src/core/enum/termination-type.dto';
 import { EligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
+import { TerminationType } from '@root/src/core/enum/termination-type.dto';
 
 describe('EmployeeTerminationController', () => {
   let controller: EmployeeTerminationController;

@@ -1,4 +1,4 @@
-export enum eligibleForRehire{
+export enum EligibleForRehire{
     yes="Yes",
     no="No",
     mayBe="MayBe"
