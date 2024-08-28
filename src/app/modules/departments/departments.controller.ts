@@ -35,7 +35,7 @@ export class DepartmentsController {
   }
 
   @Get()
-  async findAllDepartments(@Req() req: Request): Promise<Department> {
+  async findAllDepartments(@Req() req: Request) {
     const tenantId = req['tenantId'];
     return await this.departmentsService.findAllDepartments(tenantId);
   }

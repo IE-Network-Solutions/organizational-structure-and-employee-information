@@ -19,10 +19,12 @@ import { EmployeeDocumentModule } from '../employee-documents/employee-document.
 import { RolePermissionModule } from '../role-permission/role-permission.module';
 import { UserPermissionModule } from '../user-permission/user-permission.module';
 import { DepartmentsModule } from '../departments/departments.module';
+import { RoleService } from '../role/role.service';
+import { Role } from '../role/entities/role.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Department]),
+    TypeOrmModule.forFeature([User, Department, Role]),
     EmployeeInformationModule,
     EmployeeJobInformationModule,
     EmployeeInformationFormModule,
@@ -35,9 +37,10 @@ import { DepartmentsModule } from '../departments/departments.module';
     EmployeeDocumentModule,
     RolePermissionModule,
     UserPermissionModule,
+    RoleModule
   ],
   controllers: [UserController],
-  providers: [UserService, PaginationService, DepartmentsService],
+  providers: [UserService, PaginationService, DepartmentsService, RoleService],
   exports: [UserService],
 })
-export class UserModule {}
+export class UserModule { }

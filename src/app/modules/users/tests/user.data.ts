@@ -2,7 +2,7 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 
-export const userData = (): User => {
+export const userData = () => {
   return {
     id: '1',
     firstName: 'John',
@@ -21,7 +21,7 @@ export const userData = (): User => {
     employeeDocument: undefined,
     employeeInformation: undefined,
     firebaseId: 'gh',
-    employeeTermination:undefined
+    permission: [],
   };
 };
 

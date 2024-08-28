@@ -28,6 +28,10 @@ import { generateRandom4DigitNumber } from '@root/src/core/utils/generateRandomN
 import filterEntities from '@root/src/core/utils/filters.utils';
 import { FilterDto } from './dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
+import { error } from 'console';
+import { CreateUserDto } from './dto/create-user.dto';
+import { RoleService } from '../role/role.service';
+import { CreateRoleDto } from '../role/dto/create-role.dto';
 
 @Injectable()
 export class UserService {
@@ -42,13 +46,14 @@ export class UserService {
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
-  ) {}
+    private readonly rolesService: RoleService
+  ) { }
 
   async create(
     tenantId: string,
     createBulkRequestDto: CreateBulkRequestDto,
-    profileImage: Express.Multer.File,
-    documentName: Express.Multer.File,
+    profileImage?: Express.Multer.File,
+    documentName?: Express.Multer.File,
   ) {
     const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
 
@@ -77,12 +82,8 @@ export class UserService {
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const password = createUserDto.email + generateRandom4DigitNumber();
 
-      const userRecord = await admin.auth().createUser({
-        email: createUserDto.email,
-        password: password,
-      });
 
-      await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
+      const userRecord = await this.createUserToFirebase(createUserDto.email, tenantId)
 
       user.firebaseId = userRecord.uid;
 
@@ -238,6 +239,7 @@ export class UserService {
           'workSchedule',
         )
         .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect('user.userPermissions', 'userPermissions')
         .where('user.id = :id', { id })
         .getOne();
       user['reportingTo'] = await this.findReportingToUser(id);
@@ -251,10 +253,15 @@ export class UserService {
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, tenantId: string, updateUserDto: UpdateUserDto) {
     try {
+      const createPremission = new CreateUserPermissionDto();
+      createPremission.permissionId = updateUserDto.permission;
+      createPremission.userId = id;
+      delete updateUserDto.permission;
       await this.userRepository.findOneOrFail({ where: { id: id } });
       await this.userRepository.update({ id }, updateUserDto);
+      await this.userPermissionService.update(id, createPremission, tenantId);
       return await this.userRepository.findOneOrFail({ where: { id: id } });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
@@ -362,6 +369,15 @@ export class UserService {
     );
   }
 
+  async assignPermissionToUser1(
+    createUserPermissionDto: CreateUserPermissionDto,
+    tenantId: string,
+  ) {
+    return await this.userPermissionService.assignPermissionToUser(
+      createUserPermissionDto,
+      tenantId,
+    );
+  }
   async findPermissionsByUserId(id: string) {
     try {
       const user = await this.userRepository
@@ -404,9 +420,54 @@ export class UserService {
   }
 
   async findUserByFirbaseId(firbaseId: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { firebaseId: firbaseId },
+    try {
+      const user = await this.userRepository.findOne({
+        where: { firebaseId: firbaseId },
+        relations: ['role', 'userPermissions'],
+      });
+      if (!user) {
+        throw new NotFoundException('user not found');
+      }
+
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
+    let createRoleDto = new CreateRoleDto
+    createRoleDto.name = role
+    createRoleDto.description = role
+    let createRole = await this.rolesService.createFirstRole(createRoleDto, tenantId)
+    if (createRole) {
+      createUserDto.roleId = createRole.id
+      const user = this.userRepository.create({ ...createUserDto, tenantId });
+      const password = createUserDto.email + generateRandom4DigitNumber();
+
+      const userRecord = await this.createUserToFirebase(createUserDto.email, tenantId)
+
+      user.firebaseId = userRecord.uid;
+
+      const valuesToCheck = { email: user.email };
+
+      await checkIfDataExists(valuesToCheck, this.userRepository);
+
+      return await this.userRepository.save(user);
+    }
+    else {
+      throw new NotFoundException('Role Not Found')
+    }
+  }
+
+  async createUserToFirebase(email: string, tenantId: string) {
+    const userRecord = await admin.auth().createUser({
+      email: email,
+      password: '123456789',
     });
-    return user;
+
+    await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
+    return userRecord
+
+
   }
 }

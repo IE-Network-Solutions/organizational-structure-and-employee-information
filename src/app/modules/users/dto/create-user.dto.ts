@@ -2,27 +2,28 @@ import { IsEmail, IsOptional, IsString, Validate } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
-  firstName: string;
+  firstName?: string;
 
   @IsString()
-  middleName: string;
+  middleName?: string;
 
   @IsString()
-  lastName: string;
+  lastName?: string;
 
   // @IsString()
   @IsOptional()
-  profileImage: any;
+  profileImage?: any;
 
   @IsOptional()
   @IsString()
-  profileImageDownload: string;
+  profileImageDownload?: string;
 
   @IsOptional()
   @IsString()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsString()
   roleId?: string;
+
 }

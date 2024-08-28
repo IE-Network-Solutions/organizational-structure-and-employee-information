@@ -31,7 +31,7 @@ async function bootstrap() {
 
   try {
     admin.initializeApp({
-      credential: admin.credential.cert(await serviceAccount()),
+      credential: admin.credential.cert(serviceAccount(configService) as any),
     });
   } catch (error) {
     throw error;

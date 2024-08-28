@@ -72,12 +72,26 @@ export class UserPermissionService {
   async update(
     id: string,
     userPermissionDto: UpdateRolePermissionDto,
-  ): Promise<UserPermission> {
+    tenantId: string,
+  ) {
     try {
-      const userPermission = await this.findOne(id);
-      Object.assign(userPermission, userPermissionDto);
-      await this.userPermissionRepository.save(userPermission);
-      return userPermission;
+      await this.userPermissionRepository.delete({ user: { id: id } });
+      const assignedPermissions = userPermissionDto.permissionId.map(
+        (permissionId) => {
+          return this.userPermissionRepository.create({
+            user: { id: id },
+
+            permission: { id: permissionId },
+            tenantId: tenantId,
+          });
+        },
+      );
+      return await this.userPermissionRepository.save(assignedPermissions);
+
+      // const userPermission = await this.findOne(id);
+      // Object.assign(userPermission, userPermissionDto);
+      // await this.userPermissionRepository.save(userPermission);
+      // return userPermission;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User-Permission with id ${id} not found.`);
@@ -103,13 +117,13 @@ export class UserPermissionService {
     permissionId: string,
   ) {
     try {
-      // const userPermission = await this.userPermissionRepository.findOneOrFail({
-      //   where: {
-      //     user: { id: userId },
-      //     permission: { id: permissionId },
-      //   },
-      // });
-      // await this.userPermissionRepository.delete({ id: userPermission.id });
+      const userPermission = await this.userPermissionRepository.findOneOrFail({
+        where: {
+          user: { id: userId },
+          permission: { id: permissionId },
+        },
+      });
+      await this.userPermissionRepository.delete({ id: userPermission.id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User-Permission not found.`);

@@ -12,6 +12,8 @@ import {
   deleteUserData,
   paginationResultUserData,
   updateUserData,
+  userData,
+  userDataOnFindOne,
   userDataSave,
 } from './tests/user.data';
 import { EmployeeInformationService } from '../employee-information/employee-information.service';
@@ -24,6 +26,7 @@ import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data
 import { FileUploadService } from '@root/src/core/upload/upload.service';
 import { FilterDto } from './dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
+import { RoleService } from '../role/role.service';
 
 jest.mock('firebase-admin', () => {
   return {
@@ -44,6 +47,7 @@ describe('UserService', () => {
   let employeeDocumentService: EmployeeDocumentService;
   let rolePermissionService: RolePermissionService;
   let fileUploadService: FileUploadService;
+  let rolesService: RoleService;
   let queryRunner: QueryRunner;
 
   beforeEach(async () => {
@@ -98,6 +102,10 @@ describe('UserService', () => {
           provide: DepartmentsService,
           useValue: mock<DepartmentsService>(),
         },
+        {
+          provide: RoleService,
+          useValue: mock<RoleService>(),
+        },
       ],
     }).compile();
 
@@ -116,6 +124,9 @@ describe('UserService', () => {
     );
     rolePermissionService = moduleRef.get<RolePermissionService>(
       RolePermissionService,
+    );
+    rolesService = moduleRef.get<RoleService>(
+      RoleService,
     );
     fileUploadService = moduleRef.get<FileUploadService>(FileUploadService);
     queryRunner = moduleRef.get<DataSource>(DataSource).createQueryRunner();
@@ -296,20 +307,45 @@ describe('UserService', () => {
 
   describe('update', () => {
     it('should update the user and return the updated data', async () => {
-      const user = userDataSave() as any;
-      usersRepository.findOneOrFail.mockResolvedValue(user);
-      usersRepository.update.mockResolvedValue(updateUserData());
+      const request = {
+        tenantId: 'some-tenant-id', // Mock tenantId
+      } as unknown as Request;
 
+      // Mock user data before update
+      const user = userDataSave() as any;
+
+      // Mock updated user data
+      const updatedUser = updateUserData() as any;
+
+      // Mock the interactions with the repository and service
+      usersRepository.findOneOrFail.mockResolvedValueOnce(user);
+      usersRepository.update.mockResolvedValueOnce(undefined); // Update returns void/undefined
+      usersRepository.findOneOrFail.mockResolvedValueOnce(updatedUser); // After update, return the updated user
+
+      // Call the update method
       const result = await userService.update(
         user.id,
-        userDataSave() as UpdateUserDto,
+        request['tenantId'],
+        userData(),
       );
 
+      // Adjust the expected call to match the structure
       expect(usersRepository.update).toHaveBeenCalledWith(
-        { id: user.id },
-        userDataSave(),
+        { id: user.id }, // Pass the id as an object
+        expect.objectContaining({
+          firstName: 'John',
+          middleName: 'H',
+          lastName: 'Doe',
+          profileImage: 'profile_image_url',
+          profileImageDownload: 'profile_image_download_url',
+          email: 'hiluf@gmail.com',
+          roleId: 'role-id-123',
+          tenantId: 'tenant-id-123',
+        }),
       );
-      expect(result).toEqual(userDataSave());
+
+      // Assert the final result is the updated user data
+      expect(result).toEqual(updatedUser);
     });
   });
 
