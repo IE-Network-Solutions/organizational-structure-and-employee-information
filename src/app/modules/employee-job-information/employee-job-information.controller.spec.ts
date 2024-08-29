@@ -15,19 +15,16 @@ describe('EmployeeJobInformationsController', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [],
       controllers: [EmployeeJobInformationsController],
       providers: [EmployeeJobInformationService],
     }).compile();
 
-    employeeJobInformationsController =
-      moduleRef.get<EmployeeJobInformationsController>(
-        EmployeeJobInformationsController,
-      );
-    employeeJobInformationService =
-      moduleRef.get<EmployeeJobInformationService>(
-        EmployeeJobInformationService,
-      );
+    employeeJobInformationsController = moduleRef.get<EmployeeJobInformationsController>(
+      EmployeeJobInformationsController,
+    );
+    employeeJobInformationService = moduleRef.get<EmployeeJobInformationService>(
+      EmployeeJobInformationService,
+    );
     jest.clearAllMocks();
   });
 
@@ -79,7 +76,7 @@ describe('EmployeeJobInformationsController', () => {
         );
       });
 
-      test('then it should return a list of EmployeeJobInformation', () => {
+      test('then it should return a paginated list of EmployeeJobInformation', () => {
         expect(result).toEqual(paginationResultEmployeeJobInformationData());
       });
     });
@@ -113,6 +110,13 @@ describe('EmployeeJobInformationsController', () => {
           .spyOn(employeeJobInformationService, 'update')
           .mockResolvedValue(employeeJobInformationData());
         result = await employeeJobInformationsController.update(
+          'a7c8a8b3-1f4a-4f91-a8d2-5f2a9a1b8d2c',
+          employeeJobInformationData(),
+        );
+      });
+
+      test('then it should call EmployeeJobInformationService', () => {
+        expect(employeeJobInformationService.update).toHaveBeenCalledWith(
           'a7c8a8b3-1f4a-4f91-a8d2-5f2a9a1b8d2c',
           employeeJobInformationData(),
         );

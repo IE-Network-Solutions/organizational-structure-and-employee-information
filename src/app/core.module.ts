@@ -20,6 +20,9 @@ import { NationalityModule } from './modules/nationality/nationality.module';
 import { RolePermissionModule } from './modules/role-permission/role-permission.module';
 import { UserPermissionModule } from './modules/user-permission/user-permission.module';
 import { EmployementTypeModule } from './modules/employment-type/employement-type.module';
+import { OffboardingEmployeeTask } from './modules/offboarding-employee-task/entities/offboarding-employee-task.entity';
+import { OffboardingEmployeeTaskModule } from './modules/offboarding-employee-task/offboarding-employee-tasks.module';
+import { OffboardingTasksTemplate } from './modules/offboarding-tasks-template/entities/offboarding-tasks-template..entity';
 @Global()
 @Module({
   imports: [
@@ -41,6 +44,8 @@ import { EmployementTypeModule } from './modules/employment-type/employement-typ
     CalendarsModule,
     DepartmentsModule,
     BranchesModule,
+    OffboardingEmployeeTaskModule,
+    OffboardingTasksTemplate
   ],
 })
-export class CoreModule {}
+export class CoreModule { }

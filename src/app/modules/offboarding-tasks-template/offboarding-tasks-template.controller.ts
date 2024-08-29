@@ -1,0 +1,43 @@
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
+import { OffboardingTasksTemplateService } from './offboarding-tasks-template.service';
+import { CreateOffboardingTasksTemplateDto } from './dto/create-offboarding-tasks-template.dto';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { OffboardingTasksTemplate } from './entities/offboarding-tasks-template..entity';
+import { UpdateOffboardingTasksTemplateDto } from './dto/update-offboarding-tasks-template..dto';
+import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+
+@Controller('offboarding-tasks-template')
+export class OffboardingTasksTemplateController {
+  constructor(private readonly offboardingTasksTemplateService: OffboardingTasksTemplateService) { }
+
+  @Post()
+  create(
+    @Req() request: Request,
+    @Body() createOffboardingTasksTemplateDto: CreateOffboardingTasksTemplateDto,
+  ): Promise<OffboardingTasksTemplate> {
+    return this.offboardingTasksTemplateService.create(request['tenantId'], createOffboardingTasksTemplateDto);
+  }
+
+  @Get()
+  findAll(@Query() paginationOptions: PaginationDto): Promise<Pagination<OffboardingTasksTemplate>> {
+    return this.offboardingTasksTemplateService.findAll(paginationOptions);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string): Promise<OffboardingTasksTemplate> {
+    return this.offboardingTasksTemplateService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateOffboardingTasksTemplateDto: UpdateOffboardingTasksTemplateDto,
+  ): Promise<any> {
+    return this.offboardingTasksTemplateService.update(id, updateOffboardingTasksTemplateDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string): Promise<any> {
+    return this.offboardingTasksTemplateService.remove(id);
+  }
+}
