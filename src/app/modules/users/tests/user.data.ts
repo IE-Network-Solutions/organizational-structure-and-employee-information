@@ -1,7 +1,6 @@
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
-import { employeeJobInformationDataSave } from '../../employee-job-information/tests/employee-job-information.data';
 
 export const userData = () => {
   return {

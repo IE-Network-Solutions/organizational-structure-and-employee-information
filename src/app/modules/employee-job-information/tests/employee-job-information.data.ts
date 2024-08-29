@@ -1,4 +1,4 @@
-import { EmployementContractType } from '@root/src/core/enum/employementContractType.enum';
+import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
 import { EmployeeJobInformation } from '../entities/employee-job-information.entity';
 
 export const employeeJobInformationData = (): EmployeeJobInformation => {
@@ -15,6 +15,7 @@ export const employeeJobInformationData = (): EmployeeJobInformation => {
     departmentLeadOrNot: false,
     employmentContractType: EmployementContractType.CONTRACTUAL,
     workScheduleId: '1',
+    employeeTermination:undefined,
     tenantId: '1',
     createdAt: new Date('2023-01-01'),
     updatedAt: new Date('2023-01-01'),
