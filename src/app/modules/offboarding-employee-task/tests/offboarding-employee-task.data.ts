@@ -17,6 +17,7 @@ export const offboardingEmployeeTaskData = (): OffboardingEmployeeTask => {
     deletedAt: null,
     approver: undefined
   };
+
 };
 
 export const createOffboardingEmployeeTask = (): CreateOffboardingEmployeeTaskDto => {
