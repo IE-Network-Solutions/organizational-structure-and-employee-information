@@ -1,4 +1,4 @@
-import { EmployementContractType } from '@root/src/core/enum/employementContractType.enum';
+import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
 import {
   IsOptional,
   IsString,

@@ -149,7 +149,7 @@ describe('UserController', () => {
       } as unknown as Request;
 
       // Mock the user data
-      const mockUpdatedUser = userData();
+      const mockUpdatedUser = userData() as any;
       jest.spyOn(userService, 'update').mockResolvedValue(mockUpdatedUser);
 
       // Call the controller method
