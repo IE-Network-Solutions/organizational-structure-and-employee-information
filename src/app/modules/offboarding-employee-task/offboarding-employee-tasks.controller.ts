@@ -41,23 +41,23 @@ export class OffboardingEmployeeTaskController {
     return this.offboardingEmployeeTaskService.findAll(paginationOptions);
   }
 
-  @Get(':taskId')
-  findOne(@Param('taskId') id: string) {
+  @Get(':id')
+  findOne(@Param('id') id: string) {
     return this.offboardingEmployeeTaskService.findOne(id);
   }
 
-  @Patch(':taskId')
+  @Patch(':id')
   update(
     @Req() request: Request,
-    @Param('taskId') id: string,
+    @Param('id') id: string,
     @Body() updateOffboardingEmployeeTaskDto: UpdateOffboardingEmployeeTaskDto,
   ) {
     const tenantId = request['tenantId'];
     return this.offboardingEmployeeTaskService.update(id, updateOffboardingEmployeeTaskDto, tenantId);
   }
 
-  @Delete(':taskId')
-  remove(@Param('taskId') id: string) {
+  @Delete(':id')
+  remove(@Param('id') id: string) {
     return this.offboardingEmployeeTaskService.remove(id);
   }
 }

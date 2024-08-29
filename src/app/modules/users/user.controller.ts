@@ -207,4 +207,15 @@ export class UserController {
   ): Promise<User> {
     return await this.userService.findUserByFirbaseId(firebaseId);
   }
+
+  @Post('/create-first-user-for-tenant')
+  async createFromTenant(@Body() body: any, @Req() request: Request) {
+    const {
+      createUserDto,
+    } = body;
+    let role = createUserDto.role
+    delete createUserDto.role
+    const tenantId = request['tenantId'];
+    return await this.userService.createFromTenant(createUserDto, tenantId, role);
+  }
 }

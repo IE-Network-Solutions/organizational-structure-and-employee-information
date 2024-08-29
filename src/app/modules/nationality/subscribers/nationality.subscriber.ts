@@ -11,7 +11,9 @@ import { EmployeeInformation } from '../../employee-information/entities/employe
 
 @EventSubscriber()
 @Injectable()
-export class NationalitySubscriber implements EntitySubscriberInterface<Nationality> {
+export class NationalitySubscriber
+  implements EntitySubscriberInterface<Nationality>
+{
   listenTo() {
     return Nationality;
   }

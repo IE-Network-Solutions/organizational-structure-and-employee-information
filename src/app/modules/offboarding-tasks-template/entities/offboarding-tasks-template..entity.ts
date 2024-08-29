@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { BaseModel } from '@root/src/database/base.model';
 
@@ -17,9 +17,8 @@ export class OffboardingTasksTemplate extends BaseModel {
   @Column({ type: 'text' })
   approverId: string;
 
-  // @ManyToOne(() => User, (user) => user.offboardingTasksTemplates, { nullable: false })
-  // @JoinColumn({ name: 'approverId' })
-  // approver: User;
+  @OneToMany(() => User, (user) => user.offboardingTasksTemplate)
+  approver: User;
 
   @Column({ type: 'uuid', nullable: true })
   tenantId: string | null;

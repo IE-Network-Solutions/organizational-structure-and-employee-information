@@ -7,6 +7,8 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 import { EmployeeDocument } from '../../employee-documents/entities/employee-documents.entity';
 import { EmployeeInformation } from '../../employee-information/entities/employee-information.entity';
 import { OffboardingEmployeeTask } from '../../offboarding-employee-task/entities/offboarding-employee-task.entity';
+import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
+import { OffboardingTasksTemplate } from '../../offboarding-tasks-template/entities/offboarding-tasks-template..entity';
 @Entity()
 export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
@@ -54,6 +56,7 @@ export class User extends BaseModel {
   })
   userPermissions: UserPermission[];
 
+
   @OneToMany(
     () => EmployeeJobInformation,
     (employeeJobInformation) => employeeJobInformation.user,
@@ -77,4 +80,17 @@ export class User extends BaseModel {
     (offboardingEmployeeTask) => offboardingEmployeeTask.approver,
   )
   offboardingEmployeeTask: OffboardingEmployeeTask;
+
+  @OneToMany(
+    () => OffboardingTasksTemplate,
+    (offboardingTasksTemplate) => offboardingTasksTemplate.approver,
+  )
+  offboardingTasksTemplate: OffboardingTasksTemplate;
+
+  @OneToMany(() => EmployeeTermination, (employeeTermination) => employeeTermination.user, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  employeeTermination?: EmployeeTermination[];
+
 }

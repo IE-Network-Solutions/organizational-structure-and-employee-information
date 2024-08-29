@@ -155,8 +155,8 @@ describe('UserController', () => {
       // Call the controller method
       const result = await userController.update(
         request['tenantId'], // Pass the tenant ID second
-        userData().id,  // Pass the user ID first
-        mockUpdatedUser,     // Pass the user data third
+        userData().id, // Pass the user ID first
+        mockUpdatedUser, // Pass the user data third
       );
 
       expect(result).toEqual(mockUpdatedUser);

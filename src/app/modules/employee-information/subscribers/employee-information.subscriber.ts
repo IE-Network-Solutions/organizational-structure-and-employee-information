@@ -11,11 +11,15 @@ import { EmployeeDocument } from '../../employee-documents/entities/employee-doc
 
 @EventSubscriber()
 @Injectable()
-export class EmployeeInformationSubscriber implements EntitySubscriberInterface<EmployeeInformation> {
+export class EmployeeInformationSubscriber
+  implements EntitySubscriberInterface<EmployeeInformation>
+{
   listenTo() {
     return EmployeeInformation;
   }
-  async afterEmployeeInformationSoftRemoveFromEmployeeDocument(event: SoftRemoveEvent<EmployeeInformation>) {
+  async afterEmployeeInformationSoftRemoveFromEmployeeDocument(
+    event: SoftRemoveEvent<EmployeeInformation>,
+  ) {
     const employeeInformationRepository: Repository<EmployeeDocument> =
       event.connection.getRepository(EmployeeDocument);
     if (event.entity.deletedAt) {

@@ -7,22 +7,19 @@ import { BranchesModule } from './modules/branchs/branches.module';
 import { CalendarsModule } from './modules/calendars/calendars.module';
 import { UserModule } from './modules/users/user.module';
 import { EmployeeInformationModule } from './modules/employee-information/employee-information.module';
-import { EmployeeDocument } from './modules/employee-documents/entities/employee-documents.entity';
 import { EmployeeDocumentModule } from './modules/employee-documents/employee-document.module';
 import { PermissionModule } from './modules/permission/permission.module';
-import { PermissionGroup } from './modules/permission-group/entities/permission-group.entity';
 import { PermissionGroupModule } from './modules/permission-group/permission-group.module';
 import { RoleModule } from './modules/role/role.module';
-import { EmployeeInformationForm } from './modules/employee-information-form/entities/employee-information-form.entity';
 import { EmployeeInformationFormModule } from './modules/employee-information-form/employee-information-form.module';
 import { EmployeeJobInformationModule } from './modules/employee-job-information/employee-job-information.module';
 import { NationalityModule } from './modules/nationality/nationality.module';
 import { RolePermissionModule } from './modules/role-permission/role-permission.module';
 import { UserPermissionModule } from './modules/user-permission/user-permission.module';
 import { EmployementTypeModule } from './modules/employment-type/employement-type.module';
-import { OffboardingEmployeeTask } from './modules/offboarding-employee-task/entities/offboarding-employee-task.entity';
+import { EmployeeTerminationModule } from './modules/employee-termination/employee-termination.module';
 import { OffboardingEmployeeTaskModule } from './modules/offboarding-employee-task/offboarding-employee-tasks.module';
-import { OffboardingTasksTemplate } from './modules/offboarding-tasks-template/entities/offboarding-tasks-template..entity';
+import { OffboardingTasksTemplateModule } from './modules/offboarding-tasks-template/offboarding-tasks-template.module';
 @Global()
 @Module({
   imports: [
@@ -45,7 +42,8 @@ import { OffboardingTasksTemplate } from './modules/offboarding-tasks-template/e
     DepartmentsModule,
     BranchesModule,
     OffboardingEmployeeTaskModule,
-    OffboardingTasksTemplate
+    OffboardingTasksTemplateModule,
+    EmployeeTerminationModule,
   ],
 })
 export class CoreModule { }

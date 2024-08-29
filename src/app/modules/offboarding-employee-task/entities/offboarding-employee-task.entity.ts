@@ -5,6 +5,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
 
 @Entity()
 export class OffboardingEmployeeTask extends BaseModel {
@@ -29,8 +30,8 @@ export class OffboardingEmployeeTask extends BaseModel {
   @Column({ nullable: true })
   approverId: string
 
-  // @ManyToOne(() => EmployeeTermination, (employeeTermination) => employeeTermination.offboardingTasks, { onDelete: 'CASCADE' })
-  // employeTermination: EmployeeTermination;
+  @ManyToOne(() => EmployeeTermination, (employeeTermination) => employeeTermination.offboardingEmployeeTask, { onDelete: 'CASCADE' })
+  employeTermination: EmployeeTermination;
 
   @ManyToOne(() => User, (user) => user.offboardingEmployeeTask, { onDelete: 'SET NULL' })
   approver: User;

@@ -5,8 +5,10 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 import { OffboardingTasksTemplate } from './entities/offboarding-tasks-template..entity';
 import { UpdateOffboardingTasksTemplateDto } from './dto/update-offboarding-tasks-template..dto';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('offboarding-tasks-template')
+@ApiTags('Offboarding Tasks Template')
 export class OffboardingTasksTemplateController {
   constructor(private readonly offboardingTasksTemplateService: OffboardingTasksTemplateService) { }
 

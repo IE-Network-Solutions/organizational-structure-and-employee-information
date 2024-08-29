@@ -7,6 +7,8 @@ import { User } from '../../users/entities/user.entity';
 export class Role extends BaseModel {
   @Column()
   name: string;
+  @Column({ unique: true, nullable: true })
+  slug: string;
 
   @Column({ nullable: true })
   description: string;
