@@ -62,7 +62,7 @@ export class DepartmentsService {
       throw new BadRequestException(error);
     }
   }
-  async findAllDepartments(tenantId: string): Promise<Department> {
+  async findAllDepartments(tenantId: string): Promise<any> {
     try {
       const departments = await this.departmentRepository.find({
         where: {
@@ -74,7 +74,7 @@ export class DepartmentsService {
           departments.map(department => this.departmentRepository.findDescendantsTree(department)
           )
         );
-        return departmentTrees[0]
+        return departmentTrees.filter(item => item.level === 0)[0]
       }
       else {
         throw new NotFoundException('No Department was created.')
@@ -103,7 +103,7 @@ export class DepartmentsService {
             return departmentTree;
           })
         );
-        return departmentTrees[0]
+        return departmentTrees.filter(item => item.level === 0)[0]
       }
       else {
         throw new NotFoundException('No Department Was Created.')

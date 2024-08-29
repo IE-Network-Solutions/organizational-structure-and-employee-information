@@ -11,6 +11,9 @@ export class Organization extends BaseModel {
   calendarId: string;
   @Column({ type: 'uuid' })
   tenantId: string;
+
+  @Column({ type: 'boolean', default: false })
+  hasFinishedOnBoarding: boolean;
   @ManyToOne(() => WorkSchedule, (schedule) => schedule.organizations, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',

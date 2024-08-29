@@ -439,11 +439,12 @@ export class UserService {
     createRoleDto.name = role
     createRoleDto.description = role
     let createRole = await this.rolesService.createFirstRole(createRoleDto, tenantId)
+    console.log(createRole, "rolecrea")
     if (createRole) {
       createUserDto.roleId = createRole.id
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const password = createUserDto.email + generateRandom4DigitNumber();
-
+      console.log(user, "lklklkl")
       const userRecord = await this.createUserToFirebase(createUserDto.email, tenantId)
 
       user.firebaseId = userRecord.uid;

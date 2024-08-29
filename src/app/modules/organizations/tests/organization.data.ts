@@ -13,6 +13,7 @@ export const organizationData = (): Organization => {
     createdAt: new Date('2022-10-22 07:11:42'),
     workSchedule: null,
     calendar: null,
+    hasFinishedOnBoarding: false
   };
 };
 
