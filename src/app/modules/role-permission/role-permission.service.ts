@@ -5,15 +5,17 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { RolePermission } from './entities/role-permission.entity';
+import { RolePermissionInterface } from './role-permission-interface';
+import { RolePermissionRepository } from './role-permission-repository';
 
 @Injectable()
-export class RolePermissionService {
+export class RolePermissionService implements RolePermissionInterface{
   constructor(
     @InjectRepository(RolePermission)
-    private readonly rolePermissionRepository: Repository<RolePermission>,
+    private readonly rolePermissionRepository: RolePermissionRepository,
     private readonly paginationService: PaginationService,
   ) {}
-  async createRoleWithPermissions(roleId: string, permissionIds: string[]) {
+  async createRoleWithPermissions(roleId: string, permissionIds: string[]) :Promise<any>{
     const assignedPermissions = permissionIds.map((permissionId) => {
       return this.rolePermissionRepository.create({
         role: { id: roleId },
@@ -64,7 +66,7 @@ export class RolePermissionService {
     roleId: string,
     permissionIds: string[],
     tenantId: string,
-  ) {
+  ):Promise<any> {
     try {
       await this.rolePermissionRepository.delete({ role: { id: roleId } });
       const assignedPermissions = permissionIds.map((permissionId) => {

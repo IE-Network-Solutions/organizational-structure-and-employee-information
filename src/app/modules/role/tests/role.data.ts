@@ -1,6 +1,5 @@
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { CreateRoleDto } from '../dto/create-role.dto';
-import { Role } from '../entities/role.entity';
 
 export const roleData = () => {
   return {

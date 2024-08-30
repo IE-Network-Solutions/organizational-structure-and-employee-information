@@ -56,9 +56,8 @@ describe('RoleController', () => {
       let request: Request;
 
       beforeEach(async () => {
-        // Mock request object with tenantId
         request = {
-          tenantId: 'tenantId', // Mock tenantId
+          tenantId: 'tenantId',
         } as any;
 
         (roleService.findAll as jest.Mock).mockResolvedValue(findAllRoles());

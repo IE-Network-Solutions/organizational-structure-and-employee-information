@@ -1,4 +1,3 @@
-// import { BaseModel } from 'src/database/base.entity';
 import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
 import { Permission } from '../../permission/entities/permission.entity';
@@ -11,12 +10,9 @@ export class PermissionGroup extends BaseModel {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ nullable: true})
   tenantId: string;
 
-  @OneToMany(() => Permission, (permissions) => permissions.permissionGroup, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
+  @OneToMany(() => Permission, permissions => permissions.permissionGroup)
   permission: Permission[];
 }

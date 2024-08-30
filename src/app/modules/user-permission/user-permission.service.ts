@@ -6,20 +6,22 @@ import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { UserPermission } from './entities/user-permission.entity';
 import { CreateUserPermissionDto } from './dto/create-user-permission.dto';
-import { UpdateRolePermissionDto } from './dto/update-user-permission.dto';
+import { UserPermissionRepository } from './user-permission-repository';
+import { UserPermissionInterface } from './user-permission-interface';
+import { UpdateUserPermissionDto } from './dto/update-user-permission.dto';
 
 @Injectable()
-export class UserPermissionService {
+export class UserPermissionService implements UserPermissionInterface {
   constructor(
     @InjectRepository(UserPermission)
-    private readonly userPermissionRepository: Repository<UserPermission>,
+    private readonly userPermissionRepository: UserPermissionRepository,
     private readonly paginationService: PaginationService,
   ) {}
 
   async assignPermissionToUser(
     createUserPermissionDto: CreateUserPermissionDto,
     tenantId: string,
-  ) {
+  ):Promise<any> {
     const assignedPermissions = createUserPermissionDto.permissionId.map(
       (permissionId) => {
         return this.userPermissionRepository.create({
@@ -71,12 +73,12 @@ export class UserPermissionService {
 
   async update(
     id: string,
-    userPermissionDto: UpdateRolePermissionDto,
+    updateUserPermissionDto: UpdateUserPermissionDto,
     tenantId: string,
-  ) {
+  ):Promise<any> {
     try {
       await this.userPermissionRepository.delete({ user: { id: id } });
-      const assignedPermissions = userPermissionDto.permissionId.map(
+      const assignedPermissions = updateUserPermissionDto.permissionId.map(
         (permissionId) => {
           return this.userPermissionRepository.create({
             user: { id: id },
