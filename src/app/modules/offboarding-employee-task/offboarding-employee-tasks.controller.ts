@@ -25,14 +25,13 @@ export class OffboardingEmployeeTaskController {
   @Post()
   create(
     @Req() request: Request,
-    @Body() createOffboardingEmployeeTaskDto: CreateOffboardingEmployeeTaskDto,
+    @Body() createOffboardingEmployeeTaskDto: CreateOffboardingEmployeeTaskDto[],
   ) {
     return this.offboardingEmployeeTaskService.create(
       request['tenantId'],
       createOffboardingEmployeeTaskDto
     );
   }
-
 
   @Get()
   findAll(
