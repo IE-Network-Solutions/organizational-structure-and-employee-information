@@ -25,14 +25,13 @@ export class OffboardingEmployeeTaskController {
   @Post()
   create(
     @Req() request: Request,
-    @Body() createOffboardingEmployeeTaskDto: CreateOffboardingEmployeeTaskDto,
+    @Body() createOffboardingEmployeeTaskDto: CreateOffboardingEmployeeTaskDto[],
   ) {
     return this.offboardingEmployeeTaskService.create(
       request['tenantId'],
       createOffboardingEmployeeTaskDto
     );
   }
-
 
   @Get()
   findAll(
@@ -59,5 +58,11 @@ export class OffboardingEmployeeTaskController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.offboardingEmployeeTaskService.remove(id);
+  }
+
+  @Get('/termination/:id')
+  findTasksByTermination(@Req() request: Request, @Param('id') id: string) {
+    const tenantId = request['tenantId'];
+    return this.offboardingEmployeeTaskService.findTasksByTermination(id, tenantId);
   }
 }

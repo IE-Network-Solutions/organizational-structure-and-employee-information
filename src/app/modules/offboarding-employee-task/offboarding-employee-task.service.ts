@@ -17,9 +17,11 @@ export class OffboardingEmployeeTaskService {
 
   ) { }
 
-  async create(tenantId: string, createOffboardingEmployeeTaskDto: CreateOffboardingEmployeeTaskDto) {
-    const task = this.offboardingEmployeeTaskRepository.create({ ...createOffboardingEmployeeTaskDto, tenantId });
-    return await this.offboardingEmployeeTaskRepository.save(task);
+  async create(tenantId: string, createOffboardingEmployeeTaskDtos: CreateOffboardingEmployeeTaskDto[]) {
+    const tasks = createOffboardingEmployeeTaskDtos.map(dto => 
+      this.offboardingEmployeeTaskRepository.create({ ...dto, tenantId })
+    );
+    return await this.offboardingEmployeeTaskRepository.save(tasks); // Save all tasks at once
   }
 
   async findAll(
@@ -56,7 +58,12 @@ export class OffboardingEmployeeTaskService {
     return await this.findOne(id);
   }
 
+
   async remove(id: string) {
-    return await this.offboardingEmployeeTaskRepository.delete(id);
+    return await this.offboardingEmployeeTaskRepository.softRemove({id});
+  }
+
+  async findTasksByTermination(terminationId: string, tenantId: string) {
+    return await this.offboardingEmployeeTaskRepository.find({ where: { employeTerminationId: terminationId, tenantId: tenantId } });
   }
 }
