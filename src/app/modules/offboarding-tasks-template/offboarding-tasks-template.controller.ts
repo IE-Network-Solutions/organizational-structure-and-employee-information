@@ -6,6 +6,7 @@ import { OffboardingTasksTemplate } from './entities/offboarding-tasks-template.
 import { UpdateOffboardingTasksTemplateDto } from './dto/update-offboarding-tasks-template..dto';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { ApiTags } from '@nestjs/swagger';
+import { tenantId } from '../branchs/tests/branch.data';
 
 @Controller('offboarding-tasks-template')
 @ApiTags('Offboarding Tasks Template')
@@ -21,8 +22,9 @@ export class OffboardingTasksTemplateController {
   }
 
   @Get()
-  findAll(@Query() paginationOptions: PaginationDto): Promise<Pagination<OffboardingTasksTemplate>> {
-    return this.offboardingTasksTemplateService.findAll(paginationOptions);
+  findAll(@Req() request: Request, @Query() paginationOptions: PaginationDto): Promise<Pagination<OffboardingTasksTemplate>> {
+    let tenantId = request['tenantId']
+    return this.offboardingTasksTemplateService.findAll(paginationOptions, tenantId);
   }
 
   @Get(':id')

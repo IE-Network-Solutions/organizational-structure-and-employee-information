@@ -59,4 +59,8 @@ export class OffboardingEmployeeTaskService {
   async remove(id: string) {
     return await this.offboardingEmployeeTaskRepository.delete(id);
   }
+
+  async findTasksByTermination(terminationId: string, tenantId: string) {
+    return await this.offboardingEmployeeTaskRepository.find({ where: { employeTerminationId: terminationId, tenantId: tenantId } });
+  }
 }
