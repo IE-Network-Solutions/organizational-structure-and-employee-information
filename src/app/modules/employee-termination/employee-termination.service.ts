@@ -15,6 +15,7 @@ import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.dto';
 import { UpdateEmployeeTerminationDto } from './dto/update-employee-termination.dto';
 import { UserService } from '../users/user.service';
+import { AnyCnameRecord } from 'dns';
 
 @Injectable()
 export class EmployeeTerminationService {
@@ -34,7 +35,7 @@ export class EmployeeTerminationService {
           ...createEmployeeTerminationDto,
           tenantId: tenantId,
         });
-      const valuesToCheck = { reason: createEmployeeTerminationDto.reason };
+      const valuesToCheck = { isActive: "true" };
       await checkIfDataExists(
         valuesToCheck,
         this.employeeTerminationRepository,
@@ -81,6 +82,20 @@ export class EmployeeTerminationService {
     } catch (error) {
       throw new NotFoundException(
         `Employee Termination with Id ${id} not found`,
+      );
+    }
+  }
+  async findOneByUserIdWithJobInfo(userId: string): Promise<any> {
+
+    try {
+      const termination = await this.employeeTerminationRepository.findOne({
+        where: { userId: userId ,isActive:true},
+        relations: ['jobInformation'],
+      });
+      return termination;
+    } catch (error) {
+      throw new NotFoundException(
+        `Employee Termination with User Id ${userId} not found`,
       );
     }
   }

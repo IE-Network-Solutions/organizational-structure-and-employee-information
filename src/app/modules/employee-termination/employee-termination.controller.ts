@@ -56,6 +56,11 @@ export class EmployeeTerminationController {
     return await this.employeeTerminationService.findOne(id);
   }
 
+  @Get('/user/:userId')
+  async findOneByUserIdWithJobInfo(@Param('userId') userId: string): Promise<EmployeeTermination> {
+    return await this.employeeTerminationService.findOneByUserIdWithJobInfo(userId);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

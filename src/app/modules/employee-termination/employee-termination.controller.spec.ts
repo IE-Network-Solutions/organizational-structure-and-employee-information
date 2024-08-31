@@ -54,6 +54,7 @@ describe('EmployeeTerminationController', () => {
         comment: 'Left for a better opportunity',
         jobInformationId: 'job-info-2',
         userId: 'user-2',
+        isActive:true,
         effectiveDate: new Date('2023-02-01'),
       };
       const result = await controller.createEmployeeTermination(
@@ -81,6 +82,15 @@ describe('EmployeeTerminationController', () => {
       expect(result).toEqual(employeeTerminationData());
     });
   });
+
+  describe('findOneByUserId', () => {
+    it('should return a single employee termination', async () => {
+      const result = await controller.findOneByUserIdWithJobInfo('1');
+      expect(result).toEqual(employeeTerminationData());
+    });
+  });
+
+
 
   describe('update', () => {
     it('should update an employee termination', async () => {

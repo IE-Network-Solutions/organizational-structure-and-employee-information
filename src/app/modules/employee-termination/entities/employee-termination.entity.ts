@@ -1,5 +1,5 @@
 import { BaseModel } from '@root/src/database/base.model';
-import { Column, Entity, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
 import { User } from '../../users/entities/user.entity';
 import { TerminationType } from '@root/src/core/enum/termination-type.dto';
@@ -20,11 +20,14 @@ export class EmployeeTermination extends BaseModel {
   @Column({ nullable: true })
   comment: string;
 
-  @Column()
+  @Column({nullable:true})
   jobInformationId: string;
 
   @Column()
   userId: string;
+  
+  @Column({default:true})
+  isActive: boolean;
 
   @Column({ nullable: true })
   effectiveDate: Date;
@@ -36,6 +39,7 @@ export class EmployeeTermination extends BaseModel {
     () => EmployeeJobInformation,
     (employeeJobInformation) => employeeJobInformation.employeeTermination,
   )
+  @JoinColumn({name:'jobInformationId'})
   jobInformation: EmployeeJobInformation;
 
   @ManyToOne(() => User, (user) => user.employeeTermination)
@@ -45,6 +49,7 @@ export class EmployeeTermination extends BaseModel {
     () => OffboardingEmployeeTask,
     (offboardingEmployeeTask) => offboardingEmployeeTask.approver,
   )
+ 
   offboardingEmployeeTask: OffboardingEmployeeTask;
 
 }

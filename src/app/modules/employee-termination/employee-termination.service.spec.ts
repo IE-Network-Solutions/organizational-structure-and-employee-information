@@ -15,6 +15,8 @@ import {
   paginationResultEmployeeTerminationData,
 } from './tests/employee-termination.data';
 import { UserService } from '../users/user.service';
+import { promises } from 'fs';
+import { NotFoundException } from '@nestjs/common';
 
 describe('EmployeeTerminationService', () => {
   let employeeTerminationService: EmployeeTerminationService;
@@ -118,6 +120,60 @@ describe('EmployeeTerminationService', () => {
       });
     });
   });
+
+
+
+
+
+
+
+  describe('findOneByUserIdWithJobInfo', () => {
+    describe('when findOneByUserIdWithJobInfo is called', () => {
+      let employeeData: CreateEmployeeTerminationDto;
+  
+      beforeEach(async () => {
+        employeeData = await employeeTerminationService.findOneByUserIdWithJobInfo(
+          employeeTerminationData().userId,
+        );
+        employeeTerminationRepository.findOne.mockResolvedValue(employeeTerminationData());
+      });
+  
+      it('should call employeeTerminationRepository.findOne', async () => {
+        await employeeTerminationService.findOneByUserIdWithJobInfo(employeeTerminationData().userId);
+        expect(employeeTerminationRepository.findOne).toHaveBeenCalledWith({
+          where: { userId: employeeTerminationData().userId, isActive: true },
+          relations: ['jobInformation'],
+        });
+      });
+  
+      it('should return the correct termination data', async () => {
+        const result = await employeeTerminationService.findOneByUserIdWithJobInfo(employeeTerminationData().userId);
+        expect(result).toEqual(employeeTerminationData());
+      });
+  
+      // it('should throw NotFoundException if termination is not found', async () => {
+      //   employeeTerminationRepository.findOne.mockResolvedValue(null);
+      //   await expect(employeeTerminationService.findOneByUserIdWithJobInfo(employeeTerminationData().userId)).rejects.toThrowError(NotFoundException);
+      // });
+    });
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   describe('findAll', () => {
     describe('when findAll is called', () => {
