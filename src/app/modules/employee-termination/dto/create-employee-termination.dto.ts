@@ -14,6 +14,10 @@ export class CreateEmployeeTerminationDto {
 
   @IsOptional()
   @IsString()
+  isActive?: boolean;
+
+  @IsOptional()
+  @IsString()
   comment?: string;
 
   @IsOptional()

@@ -12,11 +12,12 @@ export const employeeTerminationData = (): EmployeeTermination => ({
   eligibleForRehire: EligibleForRehire.mayBe,
   comment: 'Repeated performance issues',
   jobInformationId: 'job-info-1',
-  userId: 'user-1',
+  userId: '1',
   effectiveDate: new Date('2023-01-01T00:00:00.000Z'),
   tenantId: 'tenant-1',
   jobInformation: null,
   user: null,
+  isActive:true,
   createdAt: new Date('2024-08-28T06:03:27.088Z'),
   updatedAt: new Date('2024-08-28T06:03:27.088Z'),
   offboardingEmployeeTask: undefined
@@ -88,6 +89,7 @@ export const createEmployeeTerminationDataOnSave = (): EmployeeTermination => {
     comment: 'Left for a better opportunity',
     jobInformationId: 'job-info-2',
     userId: 'user-2',
+    isActive:true,
     effectiveDate: new Date('2023-02-01T00:00:00.000Z'),
     tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
     jobInformation: null, // Assuming this is populated elsewhere
