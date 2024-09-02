@@ -46,4 +46,4 @@ import { OffboardingTasksTemplateModule } from './modules/offboarding-tasks-temp
     EmployeeTerminationModule,
   ],
 })
-export class CoreModule { }
+export class CoreModule {}

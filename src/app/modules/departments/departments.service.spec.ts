@@ -14,10 +14,12 @@ import {
   createdepartmentDataOnCreate,
   departmentsData,
 } from './tests/department.data';
+import { MockProxy } from 'jest-mock-extended';
 
 describe('DepartmentsService', () => {
   let service: DepartmentsService;
-  let repository: TreeRepository<Department>;
+  let repository: MockProxy<TreeRepository<Department>>;
+  const departmentToken = getRepositoryToken(Department);
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,9 +34,10 @@ describe('DepartmentsService', () => {
     }).compile();
 
     service = module.get<DepartmentsService>(DepartmentsService);
-    repository = module.get<TreeRepository<Department>>(
-      getRepositoryToken(Department),
-    );
+    repository = module.get(departmentToken);
+    // repository = module.get<TreeRepository<Department>>(
+    //   getRepositoryToken(Department),
+    // );
   });
 
   it('should be defined', () => {
@@ -53,7 +56,8 @@ describe('DepartmentsService', () => {
   //     const savedDepartment = departmentData();
 
   //     jest.spyOn(repository, 'save').mockResolvedValue(savedDepartment);
-
+  //     jest.spyOn(repository, 'findOne').mockResolvedValue(savedDepartment);
+  //     jest.spyOn(service, 'findAllDepartments').mockResolvedValue(savedDepartment);
   //     const result = await service.createDepartment(createDepartmentDto, tenantId);
 
   //     expect(repository.save).toHaveBeenCalledWith(newDepartment);
@@ -63,20 +67,53 @@ describe('DepartmentsService', () => {
   //   it('should throw a BadRequestException on error', async () => {
   //     const createDepartmentDto: CreateDepartmentDto = createdepartmentData();
   //     const tenantId = 'tenant1';
-  //     jest.spyOn(repository, 'save').mockRejectedValue(new Error('Error'));
+  //     jest.spyOn(repository, 'save').mockRejectedValue(new Error('Department with Name New Department Already exist'));
 
   //     await expect(service.createDepartment(createDepartmentDto, tenantId)).rejects.toThrow(BadRequestException);
   //   });
   // });
 
   describe('findAllDepartments', () => {
-    it('should return an array of departments', async () => {
-      const departments = [departmentData()];
-      jest.spyOn(repository, 'findTrees').mockResolvedValue(departments as any);
+    it('should return the department tree when departments exist', async () => {
+      const tenantId = 'tenant-id-123';
 
-      const result = await service.findAllDepartments('tenant1');
+      const department = new Department();
+      department.id = '1';
+      department.tenantId = tenantId;
 
-      expect(result).toEqual(departments[0]);
+      const departmentTree = { ...department, children: [], level: 0 };
+
+      jest.spyOn(repository, 'find').mockResolvedValue([department]);
+      jest
+        .spyOn(repository, 'findDescendantsTree')
+        .mockResolvedValue(departmentTree);
+
+      const result = await service.findAllDepartments(tenantId);
+      expect(result).toEqual(departmentTree);
+      expect(repository.find).toHaveBeenCalledWith({ where: { tenantId } });
+      expect(repository.findDescendantsTree).toHaveBeenCalledWith(department);
+    });
+
+    it('should throw NotFoundException if no departments are found', async () => {
+      const tenantId = 'tenant-id-123';
+
+      jest.spyOn(repository, 'find').mockResolvedValue([]);
+
+      await expect(service.findAllDepartments(tenantId)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(repository.find).toHaveBeenCalledWith({ where: { tenantId } });
+    });
+
+    it('should throw BadRequestException if an error occurs', async () => {
+      const tenantId = 'tenant-id-123';
+      const error = new Error('Something went wrong');
+
+      jest.spyOn(repository, 'find').mockRejectedValue(error);
+
+      await expect(service.findAllDepartments(tenantId)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 

@@ -23,10 +23,9 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     const employeeInformationRepository: Repository<EmployeeInformation> =
       event.connection.getRepository(EmployeeInformation);
     if (event.entity.deletedAt) {
-      await employeeInformationRepository.update(
-        { userId: event.entity.id },
-        { userId: null },
-      );
+      await employeeInformationRepository.softRemove({
+        userId: event.entity.id,
+      });
     }
   }
 
@@ -34,10 +33,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     const employeeDocumentRepository: Repository<EmployeeDocument> =
       event.connection.getRepository(EmployeeDocument);
     if (event.entity.deletedAt) {
-      await employeeDocumentRepository.update(
-        { userId: event.entity.id },
-        { userId: null },
-      );
+      await employeeDocumentRepository.softRemove({ userId: event.entity.id });
     }
   }
 
@@ -47,9 +43,12 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     const employeeJobInformationRepository: Repository<EmployeeJobInformation> =
       event.connection.getRepository(EmployeeJobInformation);
     if (event.entity.deletedAt) {
+      await employeeJobInformationRepository.softRemove({
+        userId: event.entity.id,
+      });
       await employeeJobInformationRepository.update(
         { userId: event.entity.id },
-        { userId: null },
+        { isPositionActive: false },
       );
     }
   }

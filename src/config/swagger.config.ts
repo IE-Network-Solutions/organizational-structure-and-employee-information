@@ -1,5 +1,4 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { writeFileSync } from 'fs';
 /**
  * This function sets up Swagger documentation for a mobile marketplace API.
  * @param app - The Express.js application instance that the Swagger documentation will be added to.

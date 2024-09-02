@@ -1,4 +1,11 @@
-import { IsBoolean, IsDateString, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class CreateOffboardingEmployeeTaskDto {
   @IsString()
@@ -6,8 +13,8 @@ export class CreateOffboardingEmployeeTaskDto {
   title: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @IsBoolean()
   @IsOptional()

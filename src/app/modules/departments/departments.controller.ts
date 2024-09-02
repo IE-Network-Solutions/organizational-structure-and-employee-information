@@ -70,4 +70,10 @@ export class DepartmentsController {
     const tenantId = req['tenantId'];
     return await this.departmentsService.findAllDepartmentsByTenantId(tenantId);
   }
+
+  @Get('/user/user-tree')
+  async findUserThree(@Req() req: Request): Promise<Department> {
+    const tenantId = req['tenantId'];
+    return await this.departmentsService.findUserTree(tenantId);
+  }
 }

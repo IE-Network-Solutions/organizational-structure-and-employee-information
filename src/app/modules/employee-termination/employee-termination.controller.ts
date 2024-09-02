@@ -16,6 +16,7 @@ import { EmployeeTermination } from './entities/employee-termination.entity';
 import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.dto';
 import { UpdateEmployeeTerminationDto } from './dto/update-employee-termination.dto';
 import { EmployeeTerminationService } from './employee-termination.service';
+import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto/create-employee-job-information.dto';
 @Controller('employee-termination')
 @ApiTags('employeeTermination')
 @ApiHeader({
@@ -56,9 +57,13 @@ export class EmployeeTerminationController {
     return await this.employeeTerminationService.findOne(id);
   }
 
-  @Get('/user/:userId')
-  async findOneByUserIdWithJobInfo(@Param('userId') userId: string): Promise<EmployeeTermination> {
-    return await this.employeeTerminationService.findOneByUserIdWithJobInfo(userId);
+  @Get('/users/:userId')
+  async findOneByUserIdWithJobInfo(
+    @Param('userId') userId: string,
+  ): Promise<EmployeeTermination> {
+    return await this.employeeTerminationService.findOneByUserIdWithJobInfo(
+      userId,
+    );
   }
 
   @Patch(':id')
@@ -77,5 +82,19 @@ export class EmployeeTerminationController {
     @Param('id') id: string,
   ): Promise<EmployeeTermination> {
     return await this.employeeTerminationService.remove(id);
+  }
+
+  @Patch('/rehireUser/:userId')
+  async rehireUser(
+    @Req() request: Request,
+    @Param('userId') userId: string,
+    @Body() createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+  ): Promise<any> {
+    const tenantId = request['tenantId'];
+    return await this.employeeTerminationService.rehireUser(
+      userId,
+      tenantId,
+      createEmployeeJobInformationDto,
+    );
   }
 }

@@ -19,12 +19,14 @@ describe('EmployeeJobInformationsController', () => {
       providers: [EmployeeJobInformationService],
     }).compile();
 
-    employeeJobInformationsController = moduleRef.get<EmployeeJobInformationsController>(
-      EmployeeJobInformationsController,
-    );
-    employeeJobInformationService = moduleRef.get<EmployeeJobInformationService>(
-      EmployeeJobInformationService,
-    );
+    employeeJobInformationsController =
+      moduleRef.get<EmployeeJobInformationsController>(
+        EmployeeJobInformationsController,
+      );
+    employeeJobInformationService =
+      moduleRef.get<EmployeeJobInformationService>(
+        EmployeeJobInformationService,
+      );
     jest.clearAllMocks();
   });
 

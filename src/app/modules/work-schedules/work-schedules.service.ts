@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -102,10 +101,7 @@ export class WorkSchedulesService {
         throw new NotFoundException(`WorkSchedule with Id ${id} not found`);
       }
 
-      const updatedWorkSchedule = await this.workScheduleRepository.update(
-        id,
-        updateWorkScheduleDto,
-      );
+      await this.workScheduleRepository.update(id, updateWorkScheduleDto);
       return await this.findOneWorkSchedule(id);
     } catch (error) {
       if (error instanceof NotFoundException) {

@@ -8,8 +8,6 @@ import {
   Delete,
   Query,
   Req,
-  Header,
-  Headers,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
@@ -18,7 +16,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { Organization } from './entities/organization.entity';
 import { Pagination } from 'nestjs-typeorm-paginate';
-import { request } from 'http';
 
 @Controller('organizations')
 @ApiTags('Organizations')

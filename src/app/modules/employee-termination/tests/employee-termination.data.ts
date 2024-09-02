@@ -17,10 +17,10 @@ export const employeeTerminationData = (): EmployeeTermination => ({
   tenantId: 'tenant-1',
   jobInformation: null,
   user: null,
-  isActive:true,
+  isActive: true,
   createdAt: new Date('2024-08-28T06:03:27.088Z'),
   updatedAt: new Date('2024-08-28T06:03:27.088Z'),
-  offboardingEmployeeTask: undefined
+  offboardingEmployeeTask: undefined,
 });
 
 export const createEmployeeTerminationData =
@@ -89,14 +89,14 @@ export const createEmployeeTerminationDataOnSave = (): EmployeeTermination => {
     comment: 'Left for a better opportunity',
     jobInformationId: 'job-info-2',
     userId: 'user-2',
-    isActive:true,
+    isActive: true,
     effectiveDate: new Date('2023-02-01T00:00:00.000Z'),
     tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
     jobInformation: null, // Assuming this is populated elsewhere
     user: null, // Assuming this is populated elsewhere
     createdAt: new Date('2024-08-28T06:46:58.237Z'),
     updatedAt: new Date('2024-08-28T06:46:58.237Z'),
-    offboardingEmployeeTask: undefined
+    offboardingEmployeeTask: undefined,
   };
 };
 

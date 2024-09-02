@@ -24,11 +24,16 @@ describe('OffboardingEmployeeTaskController', () => {
       providers: [OffboardingEmployeeTaskService],
     }).compile();
 
-    offboardingEmployeeTasksController = moduleRef.get<OffboardingEmployeeTaskController>(OffboardingEmployeeTaskController);
-    offboardingEmployeeTasksService = moduleRef.get<OffboardingEmployeeTaskService>(OffboardingEmployeeTaskService);
+    offboardingEmployeeTasksController =
+      moduleRef.get<OffboardingEmployeeTaskController>(
+        OffboardingEmployeeTaskController,
+      );
+    offboardingEmployeeTasksService =
+      moduleRef.get<OffboardingEmployeeTaskService>(
+        OffboardingEmployeeTaskService,
+      );
 
     jest.clearAllMocks();
-
   });
 
   describe('create', () => {
@@ -41,22 +46,29 @@ describe('OffboardingEmployeeTaskController', () => {
           tenantId: 'tenant-id-123', // Ensure this matches your mock and actual usage
         } as any;
 
-        (offboardingEmployeeTasksService.create as jest.Mock).mockResolvedValue(offboardingEmployeeTaskData());
-        offboardingEmployeeTask = await offboardingEmployeeTasksController.create(
+        (offboardingEmployeeTasksService.create as jest.Mock).mockResolvedValue(
+          [offboardingEmployeeTaskData()],
+        );
+      });
+
+      test('then it should call offboardingEmployeeTasksService.create with correct parameters', async () => {
+        await offboardingEmployeeTasksController.create(
           request, // Pass the entire request object
-          createOffboardingEmployeeTask()
+          [createOffboardingEmployeeTask()],
         );
-      });
 
-      test('then it should call offboardingEmployeeTasksService.create with correct parameters', () => {
         expect(offboardingEmployeeTasksService.create).toHaveBeenCalledWith(
-          'tenant-id-123', // Ensure this is correctly checked
-          createOffboardingEmployeeTask(),
+          offboardingEmployeeTaskData().tenantId,
+          [createOffboardingEmployeeTask()],
         );
       });
 
-      test('then it should return a task', () => {
-        expect(offboardingEmployeeTask).toEqual(offboardingEmployeeTaskData());
+      test('then it should return a task', async () => {
+        const result = await offboardingEmployeeTasksController.create(
+          request, // Pass the entire request object
+          [createOffboardingEmployeeTask()],
+        );
+        expect(result).toEqual([offboardingEmployeeTaskData()]);
       });
     });
   });
@@ -67,10 +79,12 @@ describe('OffboardingEmployeeTaskController', () => {
 
       beforeEach(async () => {
         request = {
-          tenantId: 'tenantId',
+          tenantId: 'tenant-id-123',
         } as any;
 
-        (offboardingEmployeeTasksService.findAll as jest.Mock).mockResolvedValue(findAllOffboardingEmployeeTasks());
+        (
+          offboardingEmployeeTasksService.findAll as jest.Mock
+        ).mockResolvedValue(findAllOffboardingEmployeeTasks());
 
         await offboardingEmployeeTasksController.findAll(paginationOptions());
       });
@@ -83,7 +97,8 @@ describe('OffboardingEmployeeTaskController', () => {
 
       test('then it should return all tasks', async () => {
         const result = await offboardingEmployeeTasksController.findAll(
-          paginationOptions());
+          paginationOptions(),
+        );
         expect(result).toEqual(findAllOffboardingEmployeeTasks());
       });
     });
@@ -94,11 +109,16 @@ describe('OffboardingEmployeeTaskController', () => {
       let offboardingEmployeeTask: OffboardingEmployeeTask;
 
       beforeEach(async () => {
-        offboardingEmployeeTask = await offboardingEmployeeTasksController.findOne(offboardingEmployeeTaskData().id);
+        offboardingEmployeeTask =
+          await offboardingEmployeeTasksController.findOne(
+            offboardingEmployeeTaskData().id,
+          );
       });
 
       test('then it should call offboardingEmployeeTasksService', () => {
-        expect(offboardingEmployeeTasksService.findOne).toHaveBeenCalledWith(offboardingEmployeeTaskData().id);
+        expect(offboardingEmployeeTasksService.findOne).toHaveBeenCalledWith(
+          offboardingEmployeeTaskData().id,
+        );
       });
 
       test('then it should return a task', () => {
@@ -118,13 +138,16 @@ describe('OffboardingEmployeeTaskController', () => {
           tenantId: 'tenantId',
         } as any;
 
-        (offboardingEmployeeTasksService.update as jest.Mock).mockResolvedValue(offboardingEmployeeTaskData());
-
-        offboardingEmployeeTask = await offboardingEmployeeTasksController.update(
-          request,
-          offboardingEmployeeTaskData().id,
-          updateOffboardingEmployeeTaskDto,
+        (offboardingEmployeeTasksService.update as jest.Mock).mockResolvedValue(
+          offboardingEmployeeTaskData(),
         );
+
+        offboardingEmployeeTask =
+          await offboardingEmployeeTasksController.update(
+            request,
+            offboardingEmployeeTaskData().id,
+            updateOffboardingEmployeeTaskDto,
+          );
       });
 
       test('then it should call offboardingEmployeeTasksService.update with correct parameters', () => {
@@ -144,17 +167,23 @@ describe('OffboardingEmployeeTaskController', () => {
   describe('remove', () => {
     describe('when remove is called', () => {
       beforeEach(async () => {
-        await offboardingEmployeeTasksController.remove(offboardingEmployeeTaskData().id);
+        await offboardingEmployeeTasksController.remove(
+          offboardingEmployeeTaskData().id,
+        );
       });
 
       test('then it should call remove', () => {
-        expect(offboardingEmployeeTasksService.remove).toHaveBeenCalledWith(offboardingEmployeeTaskData().id);
+        expect(offboardingEmployeeTasksService.remove).toHaveBeenCalledWith(
+          offboardingEmployeeTaskData().id,
+        );
       });
 
       test('then it should return void', async () => {
-        expect(await offboardingEmployeeTasksController.remove(offboardingEmployeeTaskData().id)).toEqual(
-          'Promise resolves with void',
-        );
+        expect(
+          await offboardingEmployeeTasksController.remove(
+            offboardingEmployeeTaskData().id,
+          ),
+        ).toEqual('Promise resolves with void');
       });
     });
   });

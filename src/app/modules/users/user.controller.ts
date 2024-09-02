@@ -28,15 +28,13 @@ import { CreateEmployeeDocumentDto } from '../employee-documents/dto/create-empl
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { parseNestedJson } from '@root/src/core/utils/parseNestedJson.utils';
-import { FilterUsertDto } from './dto/filter-user.dto';
-//import { FilterStatusDto } from './dto/filter-status-user.dto';
 import { ExcludeTenantGuard } from '@root/src/core/guards/excludetenant.guard';
 import { FilterDto } from './dto/filter-status-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
@@ -129,7 +127,6 @@ export class UserController {
     };
 
     const tenantId = request['tenantId'];
-
     return await this.userService.create(
       tenantId,
       createBulkRequestDto,
@@ -210,12 +207,14 @@ export class UserController {
 
   @Post('/create-first-user-for-tenant')
   async createFromTenant(@Body() body: any, @Req() request: Request) {
-    const {
-      createUserDto,
-    } = body;
-    let role = createUserDto.role
-    delete createUserDto.role
+    const { createUserDto } = body;
+    const role = createUserDto.role;
+    delete createUserDto.role;
     const tenantId = request['tenantId'];
-    return await this.userService.createFromTenant(createUserDto, tenantId, role);
+    return await this.userService.createFromTenant(
+      createUserDto,
+      tenantId,
+      role,
+    );
   }
 }

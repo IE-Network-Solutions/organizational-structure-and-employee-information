@@ -1,5 +1,5 @@
 import { BaseModel } from '@root/src/database/base.model';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { WorkSchedule } from '../../work-schedules/entities/work-schedule.entity';
 import { Calendar } from '../../calendars/entities/calendar.entity';
 
@@ -11,6 +11,9 @@ export class Organization extends BaseModel {
   calendarId: string;
   @Column({ type: 'uuid' })
   tenantId: string;
+
+  @Column({ type: 'boolean', default: false })
+  hasFinishedOnBoarding: boolean;
   @ManyToOne(() => WorkSchedule, (schedule) => schedule.organizations, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',

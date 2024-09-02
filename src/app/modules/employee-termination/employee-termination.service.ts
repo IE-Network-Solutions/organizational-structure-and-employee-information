@@ -16,6 +16,10 @@ import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.
 import { UpdateEmployeeTerminationDto } from './dto/update-employee-termination.dto';
 import { UserService } from '../users/user.service';
 import { AnyCnameRecord } from 'dns';
+import { User } from '../users/entities/user.entity';
+import { EligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
+import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto/create-employee-job-information.dto';
 
 @Injectable()
 export class EmployeeTerminationService {
@@ -24,7 +28,8 @@ export class EmployeeTerminationService {
     private employeeTerminationRepository: Repository<EmployeeTermination>,
     private paginationService: PaginationService,
     private userService: UserService,
-  ) { }
+    private employeeJobInformationService: EmployeeJobInformationService,
+  ) {}
   async create(
     createEmployeeTerminationDto: CreateEmployeeTerminationDto,
     tenantId: string,
@@ -35,11 +40,11 @@ export class EmployeeTerminationService {
           ...createEmployeeTerminationDto,
           tenantId: tenantId,
         });
-      const valuesToCheck = { isActive: "true" };
-      await checkIfDataExists(
-        valuesToCheck,
-        this.employeeTerminationRepository,
-      );
+      // const valuesToCheck = { isActive: "true", userId: createEmployeeTerminationDto.userId };
+      // await checkIfDataExists(
+      //   valuesToCheck,
+      //   this.employeeTerminationRepository,
+      // );
       const check = await this.employeeTerminationRepository.save(
         createEmployeeTermination,
       );
@@ -86,10 +91,9 @@ export class EmployeeTerminationService {
     }
   }
   async findOneByUserIdWithJobInfo(userId: string): Promise<any> {
-
     try {
       const termination = await this.employeeTerminationRepository.findOne({
-        where: { userId: userId ,isActive:true},
+        where: { userId: userId, isActive: true },
         relations: ['jobInformation'],
       });
       return termination;
@@ -132,6 +136,45 @@ export class EmployeeTerminationService {
       if (error instanceof NotFoundException) {
         throw error;
       }
+      throw new BadRequestException(error);
+    }
+  }
+
+  async rehireUser(
+    userId: string,
+    tenantId: string,
+    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+  ): Promise<User> {
+    try {
+      const status = EligibleForRehire.yes;
+      const user = await this.userService.findOne(userId);
+      if (user) {
+        const termination = await this.employeeTerminationRepository.findOne({
+          where: {
+            userId: userId,
+            isActive: true,
+            eligibleForRehire: 'yes' as EligibleForRehire,
+          },
+        });
+        if (!termination) {
+          await this.userService.activateUser(userId, tenantId);
+          await this.userService.activateUser(userId, tenantId);
+          await this.employeeJobInformationService.create(
+            createEmployeeJobInformationDto,
+            tenantId,
+          );
+          return user;
+        }
+
+        await this.update(termination.id, { isActive: false });
+        await this.userService.activateUser(userId, tenantId);
+        await this.employeeJobInformationService.create(
+          createEmployeeJobInformationDto,
+          tenantId,
+        );
+        return user;
+      }
+    } catch (error) {
       throw new BadRequestException(error);
     }
   }
