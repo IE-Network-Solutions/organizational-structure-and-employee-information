@@ -63,8 +63,26 @@ export class OffboardingEmployeeTaskService {
     return await this.offboardingEmployeeTaskRepository.softRemove({ id });
   }
 
-  async findTasksByTermination(terminationId: string, tenantId: string) {
-    return await this.offboardingEmployeeTaskRepository.find({ where: { employeTerminationId: terminationId, tenantId: tenantId } });
+  async findActiveTerminationTasks(userId: string, tenantId: string) {
+    const task = await this.offboardingEmployeeTaskRepository
+      .createQueryBuilder('offboarding_employee_task')
+      .leftJoinAndSelect(
+        'offboarding_employee_task.approver',
+        'approver',
+      )
+
+      .leftJoinAndSelect(
+        'offboarding_employee_task.employeTermination',
+        'employeTermination',
+        'employeTermination.isActive = :isActive',
+        { isActive: true },
+
+      )
+      .andWhere('employeTermination.userId = :userId', { userId })
+      .getMany()
+
+    return task
+
   }
 
 

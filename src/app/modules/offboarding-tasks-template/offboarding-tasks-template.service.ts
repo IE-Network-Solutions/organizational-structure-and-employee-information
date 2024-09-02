@@ -24,20 +24,22 @@ export class OffboardingTasksTemplateService {
     return await this.offboardingTasksTemplateRepository.save(taskTemplate);
   }
 
-  async findAll(paginationOptions: PaginationDto, tenantId: string): Promise<Pagination<OffboardingTasksTemplate>> {
+  async findAll(paginationOptions: PaginationDto, tenantId: string): Promise<OffboardingTasksTemplate[]> {
     try {
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      const queryBuilder = this.offboardingTasksTemplateRepository.createQueryBuilder('offboardingTasksTemplate');
+      // const queryBuilder = this.offboardingTasksTemplateRepository.createQueryBuilder('offboardingTasksTemplate');
 
-      return await this.paginationService.paginate<OffboardingTasksTemplate>(this.offboardingTasksTemplateRepository,
-        'p',
-        options,
-        paginationOptions.orderBy,
-        paginationOptions.orderDirection,
-        { tenantId },);
+      // return await this.paginationService.paginate<OffboardingTasksTemplate>(this.offboardingTasksTemplateRepository,
+      //   'p',
+      //   options,
+      //   paginationOptions.orderBy,
+      //   paginationOptions.orderDirection,
+      //   { tenantId },);
+      const templateTasks = await this.offboardingTasksTemplateRepository.find({ where: { tenantId: tenantId }, relations: ['approver'] })
+      return templateTasks
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`OffboardingTasksTemplate not found.`);

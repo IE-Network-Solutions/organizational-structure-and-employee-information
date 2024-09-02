@@ -61,8 +61,8 @@ export class OffboardingEmployeeTaskController {
   }
 
   @Get('/termination/:id')
-  findTasksByTermination(@Req() request: Request, @Param('id') id: string) {
+  findActiveTerminationTasks(@Req() request: Request, @Param('id') id: string) {
     const tenantId = request['tenantId'];
-    return this.offboardingEmployeeTaskService.findTasksByTermination(id, tenantId);
+    return this.offboardingEmployeeTaskService.findActiveTerminationTasks(id, tenantId);
   }
 }

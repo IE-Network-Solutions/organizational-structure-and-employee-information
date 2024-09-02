@@ -49,4 +49,9 @@ export class CreateEmployeeJobInformationDto {
   @IsOptional()
   @IsString()
   workScheduleId: string;
+
+
+  @IsOptional()
+  @IsString()
+  userId?: string;
 }

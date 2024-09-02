@@ -129,7 +129,6 @@ export class UserController {
     };
 
     const tenantId = request['tenantId'];
-
     return await this.userService.create(
       tenantId,
       createBulkRequestDto,
@@ -218,4 +217,5 @@ export class UserController {
     const tenantId = request['tenantId'];
     return await this.userService.createFromTenant(createUserDto, tenantId, role);
   }
+
 }

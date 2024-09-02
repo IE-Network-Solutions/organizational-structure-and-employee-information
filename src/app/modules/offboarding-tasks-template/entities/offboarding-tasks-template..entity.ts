@@ -11,13 +11,13 @@ export class OffboardingTasksTemplate extends BaseModel {
   @Column({ type: 'varchar', length: 255 })
   title: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   approverId: string;
 
-  @OneToMany(() => User, (user) => user.offboardingTasksTemplate)
+  @ManyToOne(() => User, (user) => user.offboardingTasksTemplate)
   approver: User;
 
   @Column({ type: 'uuid', nullable: true })

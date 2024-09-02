@@ -37,7 +37,7 @@ import { Role } from '../role/entities/role.entity';
     EmployeeDocumentModule,
     RolePermissionModule,
     UserPermissionModule,
-    RoleModule
+    RoleModule,
   ],
   controllers: [UserController],
   providers: [UserService, PaginationService, DepartmentsService, RoleService],

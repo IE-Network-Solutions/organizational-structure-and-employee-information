@@ -12,7 +12,7 @@ export class OffboardingEmployeeTask extends BaseModel {
   @Column({ length: 255 })
   title: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
   @Column({ default: false })

@@ -4,7 +4,7 @@ import { IsArray, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 export class CreateUserPermissionDto {
   @IsOptional()
   @IsNotEmpty()
-  userId: string;
+  userId?: string;
 
   @IsArray()
   @IsNotEmpty()

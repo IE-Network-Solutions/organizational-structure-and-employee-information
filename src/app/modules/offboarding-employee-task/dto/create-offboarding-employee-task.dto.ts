@@ -6,8 +6,8 @@ export class CreateOffboardingEmployeeTaskDto {
   title: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @IsBoolean()
   @IsOptional()

@@ -22,7 +22,7 @@ export class OffboardingTasksTemplateController {
   }
 
   @Get()
-  findAll(@Req() request: Request, @Query() paginationOptions: PaginationDto): Promise<Pagination<OffboardingTasksTemplate>> {
+  findAll(@Req() request: Request, @Query() paginationOptions: PaginationDto): Promise<OffboardingTasksTemplate[]> {
     let tenantId = request['tenantId']
     return this.offboardingTasksTemplateService.findAll(paginationOptions, tenantId);
   }

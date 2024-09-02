@@ -28,10 +28,10 @@ import { generateRandom4DigitNumber } from '@root/src/core/utils/generateRandomN
 import filterEntities from '@root/src/core/utils/filters.utils';
 import { FilterDto } from './dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
-import { error } from 'console';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RoleService } from '../role/role.service';
 import { CreateRoleDto } from '../role/dto/create-role.dto';
+import { EmployeeTerminationService } from '../employee-termination/employee-termination.service';
 
 @Injectable()
 export class UserService {
@@ -46,7 +46,7 @@ export class UserService {
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
-    private readonly rolesService: RoleService
+    private readonly rolesService: RoleService,
   ) { }
 
   async create(
@@ -92,7 +92,6 @@ export class UserService {
       await checkIfDataExists(valuesToCheck, this.userRepository);
 
       const result = await this.userRepository.save(user);
-
       await this.rolePermissionService.updateRolePermissions(
         createRolePermissionDto['roleId'],
         createRolePermissionDto['permissionId'],
@@ -216,11 +215,18 @@ export class UserService {
       throw error;
     }
   }
-
   async findOne(id: string): Promise<User> {
     try {
+      // const user = await this.userRepository.findOne({
+      //   where: { id: id }, relations: ['employeeJobInformation', 'employeeJobInformation.employementType',
+      //     'employeeInformation', 'employeeInformation.nationality',
+      //     'employeeJobInformation.branch', 'employeeJobInformation.department',
+      //     'employeeDocument', 'employeeJobInformation.workSchedule', 'role',
+      //     'userPermissions'], withDeleted: true
+      // })
       const user = await this.userRepository
         .createQueryBuilder('user')
+        .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
@@ -241,7 +247,7 @@ export class UserService {
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect('user.userPermissions', 'userPermissions')
         .where('user.id = :id', { id })
-        .getOne();
+        .getOne()
       user['reportingTo'] = await this.findReportingToUser(id);
 
       return { ...user };
@@ -286,6 +292,7 @@ export class UserService {
     try {
       const queryBuilder = this.userRepository
         .createQueryBuilder('user')
+        .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
@@ -327,6 +334,7 @@ export class UserService {
     try {
       const queryBuilder = this.userRepository
         .createQueryBuilder('user')
+        .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
@@ -439,12 +447,10 @@ export class UserService {
     createRoleDto.name = role
     createRoleDto.description = role
     let createRole = await this.rolesService.createFirstRole(createRoleDto, tenantId)
-    console.log(createRole, "rolecrea")
     if (createRole) {
       createUserDto.roleId = createRole.id
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const password = createUserDto.email + generateRandom4DigitNumber();
-      console.log(user, "lklklkl")
       const userRecord = await this.createUserToFirebase(createUserDto.email, tenantId)
 
       user.firebaseId = userRecord.uid;
@@ -471,4 +477,20 @@ export class UserService {
 
 
   }
+
+  async activateUser(userId: string, tenantId: string): Promise<User> {
+    try {
+      const user = await this.findOne(userId)
+      if (user) {
+        await this.userRepository.update(userId, { deletedAt: null })
+        return user
+      }
+    }
+    catch (error) {
+      throw new BadRequestException(error)
+    }
+
+
+  }
+
 }
