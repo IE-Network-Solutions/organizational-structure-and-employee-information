@@ -20,7 +20,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -71,17 +71,19 @@ export class DepartmentsService {
       });
       if (departments?.length > 0) {
         const departmentTrees = await Promise.all(
-          departments.map(department => this.departmentRepository.findDescendantsTree(department)
-          )
+          departments.map((department) =>
+            this.departmentRepository.findDescendantsTree(department),
+          ),
         );
-        return departmentTrees.filter(item => item.level === 0)[0]
+        return departmentTrees.filter((item) => item.level === 0)[0];
+      } else {
+        throw new NotFoundException('No Department was created.');
       }
-      else {
-        throw new NotFoundException('No Department was created.')
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
       }
-    }
-    catch (error) {
-      throw new BadRequestException(error)
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -89,29 +91,31 @@ export class DepartmentsService {
     try {
       const departments = await this.departmentRepository.find({
         where: { tenantId: tenantId },
-        relations: ['employeeJobInformation']
+        relations: ['employeeJobInformation'],
       });
       if (departments?.length > 0) {
         const departmentTrees = await Promise.all(
-          departments.map(async department => {
-            const departmentTree = await this.departmentRepository.findDescendantsTree(department, {
-              relations: ['employeeJobInformation', 'employeeJobInformation.user']
-            });
-            departmentTree.employeeJobInformation = departmentTree.employeeJobInformation.filter(
-              info => info.departmentLeadOrNot === true
-            );
+          departments.map(async (department) => {
+            const departmentTree =
+              await this.departmentRepository.findDescendantsTree(department, {
+                relations: [
+                  'employeeJobInformation',
+                  'employeeJobInformation.user',
+                ],
+              });
+            departmentTree.employeeJobInformation =
+              departmentTree.employeeJobInformation.filter(
+                (info) => info.departmentLeadOrNot === true,
+              );
             return departmentTree;
-          })
+          }),
         );
-        return departmentTrees.filter(item => item.level === 0)[0]
+        return departmentTrees.filter((item) => item.level === 0)[0];
+      } else {
+        throw new NotFoundException('No Department Was Created.');
       }
-      else {
-        throw new NotFoundException('No Department Was Created.')
-      }
-    }
-
-    catch (error) {
-      throw new BadRequestException(error)
+    } catch (error) {
+      throw new BadRequestException(error);
     }
   }
 

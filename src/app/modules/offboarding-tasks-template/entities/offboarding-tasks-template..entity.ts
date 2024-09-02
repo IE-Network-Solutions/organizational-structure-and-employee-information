@@ -1,10 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { BaseModel } from '@root/src/database/base.model';
 
 @Entity()
 export class OffboardingTasksTemplate extends BaseModel {
-
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

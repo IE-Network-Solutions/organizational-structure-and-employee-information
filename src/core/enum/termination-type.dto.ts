@@ -1,5 +1,5 @@
-export enum TerminationType{
-    Resignation="Resignation",
-    Termination="Termination",
-    Death="Death",
+export enum TerminationType {
+  Resignation = 'Resignation',
+  Termination = 'Termination',
+  Death = 'Death',
 }

@@ -14,12 +14,14 @@ export class OffboardingEmployeeTaskService {
     @InjectRepository(OffboardingEmployeeTask)
     private readonly offboardingEmployeeTaskRepository: Repository<OffboardingEmployeeTask>,
     private readonly paginationService: PaginationService,
+  ) {}
 
-  ) { }
-
-  async create(tenantId: string, createOffboardingEmployeeTaskDtos: CreateOffboardingEmployeeTaskDto[]) {
-    const tasks = createOffboardingEmployeeTaskDtos.map(dto =>
-      this.offboardingEmployeeTaskRepository.create({ ...dto, tenantId })
+  async create(
+    tenantId: string,
+    createOffboardingEmployeeTaskDtos: CreateOffboardingEmployeeTaskDto[],
+  ) {
+    const tasks = createOffboardingEmployeeTaskDtos.map((dto) =>
+      this.offboardingEmployeeTaskRepository.create({ ...dto, tenantId }),
     );
     return await this.offboardingEmployeeTaskRepository.save(tasks); // Save all tasks at once
   }
@@ -50,14 +52,22 @@ export class OffboardingEmployeeTaskService {
   }
 
   async findOne(id: string) {
-    return await this.offboardingEmployeeTaskRepository.findOne({ where: { id: id } });
+    return await this.offboardingEmployeeTaskRepository.findOne({
+      where: { id: id },
+    });
   }
 
-  async update(id: string, updateOffboardingEmployeeTaskDto: UpdateOffboardingEmployeeTaskDto, tenantId: string) {
-    await await this.offboardingEmployeeTaskRepository.update(id, { ...updateOffboardingEmployeeTaskDto, tenantId });
+  async update(
+    id: string,
+    updateOffboardingEmployeeTaskDto: UpdateOffboardingEmployeeTaskDto,
+    tenantId: string,
+  ) {
+    await await this.offboardingEmployeeTaskRepository.update(id, {
+      ...updateOffboardingEmployeeTaskDto,
+      tenantId,
+    });
     return await this.findOne(id);
   }
-
 
   async remove(id: string) {
     return await this.offboardingEmployeeTaskRepository.softRemove({ id });
@@ -66,24 +76,17 @@ export class OffboardingEmployeeTaskService {
   async findActiveTerminationTasks(userId: string, tenantId: string) {
     const task = await this.offboardingEmployeeTaskRepository
       .createQueryBuilder('offboarding_employee_task')
-      .leftJoinAndSelect(
-        'offboarding_employee_task.approver',
-        'approver',
-      )
+      .leftJoinAndSelect('offboarding_employee_task.approver', 'approver')
 
       .leftJoinAndSelect(
         'offboarding_employee_task.employeTermination',
         'employeTermination',
         'employeTermination.isActive = :isActive',
         { isActive: true },
-
       )
       .andWhere('employeTermination.userId = :userId', { userId })
-      .getMany()
+      .getMany();
 
-    return task
-
+    return task;
   }
-
-
 }

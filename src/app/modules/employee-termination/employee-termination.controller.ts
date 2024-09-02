@@ -27,7 +27,7 @@ import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto
 export class EmployeeTerminationController {
   constructor(
     private readonly employeeTerminationService: EmployeeTerminationService,
-  ) { }
+  ) {}
   @Post()
   async createEmployeeTermination(
     @Req() req: Request,
@@ -58,8 +58,12 @@ export class EmployeeTerminationController {
   }
 
   @Get('/users/:userId')
-  async findOneByUserIdWithJobInfo(@Param('userId') userId: string): Promise<EmployeeTermination> {
-    return await this.employeeTerminationService.findOneByUserIdWithJobInfo(userId);
+  async findOneByUserIdWithJobInfo(
+    @Param('userId') userId: string,
+  ): Promise<EmployeeTermination> {
+    return await this.employeeTerminationService.findOneByUserIdWithJobInfo(
+      userId,
+    );
   }
 
   @Patch(':id')
@@ -80,10 +84,17 @@ export class EmployeeTerminationController {
     return await this.employeeTerminationService.remove(id);
   }
 
-
   @Patch('/rehireUser/:userId')
-  async rehireUser(@Req() request: Request, @Param('userId') userId: string, @Body() createEmployeeJobInformationDto: CreateEmployeeJobInformationDto): Promise<any> {
+  async rehireUser(
+    @Req() request: Request,
+    @Param('userId') userId: string,
+    @Body() createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+  ): Promise<any> {
     const tenantId = request['tenantId'];
-    return await this.employeeTerminationService.rehireUser(userId, tenantId, createEmployeeJobInformationDto);
+    return await this.employeeTerminationService.rehireUser(
+      userId,
+      tenantId,
+      createEmployeeJobInformationDto,
+    );
   }
 }

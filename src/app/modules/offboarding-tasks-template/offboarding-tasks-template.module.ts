@@ -11,4 +11,4 @@ import { OffboardingTasksTemplate } from './entities/offboarding-tasks-template.
   providers: [OffboardingTasksTemplateService, PaginationService],
   exports: [OffboardingTasksTemplateService],
 })
-export class OffboardingTasksTemplateModule { }
+export class OffboardingTasksTemplateModule {}

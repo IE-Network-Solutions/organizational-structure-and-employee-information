@@ -4,8 +4,6 @@ import {
   SoftRemoveEvent,
 } from 'typeorm';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Injectable } from '@nestjs/common';
 import { WorkSchedule } from '../entities/work-schedule.entity';

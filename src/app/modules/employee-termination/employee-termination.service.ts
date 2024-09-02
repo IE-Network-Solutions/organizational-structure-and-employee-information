@@ -28,8 +28,8 @@ export class EmployeeTerminationService {
     private employeeTerminationRepository: Repository<EmployeeTermination>,
     private paginationService: PaginationService,
     private userService: UserService,
-    private employeeJobInformationService: EmployeeJobInformationService
-  ) { }
+    private employeeJobInformationService: EmployeeJobInformationService,
+  ) {}
   async create(
     createEmployeeTerminationDto: CreateEmployeeTerminationDto,
     tenantId: string,
@@ -91,7 +91,6 @@ export class EmployeeTerminationService {
     }
   }
   async findOneByUserIdWithJobInfo(userId: string): Promise<any> {
-
     try {
       const termination = await this.employeeTerminationRepository.findOne({
         where: { userId: userId, isActive: true },
@@ -141,39 +140,42 @@ export class EmployeeTerminationService {
     }
   }
 
-
-  async rehireUser(userId: string, tenantId: string, createEmployeeJobInformationDto: CreateEmployeeJobInformationDto): Promise<User> {
+  async rehireUser(
+    userId: string,
+    tenantId: string,
+    createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
+  ): Promise<User> {
     try {
-      const status = EligibleForRehire.yes
-      const user = await this.userService.findOne(userId)
+      const status = EligibleForRehire.yes;
+      const user = await this.userService.findOne(userId);
       if (user) {
         const termination = await this.employeeTerminationRepository.findOne({
           where: {
             userId: userId,
             isActive: true,
-            eligibleForRehire: "yes" as EligibleForRehire,
+            eligibleForRehire: 'yes' as EligibleForRehire,
           },
         });
         if (!termination) {
-          await this.userService.activateUser(userId, tenantId)
-          await this.userService.activateUser(userId, tenantId)
-          await this.employeeJobInformationService.create(createEmployeeJobInformationDto, tenantId)
-          return user
-
+          await this.userService.activateUser(userId, tenantId);
+          await this.userService.activateUser(userId, tenantId);
+          await this.employeeJobInformationService.create(
+            createEmployeeJobInformationDto,
+            tenantId,
+          );
+          return user;
         }
 
-        await this.update(termination.id, { isActive: false })
-        await this.userService.activateUser(userId, tenantId)
-        await this.employeeJobInformationService.create(createEmployeeJobInformationDto, tenantId)
-        return user
-
+        await this.update(termination.id, { isActive: false });
+        await this.userService.activateUser(userId, tenantId);
+        await this.employeeJobInformationService.create(
+          createEmployeeJobInformationDto,
+          tenantId,
+        );
+        return user;
       }
+    } catch (error) {
+      throw new BadRequestException(error);
     }
-    catch (error) {
-      throw new BadRequestException(error)
-
-    }
-
-
   }
 }

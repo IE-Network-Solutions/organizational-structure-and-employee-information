@@ -12,31 +12,33 @@ export const offboardingTasksTemplateData = (): OffboardingTasksTemplate => {
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
     deletedAt: null,
-    approver: undefined
+    approver: undefined,
   };
 };
 
-export const createOffboardingTasksTemplate = (): CreateOffboardingTasksTemplateDto => {
-  return {
-    title: 'Submit Final Report',
-    description: 'Submit a final report of all tasks completed.',
-    approverId: 'approver-id-789',
-    tenantId: 'tenant-id-123'
+export const createOffboardingTasksTemplate =
+  (): CreateOffboardingTasksTemplateDto => {
+    return {
+      title: 'Submit Final Report',
+      description: 'Submit a final report of all tasks completed.',
+      approverId: 'approver-id-789',
+      tenantId: 'tenant-id-123',
+    };
   };
-};
 
-export const findAllOffboardingTasksTemplates = (): Pagination<OffboardingTasksTemplate> => {
-  return {
-    items: [offboardingTasksTemplateData()],
-    meta: {
-      totalItems: 1,
-      itemCount: 1,
-      itemsPerPage: 10,
-      totalPages: 1,
-      currentPage: 1,
-    },
+export const findAllOffboardingTasksTemplates =
+  (): Pagination<OffboardingTasksTemplate> => {
+    return {
+      items: [offboardingTasksTemplateData()],
+      meta: {
+        totalItems: 1,
+        itemCount: 1,
+        itemsPerPage: 10,
+        totalPages: 1,
+        currentPage: 1,
+      },
+    };
   };
-};
 
 export const updateOffboardingTasksTemplate = () => {
   return {

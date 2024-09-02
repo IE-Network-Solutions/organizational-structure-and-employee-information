@@ -8,11 +8,8 @@ import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data
 import { UserPermissionService } from './user-permission.service';
 import { UserPermission } from './entities/user-permission.entity';
 import {
-  createUserPermission,
-  createUserPermissionData,
   deleteUserPermissionData,
   paginationResultUserPermissionData,
-  updateUserPermissionData,
   userPermissionData,
   userPermissionDataSave,
 } from './tests/user-permission.data';

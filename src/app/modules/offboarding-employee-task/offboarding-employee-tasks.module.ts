@@ -11,4 +11,4 @@ import { OffboardingEmployeeTaskService } from './offboarding-employee-task.serv
   providers: [OffboardingEmployeeTaskService, PaginationService],
   exports: [OffboardingEmployeeTaskService],
 })
-export class OffboardingEmployeeTaskModule { }
+export class OffboardingEmployeeTaskModule {}
