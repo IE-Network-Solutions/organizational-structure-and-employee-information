@@ -16,7 +16,6 @@ import {
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 import { searchFilter } from '@root/src/core/commonTestData/search-filter.data';
 import { RolePermissionService } from '../role-permission/role-permission.service';
-import { ConflictException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 
 describe('RoleService', () => {

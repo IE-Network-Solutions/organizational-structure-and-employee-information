@@ -20,7 +20,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) {}
+  ) { }
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -62,7 +62,8 @@ export class DepartmentsService {
       throw new BadRequestException(error);
     }
   }
-  async findAllDepartments(tenantId: string): Promise<any> {
+
+  async findAllDepartments(tenantId: string): Promise<Department> {
     try {
       const departments = await this.departmentRepository.find({
         where: {
@@ -84,6 +85,7 @@ export class DepartmentsService {
         throw error;
       }
       throw new BadRequestException(error.message);
+
     }
   }
 
@@ -91,6 +93,7 @@ export class DepartmentsService {
     try {
       const departments = await this.departmentRepository.find({
         where: { tenantId: tenantId },
+
         relations: ['employeeJobInformation'],
       });
       if (departments?.length > 0) {
@@ -116,6 +119,7 @@ export class DepartmentsService {
       }
     } catch (error) {
       throw new BadRequestException(error);
+
     }
   }
 

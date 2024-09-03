@@ -6,7 +6,6 @@ import {
 import { CreatePermissionGroupDto } from './dto/create-permission-group.dto';
 import { UpdatePermissionGroupDto } from './dto/update-permission-group.dto';
 import { PermissionGroup } from './entities/permission-group.entity';
-import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
@@ -15,12 +14,15 @@ import { PermissionService } from '../permission/permission.service';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
+import { PermissionGroupRepository } from './permission-group-reposiory';
+import { PermissionGroupInterface } from './permission-group-interface'; 
 
 @Injectable()
-export class PermissionGroupService {
+export class PermissionGroupService implements PermissionGroupInterface {
+  
   constructor(
     @InjectRepository(PermissionGroup)
-    private readonly permissionGroupRepository: Repository<PermissionGroup>,
+    private readonly permissionGroupRepository: PermissionGroupRepository,
     private readonly paginationService: PaginationService,
     private readonly permissionService: PermissionService,
   ) {}

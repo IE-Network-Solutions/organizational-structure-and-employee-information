@@ -5,8 +5,7 @@ import {
 } from '@nestjs/common';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { PermissionRepository } from './permission-repository';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
@@ -15,29 +14,31 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
 import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 import { UpdatePermissionGroupDto } from '../permission-group/dto/update-permission-group.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PermissionInterface } from './permission-interface';
 
 @Injectable()
-export class PermissionService {
+export class PermissionService implements PermissionInterface {
   constructor(
     @InjectRepository(Permission)
-    private readonly permissionRepository: Repository<Permission>,
-    private readonly paginationService: PaginationService,
+    private readonly permissionRepository: PermissionRepository,
+    private readonly paginationService: PaginationService,      
   ) {}
+
   async create(createPermissionDto: CreatePermissionDto) {
     try {
       const permission = this.permissionRepository.create(createPermissionDto);
       const valuesToCheck = { slug: createPermissionDto.slug };
+
       await checkIfDataExists(valuesToCheck, this.permissionRepository);
+
       return await this.permissionRepository.save(permission);
     } catch (error) {
       throw new ConflictException(error.message);
     }
   }
 
-  async findAll(
-    paginationOptions: PaginationDto,
-    searchFilterDTO: SearchFilterDTO,
-  ): Promise<Pagination<Permission>> {
+  async findAll( paginationOptions: PaginationDto, searchFilterDTO: SearchFilterDTO): Promise<Pagination<Permission>> {
     const options: IPaginationOptions = {
       page: paginationOptions.page,
       limit: paginationOptions.limit,
@@ -99,8 +100,15 @@ export class PermissionService {
   async findBulkPermissionsByPermissionId(
     updatePermissionGroupDto: UpdatePermissionGroupDto,
   ) {
+    try {
     return await this.permissionRepository.findByIds(
       updatePermissionGroupDto.permissions,
     );
+  } catch (error) {
+    if (error.name === 'EntityNotFoundError') {
+      throw new NotFoundException(`Permission not found.`);
+    }
+    throw error;
+  }
   }
 }
