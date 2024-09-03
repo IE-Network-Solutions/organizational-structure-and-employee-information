@@ -356,14 +356,14 @@ describe('UserService', () => {
   describe('remove', () => {
     it('should remove the user and return void', async () => {
       usersRepository.findOneOrFail.mockResolvedValue(userDataSave() as any);
-      usersRepository.softDelete.mockResolvedValue(deleteUserData());
+      usersRepository.softRemove.mockResolvedValue(deleteUserData() as any);
 
       const result = await userService.remove(userDataSave().id);
 
       expect(usersRepository.findOneOrFail).toHaveBeenCalledWith({
         where: { id: userDataSave().id },
       });
-      expect(usersRepository.softDelete).toHaveBeenCalledWith({
+      expect(usersRepository.softRemove).toHaveBeenCalledWith({
         id: userDataSave().id,
       });
       expect(result).toEqual(deleteUserData());
