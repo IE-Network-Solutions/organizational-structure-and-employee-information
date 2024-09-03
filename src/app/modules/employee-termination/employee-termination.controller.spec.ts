@@ -13,7 +13,7 @@ import {
 } from './tests/employee-termination.data';
 import { EligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
 import { TerminationType } from '@root/src/core/enum/termination-type.dto';
-
+jest.mock('./employee-termination.service');
 describe('EmployeeTerminationController', () => {
   let controller: EmployeeTerminationController;
   let service: EmployeeTerminationService;
@@ -54,6 +54,7 @@ describe('EmployeeTerminationController', () => {
         comment: 'Left for a better opportunity',
         jobInformationId: 'job-info-2',
         userId: 'user-2',
+        isActive: true,
         effectiveDate: new Date('2023-02-01'),
       };
       const result = await controller.createEmployeeTermination(

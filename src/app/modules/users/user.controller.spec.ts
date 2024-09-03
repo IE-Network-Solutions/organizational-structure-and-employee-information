@@ -2,15 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { Request } from 'express';
-import { UpdateUserDto } from './dto/update-user.dto';
 import {
   userData,
   userDataSave,
   userDataOnFindOne,
   paginationResultUserData,
-  updateUserData,
   deleteUserData,
-  createUserData,
 } from './tests/user.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 import { rolePermissionData } from '../role-permission/tests/role-permission.data';

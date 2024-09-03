@@ -1,10 +1,4 @@
-import {
-  IsArray,
-  IsBoolean,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { DayOfWeek } from '../enum/work-schedule-dayofweek.enum';
 
 export class CreateWorkScheduleDetailDto {

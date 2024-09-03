@@ -47,4 +47,4 @@ import { OffboardingTasksTemplateModule } from './modules/offboarding-tasks-temp
     
   ],
 })
-export class CoreModule { }
+export class CoreModule {}

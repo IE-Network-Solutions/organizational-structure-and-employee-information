@@ -4,20 +4,12 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Organization } from './entities/organization.entity';
 import { Repository } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
-import { CreateOrganizationDto } from './dto/create-organization.dto';
-import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { Pagination } from 'nestjs-typeorm-paginate';
 import {
   organizationData,
   createOrganizationData,
-  deleteOrganizationData,
-  UpdateOrganizationDataReturned,
   paginationResultOrganizationData,
   updateOrganizationData,
-  createOrganizationDataOnCreate,
-  findOneNotFoundReturnValue,
 } from './tests/organization.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 

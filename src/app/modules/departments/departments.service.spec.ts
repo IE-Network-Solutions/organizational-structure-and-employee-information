@@ -21,7 +21,6 @@ describe('DepartmentsService', () => {
   let repository: MockProxy<TreeRepository<Department>>;
   const departmentToken = getRepositoryToken(Department);
 
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,15 +74,48 @@ describe('DepartmentsService', () => {
   // });
 
   describe('findAllDepartments', () => {
+    it('should return the department tree when departments exist', async () => {
+      const tenantId = 'tenant-id-123';
 
-    it('should return an array of departments', async () => {
-      const departments = [departmentData()];
-      jest.spyOn(repository, 'find').mockResolvedValue(departments as any);
-      jest.spyOn(repository, 'findDescendantsTree').mockResolvedValue(departments as any);
+      const department = new Department();
+      department.id = '1';
+      department.tenantId = tenantId;
 
-      const result = await service.findAllDepartments('tenant1');
+      const departmentTree = { ...department, children: [], level: 0 };
 
-      expect(result).toEqual(departments);
+      jest.spyOn(repository, 'find').mockResolvedValue([department]);
+      jest
+        .spyOn(repository, 'findDescendantsTree')
+        .mockResolvedValue(departmentTree);
+
+      const result = await service.findAllDepartments(tenantId);
+      expect(result).toEqual(departmentTree);
+      expect(repository.find).toHaveBeenCalledWith({ where: { tenantId } });
+      expect(repository.findDescendantsTree).toHaveBeenCalledWith(department);
+    });
+
+
+    it('should throw NotFoundException if no departments are found', async () => {
+      const tenantId = 'tenant-id-123';
+
+      jest.spyOn(repository, 'find').mockResolvedValue([]);
+
+      await expect(service.findAllDepartments(tenantId)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(repository.find).toHaveBeenCalledWith({ where: { tenantId } });
+    });
+
+    it('should throw BadRequestException if an error occurs', async () => {
+      const tenantId = 'tenant-id-123';
+      const error = new Error('Something went wrong');
+
+      jest.spyOn(repository, 'find').mockRejectedValue(error);
+
+      await expect(service.findAllDepartments(tenantId)).rejects.toThrow(
+        BadRequestException,
+      );
+
     });
   });
 

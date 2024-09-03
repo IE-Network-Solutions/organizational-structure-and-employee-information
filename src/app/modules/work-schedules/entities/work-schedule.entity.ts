@@ -1,5 +1,5 @@
 import { BaseModel } from '@root/src/database/base.model';
-import { AfterSoftRemove, Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { CreateWorkScheduleDetailDto } from '../dto/create-work-schedule-detail.dto';
 import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';

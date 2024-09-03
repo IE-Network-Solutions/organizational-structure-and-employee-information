@@ -5,15 +5,13 @@ import { UserService } from './user.service';
 import { MockProxy, mock } from 'jest-mock-extended';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
-import { ConflictException } from '@nestjs/common';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import {
   createUserData,
   deleteUserData,
   paginationResultUserData,
   updateUserData,
   userData,
-  userDataOnFindOne,
   userDataSave,
 } from './tests/user.data';
 import { EmployeeInformationService } from '../employee-information/employee-information.service';
@@ -125,9 +123,7 @@ describe('UserService', () => {
     rolePermissionService = moduleRef.get<RolePermissionService>(
       RolePermissionService,
     );
-    rolesService = moduleRef.get<RoleService>(
-      RoleService,
-    );
+    rolesService = moduleRef.get<RoleService>(RoleService);
     fileUploadService = moduleRef.get<FileUploadService>(FileUploadService);
     queryRunner = moduleRef.get<DataSource>(DataSource).createQueryRunner();
   });
@@ -249,7 +245,10 @@ describe('UserService', () => {
   describe('findOne', () => {
     it('should return the user if found', async () => {
       const user = userDataSave() as any;
+
+      // Mock the createQueryBuilder and chain the necessary methods
       usersRepository.createQueryBuilder.mockReturnValue({
+        withDeleted: jest.fn().mockReturnThis(), // Mock the withDeleted method
         leftJoinAndSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValue(user),
@@ -262,10 +261,15 @@ describe('UserService', () => {
 
     it('should throw NotFoundException if the user is not found', async () => {
       usersRepository.createQueryBuilder.mockReturnValue({
+        withDeleted: jest.fn().mockReturnThis(), // Mock the withDeleted method
         leftJoinAndSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValue(null),
       } as any);
+
+      await expect(userService.findOne(userDataSave().id)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -352,14 +356,14 @@ describe('UserService', () => {
   describe('remove', () => {
     it('should remove the user and return void', async () => {
       usersRepository.findOneOrFail.mockResolvedValue(userDataSave() as any);
-      usersRepository.softDelete.mockResolvedValue(deleteUserData());
+      usersRepository.softRemove.mockResolvedValue(deleteUserData() as any);
 
       const result = await userService.remove(userDataSave().id);
 
       expect(usersRepository.findOneOrFail).toHaveBeenCalledWith({
         where: { id: userDataSave().id },
       });
-      expect(usersRepository.softDelete).toHaveBeenCalledWith({
+      expect(usersRepository.softRemove).toHaveBeenCalledWith({
         id: userDataSave().id,
       });
       expect(result).toEqual(deleteUserData());

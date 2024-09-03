@@ -20,24 +20,22 @@ import { OffboardingEmployeeTaskService } from './offboarding-employee-task.serv
 export class OffboardingEmployeeTaskController {
   constructor(
     private readonly offboardingEmployeeTaskService: OffboardingEmployeeTaskService,
-  ) { }
+  ) {}
 
   @Post()
   create(
     @Req() request: Request,
-    @Body() createOffboardingEmployeeTaskDto: CreateOffboardingEmployeeTaskDto,
+    @Body()
+    createOffboardingEmployeeTaskDto: CreateOffboardingEmployeeTaskDto[],
   ) {
     return this.offboardingEmployeeTaskService.create(
       request['tenantId'],
-      createOffboardingEmployeeTaskDto
+      createOffboardingEmployeeTaskDto,
     );
   }
 
-
   @Get()
-  findAll(
-    @Query() paginationOptions?: PaginationDto,
-  ) {
+  findAll(@Query() paginationOptions?: PaginationDto) {
     return this.offboardingEmployeeTaskService.findAll(paginationOptions);
   }
 
@@ -53,11 +51,24 @@ export class OffboardingEmployeeTaskController {
     @Body() updateOffboardingEmployeeTaskDto: UpdateOffboardingEmployeeTaskDto,
   ) {
     const tenantId = request['tenantId'];
-    return this.offboardingEmployeeTaskService.update(id, updateOffboardingEmployeeTaskDto, tenantId);
+    return this.offboardingEmployeeTaskService.update(
+      id,
+      updateOffboardingEmployeeTaskDto,
+      tenantId,
+    );
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.offboardingEmployeeTaskService.remove(id);
+  }
+
+  @Get('/termination/:id')
+  findActiveTerminationTasks(@Req() request: Request, @Param('id') id: string) {
+    const tenantId = request['tenantId'];
+    return this.offboardingEmployeeTaskService.findActiveTerminationTasks(
+      id,
+      tenantId,
+    );
   }
 }

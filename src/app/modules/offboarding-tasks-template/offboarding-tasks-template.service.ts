@@ -14,9 +14,12 @@ export class OffboardingTasksTemplateService {
     @InjectRepository(OffboardingTasksTemplate)
     private readonly offboardingTasksTemplateRepository: Repository<OffboardingTasksTemplate>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
 
-  async create(tenantId: string, createOffboardingTasksTemplateDto: CreateOffboardingTasksTemplateDto) {
+  async create(
+    tenantId: string,
+    createOffboardingTasksTemplateDto: CreateOffboardingTasksTemplateDto,
+  ) {
     const taskTemplate = this.offboardingTasksTemplateRepository.create({
       ...createOffboardingTasksTemplateDto,
       tenantId,
@@ -24,15 +27,20 @@ export class OffboardingTasksTemplateService {
     return await this.offboardingTasksTemplateRepository.save(taskTemplate);
   }
 
-  async findAll(paginationOptions: PaginationDto): Promise<Pagination<OffboardingTasksTemplate>> {
+  async findAll(
+    paginationOptions: PaginationDto,
+    tenantId: string,
+  ): Promise<OffboardingTasksTemplate[]> {
     try {
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      const queryBuilder = this.offboardingTasksTemplateRepository.createQueryBuilder('offboardingTasksTemplate');
-
-      return await this.paginationService.paginate<OffboardingTasksTemplate>(queryBuilder, options);
+      const templateTasks = await this.offboardingTasksTemplateRepository.find({
+        where: { tenantId: tenantId },
+        relations: ['approver'],
+      });
+      return templateTasks;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`OffboardingTasksTemplate not found.`);
@@ -43,7 +51,9 @@ export class OffboardingTasksTemplateService {
 
   async findOne(id: string) {
     try {
-      return await this.offboardingTasksTemplateRepository.findOne({ where: { id } });
+      return await this.offboardingTasksTemplateRepository.findOne({
+        where: { id },
+      });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`offboardingTasksTemplate not found.`);
@@ -52,12 +62,14 @@ export class OffboardingTasksTemplateService {
     }
   }
 
-  async update(id: string, updateOffboardingTasksTemplateDto: UpdateOffboardingTasksTemplateDto) {
-
+  async update(
+    id: string,
+    updateOffboardingTasksTemplateDto: UpdateOffboardingTasksTemplateDto,
+  ) {
     try {
       await this.findOne(id);
       const result = await this.offboardingTasksTemplateRepository.update(id, {
-        ...updateOffboardingTasksTemplateDto
+        ...updateOffboardingTasksTemplateDto,
       });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {

@@ -75,6 +75,7 @@ export class DepartmentsController {
   async findUserThree(
     @Req() req: Request,
   ): Promise<Department> {
+
     const tenantId = req['tenantId'];
     return await this.departmentsService.findUserTree(tenantId);
   }

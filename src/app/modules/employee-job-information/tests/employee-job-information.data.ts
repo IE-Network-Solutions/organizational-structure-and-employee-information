@@ -15,7 +15,7 @@ export const employeeJobInformationData = (): EmployeeJobInformation => {
     departmentLeadOrNot: false,
     employmentContractType: EmployementContractType.CONTRACTUAL,
     workScheduleId: '1',
-    employeeTermination:undefined,
+    employeeTermination: undefined,
     tenantId: '1',
     createdAt: new Date('2023-01-01'),
     updatedAt: new Date('2023-01-01'),

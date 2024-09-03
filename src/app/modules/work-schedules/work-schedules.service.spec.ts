@@ -11,7 +11,6 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import {
   createWorkSworkScheduleData,
   paginationResultWorkSworkScheduleData,
-  updateWorkSworkScheduleData,
   workScheduleData,
 } from './tests/work-schedule.data';
 import { UpdateWorkScheduleDto } from './dto/update-work-schedule.dto';

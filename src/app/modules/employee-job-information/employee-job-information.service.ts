@@ -22,7 +22,7 @@ export class EmployeeJobInformationService {
     private employeeJobInformationRepository: Repository<EmployeeJobInformation>,
     // private userRepository: Repository<User>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
   async create(
     createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
     tenantId: string,

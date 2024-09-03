@@ -21,7 +21,7 @@ import { UpdateResult } from 'typeorm';
 @Controller('permissions')
 @ApiTags('Permissions')
 export class PermissionController {
-  constructor(private readonly permissionService: PermissionService) { }
+  constructor(private readonly permissionService: PermissionService) {}
 
   @Post()
   create(@Body() createPermissionDto: CreatePermissionDto):Promise<Permission> {

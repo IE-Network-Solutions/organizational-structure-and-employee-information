@@ -9,9 +9,14 @@ import { EmployeeTerminationService } from './employee-termination.service';
 import { UserService } from '../users/user.service';
 import { UserModule } from '../users/user.module';
 import { User } from '../users/entities/user.entity';
+import { EmployeeJobInformationModule } from '../employee-job-information/employee-job-information.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EmployeeTermination, User]), UserModule],
+  imports: [
+    TypeOrmModule.forFeature([EmployeeTermination, User]),
+    UserModule,
+    EmployeeJobInformationModule,
+  ],
   controllers: [EmployeeTerminationController],
   providers: [EmployeeTerminationService, PaginationService],
 })

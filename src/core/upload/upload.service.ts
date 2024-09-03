@@ -11,9 +11,7 @@ export class FileUploadService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.fileServerUrl = this.configService.get<string>(
-      'FILE_SERVER_URL',
-    );
+    this.fileServerUrl = this.configService.get<string>('FILE_SERVER_URL');
   }
 
   async uploadFileToServer(

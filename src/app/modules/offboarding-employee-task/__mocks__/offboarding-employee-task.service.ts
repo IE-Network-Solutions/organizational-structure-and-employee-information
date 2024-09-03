@@ -1,6 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
-import { findAllOffboardingEmployeeTasks, offboardingEmployeeTaskData } from '../tests/offboarding-employee-task.data';
-
+import {
+  findAllOffboardingEmployeeTasks,
+  offboardingEmployeeTaskData,
+} from '../tests/offboarding-employee-task.data';
 
 export const OffboardingEmployeeTaskService = jest.fn().mockReturnValue({
   create: jest.fn().mockResolvedValue(offboardingEmployeeTaskData()),

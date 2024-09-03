@@ -16,35 +16,36 @@ export const offboardingEmployeeTaskData = (): OffboardingEmployeeTask => {
     updatedAt: new Date('2022-10-22 07:11:42'),
     deletedAt: null,
     approver: undefined,
-    employeTermination: undefined
-  };
-
-};
-
-export const createOffboardingEmployeeTask = (): CreateOffboardingEmployeeTaskDto => {
-  return {
-    title: 'Submit Final Report',
-    description: 'Submit a final report of all tasks completed.',
-    isCompleted: false,
-    tenantId: 'tenant-id-123',
-    employeTerminationId: 'termination-id-456',
-    approverId: 'approver-id-789',
-    completedDate: new Date('2022-10-22 07:11:42'),
+    employeTermination: undefined,
   };
 };
 
-export const findAllOffboardingEmployeeTasks = (): Pagination<OffboardingEmployeeTask> => {
-  return {
-    items: [offboardingEmployeeTaskData()],
-    meta: {
-      totalItems: 1,
-      itemCount: 1,
-      itemsPerPage: 10,
-      totalPages: 1,
-      currentPage: 1,
-    },
+export const createOffboardingEmployeeTask =
+  (): CreateOffboardingEmployeeTaskDto => {
+    return {
+      title: 'Submit Final Report',
+      description: 'Submit a final report of all tasks completed.',
+      isCompleted: false,
+      tenantId: 'tenant-id-123',
+      employeTerminationId: 'termination-id-456',
+      approverId: 'approver-id-789',
+      completedDate: new Date('2022-10-22 07:11:42'),
+    };
   };
-};
+
+export const findAllOffboardingEmployeeTasks =
+  (): Pagination<OffboardingEmployeeTask> => {
+    return {
+      items: [offboardingEmployeeTaskData()],
+      meta: {
+        totalItems: 1,
+        itemCount: 1,
+        itemsPerPage: 10,
+        totalPages: 1,
+        currentPage: 1,
+      },
+    };
+  };
 
 export const updateOffboardingEmployeeTask = () => {
   return {

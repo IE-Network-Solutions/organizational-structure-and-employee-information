@@ -15,12 +15,14 @@ import {
   paginationResultEmployeeTerminationData,
 } from './tests/employee-termination.data';
 import { UserService } from '../users/user.service';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 describe('EmployeeTerminationService', () => {
   let employeeTerminationService: EmployeeTerminationService;
   let userService: UserService;
   let employeeTerminationRepository: MockProxy<Repository<EmployeeTermination>>;
   let paginationService: MockProxy<PaginationService>;
+  let employeeJobInformationService: MockProxy<EmployeeJobInformationService>;
   const employeeTerminationToken = getRepositoryToken(EmployeeTermination);
 
   beforeEach(async () => {
@@ -30,6 +32,10 @@ describe('EmployeeTerminationService', () => {
         {
           provide: PaginationService,
           useValue: mock<PaginationService>(),
+        },
+        {
+          provide: EmployeeJobInformationService,
+          useValue: mock<EmployeeJobInformationService>(),
         },
         {
           provide: UserService,
@@ -116,6 +122,45 @@ describe('EmployeeTerminationService', () => {
           where: { id: employeeTerminationData().id },
         });
       });
+    });
+  });
+
+  describe('findOneByUserIdWithJobInfo', () => {
+    describe('when findOneByUserIdWithJobInfo is called', () => {
+      let employeeData: CreateEmployeeTerminationDto;
+
+      beforeEach(async () => {
+        employeeData =
+          await employeeTerminationService.findOneByUserIdWithJobInfo(
+            employeeTerminationData().userId,
+          );
+        employeeTerminationRepository.findOne.mockResolvedValue(
+          employeeTerminationData(),
+        );
+      });
+
+      it('should call employeeTerminationRepository.findOne', async () => {
+        await employeeTerminationService.findOneByUserIdWithJobInfo(
+          employeeTerminationData().userId,
+        );
+        expect(employeeTerminationRepository.findOne).toHaveBeenCalledWith({
+          where: { userId: employeeTerminationData().userId, isActive: true },
+          relations: ['jobInformation'],
+        });
+      });
+
+      it('should return the correct termination data', async () => {
+        const result =
+          await employeeTerminationService.findOneByUserIdWithJobInfo(
+            employeeTerminationData().userId,
+          );
+        expect(result).toEqual(employeeTerminationData());
+      });
+
+      // it('should throw NotFoundException if termination is not found', async () => {
+      //   employeeTerminationRepository.findOne.mockResolvedValue(null);
+      //   await expect(employeeTerminationService.findOneByUserIdWithJobInfo(employeeTerminationData().userId)).rejects.toThrowError(NotFoundException);
+      // });
     });
   });
 

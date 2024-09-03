@@ -12,7 +12,8 @@ import { User } from '../../users/entities/user.entity';
 @EventSubscriber()
 @Injectable()
 export class OffboardingEmployeeTasksSubscriber
-  implements EntitySubscriberInterface<OffboardingEmployeeTask> {
+  implements EntitySubscriberInterface<OffboardingEmployeeTask>
+{
   listenTo() {
     return OffboardingEmployeeTask;
   }

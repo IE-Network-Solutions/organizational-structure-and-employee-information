@@ -3,7 +3,11 @@ import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data
 import { OffboardingTasksTemplateController } from './offboarding-tasks-template.controller';
 import { OffboardingTasksTemplateService } from './offboarding-tasks-template.service';
 import { OffboardingTasksTemplate } from './entities/offboarding-tasks-template..entity';
-import { createOffboardingTasksTemplate, findAllOffboardingTasksTemplates, offboardingTasksTemplateData } from './tests/offboarding-tasks-template..data';
+import {
+  createOffboardingTasksTemplate,
+  findAllOffboardingTasksTemplates,
+  offboardingTasksTemplateData,
+} from './tests/offboarding-tasks-template..data';
 import { UpdateOffboardingTasksTemplateDto } from './dto/update-offboarding-tasks-template..dto';
 
 jest.mock('./offboarding-tasks-template.service');
@@ -19,8 +23,14 @@ describe('OffboardingTasksTemplateController', () => {
       providers: [OffboardingTasksTemplateService],
     }).compile();
 
-    offboardingTasksTemplateController = moduleRef.get<OffboardingTasksTemplateController>(OffboardingTasksTemplateController);
-    offboardingTasksTemplateService = moduleRef.get<OffboardingTasksTemplateService>(OffboardingTasksTemplateService);
+    offboardingTasksTemplateController =
+      moduleRef.get<OffboardingTasksTemplateController>(
+        OffboardingTasksTemplateController,
+      );
+    offboardingTasksTemplateService =
+      moduleRef.get<OffboardingTasksTemplateService>(
+        OffboardingTasksTemplateService,
+      );
 
     jest.clearAllMocks();
   });
@@ -35,11 +45,14 @@ describe('OffboardingTasksTemplateController', () => {
           tenantId: 'tenant-id-123',
         } as any;
 
-        (offboardingTasksTemplateService.create as jest.Mock).mockResolvedValue(offboardingTasksTemplateData());
-        offboardingTasksTemplate = await offboardingTasksTemplateController.create(
-          request,
-          createOffboardingTasksTemplate(),
+        (offboardingTasksTemplateService.create as jest.Mock).mockResolvedValue(
+          offboardingTasksTemplateData(),
         );
+        offboardingTasksTemplate =
+          await offboardingTasksTemplateController.create(
+            request,
+            createOffboardingTasksTemplate(),
+          );
       });
 
       test('then it should call offboardingTasksTemplateService.create with correct parameters', () => {
@@ -50,7 +63,9 @@ describe('OffboardingTasksTemplateController', () => {
       });
 
       test('then it should return a template', () => {
-        expect(offboardingTasksTemplate).toEqual(offboardingTasksTemplateData());
+        expect(offboardingTasksTemplate).toEqual(
+          offboardingTasksTemplateData(),
+        );
       });
     });
   });
@@ -61,22 +76,31 @@ describe('OffboardingTasksTemplateController', () => {
 
       beforeEach(async () => {
         request = {
-          tenantId: 'tenantId',
+          tenantId: 'tenant-id-123',
         } as any;
 
-        (offboardingTasksTemplateService.findAll as jest.Mock).mockResolvedValue(findAllOffboardingTasksTemplates());
+        (
+          offboardingTasksTemplateService.findAll as jest.Mock
+        ).mockResolvedValue(findAllOffboardingTasksTemplates());
 
-        await offboardingTasksTemplateController.findAll(paginationOptions());
+        await offboardingTasksTemplateController.findAll(
+          request,
+          paginationOptions(),
+        );
       });
 
       test('then it should call offboardingTasksTemplateService.findAll with correct parameters', () => {
         expect(offboardingTasksTemplateService.findAll).toHaveBeenCalledWith(
           paginationOptions(),
+          offboardingTasksTemplateData().tenantId,
         );
       });
 
       test('then it should return all templates', async () => {
-        const result = await offboardingTasksTemplateController.findAll(paginationOptions());
+        const result = await offboardingTasksTemplateController.findAll(
+          request,
+          paginationOptions(),
+        );
         expect(result).toEqual(findAllOffboardingTasksTemplates());
       });
     });
@@ -87,15 +111,22 @@ describe('OffboardingTasksTemplateController', () => {
       let offboardingTasksTemplate: OffboardingTasksTemplate;
 
       beforeEach(async () => {
-        offboardingTasksTemplate = await offboardingTasksTemplateController.findOne(offboardingTasksTemplateData().id);
+        offboardingTasksTemplate =
+          await offboardingTasksTemplateController.findOne(
+            offboardingTasksTemplateData().id,
+          );
       });
 
       test('then it should call offboardingTasksTemplateService', () => {
-        expect(offboardingTasksTemplateService.findOne).toHaveBeenCalledWith(offboardingTasksTemplateData().id);
+        expect(offboardingTasksTemplateService.findOne).toHaveBeenCalledWith(
+          offboardingTasksTemplateData().id,
+        );
       });
 
       test('then it should return a template', () => {
-        expect(offboardingTasksTemplate).toEqual(offboardingTasksTemplateData());
+        expect(offboardingTasksTemplate).toEqual(
+          offboardingTasksTemplateData(),
+        );
       });
     });
   });
@@ -111,12 +142,15 @@ describe('OffboardingTasksTemplateController', () => {
           tenantId: 'tenantId',
         } as any;
 
-        (offboardingTasksTemplateService.update as jest.Mock).mockResolvedValue(offboardingTasksTemplateData());
-
-        offboardingTasksTemplate = await offboardingTasksTemplateController.update(
-          offboardingTasksTemplateData().id,
-          updateOffboardingTasksTemplateDto,
+        (offboardingTasksTemplateService.update as jest.Mock).mockResolvedValue(
+          offboardingTasksTemplateData(),
         );
+
+        offboardingTasksTemplate =
+          await offboardingTasksTemplateController.update(
+            offboardingTasksTemplateData().id,
+            updateOffboardingTasksTemplateDto,
+          );
       });
 
       test('then it should call offboardingTasksTemplateService.update with correct parameters', () => {
@@ -127,7 +161,9 @@ describe('OffboardingTasksTemplateController', () => {
       });
 
       test('then it should return the updated template', () => {
-        expect(offboardingTasksTemplate).toEqual(offboardingTasksTemplateData());
+        expect(offboardingTasksTemplate).toEqual(
+          offboardingTasksTemplateData(),
+        );
       });
     });
   });
@@ -135,15 +171,23 @@ describe('OffboardingTasksTemplateController', () => {
   describe('remove', () => {
     describe('when remove is called', () => {
       beforeEach(async () => {
-        await offboardingTasksTemplateController.remove(offboardingTasksTemplateData().id);
+        await offboardingTasksTemplateController.remove(
+          offboardingTasksTemplateData().id,
+        );
       });
 
       test('then it should call remove', () => {
-        expect(offboardingTasksTemplateService.remove).toHaveBeenCalledWith(offboardingTasksTemplateData().id);
+        expect(offboardingTasksTemplateService.remove).toHaveBeenCalledWith(
+          offboardingTasksTemplateData().id,
+        );
       });
 
       test('then it should return void', async () => {
-        expect(await offboardingTasksTemplateController.remove(offboardingTasksTemplateData().id)).toEqual("Promise resolves with void");
+        expect(
+          await offboardingTasksTemplateController.remove(
+            offboardingTasksTemplateData().id,
+          ),
+        ).toEqual('Promise resolves with void');
       });
     });
   });
