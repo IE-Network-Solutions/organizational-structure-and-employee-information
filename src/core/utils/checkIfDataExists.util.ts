@@ -23,3 +23,30 @@ export async function checkIfDataExists(
     throw new Error(messages.join(' '));
   }
 }
+
+
+export async function checkIfDataExistsInEveryColumn(
+  values: Record<string, string>,
+  anyRepository: any,
+) {
+  const messages: string[] = [];
+
+  const checks = await Promise.all(
+    Object.entries(values).map(async ([column, value]) => {
+      const exists = await anyRepository.findOne({
+        where: { [column]: value },
+      });
+      if (exists) {
+        messages.push(
+          `${value} ${column} already exist. Please try a different one.`,
+        );
+      }
+      return exists;
+    }),
+  );
+
+  const hasDuplicates = checks.every((exists) => exists);
+  if (hasDuplicates) {
+    throw new Error(messages.join(' '));
+  }
+}

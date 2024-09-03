@@ -11,11 +11,10 @@ import { Repository } from 'typeorm';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { EmployeeTermination } from './entities/employee-termination.entity';
-import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
+import { checkIfDataExistsInEveryColumn } from '@root/src/core/utils/checkIfDataExists.util';
 import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.dto';
 import { UpdateEmployeeTerminationDto } from './dto/update-employee-termination.dto';
 import { UserService } from '../users/user.service';
-import { AnyCnameRecord } from 'dns';
 import { User } from '../users/entities/user.entity';
 import { EligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
@@ -29,7 +28,7 @@ export class EmployeeTerminationService {
     private paginationService: PaginationService,
     private userService: UserService,
     private employeeJobInformationService: EmployeeJobInformationService,
-  ) {}
+  ) { }
   async create(
     createEmployeeTerminationDto: CreateEmployeeTerminationDto,
     tenantId: string,
@@ -40,11 +39,11 @@ export class EmployeeTerminationService {
           ...createEmployeeTerminationDto,
           tenantId: tenantId,
         });
-      // const valuesToCheck = { isActive: "true", userId: createEmployeeTerminationDto.userId };
-      // await checkIfDataExists(
-      //   valuesToCheck,
-      //   this.employeeTerminationRepository,
-      // );
+      const valuesToCheck = { isActive: "true", userId: createEmployeeTerminationDto.userId };
+      await checkIfDataExistsInEveryColumn(
+        valuesToCheck,
+        this.employeeTerminationRepository,
+      );
       const check = await this.employeeTerminationRepository.save(
         createEmployeeTermination,
       );
@@ -153,7 +152,6 @@ export class EmployeeTerminationService {
           where: {
             userId: userId,
             isActive: true,
-            eligibleForRehire: 'yes' as EligibleForRehire,
           },
         });
         if (!termination) {
