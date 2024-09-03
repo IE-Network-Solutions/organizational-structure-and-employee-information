@@ -45,7 +45,7 @@ export class UserService {
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
-  ) {}
+  ) { }
 
   async create(
     tenantId: string,
@@ -273,7 +273,7 @@ export class UserService {
   async remove(id: string) {
     try {
       await this.userRepository.findOneOrFail({ where: { id: id } });
-      return await this.userRepository.softDelete({ id });
+      return await this.userRepository.softRemove({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);

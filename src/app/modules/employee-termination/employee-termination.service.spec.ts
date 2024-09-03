@@ -15,8 +15,6 @@ import {
   paginationResultEmployeeTerminationData,
 } from './tests/employee-termination.data';
 import { UserService } from '../users/user.service';
-import { promises } from 'fs';
-import { NotFoundException } from '@nestjs/common';
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 describe('EmployeeTerminationService', () => {
