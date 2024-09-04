@@ -135,6 +135,13 @@ export class UserController {
     );
   }
 
+  @Get('/info/user-info')
+  async findUserInfoByArrayOfUserIds(
+    @Body() arrayOfId: string[],
+  ): Promise<any> {
+    return await this.userService.findUserInfoByArrayOfUserIds(arrayOfId);
+  }
+
   @Get()
   async findAll(
     @Req() request: Request,
