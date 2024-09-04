@@ -128,4 +128,19 @@ export class EmployeeInformationService {
       throw error;
     }
   }
+
+  async findOneByUserId(userId: string) {
+    try {
+      const user = await this.employeeInformationRepository.findOne({
+        where: { userId: userId },
+      });
+
+      return { ...user };
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User with id ${userId} not found.`);
+      }
+      throw error;
+    }
+  }
 }

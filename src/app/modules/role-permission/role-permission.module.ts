@@ -6,7 +6,9 @@ import { RolePermission } from './entities/role-permission.entity';
 import { RolePermissionRepository } from './role-permission-repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RolePermission, RolePermissionRepository])],
+  imports: [
+    TypeOrmModule.forFeature([RolePermission, RolePermissionRepository]),
+  ],
   controllers: [],
   providers: [RolePermissionService, PaginationService],
   exports: [RolePermissionService],

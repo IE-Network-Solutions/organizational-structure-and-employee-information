@@ -94,7 +94,6 @@ describe('DepartmentsService', () => {
       expect(repository.findDescendantsTree).toHaveBeenCalledWith(department);
     });
 
-
     it('should throw NotFoundException if no departments are found', async () => {
       const tenantId = 'tenant-id-123';
 
@@ -115,7 +114,6 @@ describe('DepartmentsService', () => {
       await expect(service.findAllDepartments(tenantId)).rejects.toThrow(
         BadRequestException,
       );
-
     });
   });
 

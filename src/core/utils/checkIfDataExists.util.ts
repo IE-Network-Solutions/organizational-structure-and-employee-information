@@ -24,7 +24,6 @@ export async function checkIfDataExists(
   }
 }
 
-
 export async function checkIfDataExistsInEveryColumn(
   values: Record<string, string>,
   anyRepository: any,

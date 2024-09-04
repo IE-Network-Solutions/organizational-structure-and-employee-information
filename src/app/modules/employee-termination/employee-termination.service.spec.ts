@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { mock, MockProxy } from 'jest-mock-extended';
 
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
@@ -15,7 +15,10 @@ import {
   paginationResultEmployeeTerminationData,
 } from './tests/employee-termination.data';
 import { UserService } from '../users/user.service';
+import { promises } from 'fs';
+import { NotFoundException } from '@nestjs/common';
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
+import { EmployeeInformationService } from '../employee-information/employee-information.service';
 
 describe('EmployeeTerminationService', () => {
   let employeeTerminationService: EmployeeTerminationService;
@@ -23,7 +26,10 @@ describe('EmployeeTerminationService', () => {
   let employeeTerminationRepository: MockProxy<Repository<EmployeeTermination>>;
   let paginationService: MockProxy<PaginationService>;
   let employeeJobInformationService: MockProxy<EmployeeJobInformationService>;
+  let employeeIformationService: MockProxy<EmployeeInformationService>;
+
   const employeeTerminationToken = getRepositoryToken(EmployeeTermination);
+  let queryRunner: QueryRunner;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -38,8 +44,24 @@ describe('EmployeeTerminationService', () => {
           useValue: mock<EmployeeJobInformationService>(),
         },
         {
+          provide: EmployeeInformationService,
+          useValue: mock<EmployeeInformationService>(),
+        },
+        {
           provide: UserService,
           useValue: mock<UserService>(),
+        },
+        {
+          provide: DataSource,
+          useValue: {
+            createQueryRunner: jest.fn().mockReturnValue({
+              connect: jest.fn(),
+              startTransaction: jest.fn(),
+              commitTransaction: jest.fn(),
+              rollbackTransaction: jest.fn(),
+              release: jest.fn(),
+            }),
+          },
         },
         {
           provide: employeeTerminationToken,
@@ -51,6 +73,8 @@ describe('EmployeeTerminationService', () => {
     employeeTerminationService = moduleRef.get<EmployeeTerminationService>(
       EmployeeTerminationService,
     );
+    userService = moduleRef.get<UserService>(UserService);
+    userService = moduleRef.get<UserService>(UserService);
     employeeTerminationRepository = moduleRef.get(employeeTerminationToken);
     paginationService = moduleRef.get(PaginationService);
   });

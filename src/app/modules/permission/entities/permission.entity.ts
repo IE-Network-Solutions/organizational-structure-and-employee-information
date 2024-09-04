@@ -19,14 +19,20 @@ export class Permission extends BaseModel {
   permissionGroupId: string;
 
   @ManyToOne(
-    () => PermissionGroup,permissionGroup => permissionGroup.permission  )
+    () => PermissionGroup,
+    (permissionGroup) => permissionGroup.permission,
+  )
   permissionGroup: PermissionGroup;
 
   @OneToMany(
-    () => RolePermission,rolePermission => rolePermission.permissions)
+    () => RolePermission,
+    (rolePermission) => rolePermission.permissions,
+  )
   rolePermissions: RolePermission[];
 
   @OneToMany(
-    () => UserPermission,userPermissions => userPermissions.permission)
+    () => UserPermission,
+    (userPermissions) => userPermissions.permission,
+  )
   userPermissions: UserPermission[];
 }

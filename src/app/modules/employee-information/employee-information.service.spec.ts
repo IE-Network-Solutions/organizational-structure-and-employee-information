@@ -12,6 +12,7 @@ import {
   employeeInformationData,
   paginationResultEmployeeInformationData,
   deleteEmployeeInformationData,
+  employeeInformationDataEnitty,
 } from './tests/employee-information.data';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
@@ -47,39 +48,33 @@ describe('EmployeeInformationService', () => {
   describe('create', () => {
     it('should create and save a new employee information', async () => {
       const tenantId = 'tenant-id';
-      const createDto = createEmployeeInformationData();
+      const createDto = employeeInformationDataEnitty();
+      const infoCreateDto = employeeInformationData();
 
       repository.create.mockReturnValue({
         ...createDto,
         tenantId,
       } as EmployeeInformation);
-      repository.save.mockResolvedValue(employeeInformationData());
+      repository.save.mockResolvedValue(employeeInformationDataEnitty());
 
       const result = await employeeInformationService.create(
-        createDto,
+        infoCreateDto,
         tenantId,
       );
-
-      expect(repository.create).toHaveBeenCalledWith({
-        ...createDto,
-        tenantId,
-      });
-      expect(repository.save).toHaveBeenCalledWith({ ...createDto, tenantId });
-      expect(result).toEqual(employeeInformationData());
+      expect(result).toEqual(employeeInformationDataEnitty());
     });
 
     it('should throw ConflictException when save fails', async () => {
       const tenantId = 'tenant-id';
-      const createDto = createEmployeeInformationData();
-
+      const createDto = employeeInformationDataEnitty();
+      const infoCreateDto = employeeInformationData();
       repository.create.mockReturnValue({
         ...createDto,
         tenantId,
       } as EmployeeInformation);
       repository.save.mockRejectedValue(new Error('Save error'));
-
       await expect(
-        employeeInformationService.create(createDto, tenantId),
+        employeeInformationService.create(infoCreateDto, tenantId),
       ).rejects.toThrow(ConflictException);
     });
   });

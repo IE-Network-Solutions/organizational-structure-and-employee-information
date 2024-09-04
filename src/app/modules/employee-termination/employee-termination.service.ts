@@ -6,8 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { EmployeeTermination } from './entities/employee-termination.entity';
@@ -16,19 +16,22 @@ import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.
 import { UpdateEmployeeTerminationDto } from './dto/update-employee-termination.dto';
 import { UserService } from '../users/user.service';
 import { User } from '../users/entities/user.entity';
-import { EligibleForRehire } from '@root/src/core/enum/eligible-for-hire.enum';
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto/create-employee-job-information.dto';
-
+import { EmployeeInformationService } from '../employee-information/employee-information.service';
+import { UpdateEmployeeInformationDto } from '../employee-information/dto/update-employee-information.dto';
+import { Connection } from 'typeorm';
 @Injectable()
 export class EmployeeTerminationService {
   constructor(
     @InjectRepository(EmployeeTermination)
     private employeeTerminationRepository: Repository<EmployeeTermination>,
+    @InjectDataSource() private dataSource: DataSource,
     private paginationService: PaginationService,
     private userService: UserService,
     private employeeJobInformationService: EmployeeJobInformationService,
-  ) { }
+    private employeenformationService: EmployeeInformationService,
+  ) {}
   async create(
     createEmployeeTerminationDto: CreateEmployeeTerminationDto,
     tenantId: string,
@@ -39,7 +42,10 @@ export class EmployeeTerminationService {
           ...createEmployeeTerminationDto,
           tenantId: tenantId,
         });
-      const valuesToCheck = { isActive: "true", userId: createEmployeeTerminationDto.userId };
+      const valuesToCheck = {
+        isActive: 'true',
+        userId: createEmployeeTerminationDto.userId,
+      };
       await checkIfDataExistsInEveryColumn(
         valuesToCheck,
         this.employeeTerminationRepository,
@@ -144,36 +150,59 @@ export class EmployeeTerminationService {
     tenantId: string,
     createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
   ): Promise<User> {
-    try {
-      const status = EligibleForRehire.yes;
-      const user = await this.userService.findOne(userId);
-      if (user) {
-        const termination = await this.employeeTerminationRepository.findOne({
-          where: {
-            userId: userId,
-            isActive: true,
-          },
-        });
-        if (!termination) {
-          await this.userService.activateUser(userId, tenantId);
-          await this.userService.activateUser(userId, tenantId);
-          await this.employeeJobInformationService.create(
-            createEmployeeJobInformationDto,
-            tenantId,
-          );
-          return user;
-        }
+    const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
 
+    await queryRunner.connect();
+
+    await queryRunner.startTransaction();
+
+    try {
+      const user = await this.userService.findOne(userId);
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found.`);
+      }
+
+      const termination = await this.employeeTerminationRepository.findOne({
+        where: {
+          userId: userId,
+          isActive: true,
+        },
+      });
+
+      if (!termination) {
+        await this.userService.activateUser(userId, tenantId);
+        await this.employeeJobInformationService.create(
+          createEmployeeJobInformationDto,
+          tenantId,
+        );
+
+        const employeeInformation =
+          await this.employeenformationService.findOne(userId);
+        const updateEmployeeInformation: UpdateEmployeeInformationDto = {
+          joinedDate: createEmployeeJobInformationDto['joinedDate'],
+        };
+
+        await this.employeenformationService.update(
+          'employeeInformation.id,',
+          updateEmployeeInformation,
+        );
+      } else {
         await this.update(termination.id, { isActive: false });
         await this.userService.activateUser(userId, tenantId);
         await this.employeeJobInformationService.create(
           createEmployeeJobInformationDto,
           tenantId,
         );
-        return user;
       }
+
+      await queryRunner.commitTransaction();
+      return user;
     } catch (error) {
-      throw new BadRequestException(error);
+      await queryRunner.rollbackTransaction();
+
+      throw new ConflictException(error);
+    } finally {
+      await queryRunner.release();
     }
   }
 }

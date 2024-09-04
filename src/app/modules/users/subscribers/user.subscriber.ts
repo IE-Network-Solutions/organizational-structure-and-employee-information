@@ -17,39 +17,39 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
   listenTo() {
     return User;
   }
-  async afterUserSoftRemoveFromEmployeeInformation(
-    event: SoftRemoveEvent<User>,
-  ) {
-    const employeeInformationRepository: Repository<EmployeeInformation> =
-      event.connection.getRepository(EmployeeInformation);
-    if (event.entity.deletedAt) {
-      await employeeInformationRepository.softRemove({
-        userId: event.entity.id,
-      });
-    }
-  }
-
-  async afterUserSoftRemoveFromEmployeeDocument(event: SoftRemoveEvent<User>) {
-    const employeeDocumentRepository: Repository<EmployeeDocument> =
-      event.connection.getRepository(EmployeeDocument);
-    if (event.entity.deletedAt) {
-      await employeeDocumentRepository.softRemove({ userId: event.entity.id });
-    }
-  }
-
-  async afterUserSoftRemoveFromEmployeeJobInformation(
-    event: SoftRemoveEvent<User>,
-  ) {
+  async afterSoftRemove(event: SoftRemoveEvent<User>) {
     const employeeJobInformationRepository: Repository<EmployeeJobInformation> =
       event.connection.getRepository(EmployeeJobInformation);
+
     if (event.entity.deletedAt) {
-      await employeeJobInformationRepository.softRemove({
-        userId: event.entity.id,
+      const jobInfo = await employeeJobInformationRepository.find({
+        where: { userId: event.entity.id },
       });
+      for (const job of jobInfo) {
+        await employeeJobInformationRepository.softRemove(job);
+      }
       await employeeJobInformationRepository.update(
         { userId: event.entity.id },
         { isPositionActive: false },
       );
+
+      const employeeDocumentRepository: Repository<EmployeeDocument> =
+        event.connection.getRepository(EmployeeDocument);
+      const employeeDocument = await employeeDocumentRepository.find({
+        where: { userId: event.entity.id },
+      });
+      for (const document of employeeDocument) {
+        await employeeDocumentRepository.softRemove(document);
+      }
+
+      const employeeInformationRepository: Repository<EmployeeInformation> =
+        event.connection.getRepository(EmployeeInformation);
+      const employeeInformation = await employeeInformationRepository.find({
+        where: { userId: event.entity.id },
+      });
+      for (const information of employeeInformation) {
+        await employeeInformationRepository.softRemove(information);
+      }
     }
   }
 }

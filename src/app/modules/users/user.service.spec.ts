@@ -104,6 +104,11 @@ describe('UserService', () => {
           provide: RoleService,
           useValue: mock<RoleService>(),
         },
+        // Mocking the EmployeeTerminationService dependencies
+        {
+          provide: EmployeeInformationService,
+          useValue: mock<EmployeeInformationService>(),
+        },
       ],
     }).compile();
 

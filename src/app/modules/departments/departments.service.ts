@@ -20,7 +20,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -85,7 +85,6 @@ export class DepartmentsService {
         throw error;
       }
       throw new BadRequestException(error.message);
-
     }
   }
 
@@ -119,7 +118,6 @@ export class DepartmentsService {
       }
     } catch (error) {
       throw new BadRequestException(error);
-
     }
   }
 

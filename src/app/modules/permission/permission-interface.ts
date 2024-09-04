@@ -8,8 +8,14 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 
 export interface PermissionInterface {
   create(createPermissionDto: CreatePermissionDto): Promise<Permission>;
-  findAll(paginationOptions?: PaginationDto,searchFilterDTO?: SearchFilterDTO): Promise<Pagination<Permission>>;
+  findAll(
+    paginationOptions?: PaginationDto,
+    searchFilterDTO?: SearchFilterDTO,
+  ): Promise<Pagination<Permission>>;
   findOne(id: string): Promise<Permission>;
-  update(id: string,updatePermissionDto: UpdatePermissionDto): Promise<Permission>;
+  update(
+    id: string,
+    updatePermissionDto: UpdatePermissionDto,
+  ): Promise<Permission>;
   remove(id: string): Promise<UpdateResult>;
 }

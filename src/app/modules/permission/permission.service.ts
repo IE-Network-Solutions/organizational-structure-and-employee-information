@@ -22,7 +22,7 @@ export class PermissionService implements PermissionInterface {
   constructor(
     @InjectRepository(Permission)
     private readonly permissionRepository: PermissionRepository,
-    private readonly paginationService: PaginationService,      
+    private readonly paginationService: PaginationService,
   ) {}
 
   async create(createPermissionDto: CreatePermissionDto) {
@@ -38,7 +38,10 @@ export class PermissionService implements PermissionInterface {
     }
   }
 
-  async findAll( paginationOptions: PaginationDto, searchFilterDTO: SearchFilterDTO): Promise<Pagination<Permission>> {
+  async findAll(
+    paginationOptions: PaginationDto,
+    searchFilterDTO: SearchFilterDTO,
+  ): Promise<Pagination<Permission>> {
     const options: IPaginationOptions = {
       page: paginationOptions.page,
       limit: paginationOptions.limit,
@@ -101,14 +104,14 @@ export class PermissionService implements PermissionInterface {
     updatePermissionGroupDto: UpdatePermissionGroupDto,
   ) {
     try {
-    return await this.permissionRepository.findByIds(
-      updatePermissionGroupDto.permissions,
-    );
-  } catch (error) {
-    if (error.name === 'EntityNotFoundError') {
-      throw new NotFoundException(`Permission not found.`);
+      return await this.permissionRepository.findByIds(
+        updatePermissionGroupDto.permissions,
+      );
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`Permission not found.`);
+      }
+      throw error;
     }
-    throw error;
-  }
   }
 }

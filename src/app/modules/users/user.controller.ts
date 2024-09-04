@@ -28,8 +28,11 @@ import { CreateEmployeeDocumentDto } from '../employee-documents/dto/create-empl
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { parseNestedJson } from '@root/src/core/utils/parseNestedJson.utils';
-import { ExcludeTenantGuard } from '@root/src/core/guards/excludetenant.guard';
 import { FilterDto } from './dto/filter-status-user.dto';
+import {
+  ExcludeAuthGuard,
+  ExcludeTenantGuard,
+} from '@root/src/core/guards/exclud.guard';
 
 @Controller('users')
 @ApiTags('Users')
@@ -206,6 +209,7 @@ export class UserController {
   }
 
   @Post('/create-first-user-for-tenant')
+  @ExcludeAuthGuard()
   async createFromTenant(@Body() body: any, @Req() request: Request) {
     const { createUserDto } = body;
     const role = createUserDto.role;
