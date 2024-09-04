@@ -15,11 +15,10 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
 import { PermissionGroupRepository } from './permission-group-reposiory';
-import { PermissionGroupInterface } from './permission-group-interface'; 
+import { PermissionGroupInterface } from './permission-group-interface';
 
 @Injectable()
 export class PermissionGroupService implements PermissionGroupInterface {
-  
   constructor(
     @InjectRepository(PermissionGroup)
     private readonly permissionGroupRepository: PermissionGroupRepository,

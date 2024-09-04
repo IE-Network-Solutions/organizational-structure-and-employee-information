@@ -1,4 +1,3 @@
-
 import { EntityRepository, Repository } from 'typeorm';
 import { PermissionGroup } from './entities/permission-group.entity';
 

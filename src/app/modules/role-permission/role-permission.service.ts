@@ -9,13 +9,16 @@ import { RolePermissionInterface } from './role-permission-interface';
 import { RolePermissionRepository } from './role-permission-repository';
 
 @Injectable()
-export class RolePermissionService implements RolePermissionInterface{
+export class RolePermissionService implements RolePermissionInterface {
   constructor(
     @InjectRepository(RolePermission)
     private readonly rolePermissionRepository: RolePermissionRepository,
     private readonly paginationService: PaginationService,
   ) {}
-  async createRoleWithPermissions(roleId: string, permissionIds: string[]) :Promise<any>{
+  async createRoleWithPermissions(
+    roleId: string,
+    permissionIds: string[],
+  ): Promise<any> {
     const assignedPermissions = permissionIds.map((permissionId) => {
       return this.rolePermissionRepository.create({
         role: { id: roleId },
@@ -66,7 +69,7 @@ export class RolePermissionService implements RolePermissionInterface{
     roleId: string,
     permissionIds: string[],
     tenantId: string,
-  ):Promise<any> {
+  ): Promise<any> {
     try {
       await this.rolePermissionRepository.delete({ role: { id: roleId } });
       const assignedPermissions = permissionIds.map((permissionId) => {

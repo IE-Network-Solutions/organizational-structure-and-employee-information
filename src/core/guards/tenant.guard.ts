@@ -15,7 +15,10 @@ export class TenantGuard implements CanActivate {
     const handler = context.getHandler();
 
     // Check if the route is excluded from the guard
-    const isExcluded = this.reflector.get<boolean>('isExcluded', handler);
+    const isExcluded = this.reflector.get<boolean>(
+      'hasExcludedTenantId',
+      handler,
+    );
     if (isExcluded) {
       return true;
     }

@@ -24,17 +24,22 @@ export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
   @Post()
-  create(@Body() createPermissionDto: CreatePermissionDto):Promise<Permission> {
+  create(
+    @Body() createPermissionDto: CreatePermissionDto,
+  ): Promise<Permission> {
     return this.permissionService.create(createPermissionDto);
   }
 
   @Get()
-  findAll(@Query() paginationOptions?: PaginationDto,@Query() searchFilterDTO?: SearchFilterDTO):Promise< Pagination<Permission> > {
+  findAll(
+    @Query() paginationOptions?: PaginationDto,
+    @Query() searchFilterDTO?: SearchFilterDTO,
+  ): Promise<Pagination<Permission>> {
     return this.permissionService.findAll(paginationOptions, searchFilterDTO);
   }
 
   @Get(':permissionId')
-  findOne(@Param('permissionId') id: string):Promise<Permission> {
+  findOne(@Param('permissionId') id: string): Promise<Permission> {
     return this.permissionService.findOne(id);
   }
 
@@ -42,7 +47,7 @@ export class PermissionController {
   update(
     @Param('permissionId') id: string,
     @Body() updatePermissionDto: UpdatePermissionDto,
-  ):Promise<Permission> {
+  ): Promise<Permission> {
     return this.permissionService.update(id, updatePermissionDto);
   }
 

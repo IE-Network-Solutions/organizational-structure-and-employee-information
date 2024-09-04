@@ -21,7 +21,7 @@ export class UserPermissionService implements UserPermissionInterface {
   async assignPermissionToUser(
     createUserPermissionDto: CreateUserPermissionDto,
     tenantId: string,
-  ):Promise<any> {
+  ): Promise<any> {
     const assignedPermissions = createUserPermissionDto.permissionId.map(
       (permissionId) => {
         return this.userPermissionRepository.create({
@@ -75,7 +75,7 @@ export class UserPermissionService implements UserPermissionInterface {
     id: string,
     updateUserPermissionDto: UpdateUserPermissionDto,
     tenantId: string,
-  ):Promise<any> {
+  ): Promise<any> {
     try {
       await this.userPermissionRepository.delete({ user: { id: id } });
       const assignedPermissions = updateUserPermissionDto.permissionId.map(

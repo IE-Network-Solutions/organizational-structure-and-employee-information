@@ -10,9 +10,9 @@ export class PermissionGroup extends BaseModel {
   @Column()
   description: string;
 
-  @Column({ nullable: true})
+  @Column({ nullable: true })
   tenantId: string;
 
-  @OneToMany(() => Permission, permissions => permissions.permissionGroup)
+  @OneToMany(() => Permission, (permissions) => permissions.permissionGroup)
   permission: Permission[];
 }

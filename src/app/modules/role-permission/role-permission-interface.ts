@@ -4,9 +4,18 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 import { UpdateResult } from 'typeorm';
 
 export interface RolePermissionInterface {
-    createRoleWithPermissions(roleId: string, permissionIds: string[]): Promise<RolePermission>;
-    findAll(paginationOptions?: PaginationDto): Promise<Pagination<RolePermission>>;
-    findOne(id: string): Promise<RolePermission> ;
-    updateRolePermissions(roleId: string,permissionIds: string[],tenantId: string): Promise<RolePermission>
-    remove(id: string): Promise<UpdateResult>;
+  createRoleWithPermissions(
+    roleId: string,
+    permissionIds: string[],
+  ): Promise<RolePermission>;
+  findAll(
+    paginationOptions?: PaginationDto,
+  ): Promise<Pagination<RolePermission>>;
+  findOne(id: string): Promise<RolePermission>;
+  updateRolePermissions(
+    roleId: string,
+    permissionIds: string[],
+    tenantId: string,
+  ): Promise<RolePermission>;
+  remove(id: string): Promise<UpdateResult>;
 }
