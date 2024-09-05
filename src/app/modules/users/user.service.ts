@@ -167,9 +167,13 @@ export class UserService {
       };
       let queryBuilder = await this.userRepository
         .createQueryBuilder('user')
+        .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+
         )
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
@@ -180,8 +184,7 @@ export class UserService {
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
-        .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId });
-      queryBuilder.withDeleted();
+        .andWhere('user.tenantId = :tenantId', { tenantId });
       queryBuilder = await filterEntities(
         queryBuilder,
         userFilters,
