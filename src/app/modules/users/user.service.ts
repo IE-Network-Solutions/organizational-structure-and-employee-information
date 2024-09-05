@@ -45,7 +45,7 @@ export class UserService {
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
-  ) {}
+  ) { }
 
   async create(
     tenantId: string,
@@ -167,11 +167,13 @@ export class UserService {
       };
       let queryBuilder = await this.userRepository
         .createQueryBuilder('user')
+        .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
           'employeeJobInformation.isPositionActive = :isPositionActive',
           { isPositionActive: true },
+
         )
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
@@ -182,8 +184,7 @@ export class UserService {
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
-        .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId });
-      queryBuilder.withDeleted();
+        .andWhere('user.tenantId = :tenantId', { tenantId });
       queryBuilder = await filterEntities(
         queryBuilder,
         userFilters,
@@ -271,14 +272,19 @@ export class UserService {
 
   async remove(id: string) {
     try {
-      await this.userRepository.findOneOrFail({ where: { id: id } });
+      const user = await this.userRepository.findOneOrFail({
+        where: { id: id },
+      });
+      await admin.auth().updateUser(user.firebaseId, {
+        disabled: true,
+      });
 
       return await this.userRepository.softRemove({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
-      throw error;
+      throw error?.message || error;
     }
   }
   async findReportingToUser(id: string) {
@@ -479,10 +485,21 @@ export class UserService {
       const user = await this.findOne(userId);
       if (user) {
         await this.userRepository.update(userId, { deletedAt: null });
+        await this.activateUserFromFirabse(user.firebaseId);
         return user;
       }
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async activateUserFromFirabse(firebaseId: string) {
+    try {
+      await admin.auth().updateUser(firebaseId, {
+        disabled: false,
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 }
