@@ -45,7 +45,7 @@ export class UserService {
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
-  ) {}
+  ) { }
 
   async create(
     tenantId: string,
@@ -170,8 +170,6 @@ export class UserService {
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
-          'employeeJobInformation.isPositionActive = :isPositionActive',
-          { isPositionActive: true },
         )
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
