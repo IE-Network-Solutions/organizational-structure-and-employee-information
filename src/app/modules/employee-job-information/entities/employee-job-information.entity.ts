@@ -36,7 +36,7 @@ export class EmployeeJobInformation extends BaseModel {
   effectiveEndDate: Date;
 
   @Column({ nullable: true })
-  employmentTypeId: string;
+  employementTypeId: string;
 
   @Column({ nullable: true })
   departmentId: string;
