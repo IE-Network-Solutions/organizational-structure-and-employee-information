@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,10 +8,7 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { Department } from './entities/department.entity';
-import { Repository, TreeRepository } from 'typeorm';
-import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
-import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { level } from 'winston';
+import { TreeRepository } from 'typeorm';
 
 @Injectable()
 export class DepartmentsService {
@@ -20,7 +16,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) {}
+  ) { }
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -202,12 +198,22 @@ export class DepartmentsService {
   }
 
   async removeDepartment(id: string): Promise<Department> {
-    const Department = await this.findOneDepartment(id);
-    if (!Department) {
+    const department = await this.findOneDepartment(id);
+    const descendants = await this.departmentRepository.findDescendants(department)
+
+    if (!department) {
       throw new NotFoundException(`Department with Id ${id} not found`);
     }
-    await this.departmentRepository.softDelete(id);
-    return Department;
+
+    if (descendants?.length > 0) {
+      for (let dep of descendants) {
+        await this.departmentRepository.softRemove(dep);
+      }
+
+    }
+    await this.departmentRepository.softRemove(department);
+
+    return department;
   }
 
   async findAncestor(id: string) {
