@@ -32,7 +32,7 @@ export class CreateEmployeeJobInformationDto {
 
   @IsOptional()
   @IsString()
-  employmentTypeId: string;
+  employementTypeId: string;
 
   @IsOptional()
   @IsString()

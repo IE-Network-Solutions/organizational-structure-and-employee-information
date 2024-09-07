@@ -12,8 +12,7 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 @EventSubscriber()
 @Injectable()
 export class EmployeeTypeSubscriber
-  implements EntitySubscriberInterface<EmployementType>
-{
+  implements EntitySubscriberInterface<EmployementType> {
   listenTo() {
     return EmployementType;
   }
@@ -24,8 +23,8 @@ export class EmployeeTypeSubscriber
       event.connection.getRepository(EmployeeJobInformation);
     if (event.entity.deletedAt) {
       await employeeJobInformationRepository.update(
-        { employmentTypeId: event.entity.id },
-        { employmentTypeId: null },
+        { employementTypeId: event.entity.id },
+        { employementTypeId: null },
       );
     }
   }

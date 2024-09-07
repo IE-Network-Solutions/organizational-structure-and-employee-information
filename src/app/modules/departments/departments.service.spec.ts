@@ -188,12 +188,16 @@ describe('DepartmentsService', () => {
       jest
         .spyOn(service, 'findOneDepartment')
         .mockResolvedValue(department as any);
-      jest.spyOn(repository, 'softDelete').mockResolvedValue({} as any);
+      jest.spyOn(repository, 'softRemove').mockResolvedValue({} as any);
+      jest
+        .spyOn(repository, 'findDescendants')
+        .mockResolvedValue(department as any);
+      jest.spyOn(repository, 'softRemove').mockResolvedValue({} as any);
 
       const result = await service.removeDepartment('1');
 
       expect(result).toEqual(department);
-      expect(repository.softDelete).toHaveBeenCalledWith('1');
+      expect(repository.softRemove).toHaveBeenCalledWith(department);
     });
 
     it('should throw a NotFoundException if department not found', async () => {
