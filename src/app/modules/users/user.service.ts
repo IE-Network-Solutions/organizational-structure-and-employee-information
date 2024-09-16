@@ -167,6 +167,7 @@ export class UserService {
       };
       let queryBuilder = await this.userRepository
         .createQueryBuilder('user')
+
         .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
