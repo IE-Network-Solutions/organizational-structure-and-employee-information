@@ -478,12 +478,8 @@ export class UserService {
     });
 
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
-    const expirationTime = Math.floor(Date.now() / 1000) + (24 * 60 * 60);
-
-    const additionalClaims = {
-      exp: expirationTime,
-    };
-    await admin.auth().createCustomToken(userRecord.uid, additionalClaims);
+    const expiresIn = 24 * 60 * 60 * 1000; // 24 hours
+    await admin.auth().createCustomToken(userRecord.uid, { expiresIn });
     return userRecord;
   }
   async activateUser(userId: string, tenantId: string): Promise<User> {

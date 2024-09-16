@@ -99,6 +99,7 @@ export class DepartmentsService {
                 relations: [
                   'employeeJobInformation',
                   'employeeJobInformation.user',
+                  'employeeJobInformation.user.role',
                 ],
               });
             departmentTree.employeeJobInformation =
@@ -108,6 +109,7 @@ export class DepartmentsService {
             return departmentTree;
           }),
         );
+
         return departmentTrees.filter((item) => item.level === 0)[0];
       } else {
         throw new NotFoundException('No Department Was Created.');

@@ -19,7 +19,7 @@ export class Department extends BaseModel {
   name: string;
   @Column({ length: 500, type: 'varchar', nullable: true })
   description: string;
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'uuid', })
   branchId: string;
 
   @Column({ type: 'uuid', nullable: false })
