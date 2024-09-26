@@ -20,7 +20,7 @@ import { Calendar } from './entities/calendar.entity';
 @Controller('calendars')
 @ApiTags('Calendars')
 export class CalendarsController {
-  constructor(private readonly calendarsService: CalendarsService) {}
+  constructor(private readonly calendarsService: CalendarsService) { }
 
   @Post()
   async createCalendar(
@@ -65,7 +65,7 @@ export class CalendarsController {
     return await this.calendarsService.removeCalendar(id);
   }
 
-  @Get(':/active')
+  @Get('/active')
   async findActiveCalander(@Req() req: Request): Promise<Calendar> {
     const tenantId = req['tenantId'];
     return await this.calendarsService.findActiveCalander(tenantId);

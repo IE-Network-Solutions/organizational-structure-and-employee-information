@@ -33,6 +33,7 @@ import {
   ExcludeAuthGuard,
   ExcludeTenantGuard,
 } from '@root/src/core/guards/exclud.guard';
+import { Department } from '../departments/entities/department.entity';
 
 @Controller('users')
 @ApiTags('Users')
@@ -220,5 +221,11 @@ export class UserController {
       tenantId,
       role,
     );
+  }
+
+  @Get('/all/departments')
+  findAllDepartments(@Req() request: Request): Promise<Department[]> {
+    const tenantId = request['tenantId'];
+    return this.userService.findAllDepartments(tenantId);
   }
 }

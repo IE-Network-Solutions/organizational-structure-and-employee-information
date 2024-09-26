@@ -31,8 +31,9 @@ jest.mock('firebase-admin', () => {
     auth: jest.fn().mockReturnValue({
       createUser: jest.fn().mockResolvedValue({ uid: 'firebase-uid-123' }),
       updateUser: jest.fn().mockResolvedValue({ uid: 'firebase-uid-123' }),
-      createCustomToken: jest.fn().mockResolvedValue({ uid: 'firebase-uid-123' }),
-
+      createCustomToken: jest
+        .fn()
+        .mockResolvedValue({ uid: 'firebase-uid-123' }),
     }),
     initializeApp: jest.fn(),
   };

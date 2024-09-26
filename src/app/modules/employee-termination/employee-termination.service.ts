@@ -31,7 +31,7 @@ export class EmployeeTerminationService {
     private userService: UserService,
     private employeeJobInformationService: EmployeeJobInformationService,
     private employeenformationService: EmployeeInformationService,
-  ) { }
+  ) {}
   async create(
     createEmployeeTerminationDto: CreateEmployeeTerminationDto,
     tenantId: string,
@@ -157,7 +157,8 @@ export class EmployeeTerminationService {
     await queryRunner.startTransaction();
 
     try {
-      createEmployeeJobInformationDto.effectiveStartDate = createEmployeeJobInformationDto['joinedDate']
+      createEmployeeJobInformationDto.effectiveStartDate =
+        createEmployeeJobInformationDto['joinedDate'];
       const user = await this.userService.findOne(userId);
       if (!user) {
         throw new NotFoundException(`User with ID ${userId} not found.`);

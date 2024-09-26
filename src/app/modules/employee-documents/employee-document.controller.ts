@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  UploadedFiles,
 } from '@nestjs/common';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { ApiTags } from '@nestjs/swagger';
@@ -18,26 +19,34 @@ import { UpdateEmployeeDocumentDto } from './dto/update-employee-documents.dto';
 import { EmployeeDocument } from './entities/employee-documents.entity';
 import { EmployeeDocumentService } from './employee-document.service';
 import { CreateEmployeeDocumentDto } from './dto/create-employee-documents.dto';
-import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 @Controller('employee-document')
 @ApiTags('Employee Document')
 export class EmployeeDocumentController {
   constructor(
     private readonly employeeDocumentService: EmployeeDocumentService,
-  ) {}
+  ) { }
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
   async create(
     @Req() request: Request,
     @Body() createEmployeeDocumentsDto: CreateEmployeeDocumentDto,
-    @UploadedFile() documentName: Express.Multer.File,
-  ) {
-    return this.employeeDocumentService.create(
-      createEmployeeDocumentsDto,
-      documentName,
-      request['tenantId'],
-    );
+    @UploadedFiles() documentName: Express.Multer.File[],
+  ): Promise<EmployeeDocument[]> {
+    if (documentName?.length > 0) {
+      const doc = await Promise.all(
+        documentName.map(async (docName) => {
+          return await this.employeeDocumentService.create(
+            createEmployeeDocumentsDto,
+            docName,
+            request['tenantId'],
+          );
+        }),
+      );
+
+      return doc;
+    }
   }
 
   @Get()
