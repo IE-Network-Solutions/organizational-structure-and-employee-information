@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
@@ -45,7 +45,7 @@ export class UserService {
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
-  ) { }
+  ) {}
 
   async create(
     tenantId: string,
@@ -442,6 +442,34 @@ export class UserService {
       throw error;
     }
   }
+  async findUserInfoByArrayOfUserIds(userIds: string[]): Promise<any> {
+    try {
+      const users = await this.userRepository.find({
+        where: { id: In(userIds) },
+        relations: ['employeeJobInformation.department'],
+      });
+
+      if (!users || users.length === 0) {
+        throw new NotFoundException('Users not found');
+      }
+
+      const usersInfo = users.map((user: any) => ({
+        lastName: user.lastName, // Changed 'users' to 'user'
+        firstName: user.firstName, // Changed 'users' to 'user'
+        middelName: user.middleName, // Changed 'users' to 'user'
+        Avatar: user.profileImage, // Changed 'users' to 'user'
+        Email: user.email,
+        DepartmentName: user.employeeJobInformation[0]?.department
+          ? user.employeeJobInformation[0].department
+          : null,
+      }));
+
+      return usersInfo; // Return usersInfo instead of users
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
     const createRoleDto = new CreateRoleDto();
     createRoleDto.name = role;

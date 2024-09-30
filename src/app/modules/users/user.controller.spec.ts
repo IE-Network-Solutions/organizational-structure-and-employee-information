@@ -8,6 +8,7 @@ import {
   userDataOnFindOne,
   paginationResultUserData,
   deleteUserData,
+  mockUsers,
 } from './tests/user.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 import { rolePermissionData } from '../role-permission/tests/role-permission.data';
@@ -36,6 +37,8 @@ describe('UserController', () => {
     userController = moduleRef.get<UserController>(UserController);
     userService = moduleRef.get<UserService>(UserService);
     jest.clearAllMocks();
+
+    userService.findUserInfoByArrayOfUserIds = jest.fn();
   });
 
   describe('create', () => {
@@ -163,11 +166,52 @@ describe('UserController', () => {
   describe('remove', () => {
     it('should call userService.remove with correct id and return delete result', async () => {
       (userService.remove as jest.Mock).mockResolvedValue(deleteUserData());
-
       const result = await userController.remove(userData().id);
 
       expect(userService.remove).toHaveBeenCalledWith(userData().id);
       expect(result).toEqual(deleteUserData());
+    });
+  });
+
+  describe('findUserInfoByArrayOfUserIds', () => {
+    it('should call userService.findUserInfoByArrayOfUserIds with the correct array of IDs and return the expected user data', async () => {
+      const arrayOfIds = ['1', '2'];
+      // jest.spyOn(userService, 'findUserInfoByArrayOfUserIds').mockImplementation(jest.fn());
+
+      // Mock the service method to return formatted mockUsers
+      (userService.findUserInfoByArrayOfUserIds as jest.Mock).mockResolvedValue(
+        mockUsers.map((user) => ({
+          lastName: user.lastName,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          Avatar: user.Avatar,
+          Email: user.email,
+          DepartmentName:
+            user.employeeJobInformation[0]?.department?.name || null,
+        })),
+      );
+
+      const result = await userController.findUserInfoByArrayOfUserIds(
+        arrayOfIds,
+      );
+
+      // Assert the service method is called with the correct arguments
+      expect(userService.findUserInfoByArrayOfUserIds).toHaveBeenCalledWith(
+        arrayOfIds,
+      );
+
+      // Assert the result is the expected user data
+      expect(result).toEqual(
+        mockUsers.map((user) => ({
+          lastName: user.lastName,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          Avatar: user.Avatar,
+          Email: user.email,
+          DepartmentName:
+            user.employeeJobInformation[0]?.department?.name || null,
+        })),
+      );
     });
   });
 });

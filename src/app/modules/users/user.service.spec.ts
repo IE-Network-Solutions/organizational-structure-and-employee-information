@@ -13,6 +13,7 @@ import {
   updateUserData,
   userData,
   userDataSave,
+  mockUsers,
 } from './tests/user.data';
 import { EmployeeInformationService } from '../employee-information/employee-information.service';
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
@@ -374,6 +375,39 @@ describe('UserService', () => {
         id: userDataSave().id,
       });
       expect(result).toEqual(deleteUserData());
+    });
+  });
+
+  describe('findUserInfoByArrayOfUserIds', () => {
+    it('should return users information based on provided user IDs', async () => {
+      // Mock the service method
+      jest
+        .spyOn(userService, 'findUserInfoByArrayOfUserIds')
+        .mockResolvedValue(mockUsers);
+
+      const userIds = ['1', '2'];
+      const usersInfo = await userService.findUserInfoByArrayOfUserIds(userIds);
+
+      // Assert the length of the returned users
+      expect(usersInfo).toHaveLength(2);
+
+      // Check the first user's properties
+      expect(usersInfo[0]).toHaveProperty('lastName', 'Smith');
+      expect(usersInfo[0]).toHaveProperty('firstName', 'Alice');
+      expect(usersInfo[0]).toHaveProperty('employeeJobInformation');
+      expect(usersInfo[0].employeeJobInformation[0].department).toHaveProperty(
+        'name',
+        'Hr',
+      );
+
+      // Check the second user's properties
+      expect(usersInfo[1]).toHaveProperty('lastName', 'Johnson');
+      expect(usersInfo[1]).toHaveProperty('firstName', 'Bob');
+      expect(usersInfo[1]).toHaveProperty('employeeJobInformation');
+      expect(usersInfo[1].employeeJobInformation[0].department).toHaveProperty(
+        'name',
+        'Hr',
+      );
     });
   });
 });

@@ -143,3 +143,58 @@ export const deleteUserDataAlternate = () => {
 export const filterDto = () => {
   return {};
 };
+
+export const mockUsers = [
+  {
+    id: '1',
+    firstName: 'Alice',
+    lastName: 'Smith',
+    email: 'alice@example.com',
+    middleName: 'Alice',
+    Avatar:
+      'https://files.ienetworks.co/view/test/9fdb9540-607e-4cc5-aebf-0879400d1f69/cat.jpg',
+    employeeJobInformation: [
+      {
+        department: {
+          id: '3ca1e26f-c7bb-4a9a-9898-cbdfd752c52a',
+          createdAt: '2024-08-02T07:13:50.111Z',
+          updatedAt: '2024-08-14T12:54:50.208Z',
+          deletedAt: null,
+          createdBy: null,
+          updatedBy: null,
+          name: 'Hr',
+          description: 'Handles specific operations',
+          branchId: '19223038-d73b-4fe6-95fd-4c4793c4ba2e',
+          tenantId: '9fdb9540-607e-4cc5-aebf-0879400d1f69',
+          level: 0,
+        },
+      },
+    ],
+  },
+  {
+    id: '2',
+    firstName: 'Bob',
+    lastName: 'Johnson',
+    email: 'bob@example.com',
+    middleName: 'Alice',
+    Avatar:
+      'https://files.ienetworks.co/view/test/9fdb9540-607e-4cc5-aebf-0879400d1f69/cat.jpg',
+    employeeJobInformation: [
+      {
+        department: {
+          id: '3ca1e26f-c7bb-4a9a-9898-cbdfd752c52a',
+          createdAt: '2024-08-02T07:13:50.111Z',
+          updatedAt: '2024-08-14T12:54:50.208Z',
+          deletedAt: null,
+          createdBy: null,
+          updatedBy: null,
+          name: 'Hr',
+          description: 'Handles specific operations',
+          branchId: '19223038-d73b-4fe6-95fd-4c4793c4ba2e',
+          tenantId: '9fdb9540-607e-4cc5-aebf-0879400d1f69',
+          level: 0,
+        },
+      },
+    ],
+  },
+];
