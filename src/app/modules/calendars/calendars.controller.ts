@@ -65,7 +65,7 @@ export class CalendarsController {
     return await this.calendarsService.removeCalendar(id);
   }
 
-  @Get('/active')
+  @Get('/active/calendar')
   async findActiveCalander(@Req() req: Request): Promise<Calendar> {
     const tenantId = req['tenantId'];
     return await this.calendarsService.findActiveCalander(tenantId);

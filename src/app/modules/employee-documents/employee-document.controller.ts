@@ -35,7 +35,7 @@ export class EmployeeDocumentController {
     @UploadedFiles() documentName: Express.Multer.File[],
   ): Promise<EmployeeDocument[]> {
     if (documentName?.length > 0) {
-      const doc = await Promise.all(
+      const document = await Promise.all(
         documentName.map(async (docName) => {
           return await this.employeeDocumentService.create(
             createEmployeeDocumentsDto,
@@ -45,7 +45,7 @@ export class EmployeeDocumentController {
         }),
       );
 
-      return doc;
+      return document;
     }
   }
 
