@@ -30,6 +30,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { RoleService } from '../role/role.service';
 import { CreateRoleDto } from '../role/dto/create-role.dto';
 import { EmployeeTerminationService } from '../employee-termination/employee-termination.service';
+import { tenantId } from '../branchs/tests/branch.data';
+import { Department } from '../departments/entities/department.entity';
 
 @Injectable()
 export class UserService {
@@ -174,7 +176,6 @@ export class UserService {
           'employeeJobInformation',
           'employeeJobInformation.isPositionActive = :isPositionActive',
           { isPositionActive: true },
-
         )
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
@@ -216,10 +217,30 @@ export class UserService {
       throw error;
     }
   }
+
+  async findAllUsersByDepartment(tenantId: string, departmentId: string) {
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .withDeleted()
+      .leftJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+        'employeeJobInformation.isPositionActive = :isPositionActive',
+        { isPositionActive: true },
+      )
+      .where('employeeJobInformation.departmentId = :departmentId', {
+        departmentId,
+      })
+      .andWhere('user.tenantId = :tenantId', { tenantId })
+      .getMany();
+
+    return users;
+  }
   async findOne(id: string): Promise<User> {
     try {
       const user = await this.userRepository
         .createQueryBuilder('user')
+        .leftJoinAndSelect('user.employeeDocument', 'employeeDocument')
         .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
@@ -233,7 +254,7 @@ export class UserService {
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
-        .leftJoinAndSelect('user.employeeDocument', 'employeeDocument')
+
         .leftJoinAndSelect(
           'employeeJobInformation.workSchedule',
           'workSchedule',
@@ -433,6 +454,7 @@ export class UserService {
         where: { firebaseId: firbaseId },
         relations: ['role', 'userPermissions'],
       });
+
       if (!user) {
         throw new NotFoundException('user not found');
       }
@@ -529,6 +551,31 @@ export class UserService {
         disabled: false,
       });
     } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async findAllDepartments(tenantId: string): Promise<Department[]> {
+    try {
+      const departments =
+        await this.departmentService.findAllDepartmentsByTenantId(tenantId);
+      if (departments?.length > 0) {
+        for (const department of departments) {
+          const users = await this.findAllUsersByDepartment(
+            tenantId,
+            department.id,
+          );
+          department['users'] = users;
+        }
+
+        return departments;
+      } else {
+        throw new NotFoundException('No Department was created.');
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new BadRequestException(error.message);
     }
   }

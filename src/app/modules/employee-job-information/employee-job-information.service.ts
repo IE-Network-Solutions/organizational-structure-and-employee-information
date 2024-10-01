@@ -22,19 +22,23 @@ export class EmployeeJobInformationService {
     private employeeJobInformationRepository: Repository<EmployeeJobInformation>,
     // private userRepository: Repository<User>,
     private readonly paginationService: PaginationService,
-  ) { }
+  ) {}
   async create(
     createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
     tenantId: string,
   ) {
     if (createEmployeeJobInformationDto?.userId) {
-
-      const employeeJobInfo = await this.employeeJobInformationRepository.find({ where: { userId: createEmployeeJobInformationDto.userId, isPositionActive: true } })
+      const employeeJobInfo = await this.employeeJobInformationRepository.find({
+        where: {
+          userId: createEmployeeJobInformationDto.userId,
+          isPositionActive: true,
+        },
+      });
       if (employeeJobInfo?.length > 0) {
         for (const job of employeeJobInfo) {
-          let dataToUpdate = new UpdateEmployeeJobInformationDto
-          dataToUpdate.isPositionActive = false
-          await this.update(job.id, dataToUpdate)
+          const dataToUpdate = new UpdateEmployeeJobInformationDto();
+          dataToUpdate.isPositionActive = false;
+          await this.update(job.id, dataToUpdate);
         }
       }
     }

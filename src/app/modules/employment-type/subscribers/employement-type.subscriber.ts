@@ -12,7 +12,8 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 @EventSubscriber()
 @Injectable()
 export class EmployeeTypeSubscriber
-  implements EntitySubscriberInterface<EmployementType> {
+  implements EntitySubscriberInterface<EmployementType>
+{
   listenTo() {
     return EmployementType;
   }

@@ -30,54 +30,12 @@ export class EmployeeInformationFormService {
       createEmployeeInformationFormDto.formTitle,
     );
 
-    if (existingForm) {
-      const existingFormFields = existingForm.form || [];
-      const newFormFields = createEmployeeInformationFormDto.form || [];
+    await this.employeeInformationFormRepository.update(
+      { id: existingForm.id },
+      { form: existingForm.form },
+    );
 
-      // Assuming the fields are objects with `id` and other properties
-      const mergedFormFields = [...existingFormFields, ...newFormFields];
-
-      const uniqueMergedFields = mergedFormFields.reduce((acc, current) => {
-        const x = acc.find((item) => item.id === current.id);
-        if (!x) {
-          return acc.concat([current]);
-        } else {
-          return acc;
-        }
-      }, []);
-
-      existingForm.form = uniqueMergedFields;
-
-      // Save the merged form
-      try {
-        return await this.employeeInformationFormRepository.save(existingForm);
-      } catch (error) {
-        throw new ConflictException(error.message);
-      }
-    } else {
-      // Directly use form fields provided from the front-end
-      const formFields = createEmployeeInformationFormDto.form?.map(
-        (formField) => ({
-          ...formField,
-        }),
-      );
-
-      // Create a new form entry
-      const employeeInformationForm =
-        this.employeeInformationFormRepository.create({
-          ...createEmployeeInformationFormDto,
-          form: formFields,
-          tenantId,
-        });
-
-      try {
-        return await this.employeeInformationFormRepository.save(
-          employeeInformationForm,
-        );
-      } catch (error) {
-        throw new ConflictException(error.message);
-      }
-    }
+    return await this.findOne(existingForm.id);
   }
 
   async findAll(

@@ -32,7 +32,7 @@ describe('EmployeeDocumentController', () => {
 
   describe('create', () => {
     describe('when create is called', () => {
-      let employeeDocument: EmployeeDocument;
+      let employeeDocument: EmployeeDocument[];
       const file: Express.Multer.File = {
         fieldname: 'documentName',
         originalname: 'file.pdf',
@@ -50,7 +50,7 @@ describe('EmployeeDocumentController', () => {
         employeeDocument = await employeeDocumentController.create(
           { tenantId: 'tenant-1' } as any,
           createEmployeeDocumentData(),
-          file,
+          [file],
         );
       });
 

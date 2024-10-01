@@ -16,7 +16,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
     tenantId: string,
@@ -201,17 +201,18 @@ export class DepartmentsService {
 
   async removeDepartment(id: string): Promise<Department> {
     const department = await this.findOneDepartment(id);
-    const descendants = await this.departmentRepository.findDescendants(department)
+    const descendants = await this.departmentRepository.findDescendants(
+      department,
+    );
 
     if (!department) {
       throw new NotFoundException(`Department with Id ${id} not found`);
     }
 
     if (descendants?.length > 0) {
-      for (let dep of descendants) {
+      for (const dep of descendants) {
         await this.departmentRepository.softRemove(dep);
       }
-
     }
     await this.departmentRepository.softRemove(department);
 
