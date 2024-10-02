@@ -16,6 +16,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { Calendar } from './entities/calendar.entity';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('calendars')
 @ApiTags('Calendars')
@@ -66,6 +67,7 @@ export class CalendarsController {
   }
 
   @Get('/active/calendar')
+  @ExcludeAuthGuard()
   async findActiveCalander(@Req() req: Request): Promise<Calendar> {
     const tenantId = req['tenantId'];
     return await this.calendarsService.findActiveCalander(tenantId);
