@@ -39,6 +39,7 @@ export class EmployeeInformationFormService {
   }
 
   async findAll(
+    tenantId:string,
     paginationOptions: PaginationDto,
   ): Promise<Pagination<EmployeeInformationForm>> {
     try {
@@ -49,7 +50,8 @@ export class EmployeeInformationFormService {
       const queryBuilder =
         await this.employeeInformationFormRepository.createQueryBuilder(
           'employee_information_form',
-        );
+        )
+        .where('employee_information_form.tenantId = :tenantId', { tenantId });
       return await this.paginationService.paginate<EmployeeInformationForm>(
         queryBuilder,
         options,
