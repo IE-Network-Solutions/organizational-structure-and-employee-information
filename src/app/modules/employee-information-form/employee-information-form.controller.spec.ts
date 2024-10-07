@@ -56,20 +56,24 @@ describe('EmployeeInformationFormsController', () => {
       const request = {
         tenantId: 'some-tenant-id', // Mock tenantId
       } as unknown as Request;
-  
+
       // Mock the service method
-      jest.spyOn(service, 'findAll').mockResolvedValue(paginatedEmployeeInformationForms());
-  
+      jest
+        .spyOn(service, 'findAll')
+        .mockResolvedValue(paginatedEmployeeInformationForms());
+
       // Call the controller method and assert the result
       const result = await controller.findAll(request, options);
-  
+
       expect(result).toEqual(paginatedEmployeeInformationForms());
-  
+
       // Ensure the correct parameters are passed to the service
-      expect(service.findAll).toHaveBeenCalledWith(request['tenantId'], options);
+      expect(service.findAll).toHaveBeenCalledWith(
+        request['tenantId'],
+        options,
+      );
     });
   });
-  
 
   describe('findOne', () => {
     it('should call EmployeeInformationFormService.findOne with correct id and return a single entity', async () => {

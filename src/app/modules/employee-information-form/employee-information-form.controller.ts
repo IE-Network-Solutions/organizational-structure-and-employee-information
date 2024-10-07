@@ -40,7 +40,10 @@ export class EmployeeInformationFormsController {
     @Query() paginationOptions?: PaginationDto,
   ): Promise<Pagination<EmployeeInformationForm>> {
     const tenantId = request['tenantId'];
-    return await this.employeeInformationFormService.findAll(tenantId,paginationOptions);
+    return await this.employeeInformationFormService.findAll(
+      tenantId,
+      paginationOptions,
+    );
   }
 
   @Get(':id')

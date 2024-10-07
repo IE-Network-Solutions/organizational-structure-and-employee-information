@@ -22,19 +22,26 @@ import { CreateUserPermissionDto } from '../user-permission/dto/create-user-perm
 import { UserPermissionService } from '../user-permission/user-permission.service';
 import { DepartmentsService } from '../departments/departments.service';
 import { CreateBulkRequestDto } from './dto/createBulkRequest.dto';
-import { generateRandom4DigitNumber, generateRandom6DigitNumber } from '@root/src/core/utils/generateRandomNumbers';
+import {
+  generateRandom4DigitNumber,
+  generateRandom6DigitNumber,
+} from '@root/src/core/utils/generateRandomNumbers';
 import filterEntities from '@root/src/core/utils/filters.utils';
 import { FilterDto } from './dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RoleService } from '../role/role.service';
 import { CreateRoleDto } from '../role/dto/create-role.dto';
-import { EmployeeTerminationService } from '../employee-termination/employee-termination.service';
-import { tenantId } from '../branchs/tests/branch.data';
 import { Department } from '../departments/entities/department.entity';
+import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
+import { CreateEmailDto } from './dto/create-email.dto';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class UserService {
+  private readonly emailServerUrl: string;
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectDataSource() private dataSource: DataSource,
@@ -47,7 +54,13 @@ export class UserService {
     private readonly userPermissionService: UserPermissionService,
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
-  ) {}
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
+  ) {
+    this.emailServerUrl = this.configService.get<string>(
+      'servicesUrl.emailUrl',
+    );
+  }
 
   async create(
     tenantId: string,
@@ -84,6 +97,7 @@ export class UserService {
 
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
+        createUserDto.firstName,
         tenantId,
       );
 
@@ -351,7 +365,7 @@ export class UserService {
     }
   }
 
-  private async findTeamLeadOrNot(departmentId: string): Promise<any> {
+   async findTeamLeadOrNot(departmentId: string): Promise<any> {
     try {
       const queryBuilder = this.userRepository
         .createQueryBuilder('user')
@@ -506,7 +520,9 @@ export class UserService {
       const password = createUserDto.email + generateRandom4DigitNumber();
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
+        createUserDto.firstName,
         tenantId,
+        createUserDto.domainUrl,
       );
 
       user.firebaseId = userRecord.uid;
@@ -521,16 +537,44 @@ export class UserService {
     }
   }
 
-  async createUserToFirebase(email: string, tenantId: string) {
-    const password=generateRandom6DigitNumber()
+  async createUserToFirebase(
+    email: string,
+    firstName: string,
+    tenantId: string,
+    domainUrl?: string,
+  ) {
+    const password = generateRandom6DigitNumber();
     const userRecord = await admin.auth().createUser({
       email: email,
-      password: password.toString()
+      password: password.toString(),
     });
-
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
-    const expiresIn = 24 * 60 * 60 * 1000; // 24 hours
+    const expiresIn = 24 * 60 * 60 * 1000;
     await admin.auth().createCustomToken(userRecord.uid, { expiresIn });
+    const emailTemplatePath = path.join(
+      process.cwd(),
+      'src',
+      'core',
+      'templates',
+      'welcome-email-template.html',
+    );
+
+    let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
+
+    emailHtml = emailHtml.replace('{{email}}', email);
+    emailHtml = emailHtml.replace('{{name}}', firstName);
+    emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
+    emailHtml = emailHtml.replace('{{password}}', password.toString());
+    const emailBody = new CreateEmailDto();
+    emailBody.to = email;
+    emailBody.subject =
+      'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
+    emailBody.html = emailHtml;
+
+    const response = await this.httpService
+      .post(`${this.emailServerUrl}/email`, emailBody)
+      .toPromise();
+
     return userRecord;
   }
   async activateUser(userId: string, tenantId: string): Promise<User> {

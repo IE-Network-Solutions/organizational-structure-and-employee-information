@@ -21,6 +21,7 @@ import { UserPermissionModule } from '../user-permission/user-permission.module'
 import { DepartmentsModule } from '../departments/departments.module';
 import { RoleService } from '../role/role.service';
 import { Role } from '../role/entities/role.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { Role } from '../role/entities/role.entity';
     RolePermissionModule,
     UserPermissionModule,
     RoleModule,
+    HttpModule.register({}),
   ],
   controllers: [UserController],
   providers: [UserService, PaginationService, DepartmentsService, RoleService],
