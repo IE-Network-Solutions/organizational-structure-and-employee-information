@@ -22,7 +22,7 @@ import { CreateUserPermissionDto } from '../user-permission/dto/create-user-perm
 import { UserPermissionService } from '../user-permission/user-permission.service';
 import { DepartmentsService } from '../departments/departments.service';
 import { CreateBulkRequestDto } from './dto/createBulkRequest.dto';
-import { generateRandom4DigitNumber } from '@root/src/core/utils/generateRandomNumbers';
+import { generateRandom4DigitNumber, generateRandom6DigitNumber } from '@root/src/core/utils/generateRandomNumbers';
 import filterEntities from '@root/src/core/utils/filters.utils';
 import { FilterDto } from './dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
@@ -522,9 +522,10 @@ export class UserService {
   }
 
   async createUserToFirebase(email: string, tenantId: string) {
+    const password=generateRandom6DigitNumber()
     const userRecord = await admin.auth().createUser({
       email: email,
-      password: '123456789',
+      password: password.toString()
     });
 
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });

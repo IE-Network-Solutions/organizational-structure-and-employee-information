@@ -11,7 +11,7 @@ export const employeeInformationFormData = (): EmployeeInformationForm => ({
     { id: '2', fieldName: 'Last Name', fieldType: 'text', isActive: true },
     { id: '3', fieldName: 'Date of Birth', fieldType: 'date', isActive: false },
   ],
-  tenantId: 'tenant-1',
+  tenantId: 'some-tenant-id',
   createdAt: new Date('2023-01-01T06:00:00.000Z'),
   updatedAt: new Date('2023-01-01T06:00:00.000Z'),
   deletedAt: null,
