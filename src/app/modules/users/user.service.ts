@@ -365,7 +365,7 @@ export class UserService {
     }
   }
 
-   async findTeamLeadOrNot(departmentId: string): Promise<any> {
+  async findTeamLeadOrNot(departmentId: string): Promise<any> {
     try {
       const queryBuilder = this.userRepository
         .createQueryBuilder('user')
@@ -468,6 +468,14 @@ export class UserService {
         where: { firebaseId: firbaseId },
         relations: ['role', 'userPermissions'],
       });
+
+      const department = await this.departmentService.findAllDepartmentsByTenantId(user.tenantId)
+     if(department.length>0){
+      user["hasCompany"]=true
+     }
+     else{
+      user["hasCompany"]=false
+     }
 
       if (!user) {
         throw new NotFoundException('user not found');
