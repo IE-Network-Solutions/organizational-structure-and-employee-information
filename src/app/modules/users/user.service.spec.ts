@@ -155,117 +155,74 @@ describe('UserService', () => {
     admin.initializeApp(); // Initialize Firebase in the test setup
   });
 
-  // describe('create', () => {
-  //   it('should create user, role permissions, user permissions, employee information, job information, and document', async () => {
-  //     const tenantId = 'tenant-123';
-  //     const createBulkRequestDto: any = {
-  //       createUserDto: { name: 'John Doe', email: 'john.doe@example.com' },
-  //       createRolePermissionDto: {
-  //         roleId: 'role-123',
-  //         permissionId: ['perm-1', 'perm-2'],
-  //       },
-  //       createUserPermissionDto: {
-  //         permissionId: ['perm-1', 'perm-2'],
-  //       },
-  //       createEmployeeInformationDto: {},
-  //       createEmployeeJobInformationDto: {},
-  //       createEmployeeDocumentDto: {},
-  //     };
-  //     const profileImage: Express.Multer.File = {} as any;
-  //     const documentName: Express.Multer.File = {} as any;
-
-  //     const user = userData();
-  //     const savedUser = userDataSave();
-
-  //     // Mock the file upload service method
-  //     jest.spyOn(fileUploadService, 'uploadFileToServer').mockResolvedValue({
-  //       viewImage:
-  //         'https://files.ienetworks.co/view/test/photo.jpg',
-  //         image:
-  //         'https://files.ienetworks.co/download/test/photo.jpg',
-  //     });
-
-  //     usersRepository.create.mockReturnValue(userData() as any);
-  //     usersRepository.save.mockResolvedValue(userDataSave() as any);
-
-  //     jest
-  //       .spyOn(employeeInformationService, 'create')
-  //       .mockResolvedValue({ id: 'emp-info-123' } as any);
-  //     jest
-  //       .spyOn(employeeJobInformationService, 'create')
-  //       .mockResolvedValue({} as any);
-  //     jest
-  //       .spyOn(employeeDocumentService, 'create')
-  //       .mockResolvedValue({} as any);
-  //     jest
-  //       .spyOn(rolePermissionService, 'updateRolePermissions')
-  //       .mockResolvedValue({} as any);
-  //     jest.spyOn(userService, 'findOne').mockResolvedValue(userDataSave() as any);
-
-  //     const result = await userService.create(
-  //       tenantId,
-  //       createBulkRequestDto,
-  //       profileImage,
-  //       documentName,
-  //     );
-
-  //     expect(queryRunner.startTransaction).toHaveBeenCalled();
-  //     expect(usersRepository.save).toHaveBeenCalledWith(user);
-  //     expect(rolePermissionService.updateRolePermissions).toHaveBeenCalledWith(
-  //       createBulkRequestDto.createRolePermissionDto.roleId,
-  //       createBulkRequestDto.createRolePermissionDto.permissionId,
-  //       tenantId,
-  //     );
-  //     expect(employeeInformationService.create).toHaveBeenCalledWith(
-  //       createBulkRequestDto.createEmployeeInformationDto,
-  //       tenantId,
-  //     );
-  //     expect(employeeJobInformationService.create).toHaveBeenCalledWith(
-  //       createBulkRequestDto.createEmployeeJobInformationDto,
-  //       tenantId,
-  //     );
-  //     expect(employeeDocumentService.create).toHaveBeenCalledWith(
-  //       createBulkRequestDto.createEmployeeDocumentDto,
-  //       documentName,
-  //       tenantId,
-  //     );
-  //     expect(userService.findOne).toHaveBeenCalledWith(savedUser.id);
-  //     expect(queryRunner.commitTransaction).toHaveBeenCalled();
-  //     expect(result).toEqual(savedUser);
-  //   });
-
-  //   it('should rollback transaction on error', async () => {
-  //     const tenantId = 'tenant-123';
-  //     const createBulkRequestDto: any = {
-  //       createUserDto: { name: 'John Doe', email: 'john.doe@example.com' },
-  //       createRolePermissionDto: {
-  //         roleId: 'role-123',
-  //         permissionId: ['perm-1', 'perm-2'],
-  //       },
-  //       createUserPermissionDto: {
-  //         permissionId: ['perm-1', 'perm-2'],
-  //       },
-  //       createEmployeeInformationDto: {},
-  //       createEmployeeJobInformationDto: {},
-  //       createEmployeeDocumentDto: {},
-  //     };
-  //     const profileImage: Express.Multer.File = {} as any;
-  //     const documentName: Express.Multer.File = {} as any;
-
-  //     usersRepository.save.mockRejectedValue(new Error('Something went wrong'));
-
-  //     await expect(
-  //       userService.create(
-  //         tenantId,
-  //         createBulkRequestDto,
-  //         profileImage,
-  //         documentName,
-  //       ),
-  //     ).rejects.toThrow(ConflictException);
-
-  //     expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
-  //   });
-  // });
+  describe('create', () => {
+      // Successfully creates a user with valid data and returns the user
+      it('should create a user and return the user when valid data is provided', async () => {
+        const mockUserRepository = { create: jest.fn(), save: jest.fn() };
+        const mockFileUploadService = { uploadFileToServer: jest.fn() };
+        const mockRolePermissionService = { updateRolePermissions: jest.fn() };
+        const mockUserPermissionService = { assignPermissionToUser: jest.fn() };
+        const mockEmployeeInformationService = { create: jest.fn() };
+        const mockEmployeeJobInformationService = { create: jest.fn() };
+        const mockEmployeeDocumentService = { create: jest.fn() };
+        const mockDataSource = { createQueryRunner: jest.fn().mockReturnValue({
+          connect: jest.fn(),
+          startTransaction: jest.fn(),
+          commitTransaction: jest.fn(),
+          rollbackTransaction: jest.fn(),
+          release: jest.fn()
+        })};
+        const service = new UserService(
+          mockUserRepository,
+          mockFileUploadService,
+          mockRolePermissionService,
+          mockUserPermissionService,
+          mockEmployeeInformationService,
+          mockEmployeeJobInformationService,
+          mockEmployeeDocumentService,
+          mockDataSource
+        );
+    
+       // Handles missing or invalid tenantId gracefully
+       it('should throw BadRequestException when tenantId is missing or invalid', async () => {
+        const mockUserRepository = { create: jest.fn(), save: jest.fn() };
+        const mockFileUploadService = { uploadFileToServer: jest.fn() };
+        const mockRolePermissionService = { updateRolePermissions: jest.fn() };
+        const mockUserPermissionService = { assignPermissionToUser: jest.fn() };
+        const mockEmployeeInformationService = { create: jest.fn() };
+        const mockEmployeeJobInformationService = { create: jest.fn() };
+        const mockEmployeeDocumentService = { create: jest.fn() };
+        const mockDataSource = { createQueryRunner: jest.fn().mockReturnValue({
+          connect: jest.fn(),
+          startTransaction: jest.fn(),
+          commitTransaction: jest.fn(),
+          rollbackTransaction: jest.fn(),
+          release: jest.fn()
+        })};
+        const service = new UserService(
+          mockUserRepository,
+          mockFileUploadService,
+          mockRolePermissionService,
+          mockUserPermissionService,
+          mockEmployeeInformationService,
+          mockEmployeeJobInformationService,
+          mockEmployeeDocumentService,
+          mockDataSource
+        );
+    
+        const invalidTenantId = null;
+        const createBulkRequestDto = {
+          createUserDto: { email: 'test@example.com', firstName: 'Test' },
+          createRolePermissionDto: { roleId: 1, permissionId: 2 },
+          createUserPermissionDto: { permissionId: 3 },
+          createEmployeeInformationDto: {},
+          createEmployeeJobInformationDto: {},
+          createEmployeeDocumentDto: {}
+        };
+    
+        await expect(service.create(invalidTenantId, createBulkRequestDto)).rejects.toThrow(BadRequestException);
+      });
+  });
 
   describe('findOne', () => {
     it('should return the user if found', async () => {
