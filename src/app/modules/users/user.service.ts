@@ -469,13 +469,15 @@ export class UserService {
         relations: ['role', 'userPermissions'],
       });
 
-      const department = await this.departmentService.findAllDepartmentsByTenantId(user.tenantId)
-     if(department.length>0){
-      user["hasCompany"]=true
-     }
-     else{
-      user["hasCompany"]=false
-     }
+      const department =
+        await this.departmentService.findAllDepartmentsByTenantId(
+          user.tenantId,
+        );
+      if (department.length > 0) {
+        user['hasCompany'] = true;
+      } else {
+        user['hasCompany'] = false;
+      }
 
       if (!user) {
         throw new NotFoundException('user not found');
