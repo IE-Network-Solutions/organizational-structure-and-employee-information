@@ -54,7 +54,7 @@ describe('UserService', () => {
   let httpService: HttpService;
   let rolesService: RoleService;
   let queryRunner: QueryRunner;
-  let  configService: ConfigService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -134,9 +134,7 @@ describe('UserService', () => {
     employeeInformationService = moduleRef.get<EmployeeInformationService>(
       EmployeeInformationService,
     );
-    httpService = moduleRef.get<HttpService>(
-      HttpService,
-    );
+    httpService = moduleRef.get<HttpService>(HttpService);
     employeeJobInformationService =
       moduleRef.get<EmployeeJobInformationService>(
         EmployeeJobInformationService,
