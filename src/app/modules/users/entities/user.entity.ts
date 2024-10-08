@@ -14,7 +14,7 @@ export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
   firstName: string;
 
-  @Column({ length: 500, type: 'varchar',nullable:true })
+  @Column({ length: 500, type: 'varchar', nullable: true })
   middleName: string;
 
   @Column({ length: 500, type: 'varchar' })

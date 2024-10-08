@@ -161,6 +161,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @ExcludeAuthGuard()
   findOne(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(id);
   }
@@ -231,6 +232,7 @@ export class UserController {
   }
 
   @Get('/all/departments')
+  @ExcludeAuthGuard()
   findAllDepartments(@Req() request: Request): Promise<Department[]> {
     const tenantId = request['tenantId'];
     return this.userService.findAllDepartments(tenantId);

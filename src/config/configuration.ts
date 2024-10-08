@@ -35,4 +35,9 @@ export const configuration = () => ({
     private_key: process.env.PRIVATE_KEY,
     client_email: process.env.CLIENT_EMAIL,
   },
+
+  servicesUrl: {
+    fileUrl: process.env.FILE_SERVER_URL,
+    emailUrl: process.env.EMAIL_SERVER_URL,
+  },
 });

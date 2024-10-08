@@ -25,7 +25,7 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 export class EmployeeDocumentController {
   constructor(
     private readonly employeeDocumentService: EmployeeDocumentService,
-  ) { }
+  ) {}
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())

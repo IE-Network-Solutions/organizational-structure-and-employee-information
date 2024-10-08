@@ -21,7 +21,7 @@ import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 @Controller('calendars')
 @ApiTags('Calendars')
 export class CalendarsController {
-  constructor(private readonly calendarsService: CalendarsService) { }
+  constructor(private readonly calendarsService: CalendarsService) {}
 
   @Post()
   async createCalendar(

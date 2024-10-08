@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f7;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .content {
+            text-align: center;
+        }
+        .content h1 {
+            color: #333;
+        }
+        .content p {
+            font-size: 18px;
+            color: #666;
+        }
+        .form-container {
+            margin-top: 20px;
+        }
+        .cta-button {
+            margin-top: 20px;
+        }
+        .cta-button a {
+            background-color: #3636f0;
+            color: #fff;
+            padding: 15px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            display: inline-block;
+        }
+        .cta-button a:hover {
+            background-color: #3636f0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+    <title>Welcome</title>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>Welcome to Our Service!</h1>
+        </div>
+        <div class='content'>
+            <p>Hello <strong>{{name}}</strong>,<br>We’re excited to have you on board!</p>
+            <p>Please use the following credentials to access your account:</p>
+            <div class='form-container'>
+                <p><strong>Email:</strong> {{email}}</p>
+                <p><strong>Password:</strong> {{password}}</p>
+            </div>
+            <div class='cta-button'>
+                <a href='{{domainUrl}}' target='_blank'>Get Started</a>
+            </div>
+        </div>
+        <div class='footer'>
+            <p>&copy; 2024 Selamnew Workspace. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
