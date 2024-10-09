@@ -64,8 +64,9 @@ export class RoleController {
   }
 
   @Get('/find-all-role-with-permissions/role-permissions')
-  findAllRoleWithPermissions(@Query() paginationOptions?: PaginationDto) {
-    return this.roleService.findAllRoleWithPermissions(paginationOptions);
+  findAllRoleWithPermissions(@Req() request: Request,@Query() paginationOptions?: PaginationDto) {
+    const tenantId = request['tenantId'];
+    return this.roleService.findAllRoleWithPermissions(tenantId,paginationOptions);
   }
 
   @Get('/find-one-role-with-permissions/role-permissions/:roleId')
