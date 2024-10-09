@@ -24,8 +24,6 @@ export const validationSchema = Joi.object({
   DB_SYNCHRONIZE_ENTITIES: Joi.boolean().required(),
 });
 
-
-
 export const firebaseValidationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production', 'test'),
   APP_NAME: Joi.string().required(),
@@ -41,4 +39,3 @@ export const firebaseValidationSchema = Joi.object({
   DB_TYPE: Joi.string().required().valid('postgres', 'mysql'),
   DB_SYNCHRONIZE_ENTITIES: Joi.boolean().required(),
 });
-

@@ -17,6 +17,7 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { CreateEmployementTypeDto } from './dto/create-employement-type.dto';
 import { UpdateEmployementTypeDto } from './dto/update-employement-type.dto';
 import { EmployementType } from './entities/employement-type.entity';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('employement-type')
 @ApiTags('Employement Type')
@@ -26,6 +27,7 @@ export class EmployementTypesController {
   ) {}
 
   @Post()
+  @ExcludeAuthGuard()
   create(
     @Body() createEmployementTypeDto: CreateEmployementTypeDto,
     @Req() request: Request,
@@ -58,6 +60,7 @@ export class EmployementTypesController {
   }
 
   @Delete(':id')
+  @ExcludeAuthGuard()
   remove(@Param('id') id: string) {
     return this.employementTypeService.remove(id);
   }

@@ -15,6 +15,7 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { RoleService } from './role.service';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('roles')
 @ApiTags('Roles')
@@ -22,6 +23,7 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Post()
+  @ExcludeAuthGuard()
   create(@Req() request: Request, @Body() createRoleDto: CreateRoleDto) {
     const tenantId = request['tenantId'];
     return this.roleService.create(tenantId, createRoleDto);
@@ -56,6 +58,7 @@ export class RoleController {
   }
 
   @Delete(':roleId')
+  @ExcludeAuthGuard()
   remove(@Param('roleId') id: string) {
     return this.roleService.remove(id);
   }

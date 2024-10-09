@@ -35,12 +35,16 @@ export class RoleService implements RoleInterface {
 
     const valuesToCheck = { name: data.name };
     try {
-      await checkIfDataExists(valuesToCheck, this.roleRepository);
+      await this.roleRepository.findOne({
+        where: { name: data.name, tenantId: tenantId },
+      });
       const role = await this.roleRepository.save(data);
-      await this.rolePermissionService.createRoleWithPermissions(
-        role.id,
-        createRoleDto.permission,
-      );
+      if (createRoleDto.permission && createRoleDto.permission.length > 0) {
+        await this.rolePermissionService.createRoleWithPermissions(
+          role.id,
+          createRoleDto.permission,
+        );
+      }
       return role;
     } catch (error) {
       throw new ConflictException(error);
