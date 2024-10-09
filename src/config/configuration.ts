@@ -39,6 +39,5 @@ export const configuration = () => ({
   servicesUrl: {
     fileUrl: process.env.FILE_SERVER_URL,
     emailUrl: process.env.EMAIL_SERVER_URL,
-    
   },
 });

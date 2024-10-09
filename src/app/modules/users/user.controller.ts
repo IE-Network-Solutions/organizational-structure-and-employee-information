@@ -182,6 +182,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @ExcludeAuthGuard()
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }

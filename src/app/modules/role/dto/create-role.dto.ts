@@ -12,7 +12,7 @@ export class CreateRoleDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  permission: string[];
+  permission?: string[];
 
   @IsString()
   @IsOptional()
