@@ -624,9 +624,8 @@ export class UserService {
         }
 
         return departments;
-      } else {
-        throw new NotFoundException('No Department was created.');
-      }
+      } 
+      return departments
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
