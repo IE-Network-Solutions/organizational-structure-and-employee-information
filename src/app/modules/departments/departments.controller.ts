@@ -16,6 +16,7 @@ import { Department } from './entities/department.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { ApiTags } from '@nestjs/swagger';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('departments')
 @ApiTags('departments')
@@ -64,6 +65,7 @@ export class DepartmentsController {
     return await this.departmentsService.removeDepartment(id);
   }
   @Get('/tenant/departments')
+  @ExcludeAuthGuard()
   async findAllDepartmentsByTenantId(
     @Req() req: Request,
   ): Promise<Department[]> {
