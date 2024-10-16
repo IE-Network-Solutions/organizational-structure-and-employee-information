@@ -18,6 +18,7 @@ import { CreateEmployementTypeDto } from './dto/create-employement-type.dto';
 import { UpdateEmployementTypeDto } from './dto/update-employement-type.dto';
 import { EmployementType } from './entities/employement-type.entity';
 import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
+import { EmploymentStatusFilterDto } from './dto/filter-by-category.dto';
 
 @Controller('employement-type')
 @ApiTags('Employement Type')
@@ -41,9 +42,14 @@ export class EmployementTypesController {
 
   @Get()
   async findAll(
+    @Req() req: Request,
     @Query() paginationOptions?: PaginationDto,
   ): Promise<Pagination<EmployementType>> {
-    return await this.employementTypeService.findAll(paginationOptions);
+    const tenantId = req['tenantId'];
+    return await this.employementTypeService.findAll(
+      tenantId,
+      paginationOptions,
+    );
   }
 
   @Get(':id')
@@ -63,5 +69,16 @@ export class EmployementTypesController {
   @ExcludeAuthGuard()
   remove(@Param('id') id: string) {
     return this.employementTypeService.remove(id);
+  }
+  @Get('/type/employee')
+  getJobsCountByStatus(
+    @Req() req: Request,
+    @Query() employmentStatusFilterDto: EmploymentStatusFilterDto,
+  ) {
+    const tenantId = req['tenantId'];
+    return this.employementTypeService.getEmployeesCountByEmploymentType(
+      tenantId,
+      employmentStatusFilterDto,
+    );
   }
 }
