@@ -66,4 +66,14 @@ export class EmployeeInformationController {
   remove(@Param('id') id: string) {
     return this.employeeInformationService.remove(id);
   }
+  @Get('/users/birth-day')
+  getEmployeeBirthDay(@Req() request: Request) {
+    const tenantId = request['tenantId'];
+    return this.employeeInformationService.getEmployeeBirthDay(tenantId);
+  }
+  @Get('/users/anniversary')
+  getEmployeeAnniversary(@Req() request: Request) {
+    const tenantId = request['tenantId'];
+    return this.employeeInformationService.getEmployeeAnniversary(tenantId);
+  }
 }

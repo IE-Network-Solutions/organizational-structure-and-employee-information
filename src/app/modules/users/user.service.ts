@@ -624,8 +624,8 @@ export class UserService {
         }
 
         return departments;
-      } 
-      return departments
+      }
+      return departments;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
