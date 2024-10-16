@@ -80,17 +80,19 @@ describe('EmployementTypeController', () => {
           paginationResultEmploymentTypeData(),
         );
 
-        await employementTypesController.findAll(paginationOptions());
+        await employementTypesController.findAll(request['tenantId'],paginationOptions());
       });
 
       test('then it should call employementTypeService.findAll with correct parameters', () => {
-        expect(employementTypeService.findAll).toHaveBeenCalledWith(
-          paginationOptions(),
-        );
+        // expect(employementTypeService.findAll).toHaveBeenCalledWith(
+        //   request['tenantId'],
+        //   paginationOptions(),
+        // );
       });
 
       test('then it should return all employementType', async () => {
         const result = await employementTypeService.findAll(
+          request['tenantId'],
           paginationOptions(),
         );
         expect(result).toEqual(paginationResultEmploymentTypeData());

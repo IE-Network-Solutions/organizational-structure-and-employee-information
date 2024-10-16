@@ -113,11 +113,19 @@ describe('EmployementTypeService', () => {
 
   describe('findAll', () => {
     describe('when findAll is called', () => {
-      let mockQueryBuilder: any;
+      let mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+      } as any;
+  
+      const mockRepository = {
+        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+      };
       let result: any;
 
       beforeEach(async () => {
-        mockQueryBuilder = {
+         mockQueryBuilder = {
+          where: jest.fn().mockReturnThis(),
           orderBy: jest.fn().mockReturnThis(),
         };
 
@@ -128,7 +136,7 @@ describe('EmployementTypeService', () => {
           paginationResultEmploymentTypeData(),
         );
 
-        result = await employementTypeService.findAll(paginationOptions());
+        result = await employementTypeService.findAll(employementTypeData().tenantId,paginationOptions());
       });
 
       it('should call employementTypeRepository.createQueryBuilder and chain methods correctly', async () => {
