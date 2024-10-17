@@ -83,7 +83,7 @@ export class UserService {
         createEmployeeJobInformationDto,
         createEmployeeDocumentDto,
       } = createBulkRequestDto;
-
+      console.log(createEmployeeJobInformationDto, 'gggggggg');
       const uploadedImagePath = await this.fileUploadService.uploadFileToServer(
         tenantId,
         profileImage,
@@ -94,20 +94,23 @@ export class UserService {
       createUserDto['profileImageDownload'] = uploadedImagePath['image'];
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const password = createUserDto.email + generateRandom4DigitNumber();
-
+      console.log('userRecord');
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
         createUserDto.firstName,
         tenantId,
       );
-
+      console.log(userRecord, 'userRecorduserRecorduserRecorduserRecord');
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
 
+      console.log('checkIfDataExists');
       await checkIfDataExists(valuesToCheck, this.userRepository);
+      console.log('resultSaveee');
 
       const result = await this.userRepository.save(user);
+      console.log('rolePermissionService');
       await this.rolePermissionService.updateRolePermissions(
         createRolePermissionDto['roleId'],
         createRolePermissionDto['permissionId'],
@@ -118,6 +121,7 @@ export class UserService {
 
       createUserPermissionDto['permissionId'] =
         createUserPermissionDto.permissionId;
+      console.log('assignPermissionToUser');
 
       await this.assignPermissionToUser(createUserPermissionDto, tenantId);
 
@@ -129,6 +133,7 @@ export class UserService {
       );
 
       createEmployeeJobInformationDto['userId'] = result.id;
+      console.log('employeeJobInformationService');
 
       await this.employeeJobInformationService.create(
         createEmployeeJobInformationDto,
@@ -139,20 +144,22 @@ export class UserService {
 
       createEmployeeDocumentDto['employeeInformationId'] =
         employeeInformation.id;
+      console.log('employeeDocumentService');
 
       await this.employeeDocumentService.create(
         createEmployeeDocumentDto,
         documentName,
         tenantId,
       );
+      console.log('queryRunner');
 
       await queryRunner.commitTransaction();
 
       return await this.findOne(result.id);
     } catch (error) {
       await queryRunner.rollbackTransaction();
-
-      throw new ConflictException(error);
+      console.log(error.message, 'error');
+      throw new ConflictException(error.message);
     } finally {
       await queryRunner.release();
     }
@@ -199,6 +206,7 @@ export class UserService {
         )
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
       queryBuilder = await filterEntities(
@@ -554,10 +562,13 @@ export class UserService {
     domainUrl?: string,
   ) {
     const password = generateRandom6DigitNumber();
+    console.log(email, 'emailemailemailemail');
+
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password.toString(),
     });
+    console.log(userRecord, 'userRecorduserRecord');
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
     const expiresIn = 24 * 60 * 60 * 1000;
     await admin.auth().createCustomToken(userRecord.uid, { expiresIn });
@@ -581,9 +592,9 @@ export class UserService {
       'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
     emailBody.html = emailHtml;
 
-    const response = await this.httpService
-      .post(`${this.emailServerUrl}/email`, emailBody)
-      .toPromise();
+    // const response = await this.httpService
+    //   .post(`${this.emailServerUrl}/email`, emailBody)
+    //   .toPromise();
 
     return userRecord;
   }
@@ -624,8 +635,8 @@ export class UserService {
         }
 
         return departments;
-      } 
-      return departments
+      }
+      return departments;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

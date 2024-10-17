@@ -8,6 +8,7 @@ export const roleData = () => {
     description: 'Description for admin role',
     rolePermissions: [],
     tenantId: 'tenantId',
+    slug: 'slug',
     user: [],
     permission: [],
     createdAt: new Date('2022-10-22 07:11:42'),
@@ -19,6 +20,7 @@ export const roleDataSave = (): CreateRoleDto => {
   return {
     name: 'Admin role',
     description: 'Description for admin role',
+    // slug: 'slug',
     permission: [],
     tenantId: 'tenantId',
   };
@@ -27,6 +29,7 @@ export const roleDataSave = (): CreateRoleDto => {
 export const createRole = (): CreateRoleDto => {
   return {
     name: 'Admin role',
+    // slug: 'slug',
     description: 'Description for admin role',
     permission: ['List of permission ids'],
     tenantId: 'tenantId',

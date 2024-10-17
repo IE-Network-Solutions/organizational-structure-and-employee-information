@@ -9,7 +9,7 @@ export class Role extends BaseModel {
   @Column()
   name: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: false, nullable: true })
   slug: string;
 
   @Column({ nullable: true })

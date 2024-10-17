@@ -1,7 +1,6 @@
 import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Column } from 'typeorm';
 
-export class CreateRoleDto {
+export class CreateJobPositionDto {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -9,14 +8,6 @@ export class CreateRoleDto {
   @IsString()
   @IsNotEmpty()
   description: string;
-
-  // @Column({ type: 'varchar', unique: true })
-  // slug: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  permission?: string[];
 
   @IsString()
   @IsOptional()

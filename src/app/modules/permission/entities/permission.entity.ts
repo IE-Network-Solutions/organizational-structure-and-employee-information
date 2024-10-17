@@ -6,10 +6,10 @@ import { UserPermission } from '../../user-permission/entities/user-permission.e
 
 @Entity()
 export class Permission extends BaseModel {
-  @Column({ unique: true })
+  @Column({ unique: false })
   name: string;
 
-  @Column({ unique: true })
+  @Column({ unique: false })
   slug: string;
 
   @Column({ nullable: true })
