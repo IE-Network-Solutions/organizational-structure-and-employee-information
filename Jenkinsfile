@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_SERVER = 'ubuntu@139.185.53.18'
+        REMOTE_SERVER = 'ubuntu@139.185.51.164'
         REPO_URL = 'https://github.com/IE-Network-Solutions/organizational-structure-and-employee-information.git'
         BRANCH_NAME = 'develop'
-        REPO_DIR = 'osei-backend'
+        REPO_DIR = 'staging/osei-backend'
         SSH_CREDENTIALS_ID = 'peptest'
     }
 
@@ -42,7 +42,7 @@ pipeline {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                     sh """
                  
-                        ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cp ~/backend-env/.osei-env ~/$REPO_DIR/.env'
+                        ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cp ~/backend-env/staging-env/.osei-env ~/$REPO_DIR/.env'
                         ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm install'
                     """
                 }
