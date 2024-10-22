@@ -15,6 +15,11 @@ pipeline {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no $REMOTE_SERVER '
+                        if [ ! -d "staging" ]; then
+                            mkdir -p staging
+                            sudo chown \$USER:\$USER staging
+                            sudo chmod 755 staging
+                        fi
                         if [ -d "$REPO_DIR" ]; then
                             sudo chown -R \$USER:\$USER "$REPO_DIR"
                             sudo chmod -R 755 "$REPO_DIR"
@@ -65,7 +70,7 @@ pipeline {
                 }
             }
         }
-        stage('Run NestJS App') {
+        stage('Run Nest js App') {
             steps {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                     sh """
@@ -75,10 +80,10 @@ pipeline {
             }
         }
     }
-
+    
     post {
         success {
-            echo 'NestJS application deployed successfully!'
+            echo 'Nest js application deployed successfully!'
         }
         failure {
             echo 'Deployment failed.'
