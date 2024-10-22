@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         REMOTE_SERVER = 'ubuntu@139.185.51.164'
-        REPO_URL = 'https://github.com/IE-Network-Solutions/organizational-structure-and-employee-information.git'
+        REPO_URL = 'https://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@github.com/IE-Network-Solutions/organizational-structure-and-employee-information.git'
         BRANCH_NAME = 'staging'
         REPO_DIR = '/home/ubuntu/staging/osei-backend'
         SSH_CREDENTIALS_ID = 'pepproduction'
