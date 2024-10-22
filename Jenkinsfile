@@ -8,11 +8,15 @@ pipeline {
         REPO_DIR = '/home/ubuntu/staging/osei-backend'
         SSH_CREDENTIALS_ID = 'pepproduction'
     }
+
+    stages {
         stage('Pull Latest Changes') {
             steps {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no $REMOTE_SERVER '
+                        sudo mkdir -p "$REPO_DIR" || true
+                        sudo chown -R ubuntu:ubuntu "$REPO_DIR"
                         if [ ! -d "$REPO_DIR/.git" ]; then
                             git clone $REPO_URL -b $BRANCH_NAME "$REPO_DIR"
                         else
