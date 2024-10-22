@@ -5,7 +5,7 @@ pipeline {
         REMOTE_SERVER = 'ubuntu@139.185.51.164'
         REPO_URL = 'https://github.com/IE-Network-Solutions/organizational-structure-and-employee-information.git'
         BRANCH_NAME = 'staging'
-        REPO_DIR = 'staging/osei-backend'
+        REPO_DIR = '/home/ubuntu/staging/osei-backend'
         SSH_CREDENTIALS_ID = 'pepproduction'
     }
 
@@ -15,10 +15,10 @@ pipeline {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no $REMOTE_SERVER '
-                        if [ ! -d "staging" ]; then
-                            mkdir -p staging
-                            sudo chown \$USER:\$USER staging
-                            sudo chmod 755 staging
+                        if [ ! -d "/home/ubuntu/staging" ]; then
+                            mkdir -p /home/ubuntu/staging
+                            sudo chown \$USER:\$USER /home/ubuntu/staging
+                            sudo chmod 755 /home/ubuntu/staging
                         fi
                         if [ -d "$REPO_DIR" ]; then
                             sudo chown -R \$USER:\$USER "$REPO_DIR"
@@ -80,7 +80,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
             echo 'Nest js application deployed successfully!'
@@ -89,4 +89,3 @@ pipeline {
             echo 'Deployment failed.'
         }
     }
-}
