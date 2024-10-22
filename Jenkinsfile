@@ -8,26 +8,6 @@ pipeline {
         REPO_DIR = '/home/ubuntu/staging/osei-backend'
         SSH_CREDENTIALS_ID = 'pepproduction'
     }
-
-    stages {
-        stage('Prepare Repository') {
-            steps {
-                sshagent (credentials: [SSH_CREDENTIALS_ID]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no $REMOTE_SERVER '
-                        if [ ! -d "/home/ubuntu/staging" ]; then
-                            mkdir -p /home/ubuntu/staging
-                            sudo chown \$USER:\$USER /home/ubuntu/staging
-                            sudo chmod 755 /home/ubuntu/staging
-                        fi
-                        if [ -d "$REPO_DIR" ]; then
-                            sudo chown -R \$USER:\$USER "$REPO_DIR"
-                            sudo chmod -R 755 "$REPO_DIR"
-                        fi'
-                    """
-                }
-            }
-        }
         stage('Pull Latest Changes') {
             steps {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
