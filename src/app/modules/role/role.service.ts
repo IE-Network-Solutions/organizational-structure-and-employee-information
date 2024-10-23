@@ -137,13 +137,18 @@ export class RoleService implements RoleInterface {
     }
   }
 
-  async findAllRoleWithPermissions(tenantId:string,paginationOptions: PaginationDto) {
+  async findAllRoleWithPermissions(
+    tenantId: string,
+    paginationOptions: PaginationDto,
+  ) {
     const options: IPaginationOptions = {
       page: paginationOptions.page,
       limit: paginationOptions.limit,
     };
     try {
-      const roles = await this.roleRepository.find({where:{tenantId:tenantId}});
+      const roles = await this.roleRepository.find({
+        where: { tenantId: tenantId },
+      });
       const rolePermissions = await this.roleRepository
         .createQueryBuilder('role')
         .leftJoinAndSelect('role.rolePermissions', 'rolePermissions')

@@ -1,5 +1,12 @@
 import { CreateJobPositionDto } from '../dto/create-job-position.dto';
-import { createJobPositionData, deleteJobPositionData, findOneNotFoundReturnValue, jobPositionData, paginationResultJobPositionData, updateJobPositionData } from '../tests/jobposition.data';
+import {
+  createJobPositionData,
+  deleteJobPositionData,
+  findOneNotFoundReturnValue,
+  jobPositionData,
+  paginationResultJobPositionData,
+  updateJobPositionData,
+} from '../tests/jobposition.data';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { UpdateJobPositionDto } from '../dto/update-job-position.dto';
 

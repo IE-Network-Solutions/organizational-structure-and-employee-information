@@ -38,7 +38,7 @@ describe('JobPositionService', () => {
         },
         {
           provide: jobPositionToken,
-           useValue: mock<Repository<JobPosition>>(),
+          useValue: mock<Repository<JobPosition>>(),
         },
       ],
     }).compile();
@@ -48,8 +48,6 @@ describe('JobPositionService', () => {
   });
 
   describe('create', () => {
-
-
     it('should create and return a new job position', async () => {
       const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       jobPositionRepository.findOne.mockResolvedValue(undefined); // No conflict
@@ -78,36 +76,42 @@ describe('JobPositionService', () => {
   });
   describe('findOne', () => {
     describe('when findOneJobPoJobPosition is called', () => {
-      let jobPosition:JobPosition;
+      let jobPosition: JobPosition;
 
       beforeEach(async () => {
-      await jobPositionRepository.findOneByOrFail.mockResolvedValue(jobPositionData());
-       jobPosition = await jobPositionService.findOnePosition(jobPositionData().id);
+        await jobPositionRepository.findOneByOrFail.mockResolvedValue(
+          jobPositionData(),
+        );
+        jobPosition = await jobPositionService.findOnePosition(
+          jobPositionData().id,
+        );
       });
 
       it('should callJobPositionRepository.findOne', async () => {
         await jobPositionService.findOnePosition(jobPositionData().id);
         expect(jobPositionRepository.findOneByOrFail).toHaveBeenCalledWith({
-          id:jobPositionData().id,
+          id: jobPositionData().id,
         });
       });
 
-      it('should return theJobPosition', async() => {
-        expect(await jobPositionService.findOnePosition(jobPositionData().id)).toEqual(jobPositionData());
+      it('should return theJobPosition', async () => {
+        expect(
+          await jobPositionService.findOnePosition(jobPositionData().id),
+        ).toEqual(jobPositionData());
       });
 
       it('should throw NotFoundException if id is not found', async () => {
         const wrongId = '4567';
-       jobPositionRepository.findOneByOrFail.mockRejectedValue(
+        jobPositionRepository.findOneByOrFail.mockRejectedValue(
           new Error(`Position with Id ${wrongId} not found`),
         );
 
-        await expect(jobPositionService.findOnePosition(wrongId)).rejects.toThrow(
-          NotFoundException,
-        );
-        await expect(jobPositionService.findOnePosition(wrongId)).rejects.toThrow(
-          `Position with Id ${wrongId} not found`,
-        );
+        await expect(
+          jobPositionService.findOnePosition(wrongId),
+        ).rejects.toThrow(NotFoundException);
+        await expect(
+          jobPositionService.findOnePosition(wrongId),
+        ).rejects.toThrow(`Position with Id ${wrongId} not found`);
       });
     });
   });
@@ -138,95 +142,98 @@ describe('JobPositionService', () => {
     });
   });
 
-
   describe('update', () => {
-        describe('when updatejobPosition is called', () => {
-          let jobPosition: JobPosition;
-          let companyProfileImage: Express.Multer.File;
-          beforeEach(async () => {
-            jest
-              .spyOn(jobPositionService, 'findOnePosition')
-              .mockResolvedValue(jobPositionData());
-            jobPositionRepository.update.mockResolvedValue(jobPositionData() as any);
-          });
-    
-          it('should call jobPositionService.findOnejobPosition', async () => {
-            await jobPositionService.update(
-              jobPositionData().id,
-              jobPositionData().tenantId,
-              createJobPositionData(),
-            );
-            expect(jobPositionService.findOnePosition).toHaveBeenCalledWith(
-              jobPositionData().id,
-            );
-          });
-    
-          it('should call jobPositionRepository.update', async () => {
-            await jobPositionService.update(
-              jobPositionData().id,
-              jobPositionData().tenantId,
-              createJobPositionData(),
-            );
-            expect(jobPositionRepository.update).toHaveBeenCalledWith(
-              jobPositionData().id ,
-              createJobPositionData(),
-            );
-          });
-    
-          it('should return the updated jobPosition', async () => {
-            jobPosition = await jobPositionService.update(
-              jobPositionData().id,
-              jobPositionData().tenantId,
-              createJobPositionData(),
-            );
-            expect(jobPosition).toEqual(jobPositionData());
-          });
-    
-          it('should throw NotFoundException if id is not found', async () => {
-            const wrongId = '4567';
-            jest
-              .spyOn(jobPositionService, 'findOnePosition')
-              .mockRejectedValue(
-                new NotFoundException(`Position with Id ${wrongId} not found`),
-              );
-            await expect(
-              jobPositionService.update(
-                wrongId,
-                jobPositionData().tenantId,
-                createJobPositionData(),
-              ),
-            ).rejects.toThrow(NotFoundException);
-            await expect(
-              jobPositionService.update(
-                wrongId,
-                jobPositionData().tenantId,
-                createJobPositionData(),
-              ),
-            ).rejects.toThrow(`Position with id ${wrongId} not found`);
-          });
-        });
+    describe('when updatejobPosition is called', () => {
+      let jobPosition: JobPosition;
+      let companyProfileImage: Express.Multer.File;
+      beforeEach(async () => {
+        jest
+          .spyOn(jobPositionService, 'findOnePosition')
+          .mockResolvedValue(jobPositionData());
+        jobPositionRepository.update.mockResolvedValue(
+          jobPositionData() as any,
+        );
       });
-  
-      describe('remove', () => {
-        describe('when removejobPosition is called', () => {
-          beforeEach(async () => {
-            jobPositionRepository.findOne.mockResolvedValue(jobPositionData());
-            jobPositionRepository.softDelete.mockResolvedValue(deleteJobPositionData());
-          });
-  
-    
-          it('should call jobPositionRepository.delete', async () => {
-            await jobPositionService.remove(jobPositionData().id);
-            expect(jobPositionRepository.softDelete).toHaveBeenCalledWith(
-             {id: jobPositionData().id},
-            );
-          });
-    
 
-          it('should return void when the jobPosition is removed', async () => {
-            const result = await jobPositionService.remove(jobPositionData().id);
-            expect(await jobPositionService.remove(jobPositionData().id)).toEqual(deleteJobPositionData());
-          });
+      it('should call jobPositionService.findOnejobPosition', async () => {
+        await jobPositionService.update(
+          jobPositionData().id,
+          jobPositionData().tenantId,
+          createJobPositionData(),
+        );
+        expect(jobPositionService.findOnePosition).toHaveBeenCalledWith(
+          jobPositionData().id,
+        );
+      });
+
+      it('should call jobPositionRepository.update', async () => {
+        await jobPositionService.update(
+          jobPositionData().id,
+          jobPositionData().tenantId,
+          createJobPositionData(),
+        );
+        expect(jobPositionRepository.update).toHaveBeenCalledWith(
+          jobPositionData().id,
+          createJobPositionData(),
+        );
+      });
+
+      it('should return the updated jobPosition', async () => {
+        jobPosition = await jobPositionService.update(
+          jobPositionData().id,
+          jobPositionData().tenantId,
+          createJobPositionData(),
+        );
+        expect(jobPosition).toEqual(jobPositionData());
+      });
+
+      it('should throw NotFoundException if id is not found', async () => {
+        const wrongId = '4567';
+        jest
+          .spyOn(jobPositionService, 'findOnePosition')
+          .mockRejectedValue(
+            new NotFoundException(`Position with Id ${wrongId} not found`),
+          );
+        await expect(
+          jobPositionService.update(
+            wrongId,
+            jobPositionData().tenantId,
+            createJobPositionData(),
+          ),
+        ).rejects.toThrow(NotFoundException);
+        await expect(
+          jobPositionService.update(
+            wrongId,
+            jobPositionData().tenantId,
+            createJobPositionData(),
+          ),
+        ).rejects.toThrow(`Position with id ${wrongId} not found`);
+      });
+    });
+  });
+
+  describe('remove', () => {
+    describe('when removejobPosition is called', () => {
+      beforeEach(async () => {
+        jobPositionRepository.findOne.mockResolvedValue(jobPositionData());
+        jobPositionRepository.softDelete.mockResolvedValue(
+          deleteJobPositionData(),
+        );
+      });
+
+      it('should call jobPositionRepository.delete', async () => {
+        await jobPositionService.remove(jobPositionData().id);
+        expect(jobPositionRepository.softDelete).toHaveBeenCalledWith({
+          id: jobPositionData().id,
         });
       });
+
+      it('should return void when the jobPosition is removed', async () => {
+        const result = await jobPositionService.remove(jobPositionData().id);
+        expect(await jobPositionService.remove(jobPositionData().id)).toEqual(
+          deleteJobPositionData(),
+        );
+      });
+    });
+  });
 });
