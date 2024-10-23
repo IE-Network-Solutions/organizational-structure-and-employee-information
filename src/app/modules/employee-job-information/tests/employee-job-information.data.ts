@@ -1,6 +1,6 @@
 import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
 import { EmployeeJobInformation } from '../entities/employee-job-information.entity';
-import { JobPosition } from '@root/src/job-position/entities/job-position.entity';
+import { JobPosition } from '@root/src/app/modules/job-position/entities/job-position.entity';
 
 export const employeeJobInformationData = (): EmployeeJobInformation => {
   return {

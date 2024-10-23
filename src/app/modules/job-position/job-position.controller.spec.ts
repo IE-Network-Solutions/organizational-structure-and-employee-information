@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PaginationDto } from '../core/commonDto/pagination-dto';
+import { PaginationDto } from '../../../core/commonDto/pagination-dto';
 import { CreateJobPositionDto } from './dto/create-job-position.dto';
 import { UpdateJobPositionDto } from './dto/update-job-position.dto';
 import { JobPositionController } from './job-position.controller';

@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { JobPositionService } from './job-position.service';
 import { mock, MockProxy } from 'jest-mock-extended';
-import { PaginationService } from '../core/pagination/pagination.service';
+import { PaginationService } from '../../../core/pagination/pagination.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import {
@@ -17,7 +17,7 @@ import {
   updateJobPositionData,
   updateJobPositionDataReturned,
 } from './tests/jobposition.data';
-import { paginationOptions } from '../core/commonTestData/commonTest.data';
+import { paginationOptions } from '../../../core/commonTestData/commonTest.data';
 import { JobPosition } from './entities/job-position.entity';
 
 describe('JobPositionService', () => {
