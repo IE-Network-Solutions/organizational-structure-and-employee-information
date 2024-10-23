@@ -20,7 +20,7 @@ import { EmployementTypeModule } from './modules/employment-type/employement-typ
 import { EmployeeTerminationModule } from './modules/employee-termination/employee-termination.module';
 import { OffboardingEmployeeTaskModule } from './modules/offboarding-employee-task/offboarding-employee-tasks.module';
 import { OffboardingTasksTemplateModule } from './modules/offboarding-tasks-template/offboarding-tasks-template.module';
-import { JobPositionModule } from '../job-position/job-position.module';
+import { JobPositionModule } from './modules/job-position/job-position.module';
 @Global()
 @Module({
   imports: [

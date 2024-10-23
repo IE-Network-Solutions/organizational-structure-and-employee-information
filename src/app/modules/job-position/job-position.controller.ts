@@ -15,8 +15,8 @@ import { CreateJobPositionDto } from './dto/create-job-position.dto';
 import { UpdateJobPositionDto } from './dto/update-job-position.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express'; // Explicitly type the request object
-import { PaginationDto } from '../core/commonDto/pagination-dto';
-import { SearchFilterDTO } from '../core/commonDto/search-filter-dto';
+import { PaginationDto } from '../../../core/commonDto/pagination-dto';
+import { SearchFilterDTO } from '../../../core/commonDto/search-filter-dto';
 import { JobPosition } from './entities/job-position.entity';
 
 @Controller('positions')
