@@ -80,7 +80,10 @@ describe('EmployementTypeController', () => {
           paginationResultEmploymentTypeData(),
         );
 
-        await employementTypesController.findAll(request['tenantId'],paginationOptions());
+        await employementTypesController.findAll(
+          request['tenantId'],
+          paginationOptions(),
+        );
       });
 
       test('then it should call employementTypeService.findAll with correct parameters', () => {
