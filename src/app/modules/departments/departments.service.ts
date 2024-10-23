@@ -73,8 +73,6 @@ export class DepartmentsService {
           ),
         );
         return departmentTrees.filter((item) => item.level === 0)[0];
-      } else {
-        throw new NotFoundException('No Department was created.');
       }
     } catch (error) {
       if (error instanceof NotFoundException) {

@@ -143,4 +143,44 @@ export class EmployeeInformationService {
       throw error;
     }
   }
+
+  async getEmployeeBirthDay(tenantId: string) {
+    const today = new Date();
+    const todayMonth = today.getMonth() + 1;
+    const todayDay = today.getDate();
+    const employees = await this.employeeInformationRepository
+      .createQueryBuilder('EmployeeInformation')
+      .leftJoinAndSelect('EmployeeInformation.user', 'user')
+      .where('EmployeeInformation.tenantId = :tenantId', { tenantId })
+      .andWhere(
+        'EXTRACT(MONTH FROM EmployeeInformation.dateOfBirth) = :month',
+        { month: todayMonth },
+      )
+      .andWhere('EXTRACT(DAY FROM EmployeeInformation.dateOfBirth) = :day', {
+        day: todayDay,
+      })
+      .getMany();
+
+    return employees;
+  }
+
+  async getEmployeeAnniversary(tenantId: string) {
+    const today = new Date();
+    const todayMonth = today.getMonth() + 1;
+    const todayDay = today.getDate();
+
+    const employees = await this.employeeInformationRepository
+      .createQueryBuilder('EmployeeInformation')
+      .leftJoinAndSelect('EmployeeInformation.user', 'user')
+      .where('EmployeeInformation.tenantId = :tenantId', { tenantId })
+      .andWhere('EXTRACT(MONTH FROM EmployeeInformation.joinedDate) = :month', {
+        month: todayMonth,
+      })
+      .andWhere('EXTRACT(DAY FROM EmployeeInformation.joinedDate) = :day', {
+        day: todayDay,
+      })
+      .getMany();
+
+    return employees;
+  }
 }

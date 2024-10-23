@@ -12,6 +12,7 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { EmployementType } from './entities/employement-type.entity';
 import { CreateEmployementTypeDto } from './dto/create-employement-type.dto';
 import { UpdateEmployementTypeDto } from './dto/update-employement-type.dto';
+import { EmploymentStatusFilterDto } from './dto/filter-by-category.dto';
 
 @Injectable()
 export class EmployementTypeService {
@@ -37,6 +38,7 @@ export class EmployementTypeService {
   }
 
   async findAll(
+    tenantId: string,
     paginationOptions: PaginationDto,
   ): Promise<Pagination<EmployementType>> {
     try {
@@ -46,6 +48,7 @@ export class EmployementTypeService {
       };
       const queryBuilder = await this.employeeTypeRepository
         .createQueryBuilder('EmploymentType')
+        .where('EmploymentType.tenantId =:tenantId', { tenantId })
         .orderBy('EmploymentType.createdAt', 'DESC');
 
       return await this.paginationService.paginate<EmployementType>(
@@ -104,5 +107,33 @@ export class EmployementTypeService {
       }
       throw error;
     }
+  }
+
+  async getEmployeesCountByEmploymentType(
+    tenantId: string,
+    employmentStatusFilterDto: EmploymentStatusFilterDto,
+  ) {
+    let employees = await this.employeeTypeRepository
+      .createQueryBuilder('employeeType')
+      .leftJoin('employeeType.employeeJobInformation', 'employeeJobInformation') // Join employeeJobInformation
+      .leftJoin('employeeJobInformation.user', 'user')
+      .select('employeeType.name', 'name')
+      .addSelect('employeeType.id', 'id')
+      .addSelect('COUNT(user.id)', 'count')
+      .where('employeeType.tenantId = :tenantId', { tenantId })
+      .groupBy('employeeType.id');
+
+    if (
+      employmentStatusFilterDto &&
+      employmentStatusFilterDto.type &&
+      employmentStatusFilterDto.type != null &&
+      employmentStatusFilterDto.type != ''
+    ) {
+      employees = employees.andWhere('employeeType.id = :id', {
+        id: employmentStatusFilterDto.type,
+      });
+    }
+    const result = await employees.getRawMany();
+    return result;
   }
 }

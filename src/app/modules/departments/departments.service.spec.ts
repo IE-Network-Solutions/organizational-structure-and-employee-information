@@ -94,17 +94,6 @@ describe('DepartmentsService', () => {
       expect(repository.findDescendantsTree).toHaveBeenCalledWith(department);
     });
 
-    it('should throw NotFoundException if no departments are found', async () => {
-      const tenantId = 'tenant-id-123';
-
-      jest.spyOn(repository, 'find').mockResolvedValue([]);
-
-      await expect(service.findAllDepartments(tenantId)).rejects.toThrow(
-        NotFoundException,
-      );
-      expect(repository.find).toHaveBeenCalledWith({ where: { tenantId } });
-    });
-
     it('should throw BadRequestException if an error occurs', async () => {
       const tenantId = 'tenant-id-123';
       const error = new Error('Something went wrong');
