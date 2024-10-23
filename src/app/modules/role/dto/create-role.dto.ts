@@ -10,8 +10,8 @@ export class CreateRoleDto {
   @IsNotEmpty()
   description: string;
 
-  @Column({ type: 'varchar', unique: true })
-  slug: string;
+  // @Column({ type: 'varchar', unique: true })
+  // slug: string;
 
   @IsOptional()
   @IsArray()
