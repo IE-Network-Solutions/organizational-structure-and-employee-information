@@ -26,7 +26,7 @@ export class User extends BaseModel {
   @Column({ nullable: true })
   profileImageDownload: string;
 
-  @Column({ unique: false, length: 50, type: 'varchar' })
+  @Column({ unique: true, length: 50, type: 'varchar' })
   email: string;
 
   @Column({ nullable: true, type: 'varchar' })
