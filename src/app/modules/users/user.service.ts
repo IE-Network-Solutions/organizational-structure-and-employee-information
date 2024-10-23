@@ -592,9 +592,9 @@ export class UserService {
       'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
     emailBody.html = emailHtml;
 
-    // const response = await this.httpService
-    //   .post(`${this.emailServerUrl}/email`, emailBody)
-    //   .toPromise();
+    const response = await this.httpService
+      .post(`${this.emailServerUrl}/email`, emailBody)
+      .toPromise();
 
     return userRecord;
   }

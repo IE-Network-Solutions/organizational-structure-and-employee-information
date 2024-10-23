@@ -140,7 +140,7 @@ export class JobPositionService {
       return await this.jobpositionRepository.softDelete({ id });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`User with id ${id} not found.`);
+        throw new NotFoundException(`Position with id ${id} not found.`);
       }
       throw error;
     }

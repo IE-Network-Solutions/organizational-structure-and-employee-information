@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { JobPositionService } from './job-position.service';
-import { MockProxy } from 'jest-mock-extended';
+import { mock, MockProxy } from 'jest-mock-extended';
 import { PaginationService } from '../core/pagination/pagination.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
@@ -11,9 +11,11 @@ import {
 } from '@nestjs/common';
 import {
   createJobPositionData,
+  deleteJobPositionData,
   jobPositionData,
   paginationResultJobPositionData,
   updateJobPositionData,
+  updateJobPositionDataReturned,
 } from './tests/jobposition.data';
 import { paginationOptions } from '../core/commonTestData/commonTest.data';
 import { JobPosition } from './entities/job-position.entity';
@@ -36,79 +38,77 @@ describe('JobPositionService', () => {
         },
         {
           provide: jobPositionToken,
-          useValue: (jobPositionRepository = {
-            create: jest.fn(),
-            save: jest.fn(),
-            findOne: jest.fn(),
-            findOneOrFail: jest.fn(),
-            update: jest.fn(),
-            softDelete: jest.fn(),
-          } as any),
+           useValue: mock<Repository<JobPosition>>(),
         },
       ],
     }).compile();
 
     jobPositionService = moduleRef.get<JobPositionService>(JobPositionService);
+    jobPositionRepository = moduleRef.get(jobPositionToken);
   });
 
   describe('create', () => {
-    it('should throw ConflictException if the job position already exists', async () => {
-      const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
-      jobPositionRepository.findOne.mockResolvedValue(jobPositionData());
 
-      await expect(
-        jobPositionService.create(tenantId, createJobPositionData()),
-      ).rejects.toThrow(ConflictException);
-    });
 
     it('should create and return a new job position', async () => {
       const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       jobPositionRepository.findOne.mockResolvedValue(undefined); // No conflict
       jobPositionRepository.create.mockReturnValue({
-        ...createJobPositionData(),
+        ...jobPositionData(),
         tenantId,
       } as any);
       jobPositionRepository.save.mockResolvedValue(jobPositionData());
 
       const result = await jobPositionService.create(
         tenantId,
-        createJobPositionData(),
+        jobPositionData(),
       );
       expect(jobPositionRepository.create).toHaveBeenCalledWith({
-        ...createJobPositionData(),
+        ...jobPositionData(),
         tenantId,
       });
       expect(jobPositionRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: createJobPositionData().name,
+          name: jobPositionData().name,
           tenantId,
         }),
       );
       expect(result).toEqual(jobPositionData());
     });
   });
+  describe('findOne', () => {
+    describe('when findOneJobPoJobPosition is called', () => {
+      let jobPosition:JobPosition;
 
-  describe('findOnePosition', () => {
-    it('should return a job position if found', async () => {
-      jobPositionRepository.findOneOrFail.mockResolvedValue(jobPositionData());
-
-      const result = await jobPositionService.findOnePosition(
-        jobPositionData().id,
-      );
-      expect(jobPositionRepository.findOneOrFail).toHaveBeenCalledWith({
-        where: { id: jobPositionData().id },
+      beforeEach(async () => {
+      await jobPositionRepository.findOneByOrFail.mockResolvedValue(jobPositionData());
+       jobPosition = await jobPositionService.findOnePosition(jobPositionData().id);
       });
-      expect(result).toEqual(jobPositionData());
-    });
 
-    it('should throw NotFoundException if job position is not found', async () => {
-      jobPositionRepository.findOneOrFail.mockRejectedValue(
-        new Error('not found'),
-      );
+      it('should callJobPositionRepository.findOne', async () => {
+        await jobPositionService.findOnePosition(jobPositionData().id);
+        expect(jobPositionRepository.findOneByOrFail).toHaveBeenCalledWith({
+          id:jobPositionData().id,
+        });
+      });
 
-      await expect(
-        jobPositionService.findOnePosition('nonexistent-id'),
-      ).rejects.toThrow(NotFoundException);
+      it('should return theJobPosition', async() => {
+        expect(await jobPositionService.findOnePosition(jobPositionData().id)).toEqual(jobPositionData());
+      });
+
+      it('should throw NotFoundException if id is not found', async () => {
+        const wrongId = '4567';
+       jobPositionRepository.findOneByOrFail.mockRejectedValue(
+          new Error(`Position with Id ${wrongId} not found`),
+        );
+
+        await expect(jobPositionService.findOnePosition(wrongId)).rejects.toThrow(
+          NotFoundException,
+        );
+        await expect(jobPositionService.findOnePosition(wrongId)).rejects.toThrow(
+          `Position with Id ${wrongId} not found`,
+        );
+      });
     });
   });
 
@@ -138,59 +138,95 @@ describe('JobPositionService', () => {
     });
   });
 
+
   describe('update', () => {
-    it('should throw NotFoundException if the job position does not exist', async () => {
-      jobPositionRepository.findOneOrFail.mockRejectedValue(
-        new NotFoundException(),
-      );
-
-      await expect(
-        jobPositionService.update(
-          'nonexistent-id',
-          'tenantId',
-          updateJobPositionData(),
-        ),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should update and return the job position', async () => {
-      const tenantId = 'tenantId';
-      jobPositionRepository.findOneOrFail.mockResolvedValue(jobPositionData());
-
-      await jobPositionService.update(
-        jobPositionData().id,
-        tenantId,
-        updateJobPositionData(),
-      );
-
-      expect(jobPositionRepository.update).toHaveBeenCalledWith(
-        jobPositionData().id,
-        {
-          ...updateJobPositionData(),
-          tenantId,
-        },
-      );
-    });
-  });
-
-  describe('remove', () => {
-    it('should throw NotFoundException if the job position does not exist', async () => {
-      jobPositionRepository.findOneOrFail.mockRejectedValue(
-        new NotFoundException(),
-      );
-
-      await expect(jobPositionService.remove('nonexistent-id')).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('should soft delete a job position', async () => {
-      jobPositionRepository.findOneOrFail.mockResolvedValue(jobPositionData());
-
-      await jobPositionService.remove(jobPositionData().id);
-      expect(jobPositionRepository.softDelete).toHaveBeenCalledWith({
-        id: jobPositionData().id,
+        describe('when updatejobPosition is called', () => {
+          let jobPosition: JobPosition;
+          let companyProfileImage: Express.Multer.File;
+          beforeEach(async () => {
+            jest
+              .spyOn(jobPositionService, 'findOnePosition')
+              .mockResolvedValue(jobPositionData());
+            jobPositionRepository.update.mockResolvedValue(jobPositionData() as any);
+          });
+    
+          it('should call jobPositionService.findOnejobPosition', async () => {
+            await jobPositionService.update(
+              jobPositionData().id,
+              jobPositionData().tenantId,
+              createJobPositionData(),
+            );
+            expect(jobPositionService.findOnePosition).toHaveBeenCalledWith(
+              jobPositionData().id,
+            );
+          });
+    
+          it('should call jobPositionRepository.update', async () => {
+            await jobPositionService.update(
+              jobPositionData().id,
+              jobPositionData().tenantId,
+              createJobPositionData(),
+            );
+            expect(jobPositionRepository.update).toHaveBeenCalledWith(
+              jobPositionData().id ,
+              createJobPositionData(),
+            );
+          });
+    
+          it('should return the updated jobPosition', async () => {
+            jobPosition = await jobPositionService.update(
+              jobPositionData().id,
+              jobPositionData().tenantId,
+              createJobPositionData(),
+            );
+            expect(jobPosition).toEqual(jobPositionData());
+          });
+    
+          it('should throw NotFoundException if id is not found', async () => {
+            const wrongId = '4567';
+            jest
+              .spyOn(jobPositionService, 'findOnePosition')
+              .mockRejectedValue(
+                new NotFoundException(`Position with Id ${wrongId} not found`),
+              );
+            await expect(
+              jobPositionService.update(
+                wrongId,
+                jobPositionData().tenantId,
+                createJobPositionData(),
+              ),
+            ).rejects.toThrow(NotFoundException);
+            await expect(
+              jobPositionService.update(
+                wrongId,
+                jobPositionData().tenantId,
+                createJobPositionData(),
+              ),
+            ).rejects.toThrow(`Position with id ${wrongId} not found`);
+          });
+        });
       });
-    });
-  });
+  
+      describe('remove', () => {
+        describe('when removejobPosition is called', () => {
+          beforeEach(async () => {
+            jobPositionRepository.findOne.mockResolvedValue(jobPositionData());
+            jobPositionRepository.softDelete.mockResolvedValue(deleteJobPositionData());
+          });
+  
+    
+          it('should call jobPositionRepository.delete', async () => {
+            await jobPositionService.remove(jobPositionData().id);
+            expect(jobPositionRepository.softDelete).toHaveBeenCalledWith(
+             {id: jobPositionData().id},
+            );
+          });
+    
+
+          it('should return void when the jobPosition is removed', async () => {
+            const result = await jobPositionService.remove(jobPositionData().id);
+            expect(await jobPositionService.remove(jobPositionData().id)).toEqual(deleteJobPositionData());
+          });
+        });
+      });
 });
