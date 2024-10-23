@@ -101,9 +101,13 @@ export class UserService {
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
+<<<<<<< HEAD
 
       await checkIfDataExists(valuesToCheck, this.userRepository);
 
+=======
+      await checkIfDataExists(valuesToCheck, this.userRepository);
+>>>>>>> a311ca727f048be29e1758a6b35981493e567cca
       const result = await this.userRepository.save(user);
       await this.rolePermissionService.updateRolePermissions(
         createRolePermissionDto['roleId'],

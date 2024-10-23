@@ -1,12 +1,11 @@
 import { CreateJobPositionDto } from '../dto/create-job-position.dto';
 import {
-  createJobpositionDataOnCreate,
-  deleteJobpositionData,
-  jobpositionData,
-  updateJobpositionData,
-  updateJobpositionDataReturned,
-  paginationResultJobpositionData,
-  findoneNotFoundReturnValue,
+  createJobPositionData,
+  deleteJobPositionData,
+  findOneNotFoundReturnValue,
+  jobPositionData,
+  paginationResultJobPositionData,
+  updateJobPositionData,
 } from '../tests/jobposition.data';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { UpdateJobPositionDto } from '../dto/update-job-position.dto';
@@ -16,7 +15,7 @@ export const JobPositionService = jest.fn().mockReturnValue({
   create: jest
     .fn()
     .mockImplementation((tenantId: string, dto: CreateJobPositionDto) => {
-      return Promise.resolve(createJobpositionDataOnCreate());
+      return Promise.resolve(createJobPositionData());
     }),
 
   // Mock implementation for finding all job positions
@@ -28,16 +27,16 @@ export const JobPositionService = jest.fn().mockReturnValue({
         searchFilterDTO: any,
         tenantId: string,
       ) => {
-        return Promise.resolve(paginationResultJobpositionData());
+        return Promise.resolve(paginationResultJobPositionData());
       },
     ),
 
   // Mock implementation for finding a job position by id
   findOnePosition: jest.fn().mockImplementation((id: string) => {
     if (id === '4567') {
-      return Promise.resolve(findoneNotFoundReturnValue());
+      return Promise.resolve(findOneNotFoundReturnValue());
     }
-    return Promise.resolve(jobpositionData());
+    return Promise.resolve(jobPositionData());
   }),
 
   // Mock implementation for updating a job position
@@ -45,12 +44,12 @@ export const JobPositionService = jest.fn().mockReturnValue({
     .fn()
     .mockImplementation(
       (id: string, tenantId: string, dto: UpdateJobPositionDto) => {
-        return Promise.resolve(updateJobpositionData());
+        return Promise.resolve(updateJobPositionData());
       },
     ),
 
   // Mock implementation for removing a job position by id
   remove: jest.fn().mockImplementation((id: string) => {
-    return Promise.resolve(deleteJobpositionData());
+    return Promise.resolve(deleteJobPositionData());
   }),
 });
