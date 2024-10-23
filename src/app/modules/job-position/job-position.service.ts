@@ -8,14 +8,15 @@ import { CreateJobPositionDto } from './dto/create-job-position.dto';
 import { UpdateJobPositionDto } from './dto/update-job-position.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JobPosition } from './entities/job-position.entity';
-import { PaginationService } from '../core/pagination/pagination.service';
+
 import { Repository } from 'typeorm';
-import { Role } from '../app/modules/role/entities/role.entity';
-import { PaginationDto } from '../core/commonDto/pagination-dto';
-import { SearchFilterDTO } from '../core/commonDto/search-filter-dto';
-import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
-import { applySearchFilterUtils } from '../core/utils/search-filter.utils';
+
 import { promises } from 'dns';
+import { PaginationService } from '@root/src/core/pagination/pagination.service';
+import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
+import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils';
 
 @Injectable()
 export class JobPositionService {
