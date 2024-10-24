@@ -7,6 +7,8 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 export class EmployementType extends BaseModel {
   @Column({ length: 500, nullable: true })
   name: string;
+  @Column({ length: 500, nullable: true })
+  description: string;
 
   @OneToMany(
     () => EmployeeJobInformation,
