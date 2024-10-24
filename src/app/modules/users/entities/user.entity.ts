@@ -20,6 +20,9 @@ export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
   lastName: string;
 
+  @Column({type:'boolean', default:false })
+  hasChangedPassword: boolean;
+
   @Column({ type: 'varchar', nullable: true })
   profileImage: string;
 

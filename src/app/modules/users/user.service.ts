@@ -286,12 +286,14 @@ export class UserService {
   async update(id: string, tenantId: string, updateUserDto: UpdateUserDto) {
     try {
       const createPremission = new CreateUserPermissionDto();
-      createPremission.permissionId = updateUserDto.permission;
+      createPremission.permissionId = updateUserDto.permission?updateUserDto.permission:[];
       createPremission.userId = id;
       delete updateUserDto.permission;
       await this.userRepository.findOneOrFail({ where: { id: id } });
       await this.userRepository.update({ id }, updateUserDto);
+      if(createPremission.permissionId.length>0 && createPremission.permissionId){
       await this.userPermissionService.update(id, createPremission, tenantId);
+      }
       return await this.userRepository.findOneOrFail({ where: { id: id } });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
