@@ -20,7 +20,7 @@ export const roleDataSave = (): CreateRoleDto => {
   return {
     name: 'Admin role',
     description: 'Description for admin role',
-    slug: 'slug',
+   // slug: 'slug',
     permission: [],
     tenantId: 'tenantId',
   };
@@ -29,7 +29,7 @@ export const roleDataSave = (): CreateRoleDto => {
 export const createRole = (): CreateRoleDto => {
   return {
     name: 'Admin role',
-    slug: 'slug',
+    //slug: 'slug',
     description: 'Description for admin role',
     permission: ['List of permission ids'],
     tenantId: 'tenantId',
