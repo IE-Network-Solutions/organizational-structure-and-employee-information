@@ -247,7 +247,6 @@ export class UserController {
   ) {
     const tenantId = request['tenantId'];
 
-    console.log(updateUserDto,"updateUserDto")
     return this.userService.updateUserInfo(id, tenantId, updateUserDto);
   }
 }
