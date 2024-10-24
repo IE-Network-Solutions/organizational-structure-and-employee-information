@@ -238,4 +238,16 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.findAllDepartments(tenantId);
   }
+
+  @Patch('/update/user-info/by-user-id/:id')
+  updateUserInfo(
+    @Req() request: Request,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const tenantId = request['tenantId'];
+
+    console.log(updateUserDto,"updateUserDto")
+    return this.userService.updateUserInfo(id, tenantId, updateUserDto);
+  }
 }

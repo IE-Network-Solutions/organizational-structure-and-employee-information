@@ -306,6 +306,19 @@ export class UserService {
     }
   }
 
+  async updateUserInfo(id: string, tenantId: string, updateUserDto: UpdateUserDto) {
+    try {
+    
+      await this.userRepository.findOneOrFail({ where: { id: id } });
+      await this.userRepository.update({ id }, updateUserDto);
+      return await this.userRepository.findOneOrFail({ where: { id: id } });
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User with id ${id} not found.`);
+      }
+      throw error;
+    }
+  }
   async remove(id: string) {
     try {
       const user = await this.userRepository.findOneOrFail({
