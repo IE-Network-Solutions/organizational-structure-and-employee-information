@@ -21,6 +21,7 @@ export const createEmployementTypeData = () => {
   return {
     name: 'Part-Time',
     tenantId: 'tenant-456',
+    description: 'Full-Time',
   };
 };
 
