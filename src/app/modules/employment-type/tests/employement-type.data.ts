@@ -7,6 +7,7 @@ export const employementTypeData = (): EmployementType => {
   return {
     id: 'employment-type-1',
     name: 'Full-Time',
+    description: 'Full-Time',
     employeeJobInformation: undefined,
     tenantId: 'tenant-123',
     createdAt: new Date('2023-01-01T12:00:00Z'),
@@ -28,6 +29,7 @@ export const employmentTypeDataSaved = (): EmployementType => {
   return {
     id: 'employment-type-2',
     name: 'Part-Time',
+    description: 'Full-Time',
     employeeJobInformation: undefined,
     tenantId: 'tenant-456',
     createdAt: new Date(),
@@ -41,6 +43,7 @@ export const employmentTypeDataOnFindOne = (): EmployementType => {
   return {
     id: 'employment-type-1',
     name: 'Full-Time',
+    description: 'Full-Time',
     employeeJobInformation: undefined,
     tenantId: 'tenant-123',
     createdAt: new Date('2023-01-01T12:00:00Z'),
