@@ -44,14 +44,14 @@ import { PaginationModule } from '@root/src/core/pagination/pagination.module';
     RolePermissionModule,
     UserPermissionModule,
     JobPositionModule,
-     WorkSchedulesModule,
-     DepartmentsModule,
-     PaginationModule,
-     BranchesModule,
-     HttpModule.register({})
+    WorkSchedulesModule,
+    DepartmentsModule,
+    PaginationModule,
+    BranchesModule,
+    HttpModule.register({}),
   ],
   controllers: [UserController],
-  providers: [UserService,UserDepartmentService],
+  providers: [UserService, UserDepartmentService],
   exports: [UserService],
 })
 export class UserModule {}

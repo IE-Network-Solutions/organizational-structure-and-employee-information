@@ -92,16 +92,17 @@ export class UserService {
         createEmployeeJobInformationDto,
         createEmployeeDocumentDto,
       } = createBulkRequestDto;
-      if(profileImage){
-      const uploadedImagePath = await this.fileUploadService.uploadFileToServer(
-        tenantId,
-        profileImage,
-      );
+      if (profileImage) {
+        const uploadedImagePath =
+          await this.fileUploadService.uploadFileToServer(
+            tenantId,
+            profileImage,
+          );
 
-      createUserDto['profileImage'] = uploadedImagePath['viewImage'];
+        createUserDto['profileImage'] = uploadedImagePath['viewImage'];
 
-      createUserDto['profileImageDownload'] = uploadedImagePath['image'];
-    }
+        createUserDto['profileImageDownload'] = uploadedImagePath['image'];
+      }
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
@@ -139,18 +140,18 @@ export class UserService {
         createEmployeeJobInformationDto,
         tenantId,
       );
-if(createEmployeeDocumentDto){
-      createEmployeeDocumentDto['userId'] = result.id;
+      if (createEmployeeDocumentDto) {
+        createEmployeeDocumentDto['userId'] = result.id;
 
-      createEmployeeDocumentDto['employeeInformationId'] =
-        employeeInformation.id;
+        createEmployeeDocumentDto['employeeInformationId'] =
+          employeeInformation.id;
 
-      await this.employeeDocumentService.create(
-        createEmployeeDocumentDto,
-        documentName,
-        tenantId,
-      );
-    }
+        await this.employeeDocumentService.create(
+          createEmployeeDocumentDto,
+          documentName,
+          tenantId,
+        );
+      }
 
       await queryRunner.commitTransaction();
 
@@ -220,7 +221,7 @@ if(createEmployeeDocumentDto){
       );
 
       for (const user of paginatedData.items) {
-        user['reportingTo'] = await this.findReportingToUser(user.id);
+      //  user['reportingTo'] = await this.findReportingToUser(user.id);
 
         if (
           user.employeeJobInformation &&
@@ -299,13 +300,18 @@ if(createEmployeeDocumentDto){
   async update(id: string, tenantId: string, updateUserDto: UpdateUserDto) {
     try {
       const createPremission = new CreateUserPermissionDto();
-      createPremission.permissionId = updateUserDto.permission?updateUserDto.permission:[];
+      createPremission.permissionId = updateUserDto.permission
+        ? updateUserDto.permission
+        : [];
       createPremission.userId = id;
       delete updateUserDto.permission;
       await this.userRepository.findOneOrFail({ where: { id: id } });
       await this.userRepository.update({ id }, updateUserDto);
-      if(createPremission.permissionId.length>0 && createPremission.permissionId){
-      await this.userPermissionService.update(id, createPremission, tenantId);
+      if (
+        createPremission.permissionId.length > 0 &&
+        createPremission.permissionId
+      ) {
+        await this.userPermissionService.update(id, createPremission, tenantId);
       }
       return await this.userRepository.findOneOrFail({ where: { id: id } });
     } catch (error) {
@@ -623,57 +629,58 @@ if(createEmployeeDocumentDto){
 
   async importUser(importEmployeeDto: ImportEmployeeDto[], tenantId: string) {
     const createdUsers = [];
-    try{
-     
-    for (const user of importEmployeeDto) {
-      try {
-      
-        const permissions= await this.rolePermissionService.findPermissionsByRole(user.roleId,tenantId)
-        const permissionIds = permissions.map(permission => permission.permissionId);
-        const createUserDto = new CreateUserDto();
-        createUserDto.firstName = user.firstName;
-        createUserDto.middleName = user.middleName;
-        createUserDto.lastName=user.lastName
-        createUserDto.roleId = user.roleId;
-        createUserDto.email = user.email;
-        createUserDto.userId=user.userId
-  
-        const employeeInformation = new CreateEmployeeInformationDto();
-        employeeInformation.joinedDate = user.joinedDate;
-        employeeInformation.gender = user.gender;
-        employeeInformation.maritalStatus = user.maritalStatus;
-        employeeInformation.nationalityId = user.nationalityId;
-  
-        const employeeJobInformation = new CreateEmployeeJobInformationDto();
-        employeeJobInformation.branchId = user.branchId;
-        employeeJobInformation.departmentId = user.departmentId;
-        employeeJobInformation.employementTypeId = user.employmentTypeId;
-        employeeJobInformation.workScheduleId = user.workScheduleId;
-        employeeJobInformation.positionId = user.jobPositionId;
-      const   createRolePermissionDto= new  CreateRolePermissionDto
-      createRolePermissionDto.roleId=user.roleId
-      createRolePermissionDto.permissionId=permissionIds
-   const    createUserPermissionDto=new CreateUserPermissionDto;
-   createUserPermissionDto.permissionId=permissionIds
-        const bulkCreate = new CreateBulkRequestDto();
-        bulkCreate.createUserDto = createUserDto;
-        bulkCreate.createEmployeeInformationDto = employeeInformation;
-        bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
-        bulkCreate.createRolePermissionDto=createRolePermissionDto
-        bulkCreate.createUserPermissionDto=createUserPermissionDto
-        
-   const userCreated=   await this.create(tenantId, bulkCreate);
-       createdUsers.push(userCreated);
-      } catch (error) {
-       // console.log(error.message)
+    try {
+      for (const user of importEmployeeDto) {
+        try {
+          const permissions =
+            await this.rolePermissionService.findPermissionsByRole(
+              user.roleId,
+              tenantId,
+            );
+          const permissionIds = permissions.map(
+            (permission) => permission.permissionId,
+          );
+          const createUserDto = new CreateUserDto();
+          createUserDto.firstName = user.firstName;
+          createUserDto.middleName = user.middleName;
+          createUserDto.lastName = user.lastName;
+          createUserDto.roleId = user.roleId;
+          createUserDto.email = user.email;
+          createUserDto.userId = user.userId;
+
+          const employeeInformation = new CreateEmployeeInformationDto();
+          employeeInformation.joinedDate = user.joinedDate;
+          employeeInformation.gender = user.gender;
+          employeeInformation.maritalStatus = user.maritalStatus;
+          employeeInformation.nationalityId = user.nationalityId;
+
+          const employeeJobInformation = new CreateEmployeeJobInformationDto();
+          employeeJobInformation.branchId = user.branchId;
+          employeeJobInformation.departmentId = user.departmentId;
+          employeeJobInformation.employementTypeId = user.employmentTypeId;
+          employeeJobInformation.workScheduleId = user.workScheduleId;
+          employeeJobInformation.positionId = user.jobPositionId;
+          const createRolePermissionDto = new CreateRolePermissionDto();
+          createRolePermissionDto.roleId = user.roleId;
+          createRolePermissionDto.permissionId = permissionIds;
+          const createUserPermissionDto = new CreateUserPermissionDto();
+          createUserPermissionDto.permissionId = permissionIds;
+          const bulkCreate = new CreateBulkRequestDto();
+          bulkCreate.createUserDto = createUserDto;
+          bulkCreate.createEmployeeInformationDto = employeeInformation;
+          bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
+          bulkCreate.createRolePermissionDto = createRolePermissionDto;
+          bulkCreate.createUserPermissionDto = createUserPermissionDto;
+
+          const userCreated = await this.create(tenantId, bulkCreate);
+          createdUsers.push(userCreated);
+        } catch (error) {
+          // console.log(error.message)
+        }
       }
+      return createdUsers;
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-    return createdUsers
-  }catch(error){
-    throw new BadRequestException(error.message)
-
   }
-  }
-
-
 }

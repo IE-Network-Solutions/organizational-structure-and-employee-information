@@ -9,5 +9,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   permission: string[];
   @IsOptional()
   @IsBoolean()
-  hasChangedPassword?:boolean
+  hasChangedPassword?: boolean;
 }

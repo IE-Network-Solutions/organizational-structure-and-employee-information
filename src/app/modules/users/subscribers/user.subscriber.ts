@@ -2,6 +2,7 @@ import {
   EventSubscriber,
   EntitySubscriberInterface,
   SoftRemoveEvent,
+  InsertEvent,
 } from 'typeorm';
 import { Repository } from 'typeorm';
 
@@ -50,6 +51,20 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
       for (const information of employeeInformation) {
         await employeeInformationRepository.softRemove(information);
       }
+    }
+  }
+
+  async beforeInsert(event: InsertEvent<User>) {
+    const userRepository: Repository<User> =
+      event.connection.getRepository(User);
+    if (!event.entity.userId) {
+      const tenantId = event.entity.tenantId;
+      const maxUser = await userRepository
+        .createQueryBuilder('user')
+        .select('MAX(user.userId)', 'max')
+        .where('user.tenantId = :tenantId', { tenantId })
+        .getRawOne();
+      event.entity.userId = maxUser.max ? maxUser.max + 1 : 1;
     }
   }
 }

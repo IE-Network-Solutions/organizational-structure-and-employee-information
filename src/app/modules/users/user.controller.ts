@@ -41,8 +41,9 @@ import { ImportEmployeeDto } from './dto/import-user.dto';
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
-  constructor(private readonly userService: UserService,
-    private readonly userDepartmentService: UserDepartmentService
+  constructor(
+    private readonly userService: UserService,
+    private readonly userDepartmentService: UserDepartmentService,
   ) {}
 
   @Post()
@@ -246,15 +247,24 @@ export class UserController {
 
   @Get('/department/dissolve')
   @ExcludeAuthGuard()
-  dissolveDepartment(@Req() request: Request,dissolveDepartmentDto: DissolveDepartmentDto): Promise<Department> {
+  dissolveDepartment(
+    @Req() request: Request,
+    dissolveDepartmentDto: DissolveDepartmentDto,
+  ): Promise<Department> {
     const tenantId = request['tenantId'];
-    return this.userDepartmentService.dissolveDepartment(dissolveDepartmentDto,tenantId);
+    return this.userDepartmentService.dissolveDepartment(
+      dissolveDepartmentDto,
+      tenantId,
+    );
   }
 
   @Post('/import/users')
   @ExcludeAuthGuard()
-  importUser(@Req() request: Request,@Body() importEmployeeDto: ImportEmployeeDto[]){
+  importUser(
+    @Req() request: Request,
+    @Body() importEmployeeDto: ImportEmployeeDto[],
+  ) {
     const tenantId = request['tenantId'];
-    return this.userService.importUser(importEmployeeDto,tenantId);
+    return this.userService.importUser(importEmployeeDto, tenantId);
   }
 }
