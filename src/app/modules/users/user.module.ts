@@ -1,6 +1,6 @@
 import { EmployeeInformationModule } from './../employee-information/employee-information.module';
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UserService } from './services/user.service';
 import { PaginationService } from '../../../core/pagination/pagination.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -22,10 +22,15 @@ import { DepartmentsModule } from '../departments/departments.module';
 import { RoleService } from '../role/role.service';
 import { Role } from '../role/entities/role.entity';
 import { HttpModule } from '@nestjs/axios';
+import { UserDepartmentService } from './services/user-relation-with-department.service';
+import { JobPositionModule } from '../job-position/job-position.module';
+import { BranchesModule } from '../branchs/branches.module';
+import { WorkSchedulesModule } from '../work-schedules/work-schedules.module';
+import { PaginationModule } from '@root/src/core/pagination/pagination.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Department, Role]),
+    TypeOrmModule.forFeature([User]),
     EmployeeInformationModule,
     EmployeeJobInformationModule,
     EmployeeInformationFormModule,
@@ -38,11 +43,15 @@ import { HttpModule } from '@nestjs/axios';
     EmployeeDocumentModule,
     RolePermissionModule,
     UserPermissionModule,
-    RoleModule,
-    HttpModule.register({}),
+    JobPositionModule,
+     WorkSchedulesModule,
+     DepartmentsModule,
+     PaginationModule,
+     BranchesModule,
+     HttpModule.register({})
   ],
   controllers: [UserController],
-  providers: [UserService, PaginationService, DepartmentsService, RoleService],
+  providers: [UserService,UserDepartmentService],
   exports: [UserService],
 })
 export class UserModule {}
