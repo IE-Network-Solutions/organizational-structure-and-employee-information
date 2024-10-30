@@ -72,7 +72,6 @@ export class RolePermissionService implements RolePermissionInterface {
     tenantId: string,
   ): Promise<any> {
     try {
-      console.log(roleId,"role")
       await this.rolePermissionRepository.delete({ role: { id: roleId } });
       const assignedPermissions = permissionIds.map((permissionId) => {
         return this.rolePermissionRepository.create({
@@ -120,12 +119,14 @@ export class RolePermissionService implements RolePermissionInterface {
   }
   async findPermissionsByRole(
     roleId: string,
-   
+
     tenantId: string,
   ): Promise<RolePermission[]> {
     try {
-   const permissions =   await this.rolePermissionRepository.find({where:{roleId:roleId,tenantId:tenantId}})
-   return permissions
+      const permissions = await this.rolePermissionRepository.find({
+        where: { roleId: roleId, tenantId: tenantId },
+      });
+      return permissions;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`Role-Permission not found.`);
