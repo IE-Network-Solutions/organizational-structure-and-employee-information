@@ -7,6 +7,7 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
 import { RolePermission } from './entities/role-permission.entity';
 import { RolePermissionInterface } from './role-permission-interface';
 import { RolePermissionRepository } from './role-permission-repository';
+import { Permission } from '../permission/entities/permission.entity';
 
 @Injectable()
 export class RolePermissionService implements RolePermissionInterface {
@@ -71,6 +72,7 @@ export class RolePermissionService implements RolePermissionInterface {
     tenantId: string,
   ): Promise<any> {
     try {
+      console.log(roleId,"role")
       await this.rolePermissionRepository.delete({ role: { id: roleId } });
       const assignedPermissions = permissionIds.map((permissionId) => {
         return this.rolePermissionRepository.create({
@@ -112,6 +114,21 @@ export class RolePermissionService implements RolePermissionInterface {
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException('Role-Permission not found.');
+      }
+      throw error;
+    }
+  }
+  async findPermissionsByRole(
+    roleId: string,
+   
+    tenantId: string,
+  ): Promise<RolePermission[]> {
+    try {
+   const permissions =   await this.rolePermissionRepository.find({where:{roleId:roleId,tenantId:tenantId}})
+   return permissions
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`Role-Permission not found.`);
       }
       throw error;
     }
