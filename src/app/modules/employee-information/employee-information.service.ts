@@ -26,7 +26,6 @@ export class EmployeeInformationService {
     createEmployeeInformationDto: CreateEmployeeInformationDto,
     tenantId: string,
   ): Promise<EmployeeInformation> {
-    console.log(createEmployeeInformationDto,"createEmployeeInformationDto")
     const user = await this.employeeInformationRepository.create({
       ...createEmployeeInformationDto,
       tenantId,

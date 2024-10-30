@@ -12,5 +12,6 @@ import { Organization } from '../organizations/entities/organization.entity';
 
   controllers: [WorkSchedulesController],
   providers: [WorkSchedulesService, PaginationService, OrganizationsService],
+  exports:[WorkSchedulesService]
 })
 export class WorkSchedulesModule {}
