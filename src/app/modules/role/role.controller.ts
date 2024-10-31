@@ -90,4 +90,9 @@ export class RoleController {
       permissionIds,
     );
   }
+  @Get('/slug/:slug')
+  findRoleBySlug(@Req() request: Request, @Param('slug') slug: string) {
+    const tenantId = request['tenantId'];
+    return this.roleService.findRoleBySlug(slug, tenantId);
+  }
 }

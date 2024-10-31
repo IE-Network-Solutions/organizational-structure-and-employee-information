@@ -18,7 +18,6 @@ import { OffboardingEmployeeTask } from '../../offboarding-employee-task/entitie
 import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
 import { OffboardingTasksTemplate } from '../../offboarding-tasks-template/entities/offboarding-tasks-template..entity';
 @Entity()
-@Unique(['tenantId', 'userId'])
 export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
   firstName: string;
@@ -28,9 +27,6 @@ export class User extends BaseModel {
 
   @Column({ length: 500, type: 'varchar' })
   lastName: string;
-
-  @Column({ nullable: true })
-  userId: number;
 
   @Column({ type: 'boolean', default: false })
   hasChangedPassword: boolean;

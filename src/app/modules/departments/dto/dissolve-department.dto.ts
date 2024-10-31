@@ -15,13 +15,11 @@ export class DissolveDepartmentDto {
   @IsString()
   branchId: string;
 
-  
   @IsArray()
   @IsString({ each: true })
-  departmentToDelete:string []
- 
+  departmentToDelete: string[];
+
   @ValidateNested({ each: true })
   @Type(() => UpdateDepartmentChildDto)
   department: UpdateDepartmentChildDto[];
-
 }

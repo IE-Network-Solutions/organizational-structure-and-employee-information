@@ -1,4 +1,4 @@
-import { IsObject, ValidateNested } from 'class-validator';
+import { IsObject, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateUserDto } from '@root/src/app/modules/users/dto/create-user.dto';
 import { CreateEmployeeInformationDto } from '@root/src/app/modules/employee-information/dto/create-employee-information.dto';
@@ -31,9 +31,9 @@ export class CreateBulkRequestDto {
   @ValidateNested()
   @Type(() => CreateEmployeeJobInformationDto)
   createEmployeeJobInformationDto: CreateEmployeeJobInformationDto;
-
+  @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => CreateEmployeeDocumentDto)
-  createEmployeeDocumentDto: CreateEmployeeDocumentDto;
+  createEmployeeDocumentDto?: CreateEmployeeDocumentDto;
 }

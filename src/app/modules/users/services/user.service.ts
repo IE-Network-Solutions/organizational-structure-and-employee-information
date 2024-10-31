@@ -646,13 +646,14 @@ export class UserService {
           createUserDto.lastName = user.lastName;
           createUserDto.roleId = user.roleId;
           createUserDto.email = user.email;
-          createUserDto.userId = user.userId;
 
           const employeeInformation = new CreateEmployeeInformationDto();
           employeeInformation.joinedDate = user.joinedDate;
           employeeInformation.gender = user.gender;
           employeeInformation.maritalStatus = user.maritalStatus;
           employeeInformation.nationalityId = user.nationalityId;
+          employeeInformation.employeeAttendanceId = user.employeeAttendanceId;
+
 
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;

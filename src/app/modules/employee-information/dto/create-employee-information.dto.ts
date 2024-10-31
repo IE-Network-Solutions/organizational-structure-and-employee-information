@@ -11,6 +11,9 @@ import {
 
 export class CreateEmployeeInformationDto {
   @IsOptional()
+  @IsString()
+  employeeAttendanceId?: string;
+  @IsOptional()
   @IsEnum(Gender)
   gender: Gender;
 

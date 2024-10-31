@@ -1,5 +1,6 @@
 import { RoleInterface } from './role-interface';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -43,6 +44,7 @@ export class RoleService implements RoleInterface {
         await this.rolePermissionService.createRoleWithPermissions(
           role.id,
           createRoleDto.permission,
+          tenantId
         );
       }
       return role;
@@ -229,5 +231,14 @@ export class RoleService implements RoleInterface {
       ...createRoleDto,
     });
     return await this.roleRepository.save(createRole);
+  }
+  async findRoleBySlug(slug: string, tenantId: string) {
+    try {
+      return await this.roleRepository.findOneOrFail({
+        where: { slug: slug, tenantId: tenantId },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
