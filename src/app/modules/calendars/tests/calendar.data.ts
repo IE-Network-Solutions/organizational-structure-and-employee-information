@@ -23,7 +23,8 @@ export const calendarClosedDatesData = (): CreateClosedDatesDto => {
   return {
     id: '2',
     name: "New Year's Day",
-    date: new Date('2022-10-22 07:11:42'),
+    endDate: new Date('2022-10-22 07:11:42'),
+    startDate: new Date('2022-10-22 07:11:42'),
     type: 'Holiday',
     description: 'Short description',
   };
