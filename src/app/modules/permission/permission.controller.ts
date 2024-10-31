@@ -29,7 +29,7 @@ export class PermissionController {
   create(
     @Body() createPermissionDto: CreatePermissionDto,
   ): Promise<Permission> {
-    return this.permissionService.create(createPermissionDto);
+  return this.permissionService.create(createPermissionDto);
   }
 
   @Get()

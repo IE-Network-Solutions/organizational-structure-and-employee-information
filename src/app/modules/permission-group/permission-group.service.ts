@@ -169,9 +169,7 @@ else{
                 name: singleData.group,
                 description: singleData.group,
               },
-            );
-            
-          
+            );  
           const permissions = await Promise.all(
             singleData.permissions.map(async (perm) => {
               try {
@@ -180,8 +178,7 @@ else{
                     name: perm.name,
                     slug: perm.slug,
                     description: perm.slug,
-                    permissionGroupId:group.id
-                    
+                    permissionGroupId:group.id    
                   },
   
                 );
@@ -200,9 +197,7 @@ else{
 
       return allGroupAndPermissions;
     } catch (error) {
-      throw new BadRequestException(error.message)
-      
-     
+      throw new BadRequestException(error.message) 
     }
   }
 }
