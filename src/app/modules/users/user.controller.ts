@@ -246,7 +246,6 @@ export class UserController {
   }
 
   @Get('/department/dissolve')
-  @ExcludeAuthGuard()
   dissolveDepartment(
     @Req() request: Request,
     dissolveDepartmentDto: DissolveDepartmentDto,

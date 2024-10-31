@@ -23,14 +23,20 @@ export class RolePermissionController {
 
   @Post()
   @ExcludeAuthGuard()
-  createRoleWithPermissions(@Req() request: Request, @Body() createRolePermissionDto: CreateRolePermissionDto) {
-    console.log(createRolePermissionDto,"createRolePermission")
+  createRoleWithPermissions(
+    @Req() request: Request,
+    @Body() createRolePermissionDto: CreateRolePermissionDto,
+  ) {
     const tenantId = request['tenantId'];
-    return this.rolePermissionService.createRoleWithPermissions(createRolePermissionDto.roleId,createRolePermissionDto.permissionId,tenantId);
+    return this.rolePermissionService.createRoleWithPermissions(
+      createRolePermissionDto.roleId,
+      createRolePermissionDto.permissionId,
+      tenantId,
+    );
   }
   @Delete('/:id')
   @ExcludeAuthGuard()
-  removeRoleWithPermissions(@Req() request: Request, @Param('id') id: string ) {
+  removeRoleWithPermissions(@Req() request: Request, @Param('id') id: string) {
     const tenantId = request['tenantId'];
     return this.rolePermissionService.remove(id);
   }
