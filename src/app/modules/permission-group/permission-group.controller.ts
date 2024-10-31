@@ -58,4 +58,8 @@ export class PermissionGroupController {
   remove(@Param('permissionGroupId') id: string) {
     return this.permissionGroupService.remove(id);
   }
+  @Post('/seed')
+  permissionSeeder() {
+    return this.permissionGroupService.permissionSeeder();
+  }
 }

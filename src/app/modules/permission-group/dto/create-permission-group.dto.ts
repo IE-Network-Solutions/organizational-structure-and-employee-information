@@ -12,5 +12,5 @@ export class CreatePermissionGroupDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  permissions: string[];
+  permissions?: string[];
 }
