@@ -1,6 +1,14 @@
 // import { BaseModel } from '@root/src/database/base.entity';
 import { BaseModel } from '../../../../database/base.model';
-import { Entity, Column, OneToMany, ManyToOne, OneToOne, Generated, Unique } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToMany,
+  ManyToOne,
+  OneToOne,
+  Generated,
+  Unique,
+} from 'typeorm';
 import { Role } from '../../role/entities/role.entity';
 import { UserPermission } from '../../user-permission/entities/user-permission.entity';
 import { EmployeeJobInformation } from '../../employee-job-information/entities/employee-job-information.entity';
@@ -21,10 +29,10 @@ export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
   lastName: string;
 
-  @Column({nullable:true})
+  @Column({ nullable: true })
   userId: number;
 
-  @Column({type:'boolean', default:false })
+  @Column({ type: 'boolean', default: false })
   hasChangedPassword: boolean;
 
   @Column({ type: 'varchar', nullable: true })

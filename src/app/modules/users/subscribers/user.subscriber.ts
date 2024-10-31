@@ -54,17 +54,5 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     }
   }
 
-  async beforeInsert(event: InsertEvent<User>) {
-    const userRepository: Repository<User> =
-      event.connection.getRepository(User);
-    if (!event.entity.userId) {
-      const tenantId = event.entity.tenantId;
-      const maxUser = await userRepository
-        .createQueryBuilder('user')
-        .select('MAX(user.userId)', 'max')
-        .where('user.tenantId = :tenantId', { tenantId })
-        .getRawOne();
-      event.entity.userId = maxUser.max ? maxUser.max + 1 : 1;
-    }
-  }
+ 
 }

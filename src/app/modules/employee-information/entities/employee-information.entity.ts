@@ -20,6 +20,9 @@ export class EmployeeInformation extends BaseModel {
   userId: string;
 
   @Column({ nullable: true })
+  employeeAttendanceId: string;
+
+  @Column({ nullable: true })
   gender: Gender;
 
   @Column({ nullable: true })

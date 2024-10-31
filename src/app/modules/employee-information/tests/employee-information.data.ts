@@ -48,6 +48,7 @@ export const employeeInformationDataEnitty = (): EmployeeInformation => {
     dateOfBirth: new Date('1990-01-01'),
     joinedDate: new Date('2020-01-01T00:00:00.000Z'),
     nationalityId: 'nation-1',
+    employeeAttendanceId:'employeeAttendanceId',
     addresses: JSON.stringify({
       street: '456 Another St',
       city: 'Othertown',
