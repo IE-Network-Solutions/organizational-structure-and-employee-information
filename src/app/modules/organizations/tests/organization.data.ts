@@ -5,7 +5,7 @@ import { CreateOrganizationDto } from '../dto/create-organization.dto';
 export const organizationData = (): Organization => {
   return {
     id: 'be21f28b-4651-4d6f-8f08-d8128da64ee5',
-
+    organizationFile: null,
     workScheduleId: '468b4793-8b5a-4155-a9fa-180cadf6d749',
     calendarId: '55f70e77-774d-4bfd-a2f0-8416ddbc4970',
     tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',

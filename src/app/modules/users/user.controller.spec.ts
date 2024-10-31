@@ -133,18 +133,25 @@ describe('UserController', () => {
     jest.clearAllMocks();
 
     jest.spyOn(userService, 'create').mockResolvedValue(userDataSave() as any);
-    jest.spyOn(userService, 'findAll').mockResolvedValue(paginationResultUserData()  as any);
-    jest.spyOn(userService, 'findOne').mockResolvedValue(userDataOnFindOne() as any);
-    jest.spyOn(userService, 'update').mockResolvedValue(userData()  as any);
-    jest.spyOn(userService, 'remove').mockResolvedValue(deleteUserData()  as any);
+    jest
+      .spyOn(userService, 'findAll')
+      .mockResolvedValue(paginationResultUserData() as any);
+    jest
+      .spyOn(userService, 'findOne')
+      .mockResolvedValue(userDataOnFindOne() as any);
+    jest.spyOn(userService, 'update').mockResolvedValue(userData() as any);
+    jest
+      .spyOn(userService, 'remove')
+      .mockResolvedValue(deleteUserData() as any);
     jest.spyOn(userService, 'findUserInfoByArrayOfUserIds').mockResolvedValue(
-      mockUsers.map(user => ({
+      mockUsers.map((user) => ({
         lastName: user.lastName,
         firstName: user.firstName,
         middleName: user.middleName,
         Avatar: user.Avatar,
         Email: user.email,
-        DepartmentName: user.employeeJobInformation[0]?.department?.name || null,
+        DepartmentName:
+          user.employeeJobInformation[0]?.department?.name || null,
       })),
     );
   });
@@ -158,8 +165,16 @@ describe('UserController', () => {
 
     it('should create a user and call userService.create with correct arguments', async () => {
       const files: Express.Multer.File[] = [
-        { fieldname: 'profileImage', originalname: 'profile.png', buffer: Buffer.from('profile image') } as Express.Multer.File,
-        { fieldname: 'documentName', originalname: 'document.pdf', buffer: Buffer.from('document') } as Express.Multer.File,
+        {
+          fieldname: 'profileImage',
+          originalname: 'profile.png',
+          buffer: Buffer.from('profile image'),
+        } as Express.Multer.File,
+        {
+          fieldname: 'documentName',
+          originalname: 'document.pdf',
+          buffer: Buffer.from('document'),
+        } as Express.Multer.File,
       ];
 
       const body = {
@@ -167,19 +182,31 @@ describe('UserController', () => {
         createRolePermissionDto: JSON.stringify(rolePermissionData()),
         createUserPermissionDto: JSON.stringify(userPermissionData()),
         createEmployeeInformationDto: JSON.stringify(employeeInformationData()),
-        createEmployeeJobInformationDto: JSON.stringify(employeeJobInformationData()),
+        createEmployeeJobInformationDto: JSON.stringify(
+          employeeJobInformationData(),
+        ),
         createEmployeeDocumentDto: JSON.stringify(employeeDocumentData()),
       };
 
-      const result = await userController.create(files, body, request['tenantId']);
+      const result = await userController.create(
+        files,
+        body,
+        request['tenantId'],
+      );
 
       const expectedBulkRequestDto = {
         createUserDto: parseNestedJson(body.createUserDto),
         createRolePermissionDto: parseNestedJson(body.createRolePermissionDto),
         createUserPermissionDto: parseNestedJson(body.createUserPermissionDto),
-        createEmployeeInformationDto: parseNestedJson(body.createEmployeeInformationDto),
-        createEmployeeJobInformationDto: parseNestedJson(body.createEmployeeJobInformationDto),
-        createEmployeeDocumentDto: parseNestedJson(body.createEmployeeDocumentDto),
+        createEmployeeInformationDto: parseNestedJson(
+          body.createEmployeeInformationDto,
+        ),
+        createEmployeeJobInformationDto: parseNestedJson(
+          body.createEmployeeJobInformationDto,
+        ),
+        createEmployeeDocumentDto: parseNestedJson(
+          body.createEmployeeDocumentDto,
+        ),
       };
 
       expect(result).toEqual(userDataSave());
@@ -192,7 +219,11 @@ describe('UserController', () => {
       const filterDto: FilterDto = {};
       const paginationDto = paginationOptions();
 
-      const result = await userController.findAll(request['tenantId'], filterDto, paginationDto);
+      const result = await userController.findAll(
+        request['tenantId'],
+        filterDto,
+        paginationDto,
+      );
       expect(result).toEqual(paginationResultUserData());
     });
   });
@@ -210,7 +241,11 @@ describe('UserController', () => {
       const request = { tenantId: 'tenant-id-123' } as unknown as Request;
       const mockUpdatedUser = userData();
 
-      const result = await userController.update(request['tenantId'], userData().id, mockUpdatedUser);
+      const result = await userController.update(
+        request['tenantId'],
+        userData().id,
+        mockUpdatedUser,
+      );
       expect(result).toEqual(mockUpdatedUser);
     });
   });
@@ -226,15 +261,18 @@ describe('UserController', () => {
   describe('findUserInfoByArrayOfUserIds', () => {
     it('should call userService.findUserInfoByArrayOfUserIds with the correct array of IDs and return the expected user data', async () => {
       const arrayOfIds = ['1', '2'];
-      const result = await userController.findUserInfoByArrayOfUserIds(arrayOfIds);
+      const result = await userController.findUserInfoByArrayOfUserIds(
+        arrayOfIds,
+      );
       expect(result).toEqual(
-        mockUsers.map(user => ({
+        mockUsers.map((user) => ({
           lastName: user.lastName,
           firstName: user.firstName,
           middleName: user.middleName,
           Avatar: user.Avatar,
           Email: user.email,
-          DepartmentName: user.employeeJobInformation[0]?.department?.name || null,
+          DepartmentName:
+            user.employeeJobInformation[0]?.department?.name || null,
         })),
       );
     });

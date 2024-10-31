@@ -4,13 +4,12 @@ export class CreatePermissionGroupDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  description?: string;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  permissions: string[];
+  permissions?: string[];
 }
