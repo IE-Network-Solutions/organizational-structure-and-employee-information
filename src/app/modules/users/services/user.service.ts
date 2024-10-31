@@ -5,39 +5,48 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EmployeeDocumentService } from './../employee-documents/employee-document.service';
+import { EmployeeDocumentService } from '../../employee-documents/employee-document.service';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions } from 'nestjs-typeorm-paginate';
-import { PaginationService } from '../../../core/pagination/pagination.service';
-import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { PaginationService } from '../../../../core/pagination/pagination.service';
+import { User } from '../entities/user.entity';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
-import { EmployeeInformationService } from '../employee-information/employee-information.service';
-import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
+import { EmployeeInformationService } from '../../employee-information/employee-information.service';
+import { EmployeeJobInformationService } from '../../employee-job-information/employee-job-information.service';
 import { QueryRunner, Repository } from 'typeorm';
-import { RolePermissionService } from '../role-permission/role-permission.service';
+import { RolePermissionService } from '../../role-permission/role-permission.service';
 import { FileUploadService } from '@root/src/core/upload/upload.service';
-import { CreateUserPermissionDto } from '../user-permission/dto/create-user-permission.dto';
-import { UserPermissionService } from '../user-permission/user-permission.service';
-import { DepartmentsService } from '../departments/departments.service';
-import { CreateBulkRequestDto } from './dto/createBulkRequest.dto';
+import { CreateUserPermissionDto } from '../../user-permission/dto/create-user-permission.dto';
+import { UserPermissionService } from '../../user-permission/user-permission.service';
+import { DepartmentsService } from '../../departments/departments.service';
+import { CreateBulkRequestDto } from '../dto/createBulkRequest.dto';
 import {
   generateRandom4DigitNumber,
   generateRandom6DigitNumber,
 } from '@root/src/core/utils/generateRandomNumbers';
 import filterEntities from '@root/src/core/utils/filters.utils';
-import { FilterDto } from './dto/filter-status-user.dto';
+import { FilterDto } from '../dto/filter-status-user.dto';
 import * as admin from 'firebase-admin';
-import { CreateUserDto } from './dto/create-user.dto';
-import { RoleService } from '../role/role.service';
-import { CreateRoleDto } from '../role/dto/create-role.dto';
-import { Department } from '../departments/entities/department.entity';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { RoleService } from '../../role/role.service';
+import { CreateRoleDto } from '../../role/dto/create-role.dto';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { CreateEmailDto } from './dto/create-email.dto';
+import { CreateEmailDto } from '../dto/create-email.dto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ImportEmployeeDto } from '../dto/import-user.dto';
+import { JobPositionService } from '../../job-position/job-position.service';
+import { BranchesService } from '../../branchs/branches.service';
+import { EmployementTypeService } from '../../employment-type/employement-type.service';
+import { WorkSchedulesService } from '../../work-schedules/work-schedules.service';
+import { NationalityService } from '../../nationality/nationality.service';
+import { EmployeeInformation } from '../../employee-information/entities/employee-information.entity';
+import { CreateEmployeeInformationDto } from '../../employee-information/dto/create-employee-information.dto';
+import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
+import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
 
 @Injectable()
 export class UserService {
@@ -83,16 +92,18 @@ export class UserService {
         createEmployeeJobInformationDto,
         createEmployeeDocumentDto,
       } = createBulkRequestDto;
-      const uploadedImagePath = await this.fileUploadService.uploadFileToServer(
-        tenantId,
-        profileImage,
-      );
+      if (profileImage) {
+        const uploadedImagePath =
+          await this.fileUploadService.uploadFileToServer(
+            tenantId,
+            profileImage,
+          );
 
-      createUserDto['profileImage'] = uploadedImagePath['viewImage'];
+        createUserDto['profileImage'] = uploadedImagePath['viewImage'];
 
-      createUserDto['profileImageDownload'] = uploadedImagePath['image'];
+        createUserDto['profileImageDownload'] = uploadedImagePath['image'];
+      }
       const user = this.userRepository.create({ ...createUserDto, tenantId });
-      const password = createUserDto.email + generateRandom4DigitNumber();
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
         createUserDto.firstName,
@@ -129,17 +140,18 @@ export class UserService {
         createEmployeeJobInformationDto,
         tenantId,
       );
+      if (createEmployeeDocumentDto) {
+        createEmployeeDocumentDto['userId'] = result.id;
 
-      createEmployeeDocumentDto['userId'] = result.id;
+        createEmployeeDocumentDto['employeeInformationId'] =
+          employeeInformation.id;
 
-      createEmployeeDocumentDto['employeeInformationId'] =
-        employeeInformation.id;
-
-      await this.employeeDocumentService.create(
-        createEmployeeDocumentDto,
-        documentName,
-        tenantId,
-      );
+        await this.employeeDocumentService.create(
+          createEmployeeDocumentDto,
+          documentName,
+          tenantId,
+        );
+      }
 
       await queryRunner.commitTransaction();
 
@@ -209,6 +221,8 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
+        //  user['reportingTo'] = await this.findReportingToUser(user.id);
+
         if (
           user.employeeJobInformation &&
           user.employeeJobInformation.length > 0
@@ -286,13 +300,18 @@ export class UserService {
   async update(id: string, tenantId: string, updateUserDto: UpdateUserDto) {
     try {
       const createPremission = new CreateUserPermissionDto();
-      createPremission.permissionId = updateUserDto.permission?updateUserDto.permission:[];
+      createPremission.permissionId = updateUserDto.permission
+        ? updateUserDto.permission
+        : [];
       createPremission.userId = id;
       delete updateUserDto.permission;
       await this.userRepository.findOneOrFail({ where: { id: id } });
       await this.userRepository.update({ id }, updateUserDto);
-      if(createPremission.permissionId.length>0 && createPremission.permissionId){
-      await this.userPermissionService.update(id, createPremission, tenantId);
+      if (
+        createPremission.permissionId.length > 0 &&
+        createPremission.permissionId
+      ) {
+        await this.userPermissionService.update(id, createPremission, tenantId);
       }
       return await this.userRepository.findOneOrFail({ where: { id: id } });
     } catch (error) {
@@ -608,26 +627,59 @@ export class UserService {
     }
   }
 
-  async findAllDepartments(tenantId: string): Promise<Department[]> {
+  async importUser(importEmployeeDto: ImportEmployeeDto[], tenantId: string) {
+    const createdUsers = [];
     try {
-      const departments =
-        await this.departmentService.findAllDepartmentsByTenantId(tenantId);
-      if (departments?.length > 0) {
-        for (const department of departments) {
-          const users = await this.findAllUsersByDepartment(
-            tenantId,
-            department.id,
+      for (const user of importEmployeeDto) {
+        try {
+          const permissions =
+            await this.rolePermissionService.findPermissionsByRole(
+              user.roleId,
+              tenantId,
+            );
+          const permissionIds = permissions.map(
+            (permission) => permission.permissionId,
           );
-          department['users'] = users;
-        }
+          const createUserDto = new CreateUserDto();
+          createUserDto.firstName = user.firstName;
+          createUserDto.middleName = user.middleName;
+          createUserDto.lastName = user.lastName;
+          createUserDto.roleId = user.roleId;
+          createUserDto.email = user.email;
 
-        return departments;
+          const employeeInformation = new CreateEmployeeInformationDto();
+          employeeInformation.joinedDate = user.joinedDate;
+          employeeInformation.gender = user.gender;
+          employeeInformation.maritalStatus = user.maritalStatus;
+          employeeInformation.nationalityId = user.nationalityId;
+          employeeInformation.employeeAttendanceId = user.employeeAttendanceId;
+
+          const employeeJobInformation = new CreateEmployeeJobInformationDto();
+          employeeJobInformation.branchId = user.branchId;
+          employeeJobInformation.departmentId = user.departmentId;
+          employeeJobInformation.employementTypeId = user.employmentTypeId;
+          employeeJobInformation.workScheduleId = user.workScheduleId;
+          employeeJobInformation.positionId = user.jobPositionId;
+          const createRolePermissionDto = new CreateRolePermissionDto();
+          createRolePermissionDto.roleId = user.roleId;
+          createRolePermissionDto.permissionId = permissionIds;
+          const createUserPermissionDto = new CreateUserPermissionDto();
+          createUserPermissionDto.permissionId = permissionIds;
+          const bulkCreate = new CreateBulkRequestDto();
+          bulkCreate.createUserDto = createUserDto;
+          bulkCreate.createEmployeeInformationDto = employeeInformation;
+          bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
+          bulkCreate.createRolePermissionDto = createRolePermissionDto;
+          bulkCreate.createUserPermissionDto = createUserPermissionDto;
+
+          const userCreated = await this.create(tenantId, bulkCreate);
+          createdUsers.push(userCreated);
+        } catch (error) {
+          // console.log(error.message)
+        }
       }
-      return departments;
+      return createdUsers;
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
       throw new BadRequestException(error.message);
     }
   }

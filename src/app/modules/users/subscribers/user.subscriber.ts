@@ -2,6 +2,7 @@ import {
   EventSubscriber,
   EntitySubscriberInterface,
   SoftRemoveEvent,
+  InsertEvent,
 } from 'typeorm';
 import { Repository } from 'typeorm';
 

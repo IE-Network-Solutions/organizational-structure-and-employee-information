@@ -82,7 +82,7 @@ describe('RoleService', () => {
         await roleService.create(roleData().tenantId, createRoleDto);
         expect(
           rolePermissionService.createRoleWithPermissions,
-        ).toHaveBeenCalledWith(roleData().id, createRoleDto.permission);
+        ).toHaveBeenCalledWith(roleData().id, createRoleDto.permission,roleData().tenantId);
       });
 
       it('should return the created role', async () => {

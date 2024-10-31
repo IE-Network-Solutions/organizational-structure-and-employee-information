@@ -1,4 +1,3 @@
-
 import { Repository } from 'typeorm';
 import { JobPositionService } from './job-position.service';
 import { mock, MockProxy } from 'jest-mock-extended';

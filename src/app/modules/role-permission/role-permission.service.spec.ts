@@ -58,6 +58,7 @@ describe('RolePermissionService', () => {
         await rolePermissionService.createRoleWithPermissions(
           createRolePermissionData().roleId,
           createRolePermissionData().permissionId,
+          createRolePermissionData().tenantId
         );
       });
 
@@ -65,6 +66,8 @@ describe('RolePermissionService', () => {
         await rolePermissionService.createRoleWithPermissions(
           createRolePermissionData().roleId,
           createRolePermissionData().permissionId,
+          createRolePermissionData().tenantId
+
         );
         expect(rolePermissionRepository.save).toHaveBeenCalledWith([
           createRolePermissionData(),
@@ -76,6 +79,8 @@ describe('RolePermissionService', () => {
           await rolePermissionService.createRoleWithPermissions(
             createRolePermissionData().roleId,
             createRolePermissionData().permissionId,
+            createRolePermissionData().tenantId
+
           ),
         ).toEqual(rolePermissionDataSave());
       });

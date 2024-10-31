@@ -9,15 +9,20 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
+  Unique,
 } from 'typeorm';
 import { Nationality } from '../../nationality/entities/nationality.entity';
 import { EmployeeDocument } from '../../employee-documents/entities/employee-documents.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity()
+@Unique(['tenantId', 'userId'])
 export class EmployeeInformation extends BaseModel {
   @Column({ nullable: true })
   userId: string;
+
+  @Column({ nullable: true })
+  employeeAttendanceId: string;
 
   @Column({ nullable: true })
   gender: Gender;

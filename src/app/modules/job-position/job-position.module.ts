@@ -5,7 +5,6 @@ import { JobPosition } from './entities/job-position.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 
-
 @Module({
   imports: [TypeOrmModule.forFeature([JobPosition])],
   controllers: [JobPositionController],

@@ -7,7 +7,8 @@ export interface RolePermissionInterface {
   createRoleWithPermissions(
     roleId: string,
     permissionIds: string[],
-  ): Promise<RolePermission>;
+    tenantId: string,
+  ): Promise<RolePermission[]>;
   findAll(
     paginationOptions?: PaginationDto,
   ): Promise<Pagination<RolePermission>>;

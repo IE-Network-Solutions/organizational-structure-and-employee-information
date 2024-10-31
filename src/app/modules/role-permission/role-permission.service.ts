@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
@@ -7,6 +11,8 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
 import { RolePermission } from './entities/role-permission.entity';
 import { RolePermissionInterface } from './role-permission-interface';
 import { RolePermissionRepository } from './role-permission-repository';
+import { Permission } from '../permission/entities/permission.entity';
+import { error } from 'console';
 
 @Injectable()
 export class RolePermissionService implements RolePermissionInterface {
@@ -18,14 +24,20 @@ export class RolePermissionService implements RolePermissionInterface {
   async createRoleWithPermissions(
     roleId: string,
     permissionIds: string[],
-  ): Promise<any> {
-    const assignedPermissions = permissionIds.map((permissionId) => {
-      return this.rolePermissionRepository.create({
-        role: { id: roleId },
-        permissions: { id: permissionId },
+    tenantId: string,
+  ): Promise<RolePermission[]> {
+    try {
+      const assignedPermissions = permissionIds.map((permissionId) => {
+        return this.rolePermissionRepository.create({
+          role: { id: roleId },
+          permissions: { id: permissionId },
+          tenantId: tenantId,
+        });
       });
-    });
-    return await this.rolePermissionRepository.save(assignedPermissions);
+      return await this.rolePermissionRepository.save(assignedPermissions);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   async findAll(
@@ -112,6 +124,23 @@ export class RolePermissionService implements RolePermissionInterface {
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException('Role-Permission not found.');
+      }
+      throw error;
+    }
+  }
+  async findPermissionsByRole(
+    roleId: string,
+
+    tenantId: string,
+  ): Promise<RolePermission[]> {
+    try {
+      const permissions = await this.rolePermissionRepository.find({
+        where: { roleId: roleId, tenantId: tenantId },
+      });
+      return permissions;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`Role-Permission not found.`);
       }
       throw error;
     }
