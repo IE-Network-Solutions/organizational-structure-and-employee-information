@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import { PermissionGroup } from './entities/permission-group.entity';
+import { ExcludeAuthGuard, ExcludeTenantGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('permission-group')
 @ApiTags('Permission Group')
@@ -57,5 +58,11 @@ export class PermissionGroupController {
   @Delete(':permissionGroupId')
   remove(@Param('permissionGroupId') id: string) {
     return this.permissionGroupService.remove(id);
+  }
+  @Post('/seed')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+  permissionSeeder() {
+    return this.permissionGroupService.permissionSeeder();
   }
 }
