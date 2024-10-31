@@ -44,7 +44,7 @@ export class RoleService implements RoleInterface {
         await this.rolePermissionService.createRoleWithPermissions(
           role.id,
           createRoleDto.permission,
-          tenantId
+          tenantId,
         );
       }
       return role;

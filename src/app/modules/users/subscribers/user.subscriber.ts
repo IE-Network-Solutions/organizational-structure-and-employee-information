@@ -53,6 +53,4 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
       }
     }
   }
-
- 
 }

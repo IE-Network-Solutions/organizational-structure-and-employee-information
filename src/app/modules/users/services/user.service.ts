@@ -221,7 +221,7 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-      //  user['reportingTo'] = await this.findReportingToUser(user.id);
+        //  user['reportingTo'] = await this.findReportingToUser(user.id);
 
         if (
           user.employeeJobInformation &&
@@ -653,7 +653,6 @@ export class UserService {
           employeeInformation.maritalStatus = user.maritalStatus;
           employeeInformation.nationalityId = user.nationalityId;
           employeeInformation.employeeAttendanceId = user.employeeAttendanceId;
-
 
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;

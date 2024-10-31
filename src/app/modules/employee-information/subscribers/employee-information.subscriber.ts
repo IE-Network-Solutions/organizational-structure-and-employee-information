@@ -31,8 +31,6 @@ export class EmployeeInformationSubscriber
     }
   }
 
-
-
   async beforeInsert(event: InsertEvent<EmployeeInformation>) {
     const userRepository: Repository<EmployeeInformation> =
       event.connection.getRepository(EmployeeInformation);
@@ -46,5 +44,4 @@ export class EmployeeInformationSubscriber
       event.entity.employeeAttendanceId = maxUser.max ? maxUser.max + 1 : 1;
     }
   }
-  
 }

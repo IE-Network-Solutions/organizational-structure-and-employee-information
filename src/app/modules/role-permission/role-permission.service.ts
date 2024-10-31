@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
@@ -20,21 +24,20 @@ export class RolePermissionService implements RolePermissionInterface {
   async createRoleWithPermissions(
     roleId: string,
     permissionIds: string[],
-    tenantId:string
+    tenantId: string,
   ): Promise<RolePermission[]> {
-    try{
-    const assignedPermissions = permissionIds.map((permissionId) => {
-      return this.rolePermissionRepository.create({
-        role: { id: roleId },
-        permissions: { id: permissionId },
-        tenantId:tenantId
+    try {
+      const assignedPermissions = permissionIds.map((permissionId) => {
+        return this.rolePermissionRepository.create({
+          role: { id: roleId },
+          permissions: { id: permissionId },
+          tenantId: tenantId,
+        });
       });
-    });
-    return await this.rolePermissionRepository.save(assignedPermissions);
-  }
-  catch(error){
-  throw new BadRequestException(error.message)
-  }
+      return await this.rolePermissionRepository.save(assignedPermissions);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   async findAll(
