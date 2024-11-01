@@ -29,7 +29,7 @@ export class PermissionController {
   create(
     @Body() createPermissionDto: CreatePermissionDto,
   ): Promise<Permission> {
-  return this.permissionService.create(createPermissionDto);
+    return this.permissionService.create(createPermissionDto);
   }
 
   @Get()
@@ -57,7 +57,7 @@ export class PermissionController {
   remove(@Param('permissionId') id: string): Promise<UpdateResult> {
     return this.permissionService.remove(id);
   }
-  
+
   @Get('/slug/:slug')
   @ExcludeAuthGuard()
   findPermissionBySlug(@Req() request: Request, @Param('slug') slug: string) {

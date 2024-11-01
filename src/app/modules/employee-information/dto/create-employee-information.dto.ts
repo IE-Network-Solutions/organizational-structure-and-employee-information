@@ -4,6 +4,7 @@ import { MaritalStatus } from '@root/src/core/enum/marital-status.enum';
 import {
   IsEnum,
   IsJSON,
+  IsNumber,
   IsOptional,
   IsString,
   Validate,
@@ -11,8 +12,8 @@ import {
 
 export class CreateEmployeeInformationDto {
   @IsOptional()
-  @IsString()
-  employeeAttendanceId?: string;
+  @IsNumber()
+  employeeAttendanceId?: number;
   @IsOptional()
   @IsEnum(Gender)
   gender: Gender;

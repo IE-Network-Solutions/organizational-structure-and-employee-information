@@ -19,7 +19,6 @@ import { PermissionGroupRepository } from './permission-group-reposiory';
 import { PermissionGroupInterface } from './permission-group-interface';
 import * as permissionData from '../../../core/utils/permission.json';
 
-
 @Injectable()
 export class PermissionGroupService implements PermissionGroupInterface {
   constructor(
@@ -34,7 +33,10 @@ export class PermissionGroupService implements PermissionGroupInterface {
     const data = this.permissionGroupRepository.create(permissionGroupDto);
     const valuesToCheck = { name: data.name };
     try {
-    const permissionGroup=  await checkIfDataExists(valuesToCheck, this.permissionGroupRepository);
+      const permissionGroup = await checkIfDataExists(
+        valuesToCheck,
+        this.permissionGroupRepository,
+      );
       const permissionGroups = await this.permissionGroupRepository.save(data);
       if (
         permissionGroupDto.permissions &&
@@ -57,20 +59,18 @@ export class PermissionGroupService implements PermissionGroupInterface {
   async getOrCreate(
     permissionGroupDto: CreatePermissionGroupDto,
   ): Promise<PermissionGroup> {
-   try{
-    const permissionGroup = await this.permissionGroupRepository.findOne({where:{name:permissionGroupDto.name}})
-if(permissionGroup){
-  return permissionGroup
-}
-else{
- return  await this.create(permissionGroupDto)
-}
-   }
-   catch(error){
-    throw new BadRequestException(error.message)
-
-   }
-
+    try {
+      const permissionGroup = await this.permissionGroupRepository.findOne({
+        where: { name: permissionGroupDto.name },
+      });
+      if (permissionGroup) {
+        return permissionGroup;
+      } else {
+        return await this.create(permissionGroupDto);
+      }
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   async findAll(
@@ -163,31 +163,21 @@ else{
     try {
       const allGroupAndPermissions = await Promise.all(
         permissionData.map(async (singleData) => {
-       
-            const group = await this.getOrCreate(
-              {
-                name: singleData.group,
-                description: singleData.group,
-              },
-            );  
+          const group = await this.getOrCreate({
+            name: singleData.group,
+            description: singleData.group,
+          });
           const permissions = await Promise.all(
             singleData.permissions.map(async (perm) => {
               try {
-                const permission = await this.permissionService.create(
-                  {
-                    name: perm.name,
-                    slug: perm.slug,
-                    description: perm.slug,
-                    permissionGroupId:group.id    
-                  },
-  
-                );
+                const permission = await this.permissionService.create({
+                  name: perm.name,
+                  slug: perm.slug,
+                  description: perm.slug,
+                  permissionGroupId: group.id,
+                });
                 return permission;
-                
-              } catch (error) {
-                
-              }
-            
+              } catch (error) {}
             }),
           );
 
@@ -197,7 +187,7 @@ else{
 
       return allGroupAndPermissions;
     } catch (error) {
-      throw new BadRequestException(error.message) 
+      throw new BadRequestException(error.message);
     }
   }
 }

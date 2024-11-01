@@ -15,7 +15,10 @@ import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import { PermissionGroup } from './entities/permission-group.entity';
-import { ExcludeAuthGuard, ExcludeTenantGuard } from '@root/src/core/guards/exclud.guard';
+import {
+  ExcludeAuthGuard,
+  ExcludeTenantGuard,
+} from '@root/src/core/guards/exclud.guard';
 
 @Controller('permission-group')
 @ApiTags('Permission Group')
