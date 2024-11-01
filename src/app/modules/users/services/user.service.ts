@@ -104,12 +104,12 @@ export class UserService {
         createUserDto['profileImageDownload'] = uploadedImagePath['image'];
       }
       const user = this.userRepository.create({ ...createUserDto, tenantId });
-      const userRecord = await this.createUserToFirebase(
-        createUserDto.email,
-        createUserDto.firstName,
-        tenantId,
-      );
-      user.firebaseId = userRecord.uid;
+      // const userRecord = await this.createUserToFirebase(
+      //   createUserDto.email,
+      //   createUserDto.firstName,
+      //   tenantId,
+      // );
+      // user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
       await checkIfDataExists(valuesToCheck, this.userRepository);
@@ -653,13 +653,15 @@ export class UserService {
           employeeInformation.maritalStatus = user.maritalStatus;
           employeeInformation.nationalityId = user.nationalityId;
           employeeInformation.employeeAttendanceId = user.employeeAttendanceId;
+          employeeInformation.dateOfBirth = user.dateOfBirth || null;
 
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
           employeeJobInformation.employementTypeId = user.employmentTypeId;
           employeeJobInformation.workScheduleId = user.workScheduleId;
-          employeeJobInformation.positionId = user.jobPositionId;
+          employeeJobInformation.positionId =
+            user.jobPositionId == '' ? null : user.jobPositionId;
           const createRolePermissionDto = new CreateRolePermissionDto();
           createRolePermissionDto.roleId = user.roleId;
           createRolePermissionDto.permissionId = permissionIds;

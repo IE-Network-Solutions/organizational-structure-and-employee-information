@@ -15,8 +15,8 @@ export class ImportEmployeeDto {
   //   @IsUUID()
   //   tenantId: string;
   @IsOptional()
-  @IsString()
-  employeeAttendanceId?: string;
+  @IsOptional()
+  employeeAttendanceId?: number;
 
   @IsNumber()
   userId: number;
@@ -50,7 +50,7 @@ export class ImportEmployeeDto {
   maritalStatus: MaritalStatus;
 
   @IsDateString()
-  dateOfBirth: string;
+  dateOfBirth: Date;
 
   @IsDateString()
   joinedDate: string;
