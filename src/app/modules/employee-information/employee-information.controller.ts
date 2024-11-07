@@ -17,6 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { EmployeeInformationService } from './employee-information.service';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('employee-information')
 @ApiTags('Employee Information')
@@ -75,5 +76,11 @@ export class EmployeeInformationController {
   getEmployeeAnniversary(@Req() request: Request) {
     const tenantId = request['tenantId'];
     return this.employeeInformationService.getEmployeeAnniversary(tenantId);
+  }
+  @Get('/users/employee/:employeeId')
+  @ExcludeAuthGuard()
+  employeeInformationByEmployeeId(@Req() request: Request, @Param('employeeId') employeeId: string,) {
+    const tenantId = request['tenantId'];
+    return this.employeeInformationService.employeeInformationByEmployeeId(tenantId,employeeId);
   }
 }

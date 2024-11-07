@@ -183,4 +183,43 @@ export class EmployeeInformationService {
 
     return employees;
   }
+
+
+  async employeeInformationByEmployeeId(tenantId: string,employeeId:string): Promise<EmployeeInformation> {
+    try {
+      const user = await this.employeeInformationRepository
+      .createQueryBuilder('employeeInformation')
+
+      .leftJoinAndSelect('employeeInformation.user', 'user')
+
+      .leftJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+        'employeeJobInformation.isPositionActive = :isPositionActive',
+        { isPositionActive: true },
+      )
+     // .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect(
+        'employeeJobInformation.employementType',
+        'employementType',
+      )
+      .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+      .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+      .leftJoinAndSelect('employeeJobInformation.workSchedule', 'workSchedule')
+      .leftJoinAndSelect('employeeJobInformation.position', 'position')
+      .leftJoinAndSelect('employeeJobInformation.department', 'department')
+      .andWhere('user.tenantId = :tenantId', { tenantId })
+      .andWhere('employeeInformation.userId = :userId', { userId:employeeId })
+
+        .getOne();
+
+      return { ...user };
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`EmployeeInformation Not found.`);
+      }
+      throw error;
+    }
+  }
 }
