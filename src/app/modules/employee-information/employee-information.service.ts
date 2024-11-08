@@ -187,7 +187,7 @@ export class EmployeeInformationService {
 
   async employeeInformationByEmployeeId(tenantId: string,employeeId:string): Promise<EmployeeInformation> {
     try {
-      const user = await this.employeeInformationRepository
+      const employeeInformation = await this.employeeInformationRepository
       .createQueryBuilder('employeeInformation')
 
       .leftJoinAndSelect('employeeInformation.user', 'user')
@@ -210,11 +210,11 @@ export class EmployeeInformationService {
       .leftJoinAndSelect('employeeJobInformation.position', 'position')
       .leftJoinAndSelect('employeeJobInformation.department', 'department')
       .andWhere('user.tenantId = :tenantId', { tenantId })
-      .andWhere('employeeInformation.userId = :userId', { userId:employeeId })
+      .andWhere('employeeInformation.employeeAttendanceId = :employeeAttendanceId', { employeeAttendanceId:employeeId })
 
         .getOne();
 
-      return { ...user };
+      return { ...employeeInformation };
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`EmployeeInformation Not found.`);
