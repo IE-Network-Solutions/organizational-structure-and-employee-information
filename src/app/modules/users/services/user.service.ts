@@ -685,4 +685,14 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
+
+  async getOneUSer(id:string,tenantId:string){
+    try{
+      const user= await this.userRepository.findOne({where:{id:id,tenantId:tenantId},relations:['user','user.employeeInformation']})
+return  user;
+    }
+    catch(error){
+      throw new BadRequestException(error.message)
+    }
+  }
 }
