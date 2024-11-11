@@ -221,7 +221,7 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-        //  user['reportingTo'] = await this.findReportingToUser(user.id);
+          user['reportingTo'] = await this.findReportingToUser(user.id);
 
         if (
           user.employeeJobInformation &&
