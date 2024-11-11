@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_SERVER = 'ubuntu@139.185.53.18'
+        REMOTE_SERVER = 'ubuntu@139.185.51.164'
         REPO_URL = 'https://github.com/IE-Network-Solutions/organizational-structure-and-employee-information.git'
         BRANCH_NAME = 'production'
         REPO_DIR = 'osei-backend'
