@@ -221,7 +221,7 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-        //  user['reportingTo'] = await this.findReportingToUser(user.id);
+          user['reportingTo'] = await this.findReportingToUser(user.id);
 
         if (
           user.employeeJobInformation &&
@@ -482,7 +482,7 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         where: { firebaseId: firbaseId },
-        relations: ['role', 'userPermissions'],
+        relations: ['role', 'userPermissions','userPermissions.permission'],
       });
 
       const department =
@@ -629,6 +629,8 @@ export class UserService {
 
   async importUser(importEmployeeDto: ImportEmployeeDto[], tenantId: string) {
     const createdUsers = [];
+    const bankInformation=[]
+    const singleBankInformation={}
     try {
       for (const user of importEmployeeDto) {
         try {
@@ -640,6 +642,15 @@ export class UserService {
           const permissionIds = permissions.map(
             (permission) => permission.permissionId,
           );
+
+          if(user.bankAccountName){
+
+           singleBankInformation["bankName"]
+          }
+          if(user.bankAccountNumber){
+            singleBankInformation["accountNumber"]
+
+          }
           const createUserDto = new CreateUserDto();
           createUserDto.firstName = user.firstName;
           createUserDto.middleName = user.middleName;
@@ -654,6 +665,7 @@ export class UserService {
           employeeInformation.nationalityId = user.nationalityId;
           employeeInformation.employeeAttendanceId = user.employeeAttendanceId;
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
+         employeeInformation.bankInformation=JSON.stringify(singleBankInformation)||null;
 
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
@@ -683,6 +695,16 @@ export class UserService {
       return createdUsers;
     } catch (error) {
       throw new BadRequestException(error.message);
+    }
+  }
+
+  async getOneUSer(id:string,tenantId:string){
+    try{
+      const user= await this.userRepository.findOne({where:{id:id,tenantId:tenantId},relations:['user','user.employeeInformation']})
+return  user;
+    }
+    catch(error){
+      throw new BadRequestException(error.message)
     }
   }
 }
