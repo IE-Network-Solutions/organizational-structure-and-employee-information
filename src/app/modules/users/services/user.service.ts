@@ -104,12 +104,12 @@ export class UserService {
         createUserDto['profileImageDownload'] = uploadedImagePath['image'];
       }
       const user = this.userRepository.create({ ...createUserDto, tenantId });
-      const userRecord = await this.createUserToFirebase(
-        createUserDto.email,
-        createUserDto.firstName,
-        tenantId,
-      );
-      user.firebaseId = userRecord.uid;
+      // const userRecord = await this.createUserToFirebase(
+      //   createUserDto.email,
+      //   createUserDto.firstName,
+      //   tenantId,
+      // );
+      // user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
       await checkIfDataExists(valuesToCheck, this.userRepository);
@@ -221,7 +221,7 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-          user['reportingTo'] = await this.findReportingToUser(user.id);
+        //  user['reportingTo'] = await this.findReportingToUser(user.id);
 
         if (
           user.employeeJobInformation &&
