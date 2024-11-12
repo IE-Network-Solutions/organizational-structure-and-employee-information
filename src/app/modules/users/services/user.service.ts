@@ -663,7 +663,7 @@ export class UserService {
           employeeInformation.gender = user.gender;
           employeeInformation.maritalStatus = user.maritalStatus;
           employeeInformation.nationalityId = user.nationalityId;
-          employeeInformation.employeeAttendanceId = user.employeeAttendanceId;
+          employeeInformation.employeeAttendanceId = parseInt(user.employeeAttendanceId);
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
          employeeInformation.bankInformation=JSON.stringify(singleBankInformation)||null;
 
