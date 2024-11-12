@@ -89,4 +89,12 @@ export class ImportEmployeeDto {
 
   @IsString()
   workScheduleId: string;
+
+  @IsOptional()
+  @IsString()
+  bankAccountNumber?:string
+
+  @IsOptional()
+  @IsString()
+  bankAccountName?:string
 }
