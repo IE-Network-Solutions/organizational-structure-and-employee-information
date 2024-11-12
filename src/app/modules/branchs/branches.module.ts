@@ -9,5 +9,6 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
   imports: [TypeOrmModule.forFeature([Branch])],
   controllers: [BranchesController],
   providers: [BranchesService, PaginationService],
+  exports: [BranchesService],
 })
 export class BranchesModule {}

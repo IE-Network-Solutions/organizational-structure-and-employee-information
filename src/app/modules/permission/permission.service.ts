@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -112,6 +113,15 @@ export class PermissionService implements PermissionInterface {
         throw new NotFoundException(`Permission not found.`);
       }
       throw error;
+    }
+  }
+  async findPermissionBySlug(slug: string, tenantId: string) {
+    try {
+      return await this.permissionRepository.findOneOrFail({
+        where: { slug: slug },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 }

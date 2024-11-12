@@ -1,10 +1,11 @@
 import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
 import { EmployeeJobInformation } from '../entities/employee-job-information.entity';
+import { JobPosition } from '@root/src/app/modules/job-position/entities/job-position.entity';
 
 export const employeeJobInformationData = (): EmployeeJobInformation => {
   return {
     id: 'a7c8a8b3-1f4a-4f91-a8d2-5f2a9a1b8d2c',
-    jobTitle: 'Software Engineer',
+    positionId: 'Software Engineer',
     userId: '1',
     branchId: '1',
     isPositionActive: true,
@@ -26,6 +27,7 @@ export const employeeJobInformationData = (): EmployeeJobInformation => {
     employementType: { id: '1', name: 'Full-Time' } as any, // mock as needed
     department: { id: '1', name: 'Engineering' } as any, // mock as needed
     workSchedule: { id: '1', name: '9-5' } as any, // mock as needed
+    position: { id: '1', name: 'Software Engineer' } as JobPosition,
   };
 };
 
@@ -43,7 +45,7 @@ export const employeeJobInformationDataSave = () => {
     employmentType: null,
     employmentTypeId: '1',
     isPositionActive: true,
-    jobTitle: 'Software Engineer',
+    PositionId: 'Software Engineer',
     tenantId: '1',
     updatedAt: new Date('2023-01-01T06:00:00.000Z'),
     user: null,

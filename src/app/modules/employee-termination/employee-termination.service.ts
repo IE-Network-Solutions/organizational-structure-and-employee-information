@@ -14,7 +14,7 @@ import { EmployeeTermination } from './entities/employee-termination.entity';
 import { checkIfDataExistsInEveryColumn } from '@root/src/core/utils/checkIfDataExists.util';
 import { CreateEmployeeTerminationDto } from './dto/create-employee-termination.dto';
 import { UpdateEmployeeTerminationDto } from './dto/update-employee-termination.dto';
-import { UserService } from '../users/user.service';
+import { UserService } from '../users/services/user.service';
 import { User } from '../users/entities/user.entity';
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 import { CreateEmployeeJobInformationDto } from '../employee-job-information/dto/create-employee-job-information.dto';

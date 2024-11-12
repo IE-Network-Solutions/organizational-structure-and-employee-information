@@ -23,6 +23,7 @@ export const createPermission = (): CreatePermissionDto => {
     name: 'Create permission',
     slug: 'create_permission',
     description: 'Description for create permission',
+    permissionGroupId: 'permissionGroupId',
   };
 };
 

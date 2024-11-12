@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { PermissionService } from './permission.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
@@ -17,6 +18,7 @@ import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import { Permission } from './entities/permission.entity';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { UpdateResult } from 'typeorm';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('permissions')
 @ApiTags('Permissions')
@@ -54,5 +56,12 @@ export class PermissionController {
   @Delete(':permissionId')
   remove(@Param('permissionId') id: string): Promise<UpdateResult> {
     return this.permissionService.remove(id);
+  }
+
+  @Get('/slug/:slug')
+  @ExcludeAuthGuard()
+  findPermissionBySlug(@Req() request: Request, @Param('slug') slug: string) {
+    const tenantId = request['tenantId'];
+    return this.permissionService.findPermissionBySlug(slug, tenantId);
   }
 }

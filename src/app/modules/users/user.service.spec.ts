@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { UserService } from './user.service';
+import { UserService } from './services/user.service';
 import { MockProxy, mock } from 'jest-mock-extended';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';

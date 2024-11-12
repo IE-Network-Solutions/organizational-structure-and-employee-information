@@ -1,4 +1,4 @@
-import { UserService } from './user.service';
+import { UserService } from './services/user.service';
 import {
   Controller,
   Get,
@@ -34,11 +34,17 @@ import {
   ExcludeTenantGuard,
 } from '@root/src/core/guards/exclud.guard';
 import { Department } from '../departments/entities/department.entity';
+import { UserDepartmentService } from './services/user-relation-with-department.service';
+import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dto';
+import { ImportEmployeeDto } from './dto/import-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly userDepartmentService: UserDepartmentService,
+  ) {}
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
@@ -236,6 +242,38 @@ export class UserController {
   @ExcludeAuthGuard()
   findAllDepartments(@Req() request: Request): Promise<Department[]> {
     const tenantId = request['tenantId'];
-    return this.userService.findAllDepartments(tenantId);
+    return this.userDepartmentService.findAllDepartments(tenantId);
+  }
+
+  @Get('/department/dissolve')
+  dissolveDepartment(
+    @Req() request: Request,
+    dissolveDepartmentDto: DissolveDepartmentDto,
+  ): Promise<Department> {
+    const tenantId = request['tenantId'];
+    return this.userDepartmentService.dissolveDepartment(
+      dissolveDepartmentDto,
+      tenantId,
+    );
+  }
+
+  @Post('/import/users')
+  @ExcludeAuthGuard()
+  importUser(
+    @Req() request: Request,
+    @Body() importEmployeeDto: ImportEmployeeDto[],
+  ) {
+    const tenantId = request['tenantId'];
+    return this.userService.importUser(importEmployeeDto, tenantId);
+  }
+
+  @Post('/use/info/:userId')
+
+  getOneUser(
+    @Req() request: Request,
+    @Param('userId') userId: string,
+  ) {
+    const tenantId = request['tenantId'];
+    return this.userService.getOneUSer(userId, tenantId);
   }
 }

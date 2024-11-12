@@ -5,10 +5,5 @@ export class SearchFilterDTO {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  columnName?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  query?: string;
+  name?: string;
 }

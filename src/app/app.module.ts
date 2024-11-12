@@ -15,6 +15,7 @@ import { WorkScheduleSubscriber } from './modules/work-schedules/subscribers/wor
 import { HealthModule } from './modules/health/health.module';
 import { AuthGuard } from '../core/guards/auth.guard';
 import { UserSubscriber } from './modules/users/subscribers/user.subscriber';
+import { EmployeeInformationSubscriber } from './modules/employee-information/subscribers/employee-information.subscriber';
 
 /** This is a TypeScript module that imports various modules and sets up a TypeORM connection using
 configuration values obtained from a ConfigService. */
@@ -43,6 +44,7 @@ configuration values obtained from a ConfigService. */
           BranchSubscriber,
           WorkScheduleSubscriber,
           UserSubscriber,
+          EmployeeInformationSubscriber,
         ],
       }),
       inject: [ConfigService],

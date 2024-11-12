@@ -12,7 +12,7 @@ import {
 export class CreateEmployeeJobInformationDto {
   @IsOptional()
   @IsString()
-  jobTitle: string;
+  positionId: string;
 
   @IsOptional()
   @IsString()
