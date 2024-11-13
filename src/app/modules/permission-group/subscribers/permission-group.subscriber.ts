@@ -3,11 +3,10 @@ import {
   EntitySubscriberInterface,
   SoftRemoveEvent,
 } from 'typeorm';
-import { Repository } from 'typeorm';
-
 import { Injectable } from '@nestjs/common';
 import { PermissionGroup } from '../entities/permission-group.entity';
 import { Permission } from '../../permission/entities/permission.entity';
+import { Repository } from 'typeorm';
 
 @EventSubscriber()
 @Injectable()
@@ -17,16 +16,17 @@ export class PermissionGroupSubscriber
   listenTo() {
     return PermissionGroup;
   }
-  async afterPermissionGroupFromPermissionSoftRemove(
-    event: SoftRemoveEvent<PermissionGroup>,
-  ) {
+
+  async afterSoftRemove(event: SoftRemoveEvent<PermissionGroup>) {
     const permissionRepository: Repository<Permission> =
-      event.connection.getRepository(Permission);
-    if (event.entity.deletedAt) {
-      await permissionRepository.update(
-        { permissionGroupId: event.entity.id },
-        { permissionGroupId: null },
-      );
+      event.manager.getRepository(Permission);
+
+    if (event.entity?.deletedAt) {
+      await permissionRepository
+        .createQueryBuilder()
+        .relation(Permission, 'permissionGroups')
+        .of(event.entity.id) // the soft-deleted group ID
+        .remove(event.entity); // Remove this PermissionGroup from all associated Permissions
     }
   }
 }
