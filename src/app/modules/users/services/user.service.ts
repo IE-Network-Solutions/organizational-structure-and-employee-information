@@ -699,7 +699,7 @@ export class UserService {
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
-          // console.log(error.message)
+          throw new BadRequestException(error.message);
         }
       }
       return createdUsers;
