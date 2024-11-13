@@ -276,6 +276,7 @@ export class UserService {
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
 
         .leftJoinAndSelect(
