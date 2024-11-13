@@ -51,6 +51,7 @@ import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-p
 @Injectable()
 export class UserService {
   private readonly emailServerUrl: string;
+  private readonly tenantUrl:string;
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectDataSource() private dataSource: DataSource,
@@ -68,6 +69,9 @@ export class UserService {
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
+    );
+    this.tenantUrl = this.configService.get<string>(
+      'servicesUrl.tenantUrl',
     );
   }
 
@@ -103,13 +107,16 @@ export class UserService {
 
         createUserDto['profileImageDownload'] = uploadedImagePath['image'];
       }
+      const tenant= await this.getTenantDomain(tenantId)
+      
       const user = this.userRepository.create({ ...createUserDto, tenantId });
-      // const userRecord = await this.createUserToFirebase(
-      //   createUserDto.email,
-      //   createUserDto.firstName,
-      //   tenantId,
-      // );
-      // user.firebaseId = userRecord.uid;
+      const userRecord = await this.createUserToFirebase(
+        createUserDto.email,
+        createUserDto.firstName,
+        tenantId,
+        tenant.domainUrl
+      );
+      user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
       await checkIfDataExists(valuesToCheck, this.userRepository);
@@ -674,6 +681,7 @@ export class UserService {
           employeeJobInformation.workScheduleId = user.workScheduleId;
           employeeJobInformation.positionId =
             user.jobPositionId == '' ? null : user.jobPositionId;
+            employeeJobInformation.effectiveStartDate= new Date(user.joinedDate)||null
           const createRolePermissionDto = new CreateRolePermissionDto();
           createRolePermissionDto.roleId = user.roleId;
           createRolePermissionDto.permissionId = permissionIds;
@@ -706,5 +714,22 @@ return  user;
     catch(error){
       throw new BadRequestException(error.message)
     }
+  }
+
+
+  async getTenantDomain(
+   
+    tenantId: string,
+  
+  ) {
+try{
+    const response = await this.httpService
+      .post(`${this.tenantUrl}/client/${tenantId}`)
+      .toPromise();
+
+    return response.data;
+}catch(error){
+  throw new BadRequestException(error.message)
+}
   }
 }
