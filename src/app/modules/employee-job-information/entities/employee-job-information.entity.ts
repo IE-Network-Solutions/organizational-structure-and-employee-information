@@ -52,6 +52,8 @@ export class EmployeeJobInformation extends BaseModel {
 
   @Column({
     type: 'enum',
+    enum: job_action,
+    default: job_action.new,
     nullable: false,
   })
   @IsEnum(job_action)
