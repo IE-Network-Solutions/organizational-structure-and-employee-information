@@ -722,18 +722,10 @@ return  user;
   }
 
 
-   async listAllUsers() {
-    const listUsersResult = await admin.auth().listUsers(1000,);
-    const deletePromises = listUsersResult.users.map(user => admin.auth().deleteUser(user.uid));  
-    listUsersResult.users.forEach(user => {
-      console.log('User:', user.toJSON());
-    });
-  
-    // If there are more users, continue listing them with the next page token
-    if (listUsersResult.pageToken) {
-     // await listAllUsers(listUsersResult.pageToken); // Pass the page token for the next batch
-    }
-  }
+  //  async deleteAllFirebaseUSers() {
+  //   const listUsersResult = await admin.auth().listUsers(1000,);
+  //   const deletePromises = listUsersResult.users.map(user => admin.auth().deleteUser(user.uid));      
+  // }
 
 
 //   async getTenantDomain(
