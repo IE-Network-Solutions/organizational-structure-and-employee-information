@@ -309,6 +309,7 @@ describe('UserService', () => {
         andWhere: jest.fn().mockReturnThis(),
         withDeleted: jest.fn().mockReturnThis(), // Mock the withDeleted method
         getMany: jest.fn().mockResolvedValue([userWithEmptyJobInfo]),
+        getOne:jest.fn().mockReturnThis()
       };
 
       jest

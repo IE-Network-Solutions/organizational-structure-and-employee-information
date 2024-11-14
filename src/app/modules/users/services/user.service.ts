@@ -228,7 +228,7 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-        //  user['reportingTo'] = await this.findReportingToUser(user.id);
+        user['reportingTo'] = await this.findReportingToUser(user.id);
 
         if (
           user.employeeJobInformation &&
@@ -638,6 +638,7 @@ export class UserService {
 
   async importUser(importEmployeeDto: ImportEmployeeDto[], tenantId: string) {
     const createdUsers = [];
+    const notCreatedUsers = [];
     const bankInformation=[]
     const singleBankInformation={}
     try {
@@ -683,7 +684,7 @@ export class UserService {
           employeeJobInformation.workScheduleId = user.workScheduleId;
           employeeJobInformation.positionId =
             user.jobPositionId == '' ? null : user.jobPositionId;
-            employeeJobInformation.effectiveStartDate= new Date(user.joinedDate)||null
+         employeeJobInformation.effectiveStartDate= new Date(user.joinedDate)||null
           const createRolePermissionDto = new CreateRolePermissionDto();
           createRolePermissionDto.roleId = user.roleId;
           createRolePermissionDto.permissionId = permissionIds;
@@ -699,10 +700,12 @@ export class UserService {
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
-          throw new BadRequestException(error.message);
+        notCreatedUsers.push(user)
         }
       }
-      return createdUsers;
+      return {createdUsers:createdUsers,
+        notCreatedUsers:notCreatedUsers
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -715,6 +718,20 @@ return  user;
     }
     catch(error){
       throw new BadRequestException(error.message)
+    }
+  }
+
+
+   async listAllUsers() {
+    const listUsersResult = await admin.auth().listUsers(1000,);
+    const deletePromises = listUsersResult.users.map(user => admin.auth().deleteUser(user.uid));  
+    listUsersResult.users.forEach(user => {
+      console.log('User:', user.toJSON());
+    });
+  
+    // If there are more users, continue listing them with the next page token
+    if (listUsersResult.pageToken) {
+     // await listAllUsers(listUsersResult.pageToken); // Pass the page token for the next batch
     }
   }
 
