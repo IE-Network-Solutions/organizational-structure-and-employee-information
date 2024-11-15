@@ -51,7 +51,7 @@ import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-p
 @Injectable()
 export class UserService {
   private readonly emailServerUrl: string;
- // private readonly tenantUrl:string;
+  // private readonly tenantUrl:string;
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectDataSource() private dataSource: DataSource,
@@ -107,14 +107,14 @@ export class UserService {
 
         createUserDto['profileImageDownload'] = uploadedImagePath['image'];
       }
-    //  const tenant= await this.getTenantDomain(tenantId)
-      
+      //  const tenant= await this.getTenantDomain(tenantId)
+
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
         createUserDto.firstName,
         tenantId,
-      //  tenant.domainUrl
+        //  tenant.domainUrl
       );
       user.firebaseId = userRecord.uid;
 
@@ -491,7 +491,7 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         where: { firebaseId: firbaseId },
-        relations: ['role', 'userPermissions','userPermissions.permission'],
+        relations: ['role', 'userPermissions', 'userPermissions.permission'],
       });
 
       const department =
@@ -579,7 +579,7 @@ export class UserService {
     domainUrl?: string,
   ) {
     //const password = generateRandom6DigitNumber();
-    const password="%TGBnhy6"
+    const password = '%TGBnhy6';
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password.toString(),
@@ -639,8 +639,8 @@ export class UserService {
   async importUser(importEmployeeDto: ImportEmployeeDto[], tenantId: string) {
     const createdUsers = [];
     const notCreatedUsers = [];
-    const bankInformation=[]
-    const singleBankInformation={}
+    const bankInformation = [];
+    const singleBankInformation = {};
     try {
       for (const user of importEmployeeDto) {
         try {
@@ -653,13 +653,11 @@ export class UserService {
             (permission) => permission.permissionId,
           );
 
-          if(user.bankAccountName){
-
-           singleBankInformation["bankName"]
+          if (user.bankAccountName) {
+            singleBankInformation['bankName'];
           }
-          if(user.bankAccountNumber){
-            singleBankInformation["accountNumber"]
-
+          if (user.bankAccountNumber) {
+            singleBankInformation['accountNumber'];
           }
           const createUserDto = new CreateUserDto();
           createUserDto.firstName = user.firstName;
@@ -673,9 +671,12 @@ export class UserService {
           employeeInformation.gender = user.gender;
           employeeInformation.maritalStatus = user.maritalStatus;
           employeeInformation.nationalityId = user.nationalityId;
-          employeeInformation.employeeAttendanceId = parseInt(user.employeeAttendanceId);
+          employeeInformation.employeeAttendanceId = parseInt(
+            user.employeeAttendanceId,
+          );
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
-         employeeInformation.bankInformation=JSON.stringify(singleBankInformation)||null;
+          employeeInformation.bankInformation =
+            JSON.stringify(singleBankInformation) || null;
 
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
@@ -684,7 +685,8 @@ export class UserService {
           employeeJobInformation.workScheduleId = user.workScheduleId;
           employeeJobInformation.positionId =
             user.jobPositionId == '' ? null : user.jobPositionId;
-         employeeJobInformation.effectiveStartDate= new Date(user.joinedDate)||null
+          employeeJobInformation.effectiveStartDate =
+            new Date(user.joinedDate) || null;
           const createRolePermissionDto = new CreateRolePermissionDto();
           createRolePermissionDto.roleId = user.roleId;
           createRolePermissionDto.permissionId = permissionIds;
@@ -700,47 +702,45 @@ export class UserService {
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
-        notCreatedUsers.push(user)
+          notCreatedUsers.push(user);
         }
       }
-      return {createdUsers:createdUsers,
-        notCreatedUsers:notCreatedUsers
-      };
+      return { createdUsers: createdUsers, notCreatedUsers: notCreatedUsers };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  async getOneUSer(id:string,tenantId:string){
-    try{
-      const user= await this.userRepository.findOne({where:{id:id,tenantId:tenantId},relations:['user','user.employeeInformation']})
-return  user;
-    }
-    catch(error){
-      throw new BadRequestException(error.message)
+  async getOneUSer(id: string, tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: id, tenantId: tenantId },
+        relations: ['user', 'user.employeeInformation'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 
-
   //  async deleteAllFirebaseUSers() {
   //   const listUsersResult = await admin.auth().listUsers(1000,);
-  //   const deletePromises = listUsersResult.users.map(user => admin.auth().deleteUser(user.uid));      
+  //   const deletePromises = listUsersResult.users.map(user => admin.auth().deleteUser(user.uid));
   // }
 
+  //   async getTenantDomain(
 
-//   async getTenantDomain(
-   
-//     tenantId: string,
-  
-//   ) {
-// try{
-//     const response = await this.httpService
-//       .post(`${this.tenantUrl}/client/${tenantId}`)
-//       .toPromise();
+  //     tenantId: string,
 
-//     return response.data;
-// }catch(error){
-//   throw new BadRequestException(error.message)
-// }
-//   }
+  //   ) {
+  // try{
+  //     const response = await this.httpService
+  //       .post(`${this.tenantUrl}/client/${tenantId}`)
+  //       .toPromise();
+
+  //     return response.data;
+  // }catch(error){
+  //   throw new BadRequestException(error.message)
+  // }
+  //   }
 }

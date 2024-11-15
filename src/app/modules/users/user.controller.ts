@@ -268,11 +268,7 @@ export class UserController {
   }
 
   @Post('/use/info/:userId')
-
-  getOneUser(
-    @Req() request: Request,
-    @Param('userId') userId: string,
-  ) {
+  getOneUser(@Req() request: Request, @Param('userId') userId: string) {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
