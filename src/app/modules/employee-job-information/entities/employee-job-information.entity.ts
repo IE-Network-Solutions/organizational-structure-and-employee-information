@@ -32,7 +32,7 @@ export class EmployeeJobInformation extends BaseModel {
   @Column({ type: 'boolean', default: true })
   isPositionActive: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true })
   effectiveStartDate: Date;
 
   @Column({ nullable: true })

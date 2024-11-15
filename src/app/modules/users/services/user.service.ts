@@ -51,6 +51,7 @@ import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-p
 @Injectable()
 export class UserService {
   private readonly emailServerUrl: string;
+  // private readonly tenantUrl:string;
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectDataSource() private dataSource: DataSource,
@@ -69,6 +70,9 @@ export class UserService {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
     );
+    // this.tenantUrl = this.configService.get<string>(
+    //   'servicesUrl.tenantUrl',
+    // );
   }
 
   async create(
@@ -103,11 +107,14 @@ export class UserService {
 
         createUserDto['profileImageDownload'] = uploadedImagePath['image'];
       }
+      //  const tenant= await this.getTenantDomain(tenantId)
+
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
         createUserDto.firstName,
         tenantId,
+        //  tenant.domainUrl
       );
       user.firebaseId = userRecord.uid;
 
@@ -221,7 +228,7 @@ export class UserService {
       );
 
       for (const user of paginatedData.items) {
-        //  user['reportingTo'] = await this.findReportingToUser(user.id);
+        user['reportingTo'] = await this.findReportingToUser(user.id);
 
         if (
           user.employeeJobInformation &&
@@ -483,7 +490,7 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         where: { firebaseId: firbaseId },
-        relations: ['role', 'userPermissions'],
+        relations: ['role', 'userPermissions', 'userPermissions.permission'],
       });
 
       const department =
@@ -570,8 +577,8 @@ export class UserService {
     tenantId: string,
     domainUrl?: string,
   ) {
-    const password = generateRandom6DigitNumber();
-
+    //const password = generateRandom6DigitNumber();
+    const password = '%TGBnhy6';
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password.toString(),
@@ -579,29 +586,29 @@ export class UserService {
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
     const expiresIn = 24 * 60 * 60 * 1000;
     await admin.auth().createCustomToken(userRecord.uid, { expiresIn });
-    const emailTemplatePath = path.join(
-      process.cwd(),
-      'src',
-      'core',
-      'templates',
-      'welcome-email-template.html',
-    );
+    // const emailTemplatePath = path.join(
+    //   process.cwd(),
+    //   'src',
+    //   'core',
+    //   'templates',
+    //   'welcome-email-template.html',
+    // );
 
-    let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
+    // let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
 
-    emailHtml = emailHtml.replace('{{email}}', email);
-    emailHtml = emailHtml.replace('{{name}}', firstName);
-    emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
-    emailHtml = emailHtml.replace('{{password}}', password.toString());
-    const emailBody = new CreateEmailDto();
-    emailBody.to = email;
-    emailBody.subject =
-      'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
-    emailBody.html = emailHtml;
+    // emailHtml = emailHtml.replace('{{email}}', email);
+    // emailHtml = emailHtml.replace('{{name}}', firstName);
+    // emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
+    // emailHtml = emailHtml.replace('{{password}}', password.toString());
+    // const emailBody = new CreateEmailDto();
+    // emailBody.to = email;
+    // emailBody.subject =
+    //   'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
+    // emailBody.html = emailHtml;
 
-    const response = await this.httpService
-      .post(`${this.emailServerUrl}/email`, emailBody)
-      .toPromise();
+    // const response = await this.httpService
+    //   .post(`${this.emailServerUrl}/email`, emailBody)
+    //   .toPromise();
 
     return userRecord;
   }
@@ -630,6 +637,9 @@ export class UserService {
 
   async importUser(importEmployeeDto: ImportEmployeeDto[], tenantId: string) {
     const createdUsers = [];
+    const notCreatedUsers = [];
+    const bankInformation = [];
+    const singleBankInformation = {};
     try {
       for (const user of importEmployeeDto) {
         try {
@@ -641,6 +651,13 @@ export class UserService {
           const permissionIds = permissions.map(
             (permission) => permission.permissionId,
           );
+
+          if (user.bankAccountName) {
+            singleBankInformation['bankName'];
+          }
+          if (user.bankAccountNumber) {
+            singleBankInformation['accountNumber'];
+          }
           const createUserDto = new CreateUserDto();
           createUserDto.firstName = user.firstName;
           createUserDto.middleName = user.middleName;
@@ -653,8 +670,12 @@ export class UserService {
           employeeInformation.gender = user.gender;
           employeeInformation.maritalStatus = user.maritalStatus;
           employeeInformation.nationalityId = user.nationalityId;
-          employeeInformation.employeeAttendanceId = user.employeeAttendanceId;
+          employeeInformation.employeeAttendanceId = parseInt(
+            user.employeeAttendanceId,
+          );
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
+          employeeInformation.bankInformation =
+            JSON.stringify(singleBankInformation) || null;
 
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
@@ -663,6 +684,8 @@ export class UserService {
           employeeJobInformation.workScheduleId = user.workScheduleId;
           employeeJobInformation.positionId =
             user.jobPositionId == '' ? null : user.jobPositionId;
+          employeeJobInformation.effectiveStartDate =
+            new Date(user.joinedDate) || null;
           const createRolePermissionDto = new CreateRolePermissionDto();
           createRolePermissionDto.roleId = user.roleId;
           createRolePermissionDto.permissionId = permissionIds;
@@ -678,12 +701,45 @@ export class UserService {
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
-          // console.log(error.message)
+          notCreatedUsers.push(user);
         }
       }
-      return createdUsers;
+      return { createdUsers: createdUsers, notCreatedUsers: notCreatedUsers };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
+
+  async getOneUSer(id: string, tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: id, tenantId: tenantId },
+        relations: ['user', 'user.employeeInformation'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  //  async deleteAllFirebaseUSers() {
+  //   const listUsersResult = await admin.auth().listUsers(1000,);
+  //   const deletePromises = listUsersResult.users.map(user => admin.auth().deleteUser(user.uid));
+  // }
+
+  //   async getTenantDomain(
+
+  //     tenantId: string,
+
+  //   ) {
+  // try{
+  //     const response = await this.httpService
+  //       .post(`${this.tenantUrl}/client/${tenantId}`)
+  //       .toPromise();
+
+  //     return response.data;
+  // }catch(error){
+  //   throw new BadRequestException(error.message)
+  // }
+  //   }
 }

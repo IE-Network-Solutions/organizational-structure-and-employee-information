@@ -8,7 +8,7 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 export class WorkSchedule extends BaseModel {
   @Column({ length: 255, type: 'varchar' })
   name: string;
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable:true })
   detail: CreateWorkScheduleDetailDto[];
 
   @Column({ type: 'uuid', nullable: true })
