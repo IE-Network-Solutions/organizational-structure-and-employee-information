@@ -14,7 +14,7 @@ export const employeeJobInformationData = (): EmployeeJobInformation => {
     effectiveEndDate: new Date('2024-01-01'),
     employementTypeId: '1',
     departmentId: '1',
-    JobAction: JobAction.promotion,
+    jobAction: JobAction.promotion,
     departmentLeadOrNot: false,
     employmentContractType: EmployementContractType.CONTRACTUAL,
     workScheduleId: '1',
