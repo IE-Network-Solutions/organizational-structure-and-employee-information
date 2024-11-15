@@ -15,7 +15,7 @@ import { WorkSchedule } from '../../work-schedules/entities/work-schedule.entity
 import { EmployementType } from '../../employment-type/entities/employement-type.entity';
 import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
 import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
-import { job_action } from '../enum/job-action.enum';
+import { JobAction } from '../enum/job-action.enum';
 import { JobPosition } from '@root/src/app/modules/job-position/entities/job-position.entity';
 
 @Entity()
@@ -52,12 +52,12 @@ export class EmployeeJobInformation extends BaseModel {
 
   @Column({
     type: 'enum',
-    enum: job_action,
-    default: job_action.new,
+    enum: JobAction,
+    default: JobAction.new,
     nullable: false,
   })
-  @IsEnum(job_action)
-  jobAction: job_action;
+  @IsEnum(JobAction)
+  JobAction: JobAction;
 
   @Column({ nullable: true })
   workScheduleId: string;
