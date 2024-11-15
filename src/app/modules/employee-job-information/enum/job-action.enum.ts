@@ -1,4 +1,4 @@
-export enum job_action {
+export enum JobAction {
   promotion = 'Promotion',
   transfer = 'Transfer',
   new = 'New',
