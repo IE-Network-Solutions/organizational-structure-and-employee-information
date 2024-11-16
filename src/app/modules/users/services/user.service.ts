@@ -701,6 +701,7 @@ export class UserService {
           createdUsers.push(userCreated);
         } catch (error) {
         notCreatedUsers.push(user)
+        
         }
       }
       return {createdUsers:createdUsers,
