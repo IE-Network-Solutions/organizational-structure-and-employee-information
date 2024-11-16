@@ -79,7 +79,7 @@ export class EmployeeInformationController {
   }
   @Get('/users/employee/:employeeId')
   @ExcludeAuthGuard()
-  employeeInformationByEmployeeId(@Req() request: Request, @Param('employeeId') employeeId: string,) {
+  employeeInformationByEmployeeId(@Req() request: Request, @Param('employeeId') employeeId: number,) {
     const tenantId = request['tenantId'];
     return this.employeeInformationService.employeeInformationByEmployeeId(tenantId,employeeId);
   }
