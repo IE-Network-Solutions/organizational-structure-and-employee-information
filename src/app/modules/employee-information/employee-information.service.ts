@@ -186,7 +186,7 @@ export class EmployeeInformationService {
 
   async employeeInformationByEmployeeId(
     tenantId: string,
-    employeeId: string,
+    employeeId: number,
   ): Promise<EmployeeInformation> {
     try {
       const employeeInformation = await this.employeeInformationRepository
