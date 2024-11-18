@@ -3,7 +3,6 @@ import { CreatePermissionDto } from '../dto/create-permission.dto';
 import { Permission } from '../entities/permission.entity';
 import { UpdatePermissionDto } from '../dto/update-permission.dto';
 
-
 export const permissionData = (): Permission => {
   return {
     id: '1',
@@ -17,7 +16,6 @@ export const permissionData = (): Permission => {
     updatedAt: new Date('2022-10-22 07:11:42'),
   };
 };
-
 
 export const createPermission = (): CreatePermissionDto => {
   return {
