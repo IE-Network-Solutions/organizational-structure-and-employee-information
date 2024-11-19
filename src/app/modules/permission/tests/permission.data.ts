@@ -9,8 +9,7 @@ export const permissionData = (): Permission => {
     name: 'Create permission',
     slug: 'create_permission',
     description: 'Description for create permission',
-    permissionGroupId: 'permissionGroupId',
-    permissionGroup: null,
+    permissionGroups: [], // Set to an empty array
     rolePermissions: [],
     userPermissions: [],
     createdAt: new Date('2022-10-22 07:11:42'),

@@ -10,7 +10,7 @@ export const permissionGroupData = () => {
     createdAt: new Date('2022-10-22 07:11:42'),
     updatedAt: new Date('2022-10-22 07:11:42'),
     tenantId: '1',
-    permission: [],
+    permissions: [],
   };
 };
 
@@ -18,7 +18,6 @@ export const createPermissionGroup = (): CreatePermissionGroupDto => {
   return {
     name: 'Group One',
     description: 'This is for Group one description',
-    permissions: [],
   };
 };
 
