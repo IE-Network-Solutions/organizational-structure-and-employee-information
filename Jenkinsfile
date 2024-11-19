@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_SERVER = 'ubuntu@139.185.51.164'
+        REMOTE_SERVER = 'ubuntu@139.185.53.18'
         REPO_URL = 'https://github.com/IE-Network-Solutions/organizational-structure-and-employee-information.git'
-        BRANCH_NAME = 'production'
+        BRANCH_NAME = 'develop'
         REPO_DIR = 'osei-backend'
-        SSH_CREDENTIALS_ID = 'pepproduction'
+        SSH_CREDENTIALS_ID = 'peptest'
     }
 
     stages {
