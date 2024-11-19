@@ -245,7 +245,7 @@ export class UserController {
     return this.userDepartmentService.findAllDepartments(tenantId);
   }
 
-  @Get('/department/dissolve')
+  @Post('/department/dissolve')
   dissolveDepartment(
     @Req() request: Request,
     dissolveDepartmentDto: DissolveDepartmentDto,
