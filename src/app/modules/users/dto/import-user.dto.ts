@@ -14,7 +14,7 @@ import {
 export class ImportEmployeeDto {
   //   @IsUUID()
   //   tenantId: string;
- 
+
   @IsOptional()
   employeeAttendanceId?: string;
 
@@ -92,9 +92,9 @@ export class ImportEmployeeDto {
 
   @IsOptional()
   @IsString()
-  bankAccountNumber?:string
+  bankAccountNumber?: string;
 
   @IsOptional()
   @IsString()
-  bankAccountName?:string
+  bankAccountName?: string;
 }

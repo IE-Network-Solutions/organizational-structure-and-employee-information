@@ -8,6 +8,7 @@ import {
   IsDateString,
   IsJSON,
 } from 'class-validator';
+import { JobAction } from '../enum/job-action.enum';
 
 export class CreateEmployeeJobInformationDto {
   @IsOptional()
@@ -45,6 +46,10 @@ export class CreateEmployeeJobInformationDto {
   @IsOptional()
   @IsEnum(EmployementContractType)
   employmentContractType: EmployementContractType;
+
+  @IsOptional()
+  @IsEnum(JobAction)
+  jobAction: JobAction;
 
   @IsOptional()
   @IsString()

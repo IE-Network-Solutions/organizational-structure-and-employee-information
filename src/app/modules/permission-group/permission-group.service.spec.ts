@@ -90,7 +90,7 @@ describe('PermissionGroupService', () => {
         await permissionGroupService.findOne(permissionGroupData().id);
         expect(permissionGroupRepository.findOneOrFail).toHaveBeenCalledWith({
           where: { id: permissionGroupData().id },
-          relations: ['permission'],
+          relations: ['permissions'],
         });
       });
 
@@ -152,7 +152,7 @@ describe('PermissionGroupService', () => {
       it('should call permissionGroupRepository.findOne initially', async () => {
         expect(permissionGroupRepository.findOneOrFail).toHaveBeenCalledWith({
           where: { id: permissionGroupData().id },
-          relations: ['permission'],
+          relations: ['permissions'],
         });
       });
 
@@ -164,7 +164,7 @@ describe('PermissionGroupService', () => {
 
         expect(permissionGroupRepository.findOneOrFail).toHaveBeenCalledWith({
           where: { id: permissionGroupData().id },
-          relations: ['permission'],
+          relations: ['permissions'],
         });
       });
     });

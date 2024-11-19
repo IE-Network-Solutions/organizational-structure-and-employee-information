@@ -18,6 +18,7 @@ import { applySearchFilterUtils } from '@root/src/core/utils/search-filter.utils
 import { PermissionGroupRepository } from './permission-group-reposiory';
 import { PermissionGroupInterface } from './permission-group-interface';
 import * as permissionData from '../../../core/utils/permission.json';
+import { UpdateResult } from 'typeorm';
 
 @Injectable()
 export class PermissionGroupService implements PermissionGroupInterface {
@@ -27,30 +28,33 @@ export class PermissionGroupService implements PermissionGroupInterface {
     private readonly paginationService: PaginationService,
     private readonly permissionService: PermissionService,
   ) {}
+
   async create(
     permissionGroupDto: CreatePermissionGroupDto,
   ): Promise<PermissionGroup> {
-    const data = this.permissionGroupRepository.create(permissionGroupDto);
-    const valuesToCheck = { name: data.name };
+    const newGroup = this.permissionGroupRepository.create({
+      name: permissionGroupDto.name,
+      description: permissionGroupDto.description,
+    });
+
     try {
-      const permissionGroup = await checkIfDataExists(
-        valuesToCheck,
+      await checkIfDataExists(
+        { name: newGroup.name },
         this.permissionGroupRepository,
       );
-      const permissionGroups = await this.permissionGroupRepository.save(data);
-      if (
-        permissionGroupDto.permissions &&
-        permissionGroupDto.permissions.length > 0
-      ) {
-        const updatePromises = permissionGroupDto.permissions.map(
-          (permissionId) =>
-            this.permissionService.update(permissionId, {
-              permissionGroupId: permissionGroups.id,
-            }),
+
+      if (permissionGroupDto.permissions?.length) {
+        const permissions = await Promise.all(
+          permissionGroupDto.permissions.map((permissionId) =>
+            this.permissionService.findOne(permissionId),
+          ),
         );
-        await Promise.all(updatePromises);
+
+        newGroup.permissions = permissions;
       }
-      return permissionGroups;
+
+      const savedGroup = await this.permissionGroupRepository.save(newGroup);
+      return savedGroup;
     } catch (error) {
       throw new ConflictException(error.message);
     }
@@ -59,18 +63,10 @@ export class PermissionGroupService implements PermissionGroupInterface {
   async getOrCreate(
     permissionGroupDto: CreatePermissionGroupDto,
   ): Promise<PermissionGroup> {
-    try {
-      const permissionGroup = await this.permissionGroupRepository.findOne({
-        where: { name: permissionGroupDto.name },
-      });
-      if (permissionGroup) {
-        return permissionGroup;
-      } else {
-        return await this.create(permissionGroupDto);
-      }
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+    const existingGroup = await this.permissionGroupRepository.findOne({
+      where: { name: permissionGroupDto.name },
+    });
+    return existingGroup || this.create(permissionGroupDto);
   }
 
   async findAll(
@@ -81,111 +77,86 @@ export class PermissionGroupService implements PermissionGroupInterface {
       page: paginationOptions.page,
       limit: paginationOptions.limit,
     };
+
     try {
       const queryBuilder = this.permissionGroupRepository
         .createQueryBuilder('permissionGroup')
-        .leftJoinAndSelect('permissionGroup.permission', 'permission');
+        .leftJoinAndSelect('permissionGroup.permissions', 'permissions');
+
       await applySearchFilterUtils(
         queryBuilder,
         searchFilterDTO,
         this.permissionGroupRepository,
       );
-      return await this.paginationService.paginate<PermissionGroup>(
+
+      return this.paginationService.paginate<PermissionGroup>(
         queryBuilder,
         options,
       );
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`Permission group not found.`);
-      }
-      throw error;
+      throw new NotFoundException('Permission groups not found.');
     }
   }
 
   async findOne(id: string): Promise<PermissionGroup> {
     try {
-      const permissionGroup =
-        await this.permissionGroupRepository.findOneOrFail({
-          where: { id },
-          relations: ['permission'],
-        });
-      return permissionGroup;
+      return await this.permissionGroupRepository.findOneOrFail({
+        where: { id },
+        relations: ['permissions'],
+      });
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(
-          `Permission group with id ${id} not found.`,
-        );
-      }
-      throw error;
+      throw new NotFoundException(`Permission group with ID ${id} not found.`);
     }
   }
 
   async update(
     id: string,
-    updatePermissionGroupDto: UpdatePermissionGroupDto,
+    updateDto: UpdatePermissionGroupDto,
   ): Promise<PermissionGroup> {
-    try {
-      const existingPermissionGroup = await this.findOne(id);
+    const existingGroup = await this.findOne(id);
+    Object.assign(existingGroup, updateDto);
 
-      existingPermissionGroup.name = updatePermissionGroupDto.name;
-      existingPermissionGroup.description =
-        updatePermissionGroupDto.description;
-      existingPermissionGroup.permission =
+    if (updateDto.permissions) {
+      existingGroup.permissions =
         await this.permissionService.findBulkPermissionsByPermissionId(
-          updatePermissionGroupDto,
+          updateDto,
         );
-      await this.permissionGroupRepository.save(existingPermissionGroup);
-      return existingPermissionGroup;
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(
-          `Permission group with id ${id} not found.`,
-        );
-      }
-      throw error;
     }
+
+    return this.permissionGroupRepository.save(existingGroup);
   }
 
-  async remove(id: string) {
-    try {
-      await this.findOne(id);
-      return await this.permissionGroupRepository.softDelete(id);
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(
-          `Permission group with id ${id} not found.`,
-        );
-      }
-      throw error;
-    }
+  async remove(id: string): Promise<UpdateResult> {
+    const group = await this.findOne(id);
+
+    return await this.permissionGroupRepository.softDelete(group.id);
   }
+
   async permissionSeeder() {
     try {
-      const allGroupAndPermissions = await Promise.all(
-        permissionData.map(async (singleData) => {
+      const allGroupPermissions = await Promise.all(
+        permissionData.map(async (data) => {
           const group = await this.getOrCreate({
-            name: singleData.group,
-            description: singleData.group,
+            name: data.group,
+            description: data.group,
           });
           const permissions = await Promise.all(
-            singleData.permissions.map(async (perm) => {
-              try {
-                const permission = await this.permissionService.create({
+            data.permissions.map((perm) =>
+              this.permissionService
+                .create({
                   name: perm.name,
                   slug: perm.slug,
                   description: perm.slug,
                   permissionGroupId: group.id,
-                });
-                return permission;
-              } catch (error) {}
-            }),
+                })
+                .catch(() => null),
+            ),
           );
-
-          return { group, permissions };
+          return { group, permissions: permissions.filter(Boolean) };
         }),
       );
 
-      return allGroupAndPermissions;
+      return allGroupPermissions;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
