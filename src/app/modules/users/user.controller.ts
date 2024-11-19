@@ -267,8 +267,7 @@ export class UserController {
     return this.userService.importUser(importEmployeeDto, tenantId);
   }
 
-  @Get('/user/info/:userId')
-
+  @Get('/simple-info/:userId')
   getOneUser(
     @Req() request: Request,
     @Param('userId') userId: string,
