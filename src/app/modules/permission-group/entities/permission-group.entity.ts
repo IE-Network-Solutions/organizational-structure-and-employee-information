@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
 import { Permission } from '../../permission/entities/permission.entity';
 
@@ -13,6 +13,13 @@ export class PermissionGroup extends BaseModel {
   @Column({ nullable: true })
   tenantId: string;
 
-  @OneToMany(() => Permission, (permissions) => permissions.permissionGroup)
-  permission: Permission[];
+  @ManyToMany(() => Permission, (permissions) => permissions.permissionGroups, {
+    cascade: true,
+  })
+  @JoinTable({
+    name: 'permission_group_permissions',
+    joinColumn: { name: 'permissionGroupId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'permissionId', referencedColumnName: 'id' },
+  })
+  permissions: Permission[];
 }

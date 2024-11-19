@@ -184,33 +184,41 @@ export class EmployeeInformationService {
     return employees;
   }
 
-
-  async employeeInformationByEmployeeId(tenantId: string,employeeId:string): Promise<EmployeeInformation> {
+  async employeeInformationByEmployeeId(
+    tenantId: string,
+    employeeId: number,
+  ): Promise<EmployeeInformation> {
     try {
       const employeeInformation = await this.employeeInformationRepository
-      .createQueryBuilder('employeeInformation')
+        .createQueryBuilder('employeeInformation')
 
-      .leftJoinAndSelect('employeeInformation.user', 'user')
+        .leftJoinAndSelect('employeeInformation.user', 'user')
 
-      .leftJoinAndSelect(
-        'user.employeeJobInformation',
-        'employeeJobInformation',
-        'employeeJobInformation.isPositionActive = :isPositionActive',
-        { isPositionActive: true },
-      )
-     // .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
-      .leftJoinAndSelect('user.role', 'role')
-      .leftJoinAndSelect(
-        'employeeJobInformation.employementType',
-        'employementType',
-      )
-      .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
-      .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
-      .leftJoinAndSelect('employeeJobInformation.workSchedule', 'workSchedule')
-      .leftJoinAndSelect('employeeJobInformation.position', 'position')
-      .leftJoinAndSelect('employeeJobInformation.department', 'department')
-      .andWhere('user.tenantId = :tenantId', { tenantId })
-      .andWhere('employeeInformation.employeeAttendanceId = :employeeAttendanceId', { employeeAttendanceId:employeeId })
+        .leftJoinAndSelect(
+          'user.employeeJobInformation',
+          'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        // .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect(
+          'employeeJobInformation.workSchedule',
+          'workSchedule',
+        )
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
+        .leftJoinAndSelect('employeeJobInformation.department', 'department')
+        .andWhere('user.tenantId = :tenantId', { tenantId })
+        .andWhere(
+          'employeeInformation.employeeAttendanceId = :employeeAttendanceId',
+          { employeeAttendanceId: employeeId },
+        )
 
         .getOne();
 

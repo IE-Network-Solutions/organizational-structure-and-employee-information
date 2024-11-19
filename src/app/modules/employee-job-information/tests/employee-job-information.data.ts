@@ -1,6 +1,7 @@
 import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
 import { EmployeeJobInformation } from '../entities/employee-job-information.entity';
 import { JobPosition } from '@root/src/app/modules/job-position/entities/job-position.entity';
+import { JobAction } from '../enum/job-action.enum';
 
 export const employeeJobInformationData = (): EmployeeJobInformation => {
   return {
@@ -13,6 +14,7 @@ export const employeeJobInformationData = (): EmployeeJobInformation => {
     effectiveEndDate: new Date('2024-01-01'),
     employementTypeId: '1',
     departmentId: '1',
+    jobAction: JobAction.promotion,
     departmentLeadOrNot: false,
     employmentContractType: EmployementContractType.CONTRACTUAL,
     workScheduleId: '1',

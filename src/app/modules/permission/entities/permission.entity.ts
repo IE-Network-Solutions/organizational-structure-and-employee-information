@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToMany } from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
 import { PermissionGroup } from '../../permission-group/entities/permission-group.entity';
 import { RolePermission } from '../../role-permission/entities/role-permission.entity';
@@ -15,14 +15,11 @@ export class Permission extends BaseModel {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ nullable: true })
-  permissionGroupId: string;
-
-  @ManyToOne(
+  @ManyToMany(
     () => PermissionGroup,
-    (permissionGroup) => permissionGroup.permission,
+    (permissionGroup) => permissionGroup.permissions,
   )
-  permissionGroup: PermissionGroup;
+  permissionGroups: PermissionGroup[];
 
   @OneToMany(
     () => RolePermission,
