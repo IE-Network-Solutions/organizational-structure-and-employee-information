@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { BranchRequestService } from './branch-request.service';
 import { CreateBranchRequestDto } from './dto/create-branch-request.dto';
@@ -45,7 +46,37 @@ export class BranchRequestController {
     return await this.branchRequestService.findAll(paginationOptions, tenantId);
   }
 
-  @Get(':id')
+  @Get('BranchRequestwithApprover/:userId')
+  async findAllBranchRequestWithApprover(
+    @Param('userId') userId: string,
+    @Req() req: Request,
+    @Query() paginationOptions: PaginationDto,
+  ) {
+    const tenantId = req['tenantId'];
+
+    if (!tenantId) {
+      throw new BadRequestException('Tenant ID is missing in the request.');
+    }
+
+    return this.branchRequestService.findAllBranchRequestwithApprover(
+      paginationOptions,
+      tenantId,
+      userId,
+    );
+  }
+
+  @Get(':userId')
+  async findAll_BasedOnUser(
+    @Param('userId') userId: string,
+    @Query() paginationOptions: PaginationDto, // Automatically maps query params
+  ): Promise<Pagination<BranchRequest>> {
+    return await this.branchRequestService.findAll_BasedOnUser(
+      paginationOptions,
+      userId,
+    );
+  }
+
+  @Get('request/:id')
   async findOne(@Param('id') id: string): Promise<BranchRequest> {
     return await this.branchRequestService.findOne(id);
   }

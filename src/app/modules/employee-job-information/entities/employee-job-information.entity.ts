@@ -50,14 +50,14 @@ export class EmployeeJobInformation extends BaseModel {
   @IsEnum({ nullable: true })
   employmentContractType: EmployementContractType;
 
-  @Column({
-    type: 'enum',
-    enum: JobAction,
-    default: JobAction.new,
-    nullable: false,
-  })
-  @IsEnum(JobAction)
-  JobAction: JobAction;
+  // @Column({
+  //   type: 'enum',
+  //   enum: JobAction,
+  //   default: JobAction.new,
+  //   nullable: false,
+  // })
+  // @IsEnum(JobAction)
+  // JobAction: JobAction;
 
   @Column({ nullable: true })
   workScheduleId: string;

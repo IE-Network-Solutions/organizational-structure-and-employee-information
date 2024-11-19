@@ -1,7 +1,7 @@
 import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
 import { EmployeeJobInformation } from '../entities/employee-job-information.entity';
 import { JobPosition } from '@root/src/app/modules/job-position/entities/job-position.entity';
-import { job_action } from '../enum/job-action.enum';
+// import { job_action } from '../enum/job-action.enum';
 
 export const employeeJobInformationData = (): EmployeeJobInformation => {
   return {
@@ -16,7 +16,7 @@ export const employeeJobInformationData = (): EmployeeJobInformation => {
     departmentId: '1',
     departmentLeadOrNot: false,
     employmentContractType: EmployementContractType.CONTRACTUAL,
-    jobAction: job_action.promotion,
+    // jobAction: job_action.promotion,
     workScheduleId: '1',
     employeeTermination: undefined,
     tenantId: '1',
