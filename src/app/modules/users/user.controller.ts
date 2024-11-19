@@ -267,7 +267,7 @@ export class UserController {
     return this.userService.importUser(importEmployeeDto, tenantId);
   }
 
-  @Post('/use/info/:userId')
+  @Get('/user/info/:userId')
 
   getOneUser(
     @Req() request: Request,
@@ -276,4 +276,14 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
+
+//   @Post('users/delete/all/all')
+// @ExcludeAuthGuard()
+// @ExcludeTenantGuard()
+//   delete(
+
+//   ) {
+   
+//     return this.userService.deleteAllFirebaseUSers();
+//   }
 }

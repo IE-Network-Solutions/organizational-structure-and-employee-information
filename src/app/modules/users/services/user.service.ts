@@ -713,7 +713,7 @@ export class UserService {
 
   async getOneUSer(id:string,tenantId:string){
     try{
-      const user= await this.userRepository.findOne({where:{id:id,tenantId:tenantId},relations:['user','user.employeeInformation']})
+      const user= await this.userRepository.findOne({where:{id:id,tenantId:tenantId},relations:['employeeInformation']})
 return  user;
     }
     catch(error){
