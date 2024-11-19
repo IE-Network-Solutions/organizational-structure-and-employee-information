@@ -267,9 +267,23 @@ export class UserController {
     return this.userService.importUser(importEmployeeDto, tenantId);
   }
 
-  @Post('/use/info/:userId')
-  getOneUser(@Req() request: Request, @Param('userId') userId: string) {
+  @Get('/user/info/:userId')
+
+  getOneUser(
+    @Req() request: Request,
+    @Param('userId') userId: string,
+  ) {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
+
+//   @Post('users/delete/all/all')
+// @ExcludeAuthGuard()
+// @ExcludeTenantGuard()
+//   delete(
+
+//   ) {
+   
+//     return this.userService.deleteAllFirebaseUSers();
+//   }
 }
