@@ -4,10 +4,7 @@ import { BranchRequest } from '../entities/branch-request.entity';
 import { CreateBranchRequestDto } from '../dto/create-branch-request.dto';
 import { Branch } from '../../branchs/entities/branch.entity'; // Importing Branch entity for relation
 
-// Updated BranchRequest mock data
-
 export const branchRequestData = (): BranchRequest => {
-  // Create mock Branch instances
   const currentBranch: Branch = {
     id: 'branch-id-1',
     name: 'Current Branch',
@@ -40,12 +37,11 @@ export const branchRequestData = (): BranchRequest => {
     updatedAt: new Date('2024-11-21T06:13:40.957Z'),
   };
 
-  // Return the BranchRequest object
   return {
     id: 'be21f28b-4651-4d6f-8f08-d8128da64ee5',
     userId: 'hq',
-    currentBranch, // Use the constructed Branch instance
-    requestBranch, // Use the constructed Branch instance
+    currentBranch,
+    requestBranch,
     currentBranchId: currentBranch.id,
     requestBranchId: requestBranch.id,
     approvalType: '34567890',
@@ -112,9 +108,9 @@ export const updatebranchRequestData = () => {
 
 export const createbranchRequestDataOnCreate = (): CreateBranchRequestDto => {
   return {
-    userId: 'ndcijwebfi583498bnfdiu983r98', // Added userId
-    currentBranchId: 'branch-id-1', // Added currentBranchId
-    requestBranchId: 'branch-id-2', // Added requestBranchId
+    userId: 'ndcijwebfi583498bnfdiu983r98',
+    currentBranchId: 'branch-id-1',
+    requestBranchId: 'branch-id-2',
     approvalType: '34567890',
     status: BranchRequestStatus.PENDING,
     approvalWorkflowId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',

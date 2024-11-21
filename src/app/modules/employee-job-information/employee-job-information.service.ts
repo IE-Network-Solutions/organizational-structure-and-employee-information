@@ -125,38 +125,27 @@ export class EmployeeJobInformationService {
     updateEmployeeJobInformationDto: UpdateEmployeeJobInformationDto,
   ) {
     try {
-      // Check if the record exists
       const existingRecord =
         await this.employeeJobInformationRepository.findOne({
           where: { userId, isPositionActive: true },
         });
 
-      console.log(existingRecord, 'existingRecord');
       if (!existingRecord) {
         throw new NotFoundException(
           `EmployeeJobInformation with userId ${userId} not found or position is inactive.`,
         );
       }
 
-      console.log(
-        updateEmployeeJobInformationDto,
-        'updateEmployeeJobInformationDto',
-      );
-
-      // Perform the update
       await this.employeeJobInformationRepository.update(
         { userId },
         updateEmployeeJobInformationDto,
       );
 
-      // Fetch and return the updated record
       const updatedRecord = await this.employeeJobInformationRepository.findOne(
         {
           where: { userId },
         },
       );
-
-      console.log(updatedRecord, 'updatedRecord');
 
       if (!updatedRecord) {
         throw new NotFoundException(
@@ -166,13 +155,11 @@ export class EmployeeJobInformationService {
 
       return updatedRecord;
     } catch (error) {
-      // Handle specific EntityNotFoundError
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(
           `EmployeeJobInformation with userId ${userId} not found.`,
         );
       }
-      // Rethrow other errors
       throw error;
     }
   }

@@ -11,7 +11,7 @@ import { BranchRequestStatus } from '../enum/Branch-request-status.enum';
 export class CreateBranchRequestDto {
   @IsNotEmpty()
   @IsString()
-  userId: string; // Representing the user relationship by user ID
+  userId: string;
 
   @IsNotEmpty()
   @IsString()

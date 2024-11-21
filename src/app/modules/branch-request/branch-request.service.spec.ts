@@ -38,15 +38,15 @@ describe('BranchRequestService', () => {
         },
         {
           provide: EmployeeJobInformationService,
-          useValue: mock<EmployeeJobInformationService>(), // Mock for the missing dependency
+          useValue: mock<EmployeeJobInformationService>(),
         },
         {
           provide: ConfigService,
-          useValue: mock<ConfigService>(), // Mock ConfigService if used in the service
+          useValue: mock<ConfigService>(),
         },
         {
           provide: HttpService,
-          useValue: mock<HttpService>(), // Mock HttpService if used in the service
+          useValue: mock<HttpService>(),
         },
       ],
     }).compile();
@@ -132,7 +132,6 @@ describe('BranchRequestService', () => {
     });
 
     it('should throw NotFoundException if branch request not found', async () => {
-      // Simulate `findOneByOrFail` throwing an exception
       repository.findOneByOrFail.mockRejectedValue(
         new NotFoundException('Branch request not found'),
       );
@@ -167,7 +166,6 @@ describe('BranchRequestService', () => {
     it('should throw NotFoundException if branch request not found during update', async () => {
       const nonExistingId = 'non-existing-id';
 
-      // Simulate findOne returning null to represent a non-existent branch
       jest
         .spyOn(service, 'findOne')
         .mockRejectedValue(
@@ -186,17 +184,12 @@ describe('BranchRequestService', () => {
 
   describe('remove', () => {
     it('should remove a branch request successfully', async () => {
-      const branchRequest = branchRequestData(); // Mock branch request data
-      //const updateDto = updatebranchRequestData();
-      // Mock `findOne` to return the branch request
+      const branchRequest = branchRequestData();
       jest.spyOn(service, 'findOne').mockResolvedValue(branchRequest);
-      // Mock `softRemove` to resolve successfully (simulate successful removal)
       repository.softRemove.mockResolvedValue(branchRequest);
 
-      // Call the service's `remove` method
       const result = await service.remove(branchRequest.id);
 
-      // Assertions
       expect(result).toEqual(branchRequest);
       expect(repository.softRemove).toHaveBeenCalledWith({
         id: branchRequest.id,
@@ -206,7 +199,6 @@ describe('BranchRequestService', () => {
     it('should throw NotFoundException if branch request not found during removal', async () => {
       const nonExistingId = 'non-existing-id';
 
-      // Mock `findOne` to throw `NotFoundException`
       jest
         .spyOn(service, 'findOne')
         .mockRejectedValue(
@@ -215,30 +207,24 @@ describe('BranchRequestService', () => {
           ),
         );
 
-      // Call the service's `remove` method and expect it to throw
       await expect(service.remove(nonExistingId)).rejects.toThrow(
         NotFoundException,
       );
 
-      // Ensure `softRemove` is not called
       expect(repository.softRemove).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException on remove error', async () => {
       const branchRequest = branchRequestData();
 
-      // Mock `findOne` to return the branch request
       jest.spyOn(service, 'findOne').mockResolvedValue(branchRequest);
 
-      // Mock `softRemove` to throw an error (simulate failure)
       repository.softRemove.mockRejectedValue(new Error('Remove Error'));
 
-      // Call the service's `remove` method and expect it to throw
       await expect(service.remove(branchRequest.id)).rejects.toThrow(
         new BadRequestException('Remove Error'),
       );
 
-      // Ensure `softRemove` is called
       expect(repository.softRemove).toHaveBeenCalledWith({
         id: branchRequest.id,
       });

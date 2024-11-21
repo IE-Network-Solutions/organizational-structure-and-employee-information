@@ -87,7 +87,7 @@ describe('BranchRequestController', () => {
       const mockTenantId = 'tenantId';
       const req = { tenantId: mockTenantId } as any;
       const userId = 'user123';
-      const pagination = paginationOptions(); // Call the function to get PaginationDto
+      const pagination = paginationOptions();
       branchRequestService.findAllBranchRequestWithApprover.mockResolvedValue({
         items: [branchRequestData()],
         meta: {},
@@ -115,7 +115,7 @@ describe('BranchRequestController', () => {
   describe('findAll_BasedOnUser', () => {
     it('should call BranchRequestService.findAll_BasedOnUser', async () => {
       const userId = 'user123';
-      const pagination = paginationOptions(); // Call the function to get PaginationDto
+      const pagination = paginationOptions();
       branchRequestService.findAll_BasedOnUser.mockResolvedValue(
         paginationResultbranchRequestData(),
       );

@@ -26,7 +26,7 @@ export class BranchRequestController {
 
   @Post()
   async create(
-    @Req() req: Request, // Get tenantId from request
+    @Req() req: Request,
     @Body() createBranchRequestDto: CreateBranchRequestDto,
   ) {
     const tenantId = req['tenantId'];
@@ -38,7 +38,7 @@ export class BranchRequestController {
 
   @Get()
   async findAll(
-    @Req() req: Request, // Get tenantId from request
+    @Req() req: Request,
     @Query()
     paginationOptions?: PaginationDto,
   ): Promise<Pagination<BranchRequest>> {
@@ -68,7 +68,7 @@ export class BranchRequestController {
   @Get(':userId')
   async findAll_BasedOnUser(
     @Param('userId') userId: string,
-    @Query() paginationOptions: PaginationDto, // Automatically maps query params
+    @Query() paginationOptions: PaginationDto,
   ): Promise<Pagination<BranchRequest>> {
     return await this.branchRequestService.findAll_BasedOnUser(
       paginationOptions,

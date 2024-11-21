@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BranchRequest } from './entities/branch-request.entity'; // assuming you have a BranchRequest entity
+import { BranchRequest } from './entities/branch-request.entity';
 import { CreateBranchRequestDto } from './dto/create-branch-request.dto';
 import { UpdateBranchRequestDto } from './dto/update-branch-request.dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
@@ -152,10 +152,7 @@ export class BranchRequestService {
           const updateEmployeeJobInformationDto = {
             branchId: approverRequest.requestBranchId,
           };
-          console.log(
-            updateEmployeeJobInformationDto,
-            'updateEmployeeJobInformationDto',
-          );
+
           const updateBranch =
             await this.employeeJobInformationService.updatebranchRequest(
               approverRequest.userId,
@@ -208,9 +205,9 @@ export class BranchRequestService {
     try {
       const branchRequest = await this.branchRequestRepository
         .createQueryBuilder('branchrequest')
-        .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch') // Join currentBranchId to fetch branch data
-        .leftJoinAndSelect('branchrequest.requestBranch', 'requestBranch') // Join requestBranchId to fetch branch data
-        .where('branchrequest.id = :id', { id }) // Filter by id
+        .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch')
+        .leftJoinAndSelect('branchrequest.requestBranch', 'requestBranch')
+        .where('branchrequest.id = :id', { id })
         .getOne();
 
       if (!branchRequest) {
@@ -297,11 +294,9 @@ export class BranchRequestService {
       await this.branchRequestRepository.softRemove({ id });
       return branchRequest;
     } catch (error) {
-      // If it's a known error (NotFoundException), rethrow it
       if (error instanceof NotFoundException) {
         throw error;
       }
-      // For other errors (like database errors), throw a BadRequestException
       throw new BadRequestException('Remove Error');
     }
   }
