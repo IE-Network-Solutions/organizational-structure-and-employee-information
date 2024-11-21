@@ -2,6 +2,7 @@ import { BaseModel } from '@root/src/database/base.model';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { CreateClosedDatesDto } from '../dto/create-closed-dates.dto';
+import { Session } from '../../session/entities/session.entity';
 
 @Entity()
 export class Calendar extends BaseModel {
@@ -23,4 +24,6 @@ export class Calendar extends BaseModel {
 
   @OneToMany(() => Organization, (cal) => cal.calendar)
   organizations: Organization[];
+  @OneToMany(() => Session, (cal) => cal.calendar)
+  sessions: Session[];
 }

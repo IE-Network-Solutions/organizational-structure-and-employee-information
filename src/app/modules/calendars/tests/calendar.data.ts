@@ -16,6 +16,7 @@ export const calendarData = (): Calendar => {
     updatedAt: new Date('2022-10-22 07:11:42'),
     createdAt: new Date('2022-10-22 07:11:42'),
     organizations: null,
+    sessions:null
   };
 };
 

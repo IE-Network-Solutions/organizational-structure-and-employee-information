@@ -13,5 +13,6 @@ import { OrganizationsService } from '../organizations/organizations.service';
 
   controllers: [CalendarsController],
   providers: [CalendarsService, PaginationService, OrganizationsService],
+  exports:[CalendarsService]
 })
 export class CalendarsModule {}

@@ -21,6 +21,9 @@ import { EmployeeTerminationModule } from './modules/employee-termination/employ
 import { OffboardingEmployeeTaskModule } from './modules/offboarding-employee-task/offboarding-employee-tasks.module';
 import { OffboardingTasksTemplateModule } from './modules/offboarding-tasks-template/offboarding-tasks-template.module';
 import { JobPositionModule } from './modules/job-position/job-position.module';
+import { CronJobLogModule } from './modules/cron-job-log/cron-job-log.module';
+import { SessionModule } from './modules/session/session.module';
+import { MonthModule } from './modules/month/month.module';
 @Global()
 @Module({
   imports: [
@@ -45,7 +48,7 @@ import { JobPositionModule } from './modules/job-position/job-position.module';
     OffboardingEmployeeTaskModule,
     OffboardingTasksTemplateModule,
     EmployeeTerminationModule,
-    JobPositionModule,
+    JobPositionModule,CronJobLogModule,SessionModule,MonthModule
   ],
 })
 export class CoreModule {}
