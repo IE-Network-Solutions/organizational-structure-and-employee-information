@@ -51,14 +51,14 @@ export class BranchRequestController {
     @Param('userId') userId: string,
     @Req() req: Request,
     @Query() paginationOptions: PaginationDto,
-  ) {
+  ): Promise<{ items: BranchRequest[]; meta: any; links: any }> {
     const tenantId = req['tenantId'];
 
     if (!tenantId) {
       throw new BadRequestException('Tenant ID is missing in the request.');
     }
 
-    return this.branchRequestService.findAllBranchRequestwithApprover(
+    return this.branchRequestService.findAllBranchRequestWithApprover(
       paginationOptions,
       tenantId,
       userId,
@@ -77,8 +77,8 @@ export class BranchRequestController {
   }
 
   @Get('request/:id')
-  async findOne(@Param('id') id: string): Promise<BranchRequest> {
-    return await this.branchRequestService.findOne(id);
+  async findBranch(@Param('id') id: string): Promise<BranchRequest> {
+    return await this.branchRequestService.findBranch(id);
   }
 
   @Patch(':id')

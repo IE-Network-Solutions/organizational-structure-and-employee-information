@@ -14,6 +14,8 @@ import { Branch } from '../branchs/entities/branch.entity';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
+import { BranchRequestStatus } from './enum/Branch-request-status.enum';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 @Injectable()
 export class BranchRequestService {
@@ -22,6 +24,8 @@ export class BranchRequestService {
     @InjectRepository(BranchRequest)
     private branchRequestRepository: Repository<BranchRequest>,
     private paginationService: PaginationService,
+    private employeeJobInformationService: EmployeeJobInformationService,
+
     private configService: ConfigService,
     private httpService: HttpService,
   ) {
@@ -80,20 +84,39 @@ export class BranchRequestService {
     }
   }
 
-  async findAllBranchRequestwithApprover(
+  async findAllBranchRequestWithApprover(
     paginationOptions: PaginationDto,
     tenantId: string,
     userId: string,
-  ): Promise<BranchRequest[]> {
+  ): Promise<{ items: BranchRequest[]; meta: any; links: any }> {
     try {
       const options: IPaginationOptions = {
         page: paginationOptions.page || 1,
         limit: paginationOptions.limit || 10,
       };
-      const branchRequests = await this.branchRequestRepository
+
+      const query = this.branchRequestRepository
         .createQueryBuilder('branchrequest')
+        .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch')
+        .leftJoinAndSelect('branchrequest.requestBranch', 'requestBranch')
         .where('branchrequest.tenantId = :tenantId', { tenantId })
-        .getMany();
+        .orderBy(
+          `branchrequest.${paginationOptions.orderBy || 'createdAt'}`,
+          paginationOptions.orderDirection || 'DESC',
+        );
+
+      const paginatedData =
+        await this.paginationService.paginate<BranchRequest>(query, options);
+
+      const branchRequests = paginatedData.items;
+
+      if (!branchRequests.length) {
+        return {
+          items: [],
+          meta: paginatedData.meta,
+          links: paginatedData.links,
+        };
+      }
 
       const response = await this.httpService
         .get(`${this.orgStructureServerUrl}/approver/branchCurrentApprover`, {
@@ -105,7 +128,41 @@ export class BranchRequestService {
         .toPromise();
 
       const responseData = response.data;
-      console.log(responseData, 'responseData');
+      const filteredLastTrueApprovals = responseData.items.filter(
+        (item) => item.last === true,
+      );
+      for (const approverRequest of filteredLastTrueApprovals) {
+        const approverAction = approverRequest.approverAction;
+        if (approverAction == 'Rejected') {
+          const updateapproverRequestDto = {
+            status: BranchRequestStatus.DECLINED,
+          };
+          const result = await this.update(
+            approverRequest.id,
+            updateapproverRequestDto,
+          );
+        } else {
+          const updateapproverRequestDto = {
+            status: BranchRequestStatus.APPROVED,
+          };
+          const result = await this.update(
+            approverRequest.id,
+            updateapproverRequestDto,
+          );
+          const updateEmployeeJobInformationDto = {
+            branchId: approverRequest.requestBranchId,
+          };
+          console.log(
+            updateEmployeeJobInformationDto,
+            'updateEmployeeJobInformationDto',
+          );
+          const updateBranch =
+            await this.employeeJobInformationService.updatebranchRequest(
+              approverRequest.userId,
+              updateEmployeeJobInformationDto,
+            );
+        }
+      }
       if (responseData?.items?.length > 0) {
         const filteredData = responseData.items
           .map((approver) => ({
@@ -116,10 +173,18 @@ export class BranchRequestService {
           }))
           .filter((approver) => approver.nextApprover?.length > 0);
 
-        return filteredData;
+        return {
+          items: filteredData,
+          meta: paginatedData.meta,
+          links: paginatedData.links,
+        };
       }
-      // You might want to merge or map `responseData` to `paginatedData` here if needed
-      return responseData;
+
+      return {
+        items: [],
+        meta: paginatedData.meta,
+        links: paginatedData.links,
+      };
     } catch (error) {
       throw new BadRequestException(
         'Error retrieving branch requests',
@@ -138,6 +203,26 @@ export class BranchRequestService {
       throw new NotFoundException(`BranchRequest with Id ${id} not found`);
     }
   }
+
+  async findBranch(id: string): Promise<BranchRequest> {
+    try {
+      const branchRequest = await this.branchRequestRepository
+        .createQueryBuilder('branchrequest')
+        .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch') // Join currentBranchId to fetch branch data
+        .leftJoinAndSelect('branchrequest.requestBranch', 'requestBranch') // Join requestBranchId to fetch branch data
+        .where('branchrequest.id = :id', { id }) // Filter by id
+        .getOne();
+
+      if (!branchRequest) {
+        throw new NotFoundException(`BranchRequest with Id ${id} not found`);
+      }
+
+      return branchRequest;
+    } catch (error) {
+      throw new NotFoundException(`BranchRequest with Id ${id} not found`);
+    }
+  }
+
   async findAll_BasedOnUser(
     paginationOptions: PaginationDto,
     userId: string,
@@ -146,15 +231,25 @@ export class BranchRequestService {
       page: paginationOptions.page || 1,
       limit: paginationOptions.limit || 10,
     };
+
     try {
+      const queryBuilder = this.branchRequestRepository
+        .createQueryBuilder('branchrequest')
+        .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch')
+        .leftJoinAndSelect('branchrequest.requestBranch', 'requestBranch')
+        .where('branchrequest.userId = :userId', { userId });
+
+      if (paginationOptions.orderBy) {
+        queryBuilder.orderBy(
+          `branchrequest.${paginationOptions.orderBy}`,
+          paginationOptions.orderDirection || 'ASC',
+        );
+      }
+
       const paginatedData =
         await this.paginationService.paginate<BranchRequest>(
-          this.branchRequestRepository,
-          'branchRequest',
+          queryBuilder,
           options,
-          paginationOptions.orderBy,
-          paginationOptions.orderDirection,
-          { userId }, // Add the filtering condition for userId
         );
 
       if (!paginatedData.items.length) {
@@ -202,10 +297,12 @@ export class BranchRequestService {
       await this.branchRequestRepository.softRemove({ id });
       return branchRequest;
     } catch (error) {
+      // If it's a known error (NotFoundException), rethrow it
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      // For other errors (like database errors), throw a BadRequestException
+      throw new BadRequestException('Remove Error');
     }
   }
 }
