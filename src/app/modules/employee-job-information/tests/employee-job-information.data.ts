@@ -17,6 +17,7 @@ export const employeeJobInformationData = (): EmployeeJobInformation => {
     jobAction: JobAction.promotion,
     departmentLeadOrNot: false,
     employmentContractType: EmployementContractType.CONTRACTUAL,
+    // jobAction: job_action.promotion,
     workScheduleId: '1',
     employeeTermination: undefined,
     tenantId: '1',
