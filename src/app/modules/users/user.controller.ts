@@ -268,21 +268,18 @@ export class UserController {
   }
 
   @Get('/simple-info/:userId')
-  getOneUser(
-    @Req() request: Request,
-    @Param('userId') userId: string,
-  ) {
+  getOneUser(@Req() request: Request, @Param('userId') userId: string) {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
 
-//   @Post('users/delete/all/all')
-// @ExcludeAuthGuard()
-// @ExcludeTenantGuard()
-//   delete(
+  //   @Post('users/delete/all/all')
+  // @ExcludeAuthGuard()
+  // @ExcludeTenantGuard()
+  //   delete(
 
-//   ) {
-   
-//     return this.userService.deleteAllFirebaseUSers();
-//   }
+  //   ) {
+
+  //     return this.userService.deleteAllFirebaseUSers();
+  //   }
 }
