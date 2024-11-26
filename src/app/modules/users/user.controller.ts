@@ -248,7 +248,7 @@ export class UserController {
   @Post('/department/dissolve')
   dissolveDepartment(
     @Req() request: Request,
-    @Body()dissolveDepartmentDto: DissolveDepartmentDto,
+    dissolveDepartmentDto: DissolveDepartmentDto,
   ): Promise<Department> {
     const tenantId = request['tenantId'];
     return this.userDepartmentService.dissolveDepartment(
@@ -283,6 +283,6 @@ export class UserController {
 
 //   ) {
    
-//     return this.userService.deleteAllFirebaseUsers();
+//     return this.userService.deleteAllFirebaseUSers();
 //   }
 }

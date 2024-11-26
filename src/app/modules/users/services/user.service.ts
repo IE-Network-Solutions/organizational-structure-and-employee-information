@@ -641,7 +641,6 @@ export class UserService {
     const notCreatedUsers = [];
     const bankInformation = [];
     const singleBankInformation = {};
-    const userAddress={}
     try {
       for (const user of importEmployeeDto) {
         try {
@@ -655,16 +654,10 @@ export class UserService {
           );
 
           if (user.bankAccountName) {
-            singleBankInformation['bankName']=user.bankAccountName;
+            singleBankInformation['bankName'];
           }
           if (user.bankAccountNumber) {
-            singleBankInformation['accountNumber']=user.bankAccountNumber;
-          }
-          if(user.phoneNumber){
-            userAddress["phoneNumber"]=user.phoneNumber
-          }
-          if(user.address){
-            userAddress["subCity"]=user.address
+            singleBankInformation['accountNumber'];
           }
           const createUserDto = new CreateUserDto();
           createUserDto.firstName = user.firstName;
@@ -684,7 +677,7 @@ export class UserService {
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
           employeeInformation.bankInformation =
             JSON.stringify(singleBankInformation) || null;
-            employeeInformation.addresses= JSON.stringify(userAddress) || null
+
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
@@ -727,45 +720,11 @@ return  user;
       throw new BadRequestException(error.message)
     }
   }
-  // async  deleteAllFirebaseUsers() {
-  //   const admin = require('firebase-admin');
-  //   // Initialize Firebase Admin SDK if not already initialized
-  //   if (!admin.apps.length) {
-  //     admin.initializeApp({
-  //       credential: admin.credential.applicationDefault(),
-  //     });
-  //   }
-  
-  //   const deleteUsersBatch = async (nextPageToken?: string) => {
-  //     const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
-  
-  //     // Map delete promises
-  //     const deletePromises = listUsersResult.users.map((user) =>
-  //       admin.auth().deleteUser(user.uid)
-  //     );
-  
-  //     // Wait for all deletions in the current batch
-  //     await Promise.all(deletePromises);
-  
-  //     console.log(`Deleted ${listUsersResult.users.length} users`);
-  
-  //     // If there's a nextPageToken, process the next batch
-  //     if (listUsersResult.pageToken) {
-  //       await deleteUsersBatch(listUsersResult.pageToken);
-  //     }
-  //   };
-  
-  //   try {
-  //     await deleteUsersBatch();
-  //     console.log('All users have been successfully deleted.');
-  //   } catch (error) {
-  //     console.error('Error deleting users:', error);
-  //   }
+
+  //  async deleteAllFirebaseUSers() {
+  //   const listUsersResult = await admin.auth().listUsers(1000,);
+  //   const deletePromises = listUsersResult.users.map(user => admin.auth().deleteUser(user.uid));
   // }
-  
-  // Call the function
-  
-  
 
   //   async getTenantDomain(
 

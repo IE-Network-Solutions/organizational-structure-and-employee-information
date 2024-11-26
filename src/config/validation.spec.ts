@@ -54,7 +54,6 @@ describe('validationSchema', () => {
       DB_USER: 'postgres',
       DB_PASSWORD: 'password',
       DB_SYNCHRONIZE_ENTITIES: false,
-      APPROVAL_MODULE: 'http://localhost:8008/api/v1',
     };
 
     expect(validationSchema.validate(invalidConfig).error).toBeDefined();

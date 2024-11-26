@@ -97,12 +97,4 @@ export class ImportEmployeeDto {
   @IsOptional()
   @IsString()
   bankAccountName?: string;
-
-  @IsOptional()
-  @IsString()
-  phoneNumber?: string;
-  
-  @IsOptional()
-  @IsString()
-  address?: string;
 }
