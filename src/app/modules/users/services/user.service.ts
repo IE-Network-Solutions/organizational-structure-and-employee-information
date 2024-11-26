@@ -638,8 +638,8 @@ export class UserService {
   async importUser(importEmployeeDto: ImportEmployeeDto[], tenantId: string) {
     const createdUsers = [];
     const notCreatedUsers = [];
-    const bankInformation = [];
     const singleBankInformation = {};
+    const userAddress={}
     try {
       for (const user of importEmployeeDto) {
         try {
@@ -653,10 +653,16 @@ export class UserService {
           );
 
           if (user.bankAccountName) {
-            singleBankInformation['bankName'];
+            singleBankInformation['bankName']=user.bankAccountName;
           }
           if (user.bankAccountNumber) {
-            singleBankInformation['accountNumber'];
+            singleBankInformation['accountNumber']=user.bankAccountNumber;
+          }
+          if(user.phoneNumber){
+            userAddress["phoneNumber"]=user.phoneNumber
+          }
+          if(user.address){
+            userAddress["subCity"]=user.address
           }
           const createUserDto = new CreateUserDto();
           createUserDto.firstName = user.firstName;
@@ -676,7 +682,7 @@ export class UserService {
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
           employeeInformation.bankInformation =
             JSON.stringify(singleBankInformation) || null;
-
+            employeeInformation.addresses= JSON.stringify(userAddress) || null
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
