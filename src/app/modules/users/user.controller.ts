@@ -273,13 +273,13 @@ export class UserController {
     return this.userService.getOneUSer(userId, tenantId);
   }
 
-  //   @Post('users/delete/all/all')
-  // @ExcludeAuthGuard()
-  // @ExcludeTenantGuard()
-  //   delete(
+    @Post('users/delete/all/all')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+    delete(
 
-  //   ) {
+    ) {
 
-  //     return this.userService.deleteAllFirebaseUsers();
-  //   }
+      return this.userService.deleteAllFirebaseUsers();
+    }
 }

@@ -82,7 +82,7 @@ export const employeeInformationDataSave = (): CreateEmployeeInformationDto => {
     gender: Gender.MALE,
     maritalStatus: MaritalStatus.SINGLE,
     dateOfBirth: new Date('1990-01-01'),
-    joinedDate: '2020-01-01T00:00:00.000Z',
+    joinedDate: new Date('1990-01-01'),
     nationalityId: 'nation-1',
     employeeAttendanceId: 1,
     addresses: JSON.stringify({
@@ -110,7 +110,7 @@ export const createEmployeeInformationData =
     gender: undefined,
     maritalStatus: undefined,
     dateOfBirth: new Date('1990-01-01'),
-    joinedDate: '2020-01-01T00:00:00.000Z',
+    joinedDate: new Date('1990-01-01'),
     nationalityId: 'nation-1',
     employeeAttendanceId: 1,
     addresses: JSON.stringify({
