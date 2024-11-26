@@ -4,10 +4,12 @@ import { SessionController } from './session.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Session } from './entities/session.entity';
 import { PaginationModule } from '@root/src/core/pagination/pagination.module';
+import { MonthModule } from '../month/month.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Session]),PaginationModule],
+  imports: [TypeOrmModule.forFeature([Session]),PaginationModule,MonthModule],
   controllers: [SessionController],
-  providers: [SessionService]
+  providers: [SessionService],
+  exports:[SessionService]
 })
 export class SessionModule {}

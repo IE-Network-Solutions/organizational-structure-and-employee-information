@@ -8,13 +8,15 @@ import {
 import { CreateCalendarDto } from './dto/create-calendar.dto';
 import { UpdateCalendarDto } from './dto/update-calendar.dto';
 import { Calendar } from './entities/calendar.entity';
-import { Repository } from 'typeorm';
+import { Connection, QueryRunner, Repository } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { CreateOrganizationDto } from '../organizations/dto/create-organization.dto';
+import { SessionService } from '../session/session.service';
+import { CreateSessionDto } from '../session/dto/create-session.dto';
 
 @Injectable()
 export class CalendarsService {
@@ -23,13 +25,20 @@ export class CalendarsService {
     private calendarRepository: Repository<Calendar>,
     private paginationService: PaginationService,
     private organizationsService: OrganizationsService,
+    private sessionService : SessionService,
+
+    private readonly connection: Connection,
+
   ) {}
   async createCalendar(
     createCalendarDto: CreateCalendarDto,
     tenantId: string,
   ): Promise<Calendar> {
+    const queryRunner: QueryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
-      const status = true;
+      //const status = true;
       const calendar = await this.findActiveCalander(tenantId);
       if (calendar) {
         this.calendarRepository.update(calendar.id, { isActive: false });
@@ -39,16 +48,36 @@ export class CalendarsService {
         isActive: true,
         tenantId: tenantId,
       });
-      const savedCalendar = await this.calendarRepository.save(createCalendar);
+      const savedCalendar = await queryRunner.manager.save(
+        Calendar,
+        createCalendar,
+      );
+      for(const singleSession of createCalendarDto.sessions){
+        const session = new CreateSessionDto()
+        session.calendarId=savedCalendar.id
+        session.description=singleSession.description
+        session.endDate=singleSession.endDate
+        session.startDate=singleSession.startDate
+        session.name=singleSession.name
+        session.months=singleSession.months
+        const createMonth= this.sessionService.createSession(session,tenantId,queryRunner)
+      }
+   
       const organizationData = new CreateOrganizationDto();
       organizationData.calendarId = savedCalendar.id;
       await this.organizationsService.createOrganiztion(
         organizationData,
         tenantId,
+        queryRunner
       );
+      await queryRunner.commitTransaction();
       return savedCalendar;
     } catch (error) {
-      throw new BadRequestException(error);
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException(error.message);
+    }
+    finally {
+      await queryRunner.release();
     }
   }
 

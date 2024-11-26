@@ -7,9 +7,10 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
 import { Organization } from '../organizations/entities/organization.entity';
 import { CalendarSubscriber } from './subscribers/calendar.subscriber';
 import { OrganizationsService } from '../organizations/organizations.service';
+import { SessionModule } from '../session/session.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Calendar, Organization])],
+  imports: [TypeOrmModule.forFeature([Calendar, Organization]),SessionModule],
 
   controllers: [CalendarsController],
   providers: [CalendarsService, PaginationService, OrganizationsService],

@@ -8,6 +8,7 @@ import { PaginationModule } from '@root/src/core/pagination/pagination.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Month]),PaginationModule],
   controllers: [MonthController],
-  providers: [MonthService]
+  providers: [MonthService],
+  exports:[MonthService]
 })
 export class MonthModule {}

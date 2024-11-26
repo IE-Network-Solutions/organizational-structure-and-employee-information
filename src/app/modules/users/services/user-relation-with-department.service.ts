@@ -51,6 +51,7 @@ export class UserDepartmentService {
     tenantId: string,
   ): Promise<Department> {
     try {
+      console.log("departmentUsers")
       const departmentToDelete = dissolveDepartmentDto.departmentToDelete;
       delete dissolveDepartmentDto.departmentToDelete;
       const departments = await this.departmentService.updateDepartment(
@@ -69,6 +70,7 @@ export class UserDepartmentService {
             },
             relations: ['employeeJobInformation'],
           });
+         
           if (departmentUsers) {
             for (const user of departmentUsers) {
               for (const departmentUser of user.employeeJobInformation) {

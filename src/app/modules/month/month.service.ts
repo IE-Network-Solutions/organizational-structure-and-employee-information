@@ -3,7 +3,7 @@ import { CreateMonthDto } from './dto/create-month.dto';
 import { UpdateMonthDto } from './dto/update-month.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Month } from './entities/month.entity';
-import { Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
@@ -15,26 +15,29 @@ export class MonthService {
     private monthRepository: Repository<Month>,
     private readonly paginationService: PaginationService)
     {}
-  async createMonth(
-    createMonthDto: CreateMonthDto,
-    tenantId: string,
-  ): Promise<Month> {
-
-    try {
-      const month = await this.monthRepository.create({
-        ...createMonthDto,
-        tenantId,
-      });
-     return await this.monthRepository.save(
-      month
-      );
-     
-      
-    } catch (error) {
-     
-      throw new BadRequestException(error.message);
-    } 
-  }
+    async  createMonth(
+      createMonthDto: CreateMonthDto,
+      tenantId: string,
+      queryRunner?: QueryRunner,
+    ): Promise<Month> {
+      try {
+        const createdMonth = queryRunner
+        ? queryRunner.manager.create(Month, {
+            ...createMonthDto,
+            tenantId,
+          })
+        : this.monthRepository.create({
+            ...createMonthDto,
+            tenantId,
+          });
+      return queryRunner
+        ? await queryRunner.manager.save(Month, createdMonth)
+        : await this.monthRepository.save(createdMonth);
+      } catch (error) {
+        throw new BadRequestException(error.message);
+      }
+    }
+    
   async findAllMonths(
     tenantId: string,
     paginationOptions?: PaginationDto,

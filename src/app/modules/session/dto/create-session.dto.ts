@@ -1,4 +1,6 @@
-import { IsBoolean, isDateString, IsDateString, IsOptional, IsString, IsUUID } from "class-validator";
+import { Type } from "class-transformer";
+import { IsBoolean, isDateString, IsDateString, IsOptional, IsString, IsUUID, ValidateNested } from "class-validator";
+import { CreateMonthDto } from "../../month/dto/create-month.dto";
 
 export class CreateSessionDto {
     @IsString()
@@ -7,9 +9,9 @@ export class CreateSessionDto {
     @IsString()
     @IsOptional()
     description?: string;
-  
+    @IsOptional()
     @IsUUID()
-    calendarId: string;
+    calendarId?: string;
   
     @IsDateString()
     startDate: Date;
@@ -19,5 +21,9 @@ export class CreateSessionDto {
   
     @IsBoolean()
     active: boolean;
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => CreateMonthDto)
+    months?: CreateMonthDto[];
 
 }
