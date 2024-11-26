@@ -9,6 +9,7 @@ export class CreateSessionDto {
     @IsString()
     @IsOptional()
     description?: string;
+    
     @IsOptional()
     @IsUUID()
     calendarId?: string;
@@ -18,9 +19,11 @@ export class CreateSessionDto {
   
     @IsDateString()
     endDate: Date;
-  
+
+    @IsOptional()
     @IsBoolean()
     active: boolean;
+
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => CreateMonthDto)

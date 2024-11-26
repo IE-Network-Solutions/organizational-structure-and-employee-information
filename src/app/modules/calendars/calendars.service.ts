@@ -17,6 +17,8 @@ import { OrganizationsService } from '../organizations/organizations.service';
 import { CreateOrganizationDto } from '../organizations/dto/create-organization.dto';
 import { SessionService } from '../session/session.service';
 import { CreateSessionDto } from '../session/dto/create-session.dto';
+import { tenantId } from '../branchs/tests/branch.data';
+import { UpdateSessionDto } from '../session/dto/update-session.dto';
 
 @Injectable()
 export class CalendarsService {
@@ -125,6 +127,16 @@ export class CalendarsService {
         id,
         updateCalendarDto,
       );
+      if(updateCalendarDto.sessions.length>0){
+      for(const session of updateCalendarDto.sessions){
+        const eachSession= new UpdateSessionDto
+        eachSession.calendarId=session.calendarId
+        eachSession.name=session.name
+        eachSession.
+        
+await this.sessionService.updateSession(eachSession,tenantId)
+      }
+    }
       return await this.findOneCalendar(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
