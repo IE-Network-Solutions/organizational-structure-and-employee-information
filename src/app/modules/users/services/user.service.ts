@@ -284,7 +284,6 @@ export class UserService {
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
-
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
 
         .leftJoinAndSelect(
@@ -711,13 +710,15 @@ export class UserService {
     }
   }
 
-  async getOneUSer(id:string,tenantId:string){
-    try{
-      const user= await this.userRepository.findOne({where:{id:id,tenantId:tenantId},relations:['employeeInformation']})
-return  user;
-    }
-    catch(error){
-      throw new BadRequestException(error.message)
+  async getOneUSer(id: string, tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: id, tenantId: tenantId },
+        relations: ['employeeInformation'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 
