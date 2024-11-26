@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { mock, MockProxy } from 'jest-mock-extended';
 
 import { PaginationService } from '../../../core/pagination/pagination.service';
-import { paginationOptions } from '@root/dist/core/commonTestData/commonTest.data';
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 import { EmployeeJobInformation } from '../employee-job-information/entities/employee-job-information.entity';
 import {
@@ -12,6 +11,7 @@ import {
   employeeJobInformationDataSave,
   paginationResultEmployeeJobInformationData,
 } from '../employee-job-information/tests/employee-job-information.data';
+import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 
 describe('EmployeeJobInformationService', () => {
   let employeeJobInformationService: EmployeeJobInformationService;
