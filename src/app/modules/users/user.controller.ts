@@ -280,6 +280,6 @@ export class UserController {
 
   //   ) {
 
-  //     return this.userService.deleteAllFirebaseUSers();
+  //     return this.userService.deleteAllFirebaseUsers();
   //   }
 }

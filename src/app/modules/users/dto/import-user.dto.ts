@@ -53,7 +53,7 @@ export class ImportEmployeeDto {
   dateOfBirth: Date;
 
   @IsDateString()
-  joinedDate: string;
+  joinedDate: Date;
 
   @IsString()
   jobPositionId: string;
