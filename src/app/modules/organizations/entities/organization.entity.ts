@@ -2,6 +2,7 @@ import { BaseModel } from '@root/src/database/base.model';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { WorkSchedule } from '../../work-schedules/entities/work-schedule.entity';
 import { Calendar } from '../../calendars/entities/calendar.entity';
+import { OrganizationFile } from '../../organization-files/entities/organization-file.entity';
 
 @Entity()
 export class Organization extends BaseModel {
@@ -21,4 +22,7 @@ export class Organization extends BaseModel {
     onUpdate: 'CASCADE',
   })
   calendar: Calendar;
+
+  @ManyToOne(() => OrganizationFile, (file) => file.organizations, {})
+  organizationFile: OrganizationFile;
 }

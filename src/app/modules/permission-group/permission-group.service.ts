@@ -19,6 +19,7 @@ import { PermissionGroupRepository } from './permission-group-reposiory';
 import { PermissionGroupInterface } from './permission-group-interface';
 import * as permissionData from '../../../core/utils/permission.json';
 import { UpdateResult } from 'typeorm';
+// import { CreatePermissionDto } from '../permission/dto/create-permission.dto';
 
 @Injectable()
 export class PermissionGroupService implements PermissionGroupInterface {
@@ -161,4 +162,27 @@ export class PermissionGroupService implements PermissionGroupInterface {
       throw new BadRequestException(error.message);
     }
   }
+
+  //   async createPermissionRoleGroup(data:any){
+  //     const allGropupandpermissiion=data.map(async(singleData)=>{
+  //       const createPermissionGroup = new CreatePermissionGroupDto()
+  //       createPermissionGroup.name=singleData.group
+  //      // createPermissionGroup.permissions=singleData.permissions
+  //         const group= await this.create(createPermissionGroup)
+  //        const  createPermission= new CreatePermissionDto
+  //        singleData.permissions.map((perm)=>{
+  //         createPermission.name=perm.name
+  //         createPermission.slug=perm.slug
+  //         perm.roles.map(async(onerole)=>{
+  //       const role=    await this.roleService.findBySlug(onerole)
+
+  //       const permissions = await this.permissionService.create(createPermission)
+  //       const assignRoleToPermission= await this.RolePermissionService.create(role.id,permissions.id)
+  //         })
+
+  //        })
+
+  //     })
+
+  // }
 }

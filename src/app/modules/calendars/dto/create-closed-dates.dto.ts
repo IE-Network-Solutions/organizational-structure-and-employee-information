@@ -5,7 +5,9 @@ export class CreateClosedDatesDto {
   @IsString()
   name: string;
   @IsDateString()
-  date: Date;
+  startDate: Date;
+  @IsDateString()
+  endDate: Date;
   @IsString()
   type: string;
   @IsOptional()

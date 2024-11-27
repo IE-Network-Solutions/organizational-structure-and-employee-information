@@ -22,6 +22,7 @@ import { OffboardingEmployeeTaskModule } from './modules/offboarding-employee-ta
 import { OffboardingTasksTemplateModule } from './modules/offboarding-tasks-template/offboarding-tasks-template.module';
 import { JobPositionModule } from './modules/job-position/job-position.module';
 import { BranchRequestModule } from './modules/branch-request/branch-request.module';
+import { OrganizationFilesModule } from './modules/organization-files/organization-files.module';
 @Global()
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { BranchRequestModule } from './modules/branch-request/branch-request.mod
     EmployeeTerminationModule,
     JobPositionModule,
     BranchRequestModule,
+    OrganizationFilesModule,
   ],
 })
 export class CoreModule {}
