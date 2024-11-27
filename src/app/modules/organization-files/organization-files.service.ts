@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityNotFoundError, Repository } from 'typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '../../../core/pagination/pagination.service';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
@@ -66,7 +66,7 @@ export class OrganizationFilesService {
         { tenantId },
       );
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
+      if (error instanceof EntityNotFoundError || error.message === 'EntityNotFoundError') {
         throw new NotFoundException('OrganizationFile not found.');
       }
       throw error;
@@ -79,7 +79,7 @@ export class OrganizationFilesService {
         where: { id },
       });
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
+      if (error instanceof EntityNotFoundError || error.message === 'EntityNotFoundError') {
         throw new NotFoundException(`OrganizationFile Not Found.`);
       }
       throw error;
@@ -100,7 +100,7 @@ export class OrganizationFilesService {
         where: { id: id },
       });
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
+      if (error instanceof EntityNotFoundError || error.message === 'EntityNotFoundError') {
         throw new NotFoundException(`OrganizationFile Not Found.`);
       }
       throw error;
@@ -114,7 +114,7 @@ export class OrganizationFilesService {
       });
       return await this.employeeDocumentRepository.softDelete({ id });
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
+      if (error instanceof EntityNotFoundError || error.message === 'EntityNotFoundError') {
         throw new NotFoundException(`OrganizationFile Not Found.`);
       }
       throw error;

@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrganizationFilesController } from './organization-files.controller';
 import { OrganizationFilesService } from './organization-files.service';
 
+jest.mock('./organization-files.service');
+
 describe('OrganizationFilesController', () => {
   let controller: OrganizationFilesController;
 
