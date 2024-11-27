@@ -89,6 +89,22 @@ export class MonthService {
   throw new BadRequestException(error.message)
   }
   }
+
+  async updateBulkMonth(
+    updateMonthDto: UpdateMonthDto[],
+    tenantId: string,
+  ): Promise<Month[]> {
+    try{
+ const months= await Promise.all(updateMonthDto.map(async(item)=>
+  await this.updateMonth(item.id,item,tenantId)
+))
+  return months
+
+}catch(error){
+  throw new BadRequestException(error.message)
+  }
+    
+  }
   async removeMonth(id: string): Promise<Month> {
     try{
     const month = await this.findOneMonth(id);

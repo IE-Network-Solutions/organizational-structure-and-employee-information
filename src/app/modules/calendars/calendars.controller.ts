@@ -55,10 +55,12 @@ export class CalendarsController {
 
   @Patch(':id')
   async updateCalendar(
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() updateCalendarDto: UpdateCalendarDto,
   ): Promise<Calendar> {
-    return await this.calendarsService.updateCalendar(id, updateCalendarDto);
+    const tenantId = req['tenantId'];
+    return await this.calendarsService.updateCalendar(id, updateCalendarDto,tenantId);
   }
 
   @Delete(':id')

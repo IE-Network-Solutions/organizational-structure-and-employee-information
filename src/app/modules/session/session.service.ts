@@ -90,7 +90,20 @@ export class SessionService {
       throw new NotFoundException(`Session Not Found`);
     }
   }
+  async updateBulkSession(
+    updateSessionDto: UpdateSessionDto[],
+    tenantId: string,
+  ): Promise<Session[]> {
+    try{
+  const session=  await Promise.all(updateSessionDto.map(async(item)=>
+      await this.updateSession(item.id,item,tenantId)
+    ))
 
+    return  session
+  }catch(error){
+  throw new BadRequestException(error.message)
+  }
+  }
   async updateSession(
     id: string,
     updateSessionDto: UpdateSessionDto,
@@ -101,7 +114,12 @@ export class SessionService {
     if (!Session) {
       throw new NotFoundException(`Session Not Found`);
     }
+
     await this.sessionRepository.update({ id }, updateSessionDto);
+    if(updateSessionDto.months.length>0){
+      await this.monthService.updateBulkMonth(updateSessionDto.months,tenantId)
+    }
+  
     return await this.findOneSession(id);
   }catch(error){
   throw new BadRequestException(error.message)

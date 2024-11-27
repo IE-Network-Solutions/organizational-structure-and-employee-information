@@ -116,6 +116,7 @@ export class CalendarsService {
   async updateCalendar(
     id: string,
     updateCalendarDto: UpdateCalendarDto,
+    tenantId:string
   ): Promise<Calendar> {
     try {
       const Calendar = await this.findOneCalendar(id);
@@ -127,16 +128,10 @@ export class CalendarsService {
         id,
         updateCalendarDto,
       );
-      if(updateCalendarDto.sessions.length>0){
-      for(const session of updateCalendarDto.sessions){
-        const eachSession= new UpdateSessionDto
-        eachSession.calendarId=session.calendarId
-        eachSession.name=session.name
-        eachSession.
-        
-await this.sessionService.updateSession(eachSession,tenantId)
-      }
-    }
+       if(updateCalendarDto.sessions.length>0){
+await this.sessionService.updateBulkSession(updateCalendarDto.sessions,tenantId)
+       }
+  
       return await this.findOneCalendar(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
