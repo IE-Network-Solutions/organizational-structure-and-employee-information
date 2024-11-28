@@ -21,6 +21,7 @@ export class MonthService {
       queryRunner?: QueryRunner,
     ): Promise<Month> {
       try {
+        console.log(createMonthDto,"createMonthDto")
         const createdMonth = queryRunner
         ? queryRunner.manager.create(Month, {
             ...createMonthDto,
@@ -34,6 +35,7 @@ export class MonthService {
         ? await queryRunner.manager.save(Month, createdMonth)
         : await this.monthRepository.save(createdMonth);
       } catch (error) {
+        console.log(error.message,"kkkk")
         throw new BadRequestException(error.message);
       }
     }
@@ -113,6 +115,17 @@ export class MonthService {
     }
     await this.monthRepository.softRemove({ id });
     return month;
+  }
+  catch(error){
+    throw new BadRequestException(error.message)
+  }
+  }
+
+  async geActiveMonth(tenantId: string): Promise<Month> {
+    try{
+  
+  return await this.monthRepository.findOneOrFail({where:{ tenantId:tenantId,active:true}});
+    ;
   }
   catch(error){
     throw new BadRequestException(error.message)

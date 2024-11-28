@@ -8,7 +8,7 @@ import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Organization } from './entities/organization.entity';
-import { QueryRunner, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
@@ -24,32 +24,26 @@ export class OrganizationsService {
   async createOrganiztion(
     createOrganizationDto: CreateOrganizationDto,
     tenantId: string,
-    queryRunner?: QueryRunner,
   ): Promise<Organization> {
     try {
       const organizationExists = await this.organizationRepository.findOne({
         where: { tenantId: tenantId },
       });
       if (!organizationExists) {
-        const createOrganization = queryRunner
-        ? queryRunner.manager.create(Organization, {
-            ...createOrganizationDto,
-            tenantId,
-          })
-        : this.organizationRepository.create({
-            ...createOrganizationDto,
-            tenantId,
-          });
-        return queryRunner
-        ? await queryRunner.manager.save(Organization, createOrganizationDto)
-        : await this.organizationRepository.save(createOrganizationDto);
-  
+        const createOrganization = this.organizationRepository.create({
+          ...createOrganizationDto,
+          tenantId: tenantId,
+        });
+        return await this.organizationRepository.save(createOrganization);
       }
-      return await this.updateOrganization(
+     const g= await this.updateOrganization(
         tenantId,
         organizationExists.id,
         createOrganizationDto,
       );
+      console.log(g,"gggggbn")
+
+      return g
     } catch (error) {
       throw new BadRequestException(error);
     }

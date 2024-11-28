@@ -40,11 +40,8 @@ export class CalendarsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      //const status = true;
       const calendar = await this.findActiveCalander(tenantId);
-      if (calendar) {
-        this.calendarRepository.update(calendar.id, { isActive: false });
-      }
+   
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
         isActive: true,
@@ -54,26 +51,35 @@ export class CalendarsService {
         Calendar,
         createCalendar,
       );
-      for(const singleSession of createCalendarDto.sessions){
-        const session = new CreateSessionDto()
-        session.calendarId=savedCalendar.id
-        session.description=singleSession.description
-        session.endDate=singleSession.endDate
-        session.startDate=singleSession.startDate
-        session.name=singleSession.name
-        session.months=singleSession.months
-        const createMonth= this.sessionService.createSession(session,tenantId,queryRunner)
+      await Promise.all(
+        createCalendarDto.sessions.map(async (singleSession) => {
+          const session = new CreateSessionDto()
+          session.calendarId=savedCalendar.id
+          session.description=singleSession.description
+          session.endDate=singleSession.endDate
+          session.startDate=singleSession.startDate
+          session.name=singleSession.name
+          session.months=singleSession.months
+          const createMonth=  await this.sessionService.createSession(session,tenantId,queryRunner)
+        }),
+      );
+  
+      await queryRunner.commitTransaction();
+
+      if (calendar) {
+       await this.calendarRepository.update(calendar.id, { isActive: false });
       }
-   
+      if(savedCalendar){
+
       const organizationData = new CreateOrganizationDto();
       organizationData.calendarId = savedCalendar.id;
       await this.organizationsService.createOrganiztion(
         organizationData,
         tenantId,
-        queryRunner
       );
-      await queryRunner.commitTransaction();
-      return savedCalendar;
+      return await this.findOneCalendar(savedCalendar.id);
+    }
+        
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw new BadRequestException(error.message);
@@ -91,23 +97,26 @@ export class CalendarsService {
       page: paginationOptions.page,
       limit: paginationOptions.limit,
     };
+    let queryBuilder = await this.calendarRepository
+    .createQueryBuilder('Calendar')
+    .leftJoinAndSelect(
+      'Calendar.sessions',
+      'sessions')
+      .leftJoinAndSelect(
+        'sessions.months',
+        'months')
+        .andWhere('Calendar.tenantId = :tenantId', { tenantId });
 
     const paginatedData = await this.paginationService.paginate<Calendar>(
-      this.calendarRepository,
-      'p',
-      options,
-      paginationOptions.orderBy,
-      paginationOptions.orderDirection,
-      { tenantId },
+      queryBuilder,
+      options
     );
-
     return paginatedData;
   }
 
   async findOneCalendar(id: string): Promise<Calendar> {
     try {
-      const calendar = await this.calendarRepository.findOneByOrFail({ id });
-      return calendar;
+     return await this.calendarRepository.findOneOrFail({where:{id},relations:['sessions','sessions.months'] });
     } catch (error) {
       throw new NotFoundException(`Calendar with Id ${id} not found`);
     }
@@ -151,22 +160,21 @@ await this.sessionService.updateBulkSession(updateCalendarDto.sessions,tenantId)
   }
   async findActiveCalander(tenantId: string): Promise<Calendar> {
     try {
-      const calendar = await this.calendarRepository.findOne({
+     
+     return await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
       });
-      return calendar;
+  
     } catch (error) {
       throw new NotFoundException(`There Is No Active Calendar.`);
     }
   }
   async findActiveCalendarForAllTenants(): Promise<Calendar[]> {
     try {
-
       const calendar = await this.calendarRepository.find({
         where: { isActive: true},
         relations:['sessions','sessions.months']
       });
-      console.log()
       return calendar;
     } catch (error) {
       throw new NotFoundException(`There Is No Active Calendar.`);

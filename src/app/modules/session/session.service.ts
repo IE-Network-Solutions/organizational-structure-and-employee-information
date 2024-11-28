@@ -39,17 +39,25 @@ export class SessionService {
       const savedSession=  queryRunner
       ? await queryRunner.manager.save(Session, createdSession)
       : await this.sessionRepository.save(createdSession);
+console.log(createSessionDto.months,"createSessionDto.months")
+await Promise.all(
+  createSessionDto.months.map(async (month) => {
+    const eachMonth = new CreateMonthDto();
+    eachMonth.description = month.description;
+    eachMonth.endDate = month.endDate;
+    eachMonth.startDate = month.startDate;
+    eachMonth.sessionId = savedSession.id;
+    eachMonth.name = month.name;
 
-      for(const month of createSessionDto.months){
-        const eachMonth = new CreateMonthDto()
-        eachMonth.description=month.description
-        eachMonth.endDate= month.endDate
-        eachMonth.startDate=month.startDate
-        eachMonth.sessionId=savedSession.id
-        eachMonth.name=month.name
-        const savedMonth= await this.monthService.createMonth(eachMonth,tenantId,queryRunner)
-      }
-     
+    const savedMonth = await this.monthService.createMonth(
+      eachMonth,
+      tenantId,
+      queryRunner,
+    );
+   // return savedMonth; // Optional: if you need the result of each creation.
+  }),
+);
+
      return savedSession
     } catch (error) {
      
@@ -128,11 +136,22 @@ export class SessionService {
   async removeSession(id: string): Promise<Session> {
     try{
     const session = await this.findOneSession(id);
-    if (!Session) {
+    if (!session) {
       throw new NotFoundException(`Session Not Found`);
     }
     await this.sessionRepository.softRemove({ id });
     return session;
+  }
+  catch(error){
+    throw new BadRequestException(error.message)
+  }
+  }
+
+  async getActiveSession(tenantId: string): Promise<Session> {
+    try{
+  
+  return await this.sessionRepository.findOneOrFail({where:{ tenantId:tenantId,active:true}});
+    ;
   }
   catch(error){
     throw new BadRequestException(error.message)

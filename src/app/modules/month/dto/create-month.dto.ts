@@ -16,11 +16,11 @@ export class CreateMonthDto {
     @IsDateString()
     startDate: Date;
   
-    @IsDate()
+    @IsDateString()
     endDate: Date;
   
     @IsBoolean()
     @IsOptional()
     active?: boolean
-    
+
 }

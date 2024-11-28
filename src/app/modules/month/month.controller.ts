@@ -57,4 +57,9 @@ export class MonthController {
   removeMonth(@Headers('tenantId') tenantId: string, @Param('id') id: string) {
     return this.monthService.removeMonth(id);
   }
+
+  @Get('/active/month')
+  geActiveMonth(@Headers('tenantId') tenantId: string) {
+    return this.monthService.geActiveMonth(tenantId);
+  }
 }

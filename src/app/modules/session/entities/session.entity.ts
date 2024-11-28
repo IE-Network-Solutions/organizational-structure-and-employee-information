@@ -23,7 +23,7 @@ export class Session extends BaseModel {
     @Column({ type: 'timestamp' })
     endDate: Date;
   
-    @Column({ type: 'boolean', default: true })
+    @Column({ type: 'boolean', default: false })
     active: boolean;
   
     @Column({ type: 'uuid' })

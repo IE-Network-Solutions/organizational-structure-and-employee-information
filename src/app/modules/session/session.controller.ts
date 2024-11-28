@@ -58,4 +58,8 @@ export class SessionController {
   removeSession(@Headers('tenantId') tenantId: string, @Param('id') id: string) {
     return this.sessionService.removeSession(id);
   }
+  @Get('/active/session')
+  geActiveMonth(@Headers('tenantId') tenantId: string) {
+    return this.sessionService.getActiveSession(tenantId);
+  }
 }
