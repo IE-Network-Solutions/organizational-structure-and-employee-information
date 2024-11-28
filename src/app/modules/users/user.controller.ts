@@ -257,6 +257,18 @@ export class UserController {
     );
   }
 
+  @Post('/department/merge')
+ mergeDepartment(
+    @Req() request: Request,
+    @Body() dissolveDepartmentDto: DissolveDepartmentDto,
+  ): Promise<Department> {
+    const tenantId = request['tenantId'];
+    return this.userDepartmentService.mergeDepartment(
+      dissolveDepartmentDto,
+      tenantId,
+    );
+  }
+
   @Post('/import/users')
   @ExcludeAuthGuard()
   importUser(

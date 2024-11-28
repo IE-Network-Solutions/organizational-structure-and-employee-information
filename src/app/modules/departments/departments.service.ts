@@ -231,6 +231,44 @@ export class DepartmentsService {
     }
   }
 
+
+  async updateDepartmentToMerge(
+    id: string,
+    updateDepartmentDto: UpdateDepartmentDto,
+    tenantId: string,
+    level?: number,
+  ): Promise<Department> {
+    try {
+      const department = await this.findOneDepartment(id);
+      department.name = updateDepartmentDto.name;
+      department.branchId = updateDepartmentDto.branchId;
+      department.description = updateDepartmentDto.description;
+      department.level =level
+      await this.departmentRepository.save(department);
+
+      if (
+        updateDepartmentDto.department &&
+        updateDepartmentDto.department.length > 0
+      ) {
+        for (const dep of updateDepartmentDto.department) {
+          await this.updateDepartmentToMerge(
+            dep.id,
+            dep,
+            tenantId,
+            department.level + 1,
+          );
+        }
+      }
+      return await this.findOneDepartment(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error);
+      } else {
+        throw new BadRequestException(error);
+      }
+    }
+  }
+
   // async saveDepartmentTrees(createDepartmentDto: CreateDepartmentDto[]): Promise<void> {
   //   for (const dep of createDepartmentDto) {
   //     await this.createDepartment(dep);

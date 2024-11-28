@@ -91,4 +91,54 @@ export class UserDepartmentService {
       throw new BadRequestException(error.message);
     }
   }
+
+
+
+  async mergeDepartment(
+    dissolveDepartmentDto: DissolveDepartmentDto,
+    tenantId: string,
+  ): Promise<Department> {
+    try {
+      const departmentToDelete = dissolveDepartmentDto.departmentToDelete;
+      delete dissolveDepartmentDto.departmentToDelete;
+      const departments = await this.departmentService.updateDepartmentToMerge(
+        dissolveDepartmentDto.id,
+        dissolveDepartmentDto,
+        tenantId,
+      );
+      if (departments) {
+        for (const department of departmentToDelete) {
+          const departmentUsers = await this.userRepository.find({
+            where: {
+              employeeJobInformation: {
+                departmentId: department,
+                tenantId: tenantId,
+              },
+            },
+            relations: ['employeeJobInformation'],
+          });
+          if (departmentUsers) {
+            for (const user of departmentUsers) {
+              for (const departmentUser of user.employeeJobInformation) {
+                const updatedData = new UpdateEmployeeJobInformationDto();
+                updatedData.departmentId = dissolveDepartmentDto.id;
+                await this.employeeJobInformationService.update(
+                  departmentUser.id,
+                  updatedData,
+                );
+              }
+            }
+          }
+          await this.departmentService.removeDepartment(department)
+
+        }
+      }
+      return departments;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
 }
