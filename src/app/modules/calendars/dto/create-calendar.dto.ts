@@ -31,6 +31,4 @@ export class CreateCalendarDto {
   @ValidateNested({ each: true })
   @Type(() => CreateSessionDto)
   sessions?: CreateSessionDto[];
-
-
 }

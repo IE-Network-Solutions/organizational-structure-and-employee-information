@@ -6,9 +6,9 @@ import { Month } from './entities/month.entity';
 import { PaginationModule } from '@root/src/core/pagination/pagination.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Month]),PaginationModule],
+  imports: [TypeOrmModule.forFeature([Month]), PaginationModule],
   controllers: [MonthController],
   providers: [MonthService],
-  exports:[MonthService]
+  exports: [MonthService],
 })
 export class MonthModule {}

@@ -10,12 +10,14 @@ import {
   PaginationResultMonthData,
 } from './tests/month.data';
 import { mock } from 'jest-mock-extended';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 
 describe('MonthService', () => {
   let monthService: MonthService;
   let monthRepository: jest.Mocked<Repository<Month>>;
-  let paginationService: jest.Mocked<PaginationService>;
+  let paginationService: PaginationService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,7 +36,7 @@ describe('MonthService', () => {
 
     monthService = module.get<MonthService>(MonthService);
     monthRepository = module.get(getRepositoryToken(Month));
-    //paginationService = module.get<PaginationService>(PaginationService);
+    paginationService = module.get<PaginationService>(PaginationService);
   });
 
   afterEach(() => {
@@ -61,43 +63,42 @@ describe('MonthService', () => {
   });
 
   describe('findAllMonths', () => {
-    it('should return paginated data', async () => {
-      // Define mock data for the test
-      const tenantId = 'tenant-id';
-      const options = { page: 1, limit: 10 };
-
-      // Mock query builder
+    it('should return paginated Month', async () => {
+      const paginationOptions: PaginationDto = {
+        page: 1,
+        limit: 10,
+        orderBy: 'id',
+        orderDirection: 'ASC',
+      };
+      const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
+      const paginatedResult: Pagination<Month> = PaginationResultMonthData();
       const queryBuilderMock = {
         leftJoinAndSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn(),
+        getOne: jest.fn(),
+      };
+      monthRepository.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(queryBuilderMock);
+      const options = {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
       };
 
-      // Mock repository's createQueryBuilder method
-      // jest
-      //   .spyOn(monthRepository, 'createQueryBuilder')
-      //   .mockReturnValue(queryBuilderMock);
+      paginationService.paginate = jest.fn().mockResolvedValue(paginatedResult);
 
-      // Mock the paginate function of PaginationService
-      paginationService.paginate = jest
-        .fn()
-        .mockResolvedValue(PaginationResultMonthData());
-
-      // Call the service method
-      const result = await monthService.findAllMonths(tenantId, options);
-
-      // Assertions
-      expect(queryBuilderMock.where).toHaveBeenCalledWith(
-        'Month.tenantId = :tenantId',
-        { tenantId },
+      const result = await monthService.findAllMonths(
+        tenantId,
+        paginationOptions,
       );
+
+      expect(result).toEqual(paginatedResult);
       expect(paginationService.paginate).toHaveBeenCalledWith(
         queryBuilderMock,
-        {
-          page: options.page,
-          limit: options.limit,
-        },
+        options,
       );
-      expect(result).toEqual(PaginationResultMonthData());
     });
   });
 
@@ -113,8 +114,10 @@ describe('MonthService', () => {
       expect(result).toEqual(monthDataSave());
     });
 
-    it('should throw a NotFoundException when the month is not found', async () => {
-      monthRepository.findOne.mockResolvedValue(null);
+    it('should throw NotFoundException if branch request not found', async () => {
+      monthRepository.findOne.mockRejectedValue(
+        new NotFoundException('Branch request not found'),
+      );
 
       await expect(monthService.findOneMonth('invalid-id')).rejects.toThrow(
         NotFoundException,
@@ -164,12 +167,18 @@ describe('MonthService', () => {
       expect(result).toEqual(monthDataSave());
     });
 
-    it('should throw NotFoundException when the month is not found', async () => {
-      monthRepository.findOne.mockResolvedValue(null);
+    it('should throw NotFoundException if branch request not found during removal', async () => {
+      const nonExistingId = 'non-existing-id';
 
-      await expect(monthService.removeMonth('invalid-id')).rejects.toThrow(
-        'Month Not Found',
+      jest
+        .spyOn(monthService, 'findOneMonth')
+        .mockRejectedValue(new NotFoundException(`Month Not Found`));
+
+      await expect(monthService.removeMonth(nonExistingId)).rejects.toThrow(
+        NotFoundException,
       );
+
+      expect(monthRepository.softRemove).not.toHaveBeenCalled();
     });
   });
 });

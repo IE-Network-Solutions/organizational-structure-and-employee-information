@@ -2,6 +2,7 @@ import { Session } from '../entities/session.entity';
 import { Calendar } from '../../calendars/entities/calendar.entity';
 import { Month } from '../../month/entities/month.entity';
 import { Pagination } from 'nestjs-typeorm-paginate';
+import { CreateSessionDto } from '../dto/create-session.dto';
 
 export const calendarMock = (): Calendar => {
   return {
@@ -52,14 +53,15 @@ export const sessionMock = (): Session => {
   } as Session;
 };
 
-export const createSessionData = () => {
+export const createSessionData = (): CreateSessionDto => {
   return {
     name: 'Winter Session 2024',
     description: 'Winter academic session.',
     calendarId: 'd6f8f53b-d97d-4f85-9a62-4a8a8ddc3f45',
     startDate: new Date('2024-01-01T00:00:00Z'),
     endDate: new Date('2024-03-31T23:59:59Z'),
-    tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
+    months: null,
+    active: false,
   };
 };
 

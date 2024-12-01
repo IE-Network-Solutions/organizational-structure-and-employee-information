@@ -7,9 +7,9 @@ import { PaginationModule } from '@root/src/core/pagination/pagination.module';
 import { MonthModule } from '../month/month.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Session]),PaginationModule,MonthModule],
+  imports: [TypeOrmModule.forFeature([Session]), PaginationModule, MonthModule],
   controllers: [SessionController],
   providers: [SessionService],
-  exports:[SessionService]
+  exports: [SessionService],
 })
 export class SessionModule {}

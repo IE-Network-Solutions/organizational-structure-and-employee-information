@@ -48,7 +48,10 @@ import { MonthModule } from './modules/month/month.module';
     OffboardingEmployeeTaskModule,
     OffboardingTasksTemplateModule,
     EmployeeTerminationModule,
-    JobPositionModule,CronJobLogModule,SessionModule,MonthModule
+    JobPositionModule,
+    CronJobLogModule,
+    SessionModule,
+    MonthModule,
   ],
 })
 export class CoreModule {}

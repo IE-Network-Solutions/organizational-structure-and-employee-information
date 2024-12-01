@@ -3,7 +3,7 @@ import { CreateSessionDto } from './create-session.dto';
 import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateSessionDto extends PartialType(CreateSessionDto) {
-    @IsOptional()
-    @IsString()
-    id?:string
+  @IsOptional()
+  @IsString()
+  id?: string;
 }

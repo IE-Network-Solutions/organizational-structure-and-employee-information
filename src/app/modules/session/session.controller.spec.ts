@@ -1,149 +1,134 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionController } from './session.controller';
 import { SessionService } from './session.service';
-import { CreateSessionDto } from './dto/create-session.dto';
-import { UpdateSessionDto } from './dto/update-session.dto';
-import { Session } from './entities/session.entity';
-import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { sessionMock } from './tests/test.data';
+import { Session } from 'inspector';
+import {
+  createSessionData,
+  paginationResultSessionData,
+  sessionMock,
+} from './tests/test.data';
 
-jest.mock('./session.service');
+jest.mock('./session.service.ts');
 
 describe('SessionController', () => {
-  let sessionController: SessionController;
-  let sessionService: SessionService;
-
-  // Mock data
-  // const mockSessionData: Session = {monthMock()};
-
-  const mockPaginationOptions: PaginationDto = {
-    page: 1,
-    limit: 10,
-  };
+  let controller: SessionController;
+  let service: SessionService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SessionController],
-      providers: [
-        {
-          provide: SessionService,
-          useValue: {
-            createSession: jest.fn().mockResolvedValue(sessionMock),
-            findAllSessions: jest.fn().mockResolvedValue([sessionMock]),
-            findOneSession: jest.fn().mockResolvedValue(sessionMock),
-            updateSession: jest.fn().mockResolvedValue(sessionMock),
-            removeSession: jest.fn().mockResolvedValue(sessionMock),
-          },
-        },
-      ],
+      providers: [SessionService],
     }).compile();
 
-    sessionController = module.get<SessionController>(SessionController);
-    sessionService = module.get<SessionService>(SessionService);
-
+    controller = module.get<SessionController>(SessionController);
+    service = module.get<SessionService>(SessionService);
     jest.clearAllMocks();
   });
 
-  describe('create', () => {
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
+  describe('createSession', () => {
     describe('when createSession is called', () => {
       let session: Session;
+      const createSessionDto = createSessionData();
+      const tenantId = 'tenant-1';
 
       beforeEach(async () => {
-        const createSessionDto: CreateSessionDto = {createSessionData()};
-        session = await sessionController.createSession(createSessionDto, 'tenant-id');
+        jest.spyOn(service, 'createSession').mockResolvedValue(sessionMock());
+        await controller.createSession(createSessionDto, tenantId);
       });
 
-      test('then it should call sessionService.createSession', () => {
-        expect(sessionService.createSession).toHaveBeenCalledWith(
-          expect.any(CreateSessionDto),
-          'tenant-id',
+      test('then it should return the created Session', async () => {
+        expect(
+          await controller.createSession(createSessionDto, tenantId),
+        ).toEqual(sessionMock());
+      });
+
+      test('then it should call SessionService.createSession with correct parameters', () => {
+        expect(service.createSession).toHaveBeenCalledWith(
+          createSessionDto,
+          tenantId,
         );
       });
-
-      test('then it should return a session', () => {
-        expect(session).toEqual(sessionMock);
-      });
     });
   });
 
-  describe('findOne', () => {
-    describe('when findOneSession is called', () => {
-      let session: Session;
+  describe('findAllSessions', () => {
+    it('should call SessionService.findAllSessions with correct parameters and return paginated data', async () => {
+      const paginationOptions = { page: 1, limit: 10 };
+      const tenantId = 'some-tenant-id';
 
-      beforeEach(async () => {
-        session = await sessionController.findOneSession('1');
-      });
+      jest
+        .spyOn(service, 'findAllSessions')
+        .mockResolvedValue(paginationResultSessionData());
 
-      test('then it should call sessionService.findOneSession', () => {
-        expect(sessionService.findOneSession).toHaveBeenCalledWith('1');
-      });
+      const result = await controller.findAllSessions(
+        tenantId,
+        paginationOptions,
+      );
 
-      test('then it should return the session', () => {
-        expect(session).toEqual(sessionMock);
-      });
+      expect(result).toEqual(paginationResultSessionData());
+      expect(service.findAllSessions).toHaveBeenCalledWith(
+        tenantId,
+        paginationOptions,
+      );
     });
   });
 
-  describe('findAll', () => {
-    describe('when findAllSessions is called', () => {
-      beforeEach(async () => {
-        await sessionController.findAllSessions('tenant-id', mockPaginationOptions);
-      });
+  describe('findOneSession', () => {
+    it('should call SessionService.findOneSession with correct id and return a single entity', async () => {
+      const id = '1234567890';
 
-      test('then it should call sessionService.findAllSessions', () => {
-        expect(sessionService.findAllSessions).toHaveBeenCalledWith(
-          'tenant-id',
-          mockPaginationOptions,
-        );
-      });
+      jest.spyOn(service, 'findOneSession').mockResolvedValue(sessionMock());
 
-      test('then it should return all sessions', async () => {
-        expect(await sessionController.findAllSessions('tenant-id', mockPaginationOptions)).toEqual([sessionMock]);
-      });
+      const result = await controller.findOneSession(id);
+
+      expect(result).toEqual(sessionMock());
+      expect(service.findOneSession).toHaveBeenCalledWith(id);
     });
   });
 
-  describe('update', () => {
+  describe('updateSession', () => {
     describe('when updateSession is called', () => {
       let session: Session;
+      const updateSessionDto = sessionMock();
+      const id = '1234567890';
+      const tenantId = 'tenant-1';
 
       beforeEach(async () => {
-        const updateSessionDto: UpdateSessionDto = {
-          name: '2024 Fall Semester',
-          description: 'Fall Semester for 2024',
-          startDate: new Date('2024-09-01T00:00:00Z'),
-          endDate: new Date('2024-12-31T23:59:59Z'),
-        };
-        session = await sessionController.updateSession('tenant-id', '1', updateSessionDto);
+        jest.spyOn(service, 'updateSession').mockResolvedValue(sessionMock());
+        await controller.updateSession(tenantId, id, updateSessionDto);
       });
 
-      test('then it should call sessionService.updateSession', () => {
-        expect(sessionService.updateSession).toHaveBeenCalledWith(
-          '1',
-          expect.any(UpdateSessionDto),
-          'tenant-id',
+      test('then it should return the updated Session', async () => {
+        expect(
+          await controller.updateSession(tenantId, id, updateSessionDto),
+        ).toEqual(sessionMock());
+      });
+
+      test('then it should call SessionService.updateSession with correct parameters', () => {
+        expect(service.updateSession).toHaveBeenCalledWith(
+          id,
+          updateSessionDto,
+          tenantId,
         );
-      });
-
-      test('then it should return the updated session', () => {
-        expect(session).toEqual(sessionMock);
       });
     });
   });
 
-  describe('remove', () => {
-    describe('when removeSession is called', () => {
-      beforeEach(async () => {
-        await sessionController.removeSession('tenant-id', '1');
-      });
+  describe('removeSession', () => {
+    it('should call SessionService.removeSession with correct id and return a confirmation message', async () => {
+      const id = '1234567890';
+      const tenantId = 'tenant-1';
 
-      test('then it should call sessionService.removeSession', () => {
-        expect(sessionService.removeSession).toHaveBeenCalledWith('1');
-      });
+      jest.spyOn(service, 'removeSession').mockResolvedValue(undefined);
 
-      test('then it should return a session', async () => {
-        expect(await sessionController.removeSession('tenant-id', '1')).toEqual(sessionMock);
-      });
+      const result = await controller.removeSession(tenantId, id);
+
+      expect(result).toBeUndefined();
+      expect(service.removeSession).toHaveBeenCalledWith(id);
     });
   });
 });

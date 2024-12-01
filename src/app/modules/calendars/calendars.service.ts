@@ -27,10 +27,9 @@ export class CalendarsService {
     private calendarRepository: Repository<Calendar>,
     private paginationService: PaginationService,
     private organizationsService: OrganizationsService,
-    private sessionService : SessionService,
+    private sessionService: SessionService,
 
     private readonly connection: Connection,
-
   ) {}
   async createCalendar(
     createCalendarDto: CreateCalendarDto,
@@ -41,7 +40,7 @@ export class CalendarsService {
     await queryRunner.startTransaction();
     try {
       const calendar = await this.findActiveCalander(tenantId);
-   
+
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
         isActive: true,
@@ -51,40 +50,43 @@ export class CalendarsService {
         Calendar,
         createCalendar,
       );
-      await Promise.all(
-        createCalendarDto.sessions.map(async (singleSession) => {
-          const session = new CreateSessionDto()
-          session.calendarId=savedCalendar.id
-          session.description=singleSession.description
-          session.endDate=singleSession.endDate
-          session.startDate=singleSession.startDate
-          session.name=singleSession.name
-          session.months=singleSession.months
-          const createMonth=  await this.sessionService.createSession(session,tenantId,queryRunner)
-        }),
-      );
-  
+      if (createCalendarDto.sessions.length > 0) {
+        await Promise.all(
+          createCalendarDto.sessions.map(async (singleSession) => {
+            const session = new CreateSessionDto();
+            session.calendarId = savedCalendar.id;
+            session.description = singleSession.description;
+            session.endDate = singleSession.endDate;
+            session.startDate = singleSession.startDate;
+            session.name = singleSession.name;
+            session.months = singleSession.months;
+            const createMonth = await this.sessionService.createSession(
+              session,
+              tenantId,
+              queryRunner,
+            );
+          }),
+        );
+      }
+
       await queryRunner.commitTransaction();
 
       if (calendar) {
-       await this.calendarRepository.update(calendar.id, { isActive: false });
+        await this.calendarRepository.update(calendar.id, { isActive: false });
       }
-      if(savedCalendar){
-
-      const organizationData = new CreateOrganizationDto();
-      organizationData.calendarId = savedCalendar.id;
-      await this.organizationsService.createOrganiztion(
-        organizationData,
-        tenantId,
-      );
-      return await this.findOneCalendar(savedCalendar.id);
-    }
-        
+      if (savedCalendar) {
+        const organizationData = new CreateOrganizationDto();
+        organizationData.calendarId = savedCalendar.id;
+        await this.organizationsService.createOrganiztion(
+          organizationData,
+          tenantId,
+        );
+        return await this.findOneCalendar(savedCalendar.id);
+      }
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw new BadRequestException(error.message);
-    }
-    finally {
+    } finally {
       await queryRunner.release();
     }
   }
@@ -97,26 +99,25 @@ export class CalendarsService {
       page: paginationOptions.page,
       limit: paginationOptions.limit,
     };
-    let queryBuilder = await this.calendarRepository
-    .createQueryBuilder('Calendar')
-    .leftJoinAndSelect(
-      'Calendar.sessions',
-      'sessions')
-      .leftJoinAndSelect(
-        'sessions.months',
-        'months')
-        .andWhere('Calendar.tenantId = :tenantId', { tenantId });
+    const queryBuilder = await this.calendarRepository
+      .createQueryBuilder('Calendar')
+      .leftJoinAndSelect('Calendar.sessions', 'sessions')
+      .leftJoinAndSelect('sessions.months', 'months')
+      .andWhere('Calendar.tenantId = :tenantId', { tenantId });
 
     const paginatedData = await this.paginationService.paginate<Calendar>(
       queryBuilder,
-      options
+      options,
     );
     return paginatedData;
   }
 
   async findOneCalendar(id: string): Promise<Calendar> {
     try {
-     return await this.calendarRepository.findOneOrFail({where:{id},relations:['sessions','sessions.months'] });
+      return await this.calendarRepository.findOneOrFail({
+        where: { id },
+        relations: ['sessions', 'sessions.months'],
+      });
     } catch (error) {
       throw new NotFoundException(`Calendar with Id ${id} not found`);
     }
@@ -125,7 +126,7 @@ export class CalendarsService {
   async updateCalendar(
     id: string,
     updateCalendarDto: UpdateCalendarDto,
-    tenantId:string
+    tenantId: string,
   ): Promise<Calendar> {
     try {
       const Calendar = await this.findOneCalendar(id);
@@ -137,10 +138,13 @@ export class CalendarsService {
         id,
         updateCalendarDto,
       );
-       if(updateCalendarDto.sessions.length>0){
-await this.sessionService.updateBulkSession(updateCalendarDto.sessions,tenantId)
-       }
-  
+      if (updateCalendarDto.sessions.length > 0) {
+        await this.sessionService.updateBulkSession(
+          updateCalendarDto.sessions,
+          tenantId,
+        );
+      }
+
       return await this.findOneCalendar(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -160,11 +164,9 @@ await this.sessionService.updateBulkSession(updateCalendarDto.sessions,tenantId)
   }
   async findActiveCalander(tenantId: string): Promise<Calendar> {
     try {
-     
-     return await this.calendarRepository.findOne({
+      return await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
       });
-  
     } catch (error) {
       throw new NotFoundException(`There Is No Active Calendar.`);
     }
@@ -172,8 +174,8 @@ await this.sessionService.updateBulkSession(updateCalendarDto.sessions,tenantId)
   async findActiveCalendarForAllTenants(): Promise<Calendar[]> {
     try {
       const calendar = await this.calendarRepository.find({
-        where: { isActive: true},
-        relations:['sessions','sessions.months']
+        where: { isActive: true },
+        relations: ['sessions', 'sessions.months'],
       });
       return calendar;
     } catch (error) {

@@ -10,10 +10,10 @@ import { OrganizationsService } from '../organizations/organizations.service';
 import { SessionModule } from '../session/session.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Calendar, Organization]),SessionModule],
+  imports: [TypeOrmModule.forFeature([Calendar, Organization]), SessionModule],
 
   controllers: [CalendarsController],
   providers: [CalendarsService, PaginationService, OrganizationsService],
-  exports:[CalendarsService]
+  exports: [CalendarsService],
 })
 export class CalendarsModule {}

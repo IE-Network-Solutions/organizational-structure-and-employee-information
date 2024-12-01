@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Put, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Headers,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { CronJobLogService } from './cron-job-log.service';
 import { CreateCronJobLogDto } from './dto/create-cron-job-log.dto';
 import { UpdateCronJobLogDto } from './dto/update-cron-job-log.dto';
@@ -9,9 +20,7 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('cron-job-log')
 @ApiTags('month')
 export class CronJobLogController {
-  constructor(
-    private readonly cronJobLogService: CronJobLogService,
-  ) {}
+  constructor(private readonly cronJobLogService: CronJobLogService) {}
 
   @Post()
   async createCronJobLog(
@@ -28,7 +37,6 @@ export class CronJobLogController {
     @Headers('tenantId') tenantId: string,
     @Query() paginationOptions?: PaginationDto,
   ) {
-    
     return this.cronJobLogService.findAllCronJobLogs(
       tenantId,
       paginationOptions,
@@ -54,7 +62,10 @@ export class CronJobLogController {
   }
 
   @Delete(':id')
-  removeCronJobLog(@Headers('tenantId') tenantId: string, @Param('id') id: string) {
+  removeCronJobLog(
+    @Headers('tenantId') tenantId: string,
+    @Param('id') id: string,
+  ) {
     return this.cronJobLogService.removeCronJobLog(id);
   }
 }

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Headers,
+  Query,
+  Put,
+} from '@nestjs/common';
 import { SessionService } from './session.service';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
@@ -9,19 +20,14 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('session')
 @ApiTags('session')
 export class SessionController {
-  constructor(
-    private readonly sessionService: SessionService,
-  ) {}
+  constructor(private readonly sessionService: SessionService) {}
 
   @Post()
   async createSession(
     @Body() createSessionDto: CreateSessionDto,
     @Headers('tenantId') tenantId: string,
   ): Promise<Session> {
-    return await this.sessionService.createSession(
-      createSessionDto,
-      tenantId,
-    );
+    return await this.sessionService.createSession(createSessionDto, tenantId);
   }
 
   @Get('')
@@ -29,11 +35,7 @@ export class SessionController {
     @Headers('tenantId') tenantId: string,
     @Query() paginationOptions?: PaginationDto,
   ) {
-    
-    return this.sessionService.findAllSessions(
-      tenantId,
-      paginationOptions,
-    );
+    return this.sessionService.findAllSessions(tenantId, paginationOptions);
   }
 
   @Get(':id')
@@ -47,19 +49,18 @@ export class SessionController {
     @Param('id') id: string,
     @Body() updateSessionDto: UpdateSessionDto,
   ) {
-    return this.sessionService.updateSession(
-      id,
-      updateSessionDto,
-      tenantId,
-    );
+    return this.sessionService.updateSession(id, updateSessionDto, tenantId);
   }
 
   @Delete(':id')
-  removeSession(@Headers('tenantId') tenantId: string, @Param('id') id: string) {
+  removeSession(
+    @Headers('tenantId') tenantId: string,
+    @Param('id') id: string,
+  ) {
     return this.sessionService.removeSession(id);
   }
   @Get('/active/session')
-  geActiveMonth(@Headers('tenantId') tenantId: string) {
+  getActiveSession(@Headers('tenantId') tenantId: string) {
     return this.sessionService.getActiveSession(tenantId);
   }
 }

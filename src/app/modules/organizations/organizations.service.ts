@@ -36,14 +36,11 @@ export class OrganizationsService {
         });
         return await this.organizationRepository.save(createOrganization);
       }
-     const g= await this.updateOrganization(
+      return await this.updateOrganization(
         tenantId,
         organizationExists.id,
         createOrganizationDto,
       );
-      console.log(g,"gggggbn")
-
-      return g
     } catch (error) {
       throw new BadRequestException(error);
     }
