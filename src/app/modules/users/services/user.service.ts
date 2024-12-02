@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { EmployeeDocumentService } from '../../employee-documents/employee-document.service';
@@ -73,6 +74,45 @@ export class UserService {
     // this.tenantUrl = this.configService.get<string>(
     //   'servicesUrl.tenantUrl',
     // );
+  }
+
+  async updateProfileImage(
+    tenantId: string,
+    userId: string,
+    profileImage: Express.Multer.File,
+  ) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId, tenantId },
+      });
+      if (!user) throw new NotFoundException('User not found');
+
+      const uploadedImagePath = await this.fileUploadService
+        .uploadFileToServer(tenantId, profileImage)
+        .catch((error) => {
+          if (error.code === 'ENOTFOUND') {
+            throw new ConflictException(
+              'File server is unreachable. Please try again later.',
+            );
+          }
+          throw new ConflictException(
+            'Failed to upload file. Please try again later.',
+          );
+        });
+
+      user.profileImage = uploadedImagePath['viewImage'];
+      user.profileImageDownload = uploadedImagePath['image'];
+      await this.userRepository.save(user);
+
+      return {
+        message: 'Profile image updated successfully',
+        profileImageUrl: user.profileImage,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating the profile image. Please try again.',
+      );
+    }
   }
 
   async create(
@@ -639,7 +679,7 @@ export class UserService {
     const createdUsers = [];
     const notCreatedUsers = [];
     const singleBankInformation = {};
-    const userAddress={}
+    const userAddress = {};
     try {
       for (const user of importEmployeeDto) {
         try {
@@ -653,16 +693,16 @@ export class UserService {
           );
 
           if (user.bankAccountName) {
-            singleBankInformation['bankName']=user.bankAccountName;
+            singleBankInformation['bankName'] = user.bankAccountName;
           }
           if (user.bankAccountNumber) {
-            singleBankInformation['accountNumber']=user.bankAccountNumber;
+            singleBankInformation['accountNumber'] = user.bankAccountNumber;
           }
-          if(user.phoneNumber){
-            userAddress["phoneNumber"]=user.phoneNumber
+          if (user.phoneNumber) {
+            userAddress['phoneNumber'] = user.phoneNumber;
           }
-          if(user.address){
-            userAddress["subCity"]=user.address
+          if (user.address) {
+            userAddress['subCity'] = user.address;
           }
           const createUserDto = new CreateUserDto();
           createUserDto.firstName = user.firstName;
@@ -682,7 +722,7 @@ export class UserService {
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
           employeeInformation.bankInformation =
             JSON.stringify(singleBankInformation) || null;
-            employeeInformation.addresses= JSON.stringify(userAddress) || null
+          employeeInformation.addresses = JSON.stringify(userAddress) || null;
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
@@ -736,26 +776,26 @@ export class UserService {
   //       credential: admin.credential.applicationDefault(),
   //     });
   //   }
-  
+
   //   const deleteUsersBatch = async (nextPageToken?: string) => {
   //     const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
-  
+
   //     // Map delete promises
   //     const deletePromises = listUsersResult.users.map((user) =>
   //       admin.auth().deleteUser(user.uid)
   //     );
-  
+
   //     // Wait for all deletions in the current batch
   //     await Promise.all(deletePromises);
-  
+
   //     console.log(`Deleted ${listUsersResult.users.length} users`);
-  
+
   //     // If there's a nextPageToken, process the next batch
   //     if (listUsersResult.pageToken) {
   //       await deleteUsersBatch(listUsersResult.pageToken);
   //     }
   //   };
-  
+
   //   try {
   //     await deleteUsersBatch();
   //     console.log('All users have been successfully deleted.');
@@ -763,10 +803,8 @@ export class UserService {
   //     console.error('Error deleting users:', error);
   //   }
   // }
-  
- // Call the function
-  
-  
+
+  // Call the function
 
   //   async getTenantDomain(
 

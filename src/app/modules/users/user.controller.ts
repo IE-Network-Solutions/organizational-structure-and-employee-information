@@ -12,6 +12,7 @@ import {
   Req,
   UploadedFiles,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -45,6 +46,50 @@ export class UserController {
     private readonly userService: UserService,
     private readonly userDepartmentService: UserDepartmentService,
   ) {}
+
+  @Post('update-profile-image')
+  @UseInterceptors(AnyFilesInterceptor())
+  async updateProfileImage(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: { userId: string },
+    @Req() request: Request,
+  ) {
+    const tenantId = request['tenantId'];
+
+    // Check if tenantId exists (optional)
+    if (!tenantId) {
+      throw new BadRequestException('Tenant ID is missing in the request');
+    }
+
+    // Validate userId in body
+    const { userId } = body;
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+
+    // Retrieve the profile image from uploaded files
+    const profileImage = files.find(
+      (file) => file.fieldname === 'profileImage',
+    );
+
+    if (!profileImage) {
+      throw new BadRequestException('Profile image file is required');
+    }
+
+    // Call the service to handle image update logic
+    try {
+      return await this.userService.updateProfileImage(
+        tenantId,
+        userId,
+        profileImage,
+      );
+    } catch (error) {
+      console.error('Error updating profile image:', error);
+      throw new InternalServerErrorException(
+        'An error occurred while updating the profile image. Please try again.',
+      );
+    }
+  }
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
@@ -245,25 +290,13 @@ export class UserController {
     return this.userDepartmentService.findAllDepartments(tenantId);
   }
 
-  @Post('/department/dissolve')
+  @Get('/department/dissolve')
   dissolveDepartment(
     @Req() request: Request,
-    @Body() dissolveDepartmentDto: DissolveDepartmentDto,
+    dissolveDepartmentDto: DissolveDepartmentDto,
   ): Promise<Department> {
     const tenantId = request['tenantId'];
     return this.userDepartmentService.dissolveDepartment(
-      dissolveDepartmentDto,
-      tenantId,
-    );
-  }
-
-  @Post('/department/merge')
- mergeDepartment(
-    @Req() request: Request,
-    @Body() dissolveDepartmentDto: DissolveDepartmentDto,
-  ): Promise<Department> {
-    const tenantId = request['tenantId'];
-    return this.userDepartmentService.mergeDepartment(
       dissolveDepartmentDto,
       tenantId,
     );
@@ -278,20 +311,4 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.importUser(importEmployeeDto, tenantId);
   }
-
-  @Get('/simple-info/:userId')
-  getOneUser(@Req() request: Request, @Param('userId') userId: string) {
-    const tenantId = request['tenantId'];
-    return this.userService.getOneUSer(userId, tenantId);
-  }
-
-  //   @Post('users/delete/all/all')
-  // @ExcludeAuthGuard()
-  // @ExcludeTenantGuard()
-  //   delete(
-
-  //   ) {
-
-  //     return this.userService.deleteAllFirebaseUsers();
-  //   }
 }
