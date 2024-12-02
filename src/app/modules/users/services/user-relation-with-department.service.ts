@@ -69,6 +69,7 @@ export class UserDepartmentService {
             },
             relations: ['employeeJobInformation'],
           });
+
           if (departmentUsers) {
             for (const user of departmentUsers) {
               for (const departmentUser of user.employeeJobInformation) {
@@ -91,8 +92,6 @@ export class UserDepartmentService {
       throw new BadRequestException(error.message);
     }
   }
-
-
 
   async mergeDepartment(
     dissolveDepartmentDto: DissolveDepartmentDto,
@@ -129,8 +128,7 @@ export class UserDepartmentService {
               }
             }
           }
-          await this.departmentService.removeDepartment(department)
-
+          await this.departmentService.removeDepartment(department);
         }
       }
       return departments;
