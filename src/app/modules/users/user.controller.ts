@@ -84,7 +84,6 @@ export class UserController {
         profileImage,
       );
     } catch (error) {
-      console.error('Error updating profile image:', error);
       throw new InternalServerErrorException(
         'An error occurred while updating the profile image. Please try again.',
       );
