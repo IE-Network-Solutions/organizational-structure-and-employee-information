@@ -239,12 +239,7 @@ export class DepartmentsService {
     level?: number,
   ): Promise<Department> {
     try {
-      const department = await this.findOneDepartment(id);
-      department.name = updateDepartmentDto.name;
-      department.branchId = updateDepartmentDto.branchId;
-      department.description = updateDepartmentDto.description;
-      department.level =level
-      await this.departmentRepository.save(department);
+      await this.departmentRepository.save(updateDepartmentDto);
 
       if (
         updateDepartmentDto.department &&
@@ -255,7 +250,7 @@ export class DepartmentsService {
             dep.id,
             dep,
             tenantId,
-            department.level + 1,
+            updateDepartmentDto["level"] + 1,
           );
         }
       }

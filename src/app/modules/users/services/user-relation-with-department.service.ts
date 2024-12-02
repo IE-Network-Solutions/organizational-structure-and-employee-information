@@ -92,8 +92,6 @@ export class UserDepartmentService {
     }
   }
 
-
-
   async mergeDepartment(
     dissolveDepartmentDto: DissolveDepartmentDto,
     tenantId: string,
@@ -129,8 +127,7 @@ export class UserDepartmentService {
               }
             }
           }
-          await this.departmentService.removeDepartment(department)
-
+          await this.departmentService.removeDepartment(department);
         }
       }
       return departments;
