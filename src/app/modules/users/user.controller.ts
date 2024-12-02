@@ -13,12 +13,13 @@ import {
   UploadedFiles,
   BadRequestException,
   InternalServerErrorException,
+  UploadedFile,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { User } from './entities/user.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUserPermissionDto } from '../user-permission/dto/create-user-permission.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -48,41 +49,29 @@ export class UserController {
   ) {}
 
   @Post('update-profile-image')
-  @UseInterceptors(AnyFilesInterceptor())
+  @UseInterceptors(FileInterceptor('profileImage')) // Matches the field name of the file
   async updateProfileImage(
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFile() file: Express.Multer.File,
     @Body() body: { userId: string },
     @Req() request: Request,
   ) {
     const tenantId = request['tenantId'];
 
-    // Check if tenantId exists (optional)
     if (!tenantId) {
       throw new BadRequestException('Tenant ID is missing in the request');
     }
 
-    // Validate userId in body
     const { userId } = body;
     if (!userId) {
       throw new BadRequestException('User ID is required');
     }
 
-    // Retrieve the profile image from uploaded files
-    const profileImage = files.find(
-      (file) => file.fieldname === 'profileImage',
-    );
-
-    if (!profileImage) {
+    if (!file) {
       throw new BadRequestException('Profile image file is required');
     }
 
-    // Call the service to handle image update logic
     try {
-      return await this.userService.updateProfileImage(
-        tenantId,
-        userId,
-        profileImage,
-      );
+      return await this.userService.updateProfileImage(tenantId, userId, file);
     } catch (error) {
       throw new InternalServerErrorException(
         'An error occurred while updating the profile image. Please try again.',
@@ -221,14 +210,43 @@ export class UserController {
   //   return this.userService.findOne(id);
   // }
 
+  // @Patch(':id')
+  // update(
+  //   @Req() request: Request,
+  //   @Param('id') id: string,
+  //   @Body() updateUserDto: UpdateUserDto,
+  // ) {
+  //   const tenantId = request['tenantId'];
+  //   return this.userService.update(id, tenantId, updateUserDto);
+  // }
+
   @Patch(':id')
-  update(
+  @UseInterceptors(FileInterceptor('profileImage')) // Matches the field name of the file
+  async update(
     @Req() request: Request,
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() profileImage?: Express.Multer.File, // Optional file parameter
   ) {
     const tenantId = request['tenantId'];
-    return this.userService.update(id, tenantId, updateUserDto);
+
+    if (!tenantId) {
+      throw new BadRequestException('Tenant ID is missing in the request');
+    }
+
+    try {
+      const updatedUser = await this.userService.update(
+        id,
+        tenantId,
+        updateUserDto,
+        profileImage,
+      );
+      return updatedUser;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating the user. Please try again.',
+      );
+    }
   }
 
   @Delete(':id')
