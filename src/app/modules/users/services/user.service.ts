@@ -682,7 +682,9 @@ export class UserService {
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
           employeeInformation.bankInformation =
             JSON.stringify(singleBankInformation) || null;
+            JSON.parse(employeeInformation.bankInformation) 
             employeeInformation.addresses= JSON.stringify(userAddress) || null
+            JSON.parse(employeeInformation.addresses) 
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
