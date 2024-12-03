@@ -53,7 +53,7 @@ export class ImportEmployeeDto {
   dateOfBirth: Date;
 
   @IsDateString()
-  joinedDate: string;
+  joinedDate: Date;
 
   @IsString()
   jobPositionId: string;
@@ -97,4 +97,12 @@ export class ImportEmployeeDto {
   @IsOptional()
   @IsString()
   bankAccountName?: string;
+
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+  
+  @IsOptional()
+  @IsString()
+  address?: string;
 }

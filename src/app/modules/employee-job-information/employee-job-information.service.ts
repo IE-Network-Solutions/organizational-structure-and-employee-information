@@ -120,6 +120,49 @@ export class EmployeeJobInformationService {
       throw error;
     }
   }
+  async updatebranchRequest(
+    userId: string,
+    updateEmployeeJobInformationDto: UpdateEmployeeJobInformationDto,
+  ) {
+    try {
+      const existingRecord =
+        await this.employeeJobInformationRepository.findOne({
+          where: { userId, isPositionActive: true },
+        });
+
+      if (!existingRecord) {
+        throw new NotFoundException(
+          `EmployeeJobInformation with userId ${userId} not found or position is inactive.`,
+        );
+      }
+
+      await this.employeeJobInformationRepository.update(
+        { userId },
+        updateEmployeeJobInformationDto,
+      );
+
+      const updatedRecord = await this.employeeJobInformationRepository.findOne(
+        {
+          where: { userId },
+        },
+      );
+
+      if (!updatedRecord) {
+        throw new NotFoundException(
+          `Failed to retrieve updated EmployeeJobInformation for userId ${userId}.`,
+        );
+      }
+
+      return updatedRecord;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(
+          `EmployeeJobInformation with userId ${userId} not found.`,
+        );
+      }
+      throw error;
+    }
+  }
 
   async remove(id: string) {
     try {

@@ -15,8 +15,8 @@ import { WorkSchedule } from '../../work-schedules/entities/work-schedule.entity
 import { EmployementType } from '../../employment-type/entities/employement-type.entity';
 import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
 import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
-import { JobPosition } from '@root/src/app/modules/job-position/entities/job-position.entity';
 import { JobAction } from '../enum/job-action.enum';
+import { JobPosition } from '@root/src/app/modules/job-position/entities/job-position.entity';
 
 @Entity()
 export class EmployeeJobInformation extends BaseModel {

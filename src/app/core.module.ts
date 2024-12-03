@@ -24,6 +24,7 @@ import { JobPositionModule } from './modules/job-position/job-position.module';
 import { CronJobLogModule } from './modules/cron-job-log/cron-job-log.module';
 import { SessionModule } from './modules/session/session.module';
 import { MonthModule } from './modules/month/month.module';
+import { BranchRequestModule } from './modules/branch-request/branch-request.module';
 @Global()
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { MonthModule } from './modules/month/month.module';
     CronJobLogModule,
     SessionModule,
     MonthModule,
+    BranchRequestModule,
   ],
 })
 export class CoreModule {}

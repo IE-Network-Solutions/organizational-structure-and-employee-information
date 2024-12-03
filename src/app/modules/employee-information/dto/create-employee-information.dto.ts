@@ -28,7 +28,7 @@ export class CreateEmployeeInformationDto {
 
   @IsOptional()
   @IsString()
-  joinedDate: string;
+  joinedDate: Date;
 
   @IsOptional()
   @IsString()
