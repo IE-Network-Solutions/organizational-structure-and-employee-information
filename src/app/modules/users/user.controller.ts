@@ -258,7 +258,7 @@ export class UserController {
   }
 
   @Post('/department/merge')
- mergeDepartment(
+  mergeDepartment(
     @Req() request: Request,
     @Body() dissolveDepartmentDto: DissolveDepartmentDto,
   ): Promise<Department> {

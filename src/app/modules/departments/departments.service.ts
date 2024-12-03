@@ -231,7 +231,6 @@ export class DepartmentsService {
     }
   }
 
-
   async updateDepartmentToMerge(
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
@@ -250,7 +249,7 @@ export class DepartmentsService {
             dep.id,
             dep,
             tenantId,
-            updateDepartmentDto["level"] + 1,
+            updateDepartmentDto['level'] + 1,
           );
         }
       }

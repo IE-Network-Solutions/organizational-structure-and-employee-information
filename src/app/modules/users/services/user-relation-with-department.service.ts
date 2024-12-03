@@ -69,6 +69,7 @@ export class UserDepartmentService {
             },
             relations: ['employeeJobInformation'],
           });
+
           if (departmentUsers) {
             for (const user of departmentUsers) {
               for (const departmentUser of user.employeeJobInformation) {

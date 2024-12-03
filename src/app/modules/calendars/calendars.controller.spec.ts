@@ -49,7 +49,7 @@ describe('CalendarsController', () => {
       jest.spyOn(service, 'createCalendar').mockResolvedValue(result as any);
 
       const req = { tenantId } as Partial<Request> & { tenantId: string };
-      const response = await controller.createCalendar(req as any, dto);
+      const response = await controller.createCalendar(tenantId, dto);
 
       expect(response).toEqual(result);
       expect(service.createCalendar).toHaveBeenCalledWith(dto, tenantId);
@@ -66,7 +66,7 @@ describe('CalendarsController', () => {
 
       const req = { tenantId } as Partial<Request> & { tenantId: string };
       const response = await controller.findAllCalendars(
-        req as any,
+        tenantId,
         paginationOptions,
       );
 
@@ -109,28 +109,31 @@ describe('CalendarsController', () => {
   describe('updateCalendar', () => {
     it('should call service.updateCalendar and return the result', async () => {
       const id = 'be21f28b-4651-4d6f-8f08-d8128da64ee5';
+      const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
+
       const dto = new UpdateCalendarDto();
       const result = calendarData();
 
       jest.spyOn(service, 'updateCalendar').mockResolvedValue(result as any);
 
-      const response = await controller.updateCalendar(id, dto);
+      const response = await controller.updateCalendar(tenantId, id, dto);
 
       expect(response).toEqual(result);
-      expect(service.updateCalendar).toHaveBeenCalledWith(id, dto);
+      expect(service.updateCalendar).toHaveBeenCalledWith(id, dto, tenantId);
     });
 
     it('should throw BadRequestException on error', async () => {
       const id = 'be21f28b-4651-4d6f-8f08-d8128da64ee5';
+      const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       const dto = new UpdateCalendarDto();
 
       jest
         .spyOn(service, 'updateCalendar')
         .mockRejectedValue(new BadRequestException('Error'));
 
-      await expect(controller.updateCalendar(id, dto)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        controller.updateCalendar(tenantId, id, dto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
