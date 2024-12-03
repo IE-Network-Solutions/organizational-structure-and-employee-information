@@ -228,13 +228,9 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() profileImage?: Express.Multer.File, // Optional file parameter
   ) {
-    const tenantId = request['tenantId'];
-
-    if (!tenantId) {
-      throw new BadRequestException('Tenant ID is missing in the request');
-    }
-
     try {
+      const tenantId = request['tenantId'];
+
       const updatedUser = await this.userService.update(
         id,
         tenantId,
