@@ -228,19 +228,8 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() profileImage?: Express.Multer.File, // Optional file parameter
   ) {
-<<<<<<< HEAD
     try {
       const tenantId = request['tenantId'];
-
-=======
-    const tenantId = request['tenantId'];
-
-    if (!tenantId) {
-      throw new BadRequestException('Tenant ID is missing in the request');
-    }
-
-    try {
->>>>>>> 6c46067 (PPII-504-backend-implementation-of-profile-image-update adding picture update on the existing update function)
       const updatedUser = await this.userService.update(
         id,
         tenantId,
