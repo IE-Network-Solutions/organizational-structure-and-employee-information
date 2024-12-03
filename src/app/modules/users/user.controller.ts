@@ -56,11 +56,6 @@ export class UserController {
     @Req() request: Request,
   ) {
     const tenantId = request['tenantId'];
-
-    if (!tenantId) {
-      throw new BadRequestException('Tenant ID is missing in the request');
-    }
-
     const { userId } = body;
     if (!userId) {
       throw new BadRequestException('User ID is required');
