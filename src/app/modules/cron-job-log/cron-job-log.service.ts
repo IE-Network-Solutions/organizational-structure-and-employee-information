@@ -37,7 +37,7 @@ export class CronJobLogService {
   async cronJob() {
     let tenantId: string;
     try {
-      const today = new Date(); 
+      const today = new Date();
       const activeCalendars =
         await this.calendarsService.findActiveCalendarForAllTenants();
 

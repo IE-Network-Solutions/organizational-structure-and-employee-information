@@ -292,10 +292,6 @@ export class UserController {
 
   //   ) {
 
-<<<<<<< HEAD
-  //     return this.userService.deleteAllFirebaseUSers();
-=======
   //     return this.userService.deleteAllFirebaseUsers();
->>>>>>> c7502205a0d473ce085bc0b0267ed9595ac75236
   //   }
 }
