@@ -762,6 +762,8 @@ export class UserService {
           employeeInformation.bankInformation =
             JSON.stringify(singleBankInformation) || null;
           employeeInformation.addresses = JSON.stringify(userAddress) || null;
+          JSON.parse(employeeInformation.addresses);
+          JSON.parse(employeeInformation.bankInformation);
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
