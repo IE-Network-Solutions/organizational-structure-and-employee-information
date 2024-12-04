@@ -162,17 +162,17 @@ export class CalendarsService {
     await this.calendarRepository.softRemove({ id });
     return Calendar;
   }
-  async findActiveCalendar(tenantId: string): Promise<any> {
+  async findActiveCalendar(tenantId: string): Promise<Calendar> {
     try {
-      let activeCalendarReturned={}
+    
       const activeCalendar= await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
       });
       if (!activeCalendar) {
-        return activeCalendarReturned;
+        return null;
       }
-      activeCalendarReturned=activeCalendar
-  return activeCalendarReturned
+    
+  return activeCalendar
       
     } catch (error) {
      
