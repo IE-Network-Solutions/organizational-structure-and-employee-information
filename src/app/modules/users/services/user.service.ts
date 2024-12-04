@@ -355,8 +355,10 @@ export class UserService {
       const user = await this.userRepository.findOneOrFail({
         where: { id, tenantId },
       });
+      if(!user){
+        throw new NotFoundException("User Not Found")
+      }
 
-      // Handle profile image upload if a file is provided
       if (profileImage) {
         const uploadedImagePath = await this.fileUploadService
           .uploadFileToServer(tenantId, profileImage)
@@ -371,27 +373,30 @@ export class UserService {
             );
           });
 
-        user.profileImage = uploadedImagePath['viewImage'];
-        user.profileImageDownload = uploadedImagePath['image'];
+          updateUserDto.profileImage = uploadedImagePath['viewImage'];
+          updateUserDto.profileImageDownload = uploadedImagePath['image'];
       }
-
-      // Prepare permissions if provided in the DTO
-      if (updateUserDto.permission) {
-        const createPermission = new CreateUserPermissionDto();
-        createPermission.permissionId = updateUserDto.permission;
-        createPermission.userId = id;
-
-        await this.userPermissionService.update(id, createPermission, tenantId);
-        delete updateUserDto.permission; // Remove permissions from DTO
-      }
-
-      // Update other user details
       await this.userRepository.update({ id }, updateUserDto);
 
-      // Save changes to the user entity if profile image was updated
-      if (profileImage) {
-        await this.userRepository.save(user);
+      if (updateUserDto.permission) {
+      const createPremission = new CreateUserPermissionDto();
+      createPremission.permissionId = updateUserDto.permission
+        ? updateUserDto.permission
+        : [];
+      createPremission.userId = id;
+      delete updateUserDto.permission;
+     
+      if (
+        createPremission.permissionId.length > 0 &&
+        createPremission.permissionId
+      ) {
+        await this.userPermissionService.update(id, createPremission, tenantId);
       }
+    }
+
+    
+     
+
 
       return await this.userRepository.findOneOrFail({ where: { id } });
     } catch (error) {

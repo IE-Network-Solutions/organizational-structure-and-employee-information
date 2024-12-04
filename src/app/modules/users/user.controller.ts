@@ -297,10 +297,10 @@ export class UserController {
     return this.userDepartmentService.findAllDepartments(tenantId);
   }
 
-  @Get('/department/dissolve')
+  @Post('/department/dissolve')
   dissolveDepartment(
     @Req() request: Request,
-    dissolveDepartmentDto: DissolveDepartmentDto,
+   @Body()dissolveDepartmentDto: DissolveDepartmentDto,
   ): Promise<Department> {
     const tenantId = request['tenantId'];
     return this.userDepartmentService.dissolveDepartment(
@@ -328,5 +328,11 @@ export class UserController {
   ) {
     const tenantId = request['tenantId'];
     return this.userService.importUser(importEmployeeDto, tenantId);
+  }
+
+  @Get('/simple-info/:userId')
+  getOneUser(@Req() request: Request, @Param('userId') userId: string) {
+    const tenantId = request['tenantId'];
+    return this.userService.getOneUSer(userId, tenantId);
   }
 }
