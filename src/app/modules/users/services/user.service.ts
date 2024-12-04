@@ -639,7 +639,7 @@ export class UserService {
     const createdUsers = [];
     const notCreatedUsers = [];
     const singleBankInformation = {};
-    const userAddress = {};
+    const userAddress={}
     try {
       for (const user of importEmployeeDto) {
         try {
@@ -653,16 +653,16 @@ export class UserService {
           );
 
           if (user.bankAccountName) {
-            singleBankInformation['bankName'] = user.bankAccountName;
+            singleBankInformation['bankName']=user.bankAccountName;
           }
           if (user.bankAccountNumber) {
-            singleBankInformation['accountNumber'] = user.bankAccountNumber;
+            singleBankInformation['accountNumber']=user.bankAccountNumber;
           }
-          if (user.phoneNumber) {
-            userAddress['phoneNumber'] = user.phoneNumber;
+          if(user.phoneNumber){
+            userAddress["phoneNumber"]=user.phoneNumber
           }
-          if (user.address) {
-            userAddress['subCity'] = user.address;
+          if(user.address){
+            userAddress["subCity"]=user.address
           }
           const createUserDto = new CreateUserDto();
           createUserDto.firstName = user.firstName;
@@ -682,9 +682,9 @@ export class UserService {
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
           employeeInformation.bankInformation =
             JSON.stringify(singleBankInformation) || null;
-          JSON.parse(employeeInformation.bankInformation);
-          employeeInformation.addresses = JSON.stringify(userAddress) || null;
-          JSON.parse(employeeInformation.addresses);
+           
+            employeeInformation.addresses= JSON.stringify(userAddress) || null
+            
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
@@ -705,7 +705,8 @@ export class UserService {
           bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
           bulkCreate.createRolePermissionDto = createRolePermissionDto;
           bulkCreate.createUserPermissionDto = createUserPermissionDto;
-
+          JSON.parse(employeeInformation.addresses) 
+           JSON.parse(employeeInformation.bankInformation) 
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
@@ -738,26 +739,26 @@ export class UserService {
   //       credential: admin.credential.applicationDefault(),
   //     });
   //   }
-
+  
   //   const deleteUsersBatch = async (nextPageToken?: string) => {
   //     const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
-
+  
   //     // Map delete promises
   //     const deletePromises = listUsersResult.users.map((user) =>
   //       admin.auth().deleteUser(user.uid)
   //     );
-
+  
   //     // Wait for all deletions in the current batch
   //     await Promise.all(deletePromises);
-
+  
   //     console.log(`Deleted ${listUsersResult.users.length} users`);
-
+  
   //     // If there's a nextPageToken, process the next batch
   //     if (listUsersResult.pageToken) {
   //       await deleteUsersBatch(listUsersResult.pageToken);
   //     }
   //   };
-
+  
   //   try {
   //     await deleteUsersBatch();
   //     console.log('All users have been successfully deleted.');
@@ -765,8 +766,10 @@ export class UserService {
   //     console.error('Error deleting users:', error);
   //   }
   // }
-
-  // Call the function
+  
+ // Call the function
+  
+  
 
   //   async getTenantDomain(
 

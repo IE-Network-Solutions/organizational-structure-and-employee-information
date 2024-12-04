@@ -39,7 +39,7 @@ export class CalendarsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const calendar = await this.findActiveCalander(tenantId);
+      const calendar = await this.findActiveCalendar(tenantId);
 
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
@@ -162,12 +162,20 @@ export class CalendarsService {
     await this.calendarRepository.softRemove({ id });
     return Calendar;
   }
-  async findActiveCalander(tenantId: string): Promise<Calendar> {
+  async findActiveCalendar(tenantId: string): Promise<any> {
     try {
-      return await this.calendarRepository.findOne({
+      let activeCalendarReturned={}
+      const activeCalendar= await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
       });
+      if (!activeCalendar) {
+        return activeCalendarReturned;
+      }
+      activeCalendarReturned=activeCalendar
+  return activeCalendarReturned
+      
     } catch (error) {
+     
       throw new NotFoundException(`There Is No Active Calendar.`);
     }
   }

@@ -74,6 +74,6 @@ export class CalendarsController {
   @ExcludeAuthGuard()
   async findActiveCalander(@Req() req: Request): Promise<Calendar> {
     const tenantId = req['tenantId'];
-    return await this.calendarsService.findActiveCalander(tenantId);
+    return await this.calendarsService.findActiveCalendar(tenantId);
   }
 }
