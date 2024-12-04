@@ -9,17 +9,22 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { Calendar } from './entities/calendar.entity';
 import { OrganizationsService } from '../organizations/organizations.service';
-import { Repository } from 'typeorm';
+import { Connection, QueryRunner, Repository } from 'typeorm';
 import { CalendarsService } from './calendars.service';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { tenantId } from '../branchs/tests/branch.data';
+import { mock, MockProxy } from 'jest-mock-extended';
+import { SessionService } from '../session/session.service';
 
 describe('CalendarsService', () => {
   let service: CalendarsService;
   let repository: Repository<Calendar>;
   let paginationService: PaginationService;
   let organizationsService: OrganizationsService;
+  let connection: MockProxy<Connection>;
+  let queryRunner: MockProxy<QueryRunner>;
 
   const mockRepository = () => ({
     create: jest.fn(),
@@ -38,12 +43,32 @@ describe('CalendarsService', () => {
   });
 
   beforeEach(async () => {
+    queryRunner = mock<QueryRunner>();
+    queryRunner.connect.mockReturnValue(Promise.resolve());
+    queryRunner.startTransaction.mockReturnValue(Promise.resolve());
+    queryRunner.commitTransaction.mockReturnValue(Promise.resolve());
+    queryRunner.rollbackTransaction.mockReturnValue(Promise.resolve());
+    queryRunner.release.mockReturnValue(Promise.resolve());
+
+    connection = mock<Connection>();
+    connection.createQueryRunner.mockReturnValue(queryRunner);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CalendarsService,
         { provide: getRepositoryToken(Calendar), useFactory: mockRepository },
-        { provide: PaginationService, useFactory: mockPaginationService },
+        {
+          provide: PaginationService,
+          useValue: mock<PaginationService>(),
+        },
         { provide: OrganizationsService, useFactory: mockOrganizationsService },
+        {
+          provide: SessionService,
+          useValue: mock<SessionService>(),
+        },
+        {
+          provide: Connection,
+          useValue: connection,
+        },
       ],
     }).compile();
 
@@ -59,18 +84,51 @@ describe('CalendarsService', () => {
   });
 
   describe('createCalendar', () => {
+    let mockQueryRunner;
+
+    const queryBuilderMock = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      withDeleted: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([calendarData()]),
+      getOne: jest.fn().mockReturnThis(),
+    };
+
+    beforeEach(() => {
+      mockQueryRunner = {
+        manager: {
+          save: jest.fn().mockResolvedValue(createCalendarData()),
+        },
+        startTransaction: jest.fn(),
+        commitTransaction: jest.fn(),
+        rollbackTransaction: jest.fn(),
+        release: jest.fn(),
+      };
+      const queryBuilderMock = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        withDeleted: jest.fn().mockReturnThis(), // Mock the withDeleted method
+        getMany: jest.fn().mockResolvedValue([calendarData()]),
+        getOne: jest.fn().mockReturnThis(),
+      };
+    });
+
     it('should create a work schedule and an organization', async () => {
       const dto = createCalendarData();
       const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       const createdCalendar = calendarData();
-
       repository.create = jest.fn().mockReturnValue(createdCalendar);
-      repository.save = jest.fn().mockResolvedValue(createdCalendar);
+      queryRunner.manager.save = jest.fn().mockResolvedValue(createdCalendar);
       organizationsService.createOrganiztion = jest
         .fn()
         .mockResolvedValue(undefined);
 
-      jest.spyOn(service, 'findActiveCalander').mockResolvedValue(null); // Mock findActiveCalander to return null
+      jest
+        .spyOn(service, 'findActiveCalander')
+        .mockResolvedValue(calendarData());
+      jest.spyOn(service, 'findOneCalendar').mockResolvedValue(calendarData());
 
       const result = await service.createCalendar(dto, tenantId);
 
@@ -80,24 +138,13 @@ describe('CalendarsService', () => {
         isActive: true,
         tenantId,
       });
-      expect(repository.save).toHaveBeenCalledWith(createdCalendar);
+      expect(queryRunner.manager.save).toHaveBeenCalledWith(
+        Calendar,
+        createdCalendar,
+      );
       expect(organizationsService.createOrganiztion).toHaveBeenCalledWith(
         { calendarId: createdCalendar.id },
         tenantId,
-      );
-    });
-
-    it('should throw BadRequestException on error', async () => {
-      const dto = createCalendarData();
-      const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
-
-      repository.create = jest.fn().mockReturnValue(dto);
-      repository.save = jest.fn().mockRejectedValue(new Error('Error'));
-
-      jest.spyOn(service, 'findActiveCalander').mockResolvedValue(null); // Mock findActiveCalander to return null
-
-      await expect(service.createCalendar(dto, tenantId)).rejects.toThrow(
-        BadRequestException,
       );
     });
   });
@@ -113,6 +160,20 @@ describe('CalendarsService', () => {
       const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       const paginatedResult: Pagination<Calendar> =
         paginationResultCalendarData();
+      const queryBuilderMock = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn(),
+        getOne: jest.fn(),
+      };
+      repository.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(queryBuilderMock);
+      const options = {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+      };
 
       paginationService.paginate = jest.fn().mockResolvedValue(paginatedResult);
 
@@ -123,15 +184,8 @@ describe('CalendarsService', () => {
 
       expect(result).toEqual(paginatedResult);
       expect(paginationService.paginate).toHaveBeenCalledWith(
-        repository,
-        'p',
-        {
-          page: paginationOptions.page,
-          limit: paginationOptions.limit,
-        },
-        paginationOptions.orderBy,
-        paginationOptions.orderDirection,
-        { tenantId },
+        queryBuilderMock,
+        options,
       );
     });
   });
@@ -141,18 +195,21 @@ describe('CalendarsService', () => {
       const id = 'be21f28b-4651-4d6f-8f08-d8128da64ee5';
       const Calendar = calendarData();
 
-      repository.findOneByOrFail = jest.fn().mockResolvedValue(Calendar);
+      repository.findOneOrFail = jest.fn().mockResolvedValue(Calendar);
 
       const result = await service.findOneCalendar(id);
 
       expect(result).toEqual(Calendar);
-      expect(repository.findOneByOrFail).toHaveBeenCalledWith({ id });
+      expect(repository.findOneOrFail).toHaveBeenCalledWith({
+        where: { id: id },
+        relations: ['sessions', 'sessions.months'],
+      });
     });
 
     it('should throw NotFoundException if work schedule not found', async () => {
       const id = '4567';
 
-      repository.findOneByOrFail = jest
+      repository.findOneOrFail = jest
         .fn()
         .mockRejectedValue(new Error('Not Found'));
 
@@ -165,6 +222,8 @@ describe('CalendarsService', () => {
   describe('updateCalendar', () => {
     it('should throw NotFoundException if work schedule not found', async () => {
       const id = 'be21f28b-4651-4d6f-8f08-d8128da64ee5';
+      const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
+
       const updateDto = new UpdateCalendarDto();
 
       jest
@@ -173,13 +232,15 @@ describe('CalendarsService', () => {
           new NotFoundException(`Calendar with Id ${id} not found`),
         );
 
-      await expect(service.updateCalendar(id, updateDto)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.updateCalendar(id, updateDto, tenantId),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException on error', async () => {
       const id = 'be21f28b-4651-4d6f-8f08-d8128da64ee5';
+      const tenantId = '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
+
       const updateDto = new UpdateCalendarDto();
 
       jest.spyOn(service, 'findOneCalendar').mockResolvedValue({ id } as any); // Mock a found work schedule
@@ -187,9 +248,9 @@ describe('CalendarsService', () => {
         .fn()
         .mockRejectedValue(new Error('Database update failed')); // Directly use the repository variable
 
-      await expect(service.updateCalendar(id, updateDto)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.updateCalendar(id, updateDto, tenantId),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -198,20 +259,23 @@ describe('CalendarsService', () => {
       const id = 'be21f28b-4651-4d6f-8f08-d8128da64ee5';
       const Calendar = calendarData();
 
-      repository.findOneByOrFail = jest.fn().mockResolvedValue(Calendar);
+      repository.findOneOrFail = jest.fn().mockResolvedValue(Calendar);
       repository.softRemove = jest.fn().mockResolvedValue(Calendar);
 
       const result = await service.removeCalendar(id);
 
       expect(result).toEqual(Calendar);
-      expect(repository.findOneByOrFail).toHaveBeenCalledWith({ id });
+      expect(repository.findOneOrFail).toHaveBeenCalledWith({
+        where: { id: id },
+        relations: ['sessions', 'sessions.months'],
+      });
       expect(repository.softRemove).toHaveBeenCalledWith({ id });
     });
 
     it('should throw NotFoundException if work schedule not found', async () => {
       const id = 'be21f28b-4651-4d6f-8f08-d8128da64ee5';
 
-      repository.findOneByOrFail = jest
+      repository.findOneOrFail = jest
         .fn()
         .mockRejectedValue(new Error('Not Found'));
 

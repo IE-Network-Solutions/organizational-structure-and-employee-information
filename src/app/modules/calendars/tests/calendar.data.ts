@@ -2,6 +2,11 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 import { Calendar } from '../entities/calendar.entity';
 import { CreateCalendarDto } from '../dto/create-calendar.dto';
 import { CreateClosedDatesDto } from '../dto/create-closed-dates.dto';
+import {
+  calendarMock,
+  createSessionData,
+  sessionMock,
+} from '../../session/tests/test.data';
 
 export const calendarData = (): Calendar => {
   return {
@@ -16,6 +21,7 @@ export const calendarData = (): Calendar => {
     updatedAt: new Date('2022-10-22 07:11:42'),
     createdAt: new Date('2022-10-22 07:11:42'),
     organizations: null,
+    sessions: [sessionMock()],
   };
 };
 
@@ -36,6 +42,7 @@ export const createCalendarData = (): CreateCalendarDto => {
     endDate: new Date('2022-10-22 07:11:42'),
     startDate: new Date('2022-10-22 07:11:42'),
     closedDates: [],
+    sessions: [sessionMock()],
 
     //   tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
   };
