@@ -16,6 +16,7 @@ import { UpdateMonthDto } from './dto/update-month.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Month } from './entities/month.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('month')
 @ApiTags('month')
@@ -41,6 +42,7 @@ export class MonthController {
   findOneMonth(@Param('id') id: string) {
     return this.monthService.findOneMonth(id);
   }
+  
 
   @Put(':id')
   updateMonth(
@@ -57,7 +59,14 @@ export class MonthController {
   }
 
   @Get('/active/month')
+  @ExcludeAuthGuard()
   geActiveMonth(@Headers('tenantId') tenantId: string) {
     return this.monthService.geActiveMonth(tenantId);
+  }
+
+  @Get('/previousMonth/month')
+  @ExcludeAuthGuard()
+  activatePreviousActiveMonth(@Headers('tenantId') tenantId: string) {
+    return this.monthService.activatePreviousActiveMonth(tenantId);
   }
 }
