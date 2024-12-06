@@ -167,6 +167,7 @@ export class CalendarsService {
     
       const activeCalendar= await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
+        relations: ['sessions', 'sessions.months'],
       });
       if (!activeCalendar) {
         return null;
