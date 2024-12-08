@@ -6,16 +6,16 @@ import {
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { Department } from './entities/department.entity';
 import { TreeRepository } from 'typeorm';
+import { UserService } from '../users/services/user.service';
 
 @Injectable()
 export class DepartmentsService {
   constructor(
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
-    private paginationService: PaginationService,
+    private userService: UserService,
   ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
@@ -197,26 +197,52 @@ export class DepartmentsService {
     }
   }
 
-  async removeDepartment(id: string): Promise<Department> {
-    const department = await this.findOneDepartment(id);
-    const descendants = await this.departmentRepository.findDescendants(
-      department,
-    );
-
+  async removeDepartment(
+    departmentTobeDeletedId: string,
+    departmentTobeShiftedId: string,
+    tenantId: string
+  ): Promise<Department> {
+    const department = await this.findOneDepartment(departmentTobeDeletedId);
+  
     if (!department) {
-      throw new NotFoundException(`Department with Id ${id} not found`);
+      throw new NotFoundException(`Department with Id ${departmentTobeDeletedId} not found`);
     }
 
+    const users = await this.userService.findAllUsersByDepartment(
+      tenantId,
+      departmentTobeDeletedId
+    );
+  
+    if (users && users.length > 0) {
+      for (const user of users) {
+        await this.userService.updateUserDepartment(user.id, departmentTobeShiftedId);
+      }
+    }
+
+    const descendants = await this.departmentRepository.findDescendants(department);
+  
     if (descendants?.length > 0) {
       for (const dep of descendants) {
+        const descendantUsers = await this.userService.findAllUsersByDepartment(
+          tenantId,
+          dep.id
+        );
+  
+        if (descendantUsers && descendantUsers.length > 0) {
+          for (const user of descendantUsers) {
+            await this.userService.updateUserDepartment(user.id, departmentTobeShiftedId);
+          }
+        }
+
         await this.departmentRepository.softRemove(dep);
       }
     }
-    await this.departmentRepository.softRemove(department);
 
+    await this.departmentRepository.softRemove(department);
+  
     return department;
   }
-
+  
   async findAncestor(id: string) {
     try {
       const department = await this.departmentRepository.findOneByOrFail({

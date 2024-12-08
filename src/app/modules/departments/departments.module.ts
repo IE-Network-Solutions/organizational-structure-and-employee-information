@@ -1,16 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { DepartmentsController } from './departments.controller';
 import { Department } from './entities/department.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { UserModule } from '../users/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Department])],
-
+  imports: [TypeOrmModule.forFeature([Department]), forwardRef(() => UserModule)],
   controllers: [DepartmentsController],
-  providers: [DepartmentsService, PaginationService],
+  providers: [DepartmentsService],
   exports: [DepartmentsService],
 })
 export class DepartmentsModule {}

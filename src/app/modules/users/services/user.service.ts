@@ -2,6 +2,8 @@ import { DataSource, In } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -24,7 +26,6 @@ import { DepartmentsService } from '../../departments/departments.service';
 import { CreateBulkRequestDto } from '../dto/createBulkRequest.dto';
 import {
   generateRandom4DigitNumber,
-  generateRandom6DigitNumber,
 } from '@root/src/core/utils/generateRandomNumbers';
 import filterEntities from '@root/src/core/utils/filters.utils';
 import { FilterDto } from '../dto/filter-status-user.dto';
@@ -34,15 +35,7 @@ import { RoleService } from '../../role/role.service';
 import { CreateRoleDto } from '../../role/dto/create-role.dto';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { CreateEmailDto } from '../dto/create-email.dto';
-import * as fs from 'fs';
-import * as path from 'path';
 import { ImportEmployeeDto } from '../dto/import-user.dto';
-import { JobPositionService } from '../../job-position/job-position.service';
-import { BranchesService } from '../../branchs/branches.service';
-import { EmployementTypeService } from '../../employment-type/employement-type.service';
-import { WorkSchedulesService } from '../../work-schedules/work-schedules.service';
-import { NationalityService } from '../../nationality/nationality.service';
 import { EmployeeInformation } from '../../employee-information/entities/employee-information.entity';
 import { CreateEmployeeInformationDto } from '../../employee-information/dto/create-employee-information.dto';
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
@@ -51,7 +44,6 @@ import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-p
 @Injectable()
 export class UserService {
   private readonly emailServerUrl: string;
-  // private readonly tenantUrl:string;
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectDataSource() private dataSource: DataSource,
@@ -62,6 +54,7 @@ export class UserService {
     private readonly rolePermissionService: RolePermissionService,
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
+    @Inject(forwardRef(() => DepartmentsService))
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
@@ -330,6 +323,13 @@ export class UserService {
     }
   }
 
+  async updateUserDepartment(id: string, newDepartmentId: string): Promise<void> {
+    await this.employeeJobInformationService.update(
+      id ,
+      { departmentId: newDepartmentId }
+    );
+  }
+
   async remove(id: string) {
     try {
       const user = await this.userRepository.findOneOrFail({
@@ -347,6 +347,7 @@ export class UserService {
       throw error?.message || error;
     }
   }
+  
   async findReportingToUser(id: string) {
     try {
       const queryBuilder = this.userRepository
@@ -367,7 +368,6 @@ export class UserService {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
 
-      // Check if employeeJobInformation exists and has elements
       if (
         user.employeeJobInformation &&
         user.employeeJobInformation.length > 0
