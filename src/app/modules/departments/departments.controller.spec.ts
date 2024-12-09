@@ -99,20 +99,22 @@ describe('DepartmentsController', () => {
   });
 
   it('should remove a department', async () => {
+    const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any
     const result = await controller.removeDepartment(
-      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      req, "2", '7'
     );
     expect(result).toEqual(departmentData());
     expect(service.removeDepartment).toHaveBeenCalledWith(
-      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      "2", "7", "8f2e3691-423f-4f21-b676-ba3a932b7c7c"
     );
   });
 
   it('should throw not found exception for remove of non-existent department', async () => {
+    const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any
     jest.spyOn(service, 'removeDepartment').mockImplementationOnce(() => {
       throw new NotFoundException(`Department with Id 4567 not found`);
     });
-    await expect(controller.removeDepartment('4567')).rejects.toThrow(
+    await expect(controller.removeDepartment(req, '4567', '67')).rejects.toThrow(
       NotFoundException,
     );
   });

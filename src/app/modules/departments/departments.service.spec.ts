@@ -5,16 +5,11 @@ import { Department } from './entities/department.entity';
 import { TreeRepository } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { CreateDepartmentDto } from './dto/create-department.dto';
-import { UpdateDepartmentDto } from './dto/update-department.dto';
 import {
-  createdepartmentData,
   departmentData,
-  updatedepartmentData,
-  createdepartmentDataOnCreate,
-  departmentsData,
 } from './tests/department.data';
-import { MockProxy } from 'jest-mock-extended';
+import { mock, MockProxy } from 'jest-mock-extended';
+import { UserService } from '../users/services/user.service';
 
 describe('DepartmentsService', () => {
   let service: DepartmentsService;
@@ -29,6 +24,10 @@ describe('DepartmentsService', () => {
         {
           provide: getRepositoryToken(Department),
           useClass: TreeRepository,
+        },
+        {
+          provide: UserService,
+          useValue: mock<UserService>(),
         },
       ],
     }).compile();
@@ -183,7 +182,7 @@ describe('DepartmentsService', () => {
         .mockResolvedValue(department as any);
       jest.spyOn(repository, 'softRemove').mockResolvedValue({} as any);
 
-      const result = await service.removeDepartment('1');
+      const result = await service.removeDepartment('1', "2", '7');
 
       expect(result).toEqual(department);
       expect(repository.softRemove).toHaveBeenCalledWith(department);
@@ -194,7 +193,7 @@ describe('DepartmentsService', () => {
         .spyOn(service, 'findOneDepartment')
         .mockRejectedValue(new NotFoundException());
 
-      await expect(service.removeDepartment('1')).rejects.toThrow(
+      await expect(service.removeDepartment('1', "2", '7')).rejects.toThrow(
         NotFoundException,
       );
     });
