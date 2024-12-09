@@ -784,8 +784,6 @@ export class UserService {
           bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
           bulkCreate.createRolePermissionDto = createRolePermissionDto;
           bulkCreate.createUserPermissionDto = createUserPermissionDto;
-          JSON.parse(employeeInformation.addresses);
-          JSON.parse(employeeInformation.bankInformation);
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
