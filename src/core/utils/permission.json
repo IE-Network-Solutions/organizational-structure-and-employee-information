@@ -48,7 +48,34 @@
           { "name": "Update Role", "slug": "update-role", "roles": ["owner"] },
           { "name": "Create Employment Type", "slug": "create-employment-type", "roles": ["owner"] },
           { "name": "Delete Employment Type", "slug": "delete-employment-type", "roles": ["owner"] },
-          { "name": "Update Employment Type", "slug": "update-employment-type", "roles": ["owner"] }
+          { "name": "Update Employment Type", "slug": "update-employment-type", "roles": ["owner"] },
+          { "name": "Register New Employee", "slug": "register-new-employee", "roles": ["owner"] },
+          { "name": "Delete Employee", "slug": "delete-employee", "roles": ["owner"] },
+          { "name": "View Employee Detail", "slug": "view-employee-detail", "roles": ["owner"] },
+          { "name": "Update Employee Details", "slug": "update-employee-details", "roles": ["owner"] },
+          { "name": "Download Employee Document", "slug": "download-employee-document", "roles": ["owner"] },
+          { "name": "Delete Employee Document", "slug": "delete-employee-document", "roles": ["owner"] },
+          { "name": "Upload Employee Documents", "slug": "upload-employee-documents", "roles": ["owner"] },
+          { "name": "Update Employee Status", "slug": "update-employee-status", "roles": ["owner"] },
+          { "name": "Update Employee Job Information", "slug": "update-employee-job-information", "roles": ["owner"] },
+          { "name": "Update Employment Information", "slug": "update-employment-information", "roles": ["owner"] },
+          { "name": "Update Role for User", "slug": "update-role-for-user", "roles": ["owner"] },
+          { "name": "End Employment", "slug": "end-employment", "roles": ["owner"] },
+          { "name": "Add Offloading Tasks", "slug": "add-offloading-tasks", "roles": ["owner"] },
+          { "name": "Add Offloading Template Tasks", "slug": "add-offloading-template-tasks", "roles": ["owner"] },
+          { "name": "Create Group Permission", "slug": "create-group-permission", "roles": ["owner"] },
+          { "name": "Create Role", "slug": "create-role", "roles": ["owner"] },
+          { "name": "Delete Group Permission", "slug": "delete-group-permission", "roles": ["owner"] },
+          { "name": "Update Group Permission", "slug": "update-group-permission", "roles": ["owner"] },
+          { "name": "Delete Role", "slug": "delete-role", "roles": ["owner"] },
+          { "name": "Update Role", "slug": "update-role", "roles": ["owner"] },
+          { "name": "Create Employment Type", "slug": "create-employment-type", "roles": ["owner"] },
+          { "name": "Delete Employment Type", "slug": "delete-employment-type", "roles": ["owner"] },
+          { "name": "Update Employment Type", "slug": "update-employment-type", "roles": ["owner"] },
+          { "name": "Delete Approver", "slug": "delete-approver", "roles": ["admin", "owner"] },
+          { "name": "Create Position", "slug": "create-position", "roles": ["admin", "owner"] },
+          { "name": "Update Position", "slug": "update-position", "roles": ["admin", "owner"] },
+          { "name": "Delete Position", "slug": "delete-position", "roles": ["admin", "owner"] }
         ]
       },
       
@@ -106,8 +133,14 @@
           { "name": "Submit Leave Request", "slug": "submit-leave-request", "roles": ["user", "owner", "admin"] },
           { "name": "Upload Leave Justification", "slug": "upload-leave-justification", "roles": ["user", "owner", "admin"] },
           { "name": "Generate Leave Reports", "slug": "generate-leave-reports", "roles": ["owner"] },
-          { "name": "Generate Attendance Reports", "slug": "generate-attendance-reports", "roles": ["owner"] }
-        ]
+          { "name": "Generate Attendance Reports", "slug": "generate-attendance-reports", "roles": ["owner"] },
+
+          { "name": "Update Leave Request", "slug": "update-leave-request", "roles": ["admin", "owner"] },
+          { "name": "Delete Leave Request", "slug": "delete-leave-request", "roles": ["admin", "owner"] },
+          { "name": "Create Approval Workflow", "slug": "create-approval-work-flow", "roles": ["admin", "owner"] },
+          { "name": "Create Approver", "slug": "create-approver", "roles": ["admin", "owner"] },
+          { "name": "Update Approver", "slug": "update-approver", "roles": ["admin", "owner"] },
+          { "name": "Delete Approver", "slug": "delete-approver", "roles": ["admin", "owner"] }        ]
       },
       
       {
@@ -143,7 +176,9 @@
           { "name": "Review Applicant's Application", "slug": "review-applicant-application", "roles": ["owner"] },
           { "name": "Update Applicant's Application Status", "slug": "update-applicant-application-status", "roles": ["owner", "admin"] },
           { "name": "View Shortlisted Candidate", "slug": "view-shortlisted-candidate", "roles": ["owner", "admin"] },
-          { "name": "Record Candidate Report", "slug": "record-candidate-report", "roles": ["owner", "admin"] }
+          { "name": "Record Candidate Report", "slug": "record-candidate-report", "roles": ["owner", "admin"] },
+          { "name": "Approve Candidate", "slug": "approve-candidate", "roles": ["admin", "owner"] },
+          { "name": "Decline Candidate", "slug": "decline-candidate", "roles": ["admin", "owner"] }
         ]
       },
       
@@ -177,8 +212,25 @@
       
           { "name": "Create OKR Rule", "slug": "create-okr-rule", "roles": ["owner"] },
           { "name": "Delete OKR Rule", "slug": "delete-okr-rule", "roles": ["owner"] },
-          { "name": "Update OKR Rule", "slug": "update-okr-rule", "roles": ["owner"] }
-               
+          { "name": "Update OKR Rule", "slug": "update-okr-rule", "roles": ["owner"] },
+           { "name": "View All Employee Plan", "slug": "view-all-employee-plan", "roles": ["admin", "owner"] },
+        { "name": "View All Plan", "slug": "view-all-plan", "roles": ["admin", "owner"] },
+        { "name": "View All Status Plan", "slug": "view-all-plan-by-department", "roles": ["admin", "owner"] },
+        { "name": "View Reprimand and Appreciation Details", "slug": "view-reprimand-and-appreciation-details", "roles": ["user", "admin", "owner"] },
+        { "name": "Edit Appreciation and Reprimand", "slug": "edit-appreciation-and-reprimand", "roles": ["admin", "owner"] },
+        { "name": "Delete Appreciation and Reprimand", "slug": "delete-appreciation-and-reprimand", "roles": ["admin", "owner"] },
+        { "name": "Create Appreciation", "slug": "create-appreciation", "roles": ["admin", "owner"] },
+        { "name": "Update Planning Period", "slug": "update-planning-period", "roles": ["admin", "owner"] },
+        { "name": "Delete Planning Period", "slug": "delete-planning-period", "roles": ["admin", "owner"] },
+        { "name": "Assign Planning Period", "slug": "assign-planning-period", "roles": ["admin", "owner"] },
+        { "name": "Update Assigned Planning Period", "slug": "update-assigned-planning-period", "roles": ["admin", "owner"] },
+        { "name": "Delete Assigned Planning Period", "slug": "delete-assigned-planning-period", "roles": ["admin", "owner"] },
+        { "name": "Create Reprimand Type", "slug": "create-reprimand-type", "roles": ["admin", "owner"] },
+        { "name": "Delete Reprimand Type", "slug": "delete-reprimand-type", "roles": ["admin", "owner"] },
+        { "name": "Create Appreciation Type", "slug": "create-appreciation-type", "roles": ["admin", "owner"] },
+        { "name": "Update Appreciation Type", "slug": "update-appreciation-type", "roles": ["admin", "owner"] },
+        { "name": "Delete Appreciation Type", "slug": "delete-appreciation-type", "roles": ["admin", "owner"] },
+        { "name": "Create OKR Rule", "slug": "create-okr-rule", "roles": ["admin", "owner"] }               
         ]
       },
       
@@ -224,10 +276,9 @@
           { "name": "Create Form Category", "slug": "create-form-category", "roles": ["owner"] },
           { "name": "Update Form Category", "slug": "update-form-category", "roles": ["owner"] },
           { "name": "Delete Form Category", "slug": "delete-form-category", "roles": ["owner"] },
-      
-          { "name": "Create Form Category", "slug": "create-form-category", "roles": ["owner"] },
-          { "name": "Update Form Category", "slug": "update-form-category", "roles": ["owner"] },
-          { "name": "Delete Form Category", "slug": "delete-form-category", "roles": ["owner"] }
+          { "name": "Create Custom Fields", "slug": "create-custom-fields", "roles": ["admin", "owner"] },
+          { "name": "Update Custom Fields", "slug": "update-custom-fields", "roles": ["admin", "owner"] },
+          { "name": "Delete Custom Fields", "slug": "delete-custom-fields", "roles": ["admin", "owner"] }
         ]
       },
       
@@ -268,4 +319,3 @@
       }
       
   ]
-  
