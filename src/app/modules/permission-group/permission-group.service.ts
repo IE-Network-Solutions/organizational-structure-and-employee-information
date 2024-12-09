@@ -136,26 +136,32 @@ export class PermissionGroupService implements PermissionGroupInterface {
     try {
       const allGroupPermissions = await Promise.all(
         permissionData.map(async (data) => {
-          const group = await this.getOrCreate({
-            name: data.group,
-            description: data.group,
-          });
           const permissions = await Promise.all(
-            data.permissions.map((perm) =>
-              this.permissionService
-                .create({
+            data.permissions.map(async (perm) => {
+              try {
+                const createdPermission = await this.permissionService.create({
                   name: perm.name,
                   slug: perm.slug,
                   description: perm.slug,
-                  permissionGroupId: group.id,
-                })
-                .catch(() => null),
-            ),
+                });
+                return createdPermission.id; 
+              } catch {
+                return null;
+              }
+            })
           );
-          return { group, permissions: permissions.filter(Boolean) };
-        }),
+  
+          const validPermissions = permissions.filter(Boolean);
+            const group = await this.getOrCreate({
+            name: data.group,
+            description: data.group,
+            permissions: validPermissions,
+          });
+  
+          return { group, permissions: validPermissions };
+        })
       );
-
+  
       return allGroupPermissions;
     } catch (error) {
       throw new BadRequestException(error.message);

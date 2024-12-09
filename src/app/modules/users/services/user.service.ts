@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { EmployeeDocumentService } from '../../employee-documents/employee-document.service';
@@ -73,6 +74,45 @@ export class UserService {
     // this.tenantUrl = this.configService.get<string>(
     //   'servicesUrl.tenantUrl',
     // );
+  }
+
+  async updateProfileImage(
+    tenantId: string,
+    userId: string,
+    profileImage: Express.Multer.File,
+  ) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId, tenantId },
+      });
+      if (!user) throw new NotFoundException('User not found');
+
+      const uploadedImagePath = await this.fileUploadService
+        .uploadFileToServer(tenantId, profileImage)
+        .catch((error) => {
+          if (error.code === 'ENOTFOUND') {
+            throw new ConflictException(
+              'File server is unreachable. Please try again later.',
+            );
+          }
+          throw new ConflictException(
+            'Failed to upload file. Please try again later.',
+          );
+        });
+
+      user.profileImage = uploadedImagePath['viewImage'];
+      user.profileImageDownload = uploadedImagePath['image'];
+      await this.userRepository.save(user);
+
+      return {
+        message: 'Profile image updated successfully',
+        profileImageUrl: user.profileImage,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating the profile image. Please try again.',
+      );
+    }
   }
 
   async create(
@@ -305,28 +345,67 @@ export class UserService {
     }
   }
 
-  async update(id: string, tenantId: string, updateUserDto: UpdateUserDto) {
+  async update(
+    id: string,
+    tenantId: string,
+    updateUserDto: UpdateUserDto,
+    profileImage?: Express.Multer.File, // Add this optional parameter
+  ) {
     try {
+      const user = await this.userRepository.findOneOrFail({
+        where: { id, tenantId },
+      });
+      if(!user){
+        throw new NotFoundException("User Not Found")
+      }
+
+      if (profileImage) {
+        const uploadedImagePath = await this.fileUploadService
+          .uploadFileToServer(tenantId, profileImage)
+          .catch((error) => {
+            if (error.code === 'ENOTFOUND') {
+              throw new ConflictException(
+                'File server is unreachable. Please try again later.',
+              );
+            }
+            throw new ConflictException(
+              'Failed to upload file. Please try again later.',
+            );
+          });
+
+          updateUserDto.profileImage = uploadedImagePath['viewImage'];
+          updateUserDto.profileImageDownload = uploadedImagePath['image'];
+      }
+      await this.userRepository.update({ id }, updateUserDto);
+
+      if (updateUserDto.permission) {
       const createPremission = new CreateUserPermissionDto();
       createPremission.permissionId = updateUserDto.permission
         ? updateUserDto.permission
         : [];
       createPremission.userId = id;
       delete updateUserDto.permission;
-      await this.userRepository.findOneOrFail({ where: { id: id } });
-      await this.userRepository.update({ id }, updateUserDto);
+     
       if (
         createPremission.permissionId.length > 0 &&
         createPremission.permissionId
       ) {
         await this.userPermissionService.update(id, createPremission, tenantId);
       }
-      return await this.userRepository.findOneOrFail({ where: { id: id } });
+    }
+
+    
+     
+
+
+      return await this.userRepository.findOneOrFail({ where: { id } });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
-      throw error;
+      throw new InternalServerErrorException(
+        'An error occurred while updating the user. Please try again.',
+      );
     }
   }
 
@@ -682,9 +761,9 @@ export class UserService {
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
           employeeInformation.bankInformation =
             JSON.stringify(singleBankInformation) || null;
-
           employeeInformation.addresses = JSON.stringify(userAddress) || null;
-
+          JSON.parse(employeeInformation.addresses);
+          JSON.parse(employeeInformation.bankInformation);
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
