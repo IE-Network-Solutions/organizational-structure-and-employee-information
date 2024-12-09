@@ -42,7 +42,6 @@ export class MonthController {
   findOneMonth(@Param('id') id: string) {
     return this.monthService.findOneMonth(id);
   }
-  
 
   @Put(':id')
   updateMonth(

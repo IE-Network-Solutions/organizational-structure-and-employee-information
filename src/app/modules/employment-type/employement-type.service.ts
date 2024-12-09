@@ -50,7 +50,7 @@ export class EmployementTypeService {
         .createQueryBuilder('EmploymentType')
         .where('EmploymentType.tenantId =:tenantId', { tenantId })
         .orderBy('EmploymentType.createdAt', 'DESC');
-        
+
       return await this.paginationService.paginate<EmployementType>(
         queryBuilder,
         options,

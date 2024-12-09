@@ -164,19 +164,16 @@ export class CalendarsService {
   }
   async findActiveCalendar(tenantId: string): Promise<Calendar> {
     try {
-    
-      const activeCalendar= await this.calendarRepository.findOne({
+      const activeCalendar = await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
         relations: ['sessions', 'sessions.months'],
       });
       if (!activeCalendar) {
         return null;
       }
-    
-  return activeCalendar
-      
+
+      return activeCalendar;
     } catch (error) {
-     
       throw new NotFoundException(`There Is No Active Calendar.`);
     }
   }
