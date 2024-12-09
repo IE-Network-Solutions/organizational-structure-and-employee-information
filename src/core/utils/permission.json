@@ -92,7 +92,7 @@
       
           { "name": "Create Attendance Rule", "slug": "create-attendance-rule", "roles": ["owner"] },
           { "name": "Update Attendance Rule", "slug": "update-attendance-rule", "roles": ["owner"] },
-          { "name": "Delete Attendance Rule", "slug": "delete-attendance-rule", "roles": [] },
+          { "name": "Delete Attendance Rule", "slug": "delete-attendance-rule", "roles": ["owner", "admin"] },
       
           { "name": "Create Attendance Rule Type", "slug": "create-attendance-rule-type", "roles": ["owner"] },
           { "name": "Update Attendance Rule Type", "slug": "update-attendance-rule-type", "roles": ["owner"] },
@@ -132,9 +132,6 @@
           { "name": "View Leave History", "slug": "view-leave-history", "roles": ["user", "owner", "admin"] },
           { "name": "Submit Leave Request", "slug": "submit-leave-request", "roles": ["user", "owner", "admin"] },
           { "name": "Upload Leave Justification", "slug": "upload-leave-justification", "roles": ["user", "owner", "admin"] },
-          { "name": "Generate Leave Reports", "slug": "generate-leave-reports", "roles": ["owner"] },
-          { "name": "Generate Attendance Reports", "slug": "generate-attendance-reports", "roles": ["owner"] },
-
           { "name": "Update Leave Request", "slug": "update-leave-request", "roles": ["admin", "owner"] },
           { "name": "Delete Leave Request", "slug": "delete-leave-request", "roles": ["admin", "owner"] },
           { "name": "Create Approval Workflow", "slug": "create-approval-work-flow", "roles": ["admin", "owner"] },

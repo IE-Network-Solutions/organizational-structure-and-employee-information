@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Headers,
 } from '@nestjs/common';
 import { PermissionGroupService } from './permission-group.service';
 import { CreatePermissionGroupDto } from './dto/create-permission-group.dto';
@@ -64,8 +65,7 @@ export class PermissionGroupController {
   }
   @Post('/seed')
   @ExcludeAuthGuard()
-  @ExcludeTenantGuard()
-  permissionSeeder() {
-    return this.permissionGroupService.permissionSeeder();
+  permissionSeeder(@Headers('tenantId') tenantId: string) {
+    return this.permissionGroupService.permissionSeeder(tenantId);
   }
 }

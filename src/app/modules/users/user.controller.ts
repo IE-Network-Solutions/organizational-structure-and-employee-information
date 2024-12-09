@@ -300,7 +300,7 @@ export class UserController {
   @Post('/department/dissolve')
   dissolveDepartment(
     @Req() request: Request,
-   @Body()dissolveDepartmentDto: DissolveDepartmentDto,
+    @Body() dissolveDepartmentDto: DissolveDepartmentDto,
   ): Promise<Department> {
     const tenantId = request['tenantId'];
     return this.userDepartmentService.dissolveDepartment(
