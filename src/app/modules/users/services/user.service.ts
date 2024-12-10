@@ -49,6 +49,8 @@ import { CreateEmployeeInformationDto } from '../../employee-information/dto/cre
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
 
+
+
 @Injectable()
 export class UserService {
   private readonly emailServerUrl: string;
@@ -862,4 +864,80 @@ export class UserService {
   //   throw new BadRequestException(error.message)
   // }
   //   }
+
+
+  async exportUsers() {
+    const users = [];
+    let nextPageToken;
+  
+    // Fetch all users in a loop
+    do {
+      const result = await admin.auth().listUsers(1000, nextPageToken);
+      users.push(...result.users);
+      nextPageToken = result.pageToken;
+    } while (nextPageToken);
+  
+    // Map users to the desired structure
+    const mappedUsers = users.map(user => ({
+      uid: user.uid,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      phoneNumber: user.phoneNumber,
+      disabled: user.disabled,
+      customClaims: user.customClaims,
+    }));
+  
+    // Write the mapped users to a JSON file
+    const fs = require('fs');
+    fs.writeFileSync('users.json', JSON.stringify(mappedUsers, null, 2));
+  
+    console.log('Users exported successfully!');
+    return mappedUsers;
+  }
+
+
+  async importUsersFromFile(): Promise<void> {
+    try {
+      const filePath='C:\\Users\\selam\\Desktop\\pep\\organizational-structure-and-employee-information\\users.json'
+      // Step 1: Read the JSON file
+      const fileData = fs.readFileSync(path.resolve(filePath), 'utf-8');
+      const users = JSON.parse(fileData);
+
+      // Ensure users is an array
+      if (!Array.isArray(users)) {
+        console.log('Invalid data format: The file should contain an array of users.');
+        throw new Error('Invalid data format: The file should contain an array of users.');
+      }
+
+      // Step 2: Split users into chunks of 1000 (max batch size for Firebase Admin SDK)
+      const chunkSize = 1000;
+      const chunks = [];
+      for (let i = 0; i < users.length; i += chunkSize) {
+        chunks.push(users.slice(i, i + chunkSize));
+      }
+
+      // Step 3: Process each chunk
+      for (const [index, chunk] of chunks.entries()) {
+        try {
+          const userImportResults = await admin.auth().importUsers(chunk, {
+            hash: {
+              algorithm: 'SHA256', // Replace with actual password hash algorithm if needed
+              // If passwords are not hashed, users will need to reset them
+            },
+          });
+         console.log(`Chunk ${index + 1}/${chunks.length} imported successfully.`);
+         console.log('Import result:', userImportResults);
+        } catch (error) {
+         console.error(`Failed to import chunk ${index + 1}/${chunks.length}`, error.stack);
+        }
+      }
+
+     console.log('All users imported successfully!');
+    } catch (error) {
+     console.error('Error reading or importing users from file', error.stack);
+    }
+  }
+  
 }

@@ -335,4 +335,22 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
+
+
+  @Get('/export/firebase/user')
+  @ExcludeTenantGuard()
+  @ExcludeAuthGuard()
+  exportUser() {
+  
+    return this.userService.exportUsers();
+  }
+
+  @Get('/import/firebase/user')
+  @ExcludeTenantGuard()
+  @ExcludeAuthGuard()
+  importUsersddjjd() {
+  
+    return this.userService.importUsersFromFile();
+  }
+
 }
