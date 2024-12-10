@@ -355,8 +355,8 @@ export class UserService {
       const user = await this.userRepository.findOneOrFail({
         where: { id, tenantId },
       });
-      if(!user){
-        throw new NotFoundException("User Not Found")
+      if (!user) {
+        throw new NotFoundException('User Not Found');
       }
 
       if (profileImage) {
@@ -373,30 +373,30 @@ export class UserService {
             );
           });
 
-          updateUserDto.profileImage = uploadedImagePath['viewImage'];
-          updateUserDto.profileImageDownload = uploadedImagePath['image'];
+        updateUserDto.profileImage = uploadedImagePath['viewImage'];
+        updateUserDto.profileImageDownload = uploadedImagePath['image'];
       }
       await this.userRepository.update({ id }, updateUserDto);
 
       if (updateUserDto.permission) {
-      const createPremission = new CreateUserPermissionDto();
-      createPremission.permissionId = updateUserDto.permission
-        ? updateUserDto.permission
-        : [];
-      createPremission.userId = id;
-      delete updateUserDto.permission;
-     
-      if (
-        createPremission.permissionId.length > 0 &&
-        createPremission.permissionId
-      ) {
-        await this.userPermissionService.update(id, createPremission, tenantId);
+        const createPremission = new CreateUserPermissionDto();
+        createPremission.permissionId = updateUserDto.permission
+          ? updateUserDto.permission
+          : [];
+        createPremission.userId = id;
+        delete updateUserDto.permission;
+
+        if (
+          createPremission.permissionId.length > 0 &&
+          createPremission.permissionId
+        ) {
+          await this.userPermissionService.update(
+            id,
+            createPremission,
+            tenantId,
+          );
+        }
       }
-    }
-
-    
-     
-
 
       return await this.userRepository.findOneOrFail({ where: { id } });
     } catch (error) {

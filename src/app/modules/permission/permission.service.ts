@@ -38,7 +38,6 @@ export class PermissionService implements PermissionInterface {
       throw new ConflictException(error.message);
     }
   }
-
   async findAll(
     paginationOptions: PaginationDto,
     searchFilterDTO: SearchFilterDTO,
