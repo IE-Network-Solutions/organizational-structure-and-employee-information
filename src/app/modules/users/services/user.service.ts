@@ -376,8 +376,7 @@ export class UserService {
         updateUserDto.profileImage = uploadedImagePath['viewImage'];
         updateUserDto.profileImageDownload = uploadedImagePath['image'];
       }
-      await this.userRepository.update({ id }, updateUserDto);
-
+      
       if (updateUserDto.permission) {
         const createPremission = new CreateUserPermissionDto();
         createPremission.permissionId = updateUserDto.permission
@@ -397,6 +396,8 @@ export class UserService {
           );
         }
       }
+
+      await this.userRepository.update({ id }, updateUserDto);
 
       return await this.userRepository.findOneOrFail({ where: { id } });
     } catch (error) {
