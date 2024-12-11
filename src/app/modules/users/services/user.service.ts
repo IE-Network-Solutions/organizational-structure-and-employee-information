@@ -306,11 +306,13 @@ export class UserService {
 
     return users;
   }
+
   async findOne(id: string): Promise<User> {
     try {
       const user = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.employeeDocument', 'employeeDocument')
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
@@ -320,18 +322,17 @@ export class UserService {
           'employeeJobInformation.employementType',
           'employementType',
         )
-        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
-
         .leftJoinAndSelect(
           'employeeJobInformation.workSchedule',
           'workSchedule',
         )
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect('user.userPermissions', 'userPermissions')
+        .leftJoinAndSelect('userPermissions.permission', 'permission')
         .where('user.id = :id', { id })
         .getOne();
       user['reportingTo'] = await this.findReportingToUser(id);
