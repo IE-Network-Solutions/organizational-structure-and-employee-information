@@ -353,4 +353,12 @@ export class UserController {
     return this.userService.importUsersFromFile();
   }
 
+  @Delete('/delete/firebase/user')
+  @ExcludeTenantGuard()
+  @ExcludeAuthGuard()
+  deleteUSerfirbase() {
+  
+    return this.userService.deleteAllFirebaseUsers();
+  }
+
 }

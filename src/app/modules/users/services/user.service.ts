@@ -48,6 +48,7 @@ import { EmployeeInformation } from '../../employee-information/entities/employe
 import { CreateEmployeeInformationDto } from '../../employee-information/dto/create-employee-information.dto';
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
+import { HashAlgorithmType } from 'firebase-admin/lib/auth/user-import-builder';
 
 
 
@@ -378,8 +379,6 @@ export class UserService {
         updateUserDto.profileImage = uploadedImagePath['viewImage'];
         updateUserDto.profileImageDownload = uploadedImagePath['image'];
       }
-      await this.userRepository.update({ id }, updateUserDto);
-
       if (updateUserDto.permission) {
         const createPremission = new CreateUserPermissionDto();
         createPremission.permissionId = updateUserDto.permission
@@ -400,8 +399,12 @@ export class UserService {
         }
       }
 
+      await this.userRepository.update({ id }, updateUserDto);
+
+   
       return await this.userRepository.findOneOrFail({ where: { id } });
     } catch (error) {
+      console.log(error.message,"message1")
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
@@ -811,43 +814,43 @@ export class UserService {
     }
   }
 
-  // async  deleteAllFirebaseUsers() {
-  //   const admin = require('firebase-admin');
-  //   // Initialize Firebase Admin SDK if not already initialized
-  //   if (!admin.apps.length) {
-  //     admin.initializeApp({
-  //       credential: admin.credential.applicationDefault(),
-  //     });
-  //   }
+  async  deleteAllFirebaseUsers() {
+    const admin = require('firebase-admin');
+    // Initialize Firebase Admin SDK if not already initialized
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.applicationDefault(),
+      });
+    }
 
-  //   const deleteUsersBatch = async (nextPageToken?: string) => {
-  //     const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
+    const deleteUsersBatch = async (nextPageToken?: string) => {
+      const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
 
-  //     // Map delete promises
-  //     const deletePromises = listUsersResult.users.map((user) =>
-  //       admin.auth().deleteUser(user.uid)
-  //     );
+      // Map delete promises
+      const deletePromises = listUsersResult.users.map((user) =>
+        admin.auth().deleteUser(user.uid)
+      );
 
-  //     // Wait for all deletions in the current batch
-  //     await Promise.all(deletePromises);
+      // Wait for all deletions in the current batch
+      await Promise.all(deletePromises);
 
-  //     console.log(`Deleted ${listUsersResult.users.length} users`);
+      console.log(`Deleted ${listUsersResult.users.length} users`);
 
-  //     // If there's a nextPageToken, process the next batch
-  //     if (listUsersResult.pageToken) {
-  //       await deleteUsersBatch(listUsersResult.pageToken);
-  //     }
-  //   };
+      // If there's a nextPageToken, process the next batch
+      if (listUsersResult.pageToken) {
+        await deleteUsersBatch(listUsersResult.pageToken);
+      }
+    };
 
-  //   try {
-  //     await deleteUsersBatch();
-  //     console.log('All users have been successfully deleted.');
-  //   } catch (error) {
-  //     console.error('Error deleting users:', error);
-  //   }
-  // }
+    try {
+      await deleteUsersBatch();
+      console.log('All users have been successfully deleted.');
+    } catch (error) {
+      console.error('Error deleting users:', error);
+    }
+  }
 
-  // Call the function
+ // Call the function
 
   //   async getTenantDomain(
 
@@ -887,6 +890,8 @@ export class UserService {
       phoneNumber: user.phoneNumber,
       disabled: user.disabled,
       customClaims: user.customClaims,
+      passwordHash: user.passwordHash,
+      passwordSalt: user.passwordSalt, 
     }));
   
     // Write the mapped users to a JSON file
@@ -898,46 +903,70 @@ export class UserService {
   }
 
 
-  async importUsersFromFile(): Promise<void> {
-    try {
-      const filePath='C:\\Users\\selam\\Desktop\\pep\\organizational-structure-and-employee-information\\users.json'
-      // Step 1: Read the JSON file
-      const fileData = fs.readFileSync(path.resolve(filePath), 'utf-8');
-      const users = JSON.parse(fileData);
+async  importUsersFromFile(): Promise<void> {
+  const filePath = path.resolve(
+    'C:\\Users\\selam\\Desktop\\pep\\organizational-structure-and-employee-information\\users.json'
+  );
 
-      // Ensure users is an array
-      if (!Array.isArray(users)) {
-        console.log('Invalid data format: The file should contain an array of users.');
-        throw new Error('Invalid data format: The file should contain an array of users.');
-      }
+  try {
+    // Read and parse the JSON file containing user data
+    const fileData = fs.readFileSync(filePath, 'utf-8');
+    const users = JSON.parse(fileData);
 
-      // Step 2: Split users into chunks of 1000 (max batch size for Firebase Admin SDK)
-      const chunkSize = 1000;
-      const chunks = [];
-      for (let i = 0; i < users.length; i += chunkSize) {
-        chunks.push(users.slice(i, i + chunkSize));
-      }
-
-      // Step 3: Process each chunk
-      for (const [index, chunk] of chunks.entries()) {
-        try {
-          const userImportResults = await admin.auth().importUsers(chunk, {
-            hash: {
-              algorithm: 'SHA256', // Replace with actual password hash algorithm if needed
-              // If passwords are not hashed, users will need to reset them
-            },
-          });
-         console.log(`Chunk ${index + 1}/${chunks.length} imported successfully.`);
-         console.log('Import result:', userImportResults);
-        } catch (error) {
-         console.error(`Failed to import chunk ${index + 1}/${chunks.length}`, error.stack);
-        }
-      }
-
-     console.log('All users imported successfully!');
-    } catch (error) {
-     console.error('Error reading or importing users from file', error.stack);
+    // Validate data format
+    if (!Array.isArray(users)) {
+      console.error('Invalid data format: The file should contain an array of users.');
+      throw new Error('Invalid data format.');
     }
+
+    // Prepare user data for import
+    const usersForImport = users.map((user) => ({
+      uid: user.uid,
+      email: user.email,
+      emailVerified: user.emailVerified || false,
+      displayName: user.displayName || null,
+      disabled: user.disabled || false,
+      password: "123456", // Assuming password is optional but can be set
+    }));
+
+    // Process users in chunks of 1000
+    const chunkSize = 1000;
+    for (let i = 0; i < usersForImport.length; i += chunkSize) {
+      const chunk = usersForImport.slice(i, i + chunkSize);
+
+      try {
+        // Import users
+        const result = await admin.auth().importUsers(chunk);
+        console.log(`Successfully imported ${result.successCount} users out of ${chunk.length}`);
+
+        if (result.failureCount > 0) {
+          console.error('Failed to import some users:', result.errors);
+        }
+
+        const successfullyImportedUids = chunk
+          .filter((user, index) => result.errors[index] === undefined) 
+          .map((user) => user.uid); 
+
+        for (const uid of successfullyImportedUids) {
+          const user = usersForImport.find((u) => u.uid === uid);
+          if (user && user.password) {
+            try {
+              await admin.auth().updateUser(uid, { password: "%TGBnhy6" });
+              console.log(`Successfully updated password for user ${uid}`);
+            } catch (error) {
+              console.error(`Error updating password for user ${uid}:`, error.message);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error importing users for this chunk:', error.message, error.stack);
+      }
+    }
+  } catch (error) {
+    console.error('Error processing user import:', error.message, error.stack);
   }
+}
+
+  
   
 }
