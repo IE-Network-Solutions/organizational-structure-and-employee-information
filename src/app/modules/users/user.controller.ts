@@ -12,12 +12,14 @@ import {
   Req,
   UploadedFiles,
   BadRequestException,
+  InternalServerErrorException,
+  UploadedFile,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { User } from './entities/user.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUserPermissionDto } from '../user-permission/dto/create-user-permission.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -45,6 +47,32 @@ export class UserController {
     private readonly userService: UserService,
     private readonly userDepartmentService: UserDepartmentService,
   ) {}
+
+  @Post('update-profile-image')
+  @UseInterceptors(FileInterceptor('profileImage')) // Matches the field name of the file
+  async updateProfileImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { userId: string },
+    @Req() request: Request,
+  ) {
+    const tenantId = request['tenantId'];
+    const { userId } = body;
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+
+    if (!file) {
+      throw new BadRequestException('Profile image file is required');
+    }
+
+    try {
+      return await this.userService.updateProfileImage(tenantId, userId, file);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating the profile image. Please try again.',
+      );
+    }
+  }
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
@@ -177,14 +205,38 @@ export class UserController {
   //   return this.userService.findOne(id);
   // }
 
+  // @Patch(':id')
+  // update(
+  //   @Req() request: Request,
+  //   @Param('id') id: string,
+  //   @Body() updateUserDto: UpdateUserDto,
+  // ) {
+  //   const tenantId = request['tenantId'];
+  //   return this.userService.update(id, tenantId, updateUserDto);
+  // }
+
   @Patch(':id')
-  update(
+  @UseInterceptors(FileInterceptor('profileImage')) // Matches the field name of the file
+  async update(
     @Req() request: Request,
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() profileImage?: Express.Multer.File, // Optional file parameter
   ) {
-    const tenantId = request['tenantId'];
-    return this.userService.update(id, tenantId, updateUserDto);
+    try {
+      const tenantId = request['tenantId'];
+      const updatedUser = await this.userService.update(
+        id,
+        tenantId,
+        updateUserDto,
+        profileImage,
+      );
+      return updatedUser;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating the user. Please try again.',
+      );
+    }
   }
 
   @Delete(':id')
@@ -248,10 +300,21 @@ export class UserController {
   @Post('/department/dissolve')
   dissolveDepartment(
     @Req() request: Request,
-    dissolveDepartmentDto: DissolveDepartmentDto,
+    @Body() dissolveDepartmentDto: DissolveDepartmentDto,
   ): Promise<Department> {
     const tenantId = request['tenantId'];
     return this.userDepartmentService.dissolveDepartment(
+      dissolveDepartmentDto,
+      tenantId,
+    );
+  }
+  @Post('/department/merge')
+  mergeDepartment(
+    @Req() request: Request,
+    @Body() dissolveDepartmentDto: DissolveDepartmentDto,
+  ): Promise<Department> {
+    const tenantId = request['tenantId'];
+    return this.userDepartmentService.mergeDepartment(
       dissolveDepartmentDto,
       tenantId,
     );
@@ -272,14 +335,4 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
-
-  //   @Post('users/delete/all/all')
-  // @ExcludeAuthGuard()
-  // @ExcludeTenantGuard()
-  //   delete(
-
-  //   ) {
-
-  //     return this.userService.deleteAllFirebaseUSers();
-  //   }
 }

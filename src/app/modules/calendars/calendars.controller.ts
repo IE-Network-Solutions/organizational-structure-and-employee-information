@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   Req,
+  Headers,
 } from '@nestjs/common';
 import { CalendarsService } from './calendars.service';
 import { CreateCalendarDto } from './dto/create-calendar.dto';
@@ -25,10 +26,9 @@ export class CalendarsController {
 
   @Post()
   async createCalendar(
-    @Req() req: Request,
+    @Headers('tenantId') tenantId: string,
     @Body() createCalendarDto: CreateCalendarDto,
   ): Promise<Calendar> {
-    const tenantId = req['tenantId'];
     return await this.calendarsService.createCalendar(
       createCalendarDto,
       tenantId,
@@ -37,11 +37,10 @@ export class CalendarsController {
 
   @Get()
   async findAllCalendars(
-    @Req() req: Request,
+    @Headers('tenantId') tenantId: string,
     @Query()
     paginationOptions?: PaginationDto,
   ): Promise<Pagination<Calendar>> {
-    const tenantId = req['tenantId'];
     return await this.calendarsService.findAllCalendars(
       paginationOptions,
       tenantId,
@@ -55,10 +54,15 @@ export class CalendarsController {
 
   @Patch(':id')
   async updateCalendar(
+    @Headers('tenantId') tenantId: string,
     @Param('id') id: string,
     @Body() updateCalendarDto: UpdateCalendarDto,
   ): Promise<Calendar> {
-    return await this.calendarsService.updateCalendar(id, updateCalendarDto);
+    return await this.calendarsService.updateCalendar(
+      id,
+      updateCalendarDto,
+      tenantId,
+    );
   }
 
   @Delete(':id')
@@ -70,6 +74,6 @@ export class CalendarsController {
   @ExcludeAuthGuard()
   async findActiveCalander(@Req() req: Request): Promise<Calendar> {
     const tenantId = req['tenantId'];
-    return await this.calendarsService.findActiveCalander(tenantId);
+    return await this.calendarsService.findActiveCalendar(tenantId);
   }
 }

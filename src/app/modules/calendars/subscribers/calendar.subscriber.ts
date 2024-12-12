@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Calendar } from '../entities/calendar.entity';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Injectable } from '@nestjs/common';
+import { Session } from '../../session/entities/session.entity';
 
 @EventSubscriber()
 @Injectable()
@@ -24,6 +25,15 @@ export class CalendarSubscriber implements EntitySubscriberInterface<Calendar> {
         { calendarId: event.entity.id },
         { calendarId: null },
       );
+
+      const sessionRepository: Repository<Session> =
+        event.connection.getRepository(Session);
+      const sessions = await sessionRepository.find({
+        where: { calendarId: event.entity.id },
+      });
+      for (const session of sessions) {
+        await sessionRepository.softRemove(session);
+      }
     }
   }
 }
