@@ -10,6 +10,7 @@ import {
 } from './tests/department.data';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { UserService } from '../users/services/user.service';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 describe('DepartmentsService', () => {
   let service: DepartmentsService;
@@ -28,6 +29,10 @@ describe('DepartmentsService', () => {
         {
           provide: UserService,
           useValue: mock<UserService>(),
+        },
+        {
+          provide: EmployeeJobInformationService,
+          useValue: mock<EmployeeJobInformationService>(),
         },
       ],
     }).compile();
