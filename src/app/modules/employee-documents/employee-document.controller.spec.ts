@@ -57,8 +57,8 @@ describe('EmployeeDocumentController', () => {
       test('then it should call EmployeeDocumentService', () => {
         expect(employeeDocumentService.create).toHaveBeenCalledWith(
           createEmployeeDocumentData(),
-          file,
           'tenant-1',
+          file,
         );
       });
     });

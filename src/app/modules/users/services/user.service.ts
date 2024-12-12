@@ -136,7 +136,8 @@ export class UserService {
         createEmployeeJobInformationDto,
         createEmployeeDocumentDto,
       } = createBulkRequestDto;
-      if (profileImage) {
+      
+      if (profileImage && profileImage.buffer) {
         const uploadedImagePath =
           await this.fileUploadService.uploadFileToServer(
             tenantId,
@@ -195,8 +196,8 @@ export class UserService {
 
         await this.employeeDocumentService.create(
           createEmployeeDocumentDto,
-          documentName,
           tenantId,
+          documentName
         );
       }
 
