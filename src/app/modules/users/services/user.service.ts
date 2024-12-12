@@ -786,7 +786,6 @@ export class UserService {
           bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
           bulkCreate.createRolePermissionDto = createRolePermissionDto;
           bulkCreate.createUserPermissionDto = createUserPermissionDto;
-
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
