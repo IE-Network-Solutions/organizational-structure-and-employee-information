@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Department } from './entities/department.entity';
 import { TreeRepository } from 'typeorm';
 import { UserService } from '../users/services/user.service';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 @Injectable()
 export class DepartmentsService {
@@ -16,6 +17,7 @@ export class DepartmentsService {
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
     private userService: UserService,
+    private employeeJobInformationService: EmployeeJobInformationService,
   ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
@@ -215,26 +217,28 @@ export class DepartmentsService {
   
     if (users && users.length > 0) {
       for (const user of users) {
-        await this.userService.updateUserDepartment(user.id, departmentTobeShiftedId);
+        await this.employeeJobInformationService.update(user.employeeJobInformation[0].id, {departmentId: departmentTobeShiftedId});
       }
     }
 
     const descendants = await this.departmentRepository.findDescendants(department);
-  
+
     if (descendants?.length > 0) {
       for (const dep of descendants) {
-        const descendantUsers = await this.userService.findAllUsersByDepartment(
-          tenantId,
-          dep.id
-        );
-  
-        if (descendantUsers && descendantUsers.length > 0) {
-          for (const user of descendantUsers) {
-            await this.userService.updateUserDepartment(user.id, departmentTobeShiftedId);
+        if (dep.id !== departmentTobeDeletedId) {
+          const descendantUsers = await this.userService.findAllUsersByDepartment(
+            tenantId,
+            dep.id
+          );
+    
+          if (descendantUsers && descendantUsers.length > 0) {
+            for (const user of descendantUsers) {
+              await this.employeeJobInformationService.update(user.employeeJobInformation[0].id, {departmentId: departmentTobeShiftedId});
+            }
           }
-        }
 
-        await this.departmentRepository.softRemove(dep);
+          await this.departmentRepository.softRemove(dep);
+        }
       }
     }
 
