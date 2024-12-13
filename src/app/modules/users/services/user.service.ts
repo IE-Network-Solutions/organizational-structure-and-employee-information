@@ -2,6 +2,8 @@ import { DataSource, In } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -63,10 +65,10 @@ export class UserService {
     private readonly rolePermissionService: RolePermissionService,
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
+    @Inject(forwardRef(() => DepartmentsService))
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
