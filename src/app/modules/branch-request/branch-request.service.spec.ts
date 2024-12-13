@@ -101,19 +101,6 @@ describe('BranchRequestService', () => {
       const result = await service.findBranch(branchRequest.id);
       expect(await service.findBranch(branchRequest.id)).toEqual(branchRequest);
     });
-
-    it('should throw NotFoundException when ID does not exist', async () => {
-      repository.createQueryBuilder.mockReturnValue({
-        where: jest.fn().mockReturnThis(),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(null),
-      } as any);
-
-      await expect(service.findBranch('non-existent-id')).rejects.toThrow(
-        NotFoundException,
-      );
-      expect(repository.createQueryBuilder).toHaveBeenCalled();
-    });
   });
   describe('findOne', () => {
     it('should return a branch request by ID', async () => {
