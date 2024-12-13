@@ -25,24 +25,25 @@ export class EmployeeDocumentService {
 
   async create(
     createEmployeeDocumentsDto: CreateEmployeeDocumentDto,
-    documentName: Express.Multer.File,
     tenantId: string,
+    documentName?: Express.Multer.File,
   ) {
-    const uploadedDocumentPath =
-      await this.fileUploadService.uploadFileToServer(tenantId, documentName);
+    if (documentName && documentName.buffer) {
+      const uploadedDocumentPath = await this.fileUploadService.uploadFileToServer(tenantId, documentName);
 
-    createEmployeeDocumentsDto['documentName'] =
-      uploadedDocumentPath['viewImage'];
+      createEmployeeDocumentsDto['documentName'] =
+        uploadedDocumentPath['viewImage'];
 
-    createEmployeeDocumentsDto['documentLink'] = uploadedDocumentPath['image'];
+      createEmployeeDocumentsDto['documentLink'] = uploadedDocumentPath['image'];
 
-    const employeeDocument = this.employeeDocumentRepository.create(
-      createEmployeeDocumentsDto,
-    );
-    try {
-      return await this.employeeDocumentRepository.save(employeeDocument);
-    } catch (error) {
-      throw new ConflictException(error.message);
+      const employeeDocument = this.employeeDocumentRepository.create(
+        createEmployeeDocumentsDto,
+      );
+      try {
+        return await this.employeeDocumentRepository.save(employeeDocument);
+      } catch (error) {
+        throw new ConflictException(error.message);
+      }
     }
   }
 
