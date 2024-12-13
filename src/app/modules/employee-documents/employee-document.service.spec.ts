@@ -78,8 +78,8 @@ describe('EmployeeDocumentService', () => {
       it('should call fileUploadService.uploadFileToServer', async () => {
         await employeeDocumentService.create(
           createEmployeeDocumentDto,
-          documentName,
           tenantId,
+          documentName,
         );
         expect(fileUploadService.uploadFileToServer).toHaveBeenCalledWith(
           tenantId,
@@ -90,8 +90,8 @@ describe('EmployeeDocumentService', () => {
       it('should call employeeDocumentRepository.create and save', async () => {
         await employeeDocumentService.create(
           createEmployeeDocumentDto,
-          documentName,
           tenantId,
+          documentName,
         );
         expect(employeeDocumentRepository.create).toHaveBeenCalledWith({
           ...createEmployeeDocumentDto,
@@ -104,8 +104,8 @@ describe('EmployeeDocumentService', () => {
       it('should return the created employee document', async () => {
         const result = await employeeDocumentService.create(
           createEmployeeDocumentDto,
-          documentName,
           tenantId,
+          documentName,
         );
         expect(result).toEqual(employeeDocumentDataSave());
       });
@@ -117,8 +117,8 @@ describe('EmployeeDocumentService', () => {
         await expect(
           employeeDocumentService.create(
             createEmployeeDocumentDto,
-            documentName,
             tenantId,
+            documentName,
           ),
         ).rejects.toThrow(ConflictException);
       });

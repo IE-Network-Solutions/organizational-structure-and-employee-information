@@ -6,15 +6,12 @@ import {
   Patch,
   Param,
   Delete,
-  Query,
   Req,
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Department } from './entities/department.entity';
-import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { Pagination } from 'nestjs-typeorm-paginate';
 import { ApiTags } from '@nestjs/swagger';
 import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
@@ -60,10 +57,16 @@ export class DepartmentsController {
     );
   }
 
-  @Delete(':id')
-  async removeDepartment(@Param('id') id: string): Promise<Department> {
-    return await this.departmentsService.removeDepartment(id);
+  @Delete(':departmentTobeDeletedId')
+  async removeDepartment(
+    @Req() req: Request,
+    @Param('departmentTobeDeletedId') departmentTobeDeletedId: string,
+    @Body('departmentTobeShiftedId') departmentTobeShiftedId: string,
+  ): Promise<Department> {
+    const tenantId = req['tenantId'];
+    return await this.departmentsService.removeDepartmentWithShift(departmentTobeDeletedId, departmentTobeShiftedId, tenantId);
   }
+
   @Get('/tenant/departments')
   @ExcludeAuthGuard()
   async findAllDepartmentsByTenantId(

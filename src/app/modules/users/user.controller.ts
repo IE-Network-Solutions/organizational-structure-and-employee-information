@@ -81,11 +81,11 @@ export class UserController {
     @Body() body: any,
     @Req() request: Request,
   ) {
-    const profileImage = files.find(
+    const profileImage = files?.find(
       (file) => file.fieldname === 'profileImage',
     );
 
-    const documentName = files.find(
+    const documentName = files?.find(
       (file) => file.fieldname === 'documentName',
     );
 
