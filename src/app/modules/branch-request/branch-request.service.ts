@@ -61,15 +61,14 @@ export class BranchRequestService {
 
       const queryBuilder = this.branchRequestRepository
         .createQueryBuilder('branchrequest')
-        .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch') // Join currentBranchId to fetch branch data
-        .leftJoinAndSelect('branchrequest.requestBranch', 'requestBranch') // Join requestBranchId to fetch branch data
-        .where('branchrequest.tenantId = :tenantId', { tenantId }) // Filter by tenantId
+        .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch')
+        .leftJoinAndSelect('branchrequest.requestBranch', 'requestBranch')
+        .where('branchrequest.tenantId = :tenantId', { tenantId })
         .orderBy(
           `branchrequest.${paginationOptions.orderBy || 'createdAt'}`,
           paginationOptions.orderDirection || 'DESC',
         );
 
-      // Pagination handling using `paginate`
       const paginatedData = await this.paginationService.paginate(
         queryBuilder,
         options,
@@ -210,10 +209,6 @@ export class BranchRequestService {
         .where('branchrequest.id = :id', { id })
         .getOne();
 
-      if (!branchRequest) {
-        throw new NotFoundException(`BranchRequest with Id ${id} not found`);
-      }
-
       return branchRequest;
     } catch (error) {
       throw new NotFoundException(`BranchRequest with Id ${id} not found`);
@@ -249,12 +244,6 @@ export class BranchRequestService {
           options,
         );
 
-      if (!paginatedData.items.length) {
-        throw new NotFoundException(
-          `No BranchRequests found for userId ${userId}`,
-        );
-      }
-
       return paginatedData;
     } catch (error) {
       throw new NotFoundException(
@@ -269,9 +258,7 @@ export class BranchRequestService {
   ): Promise<BranchRequest> {
     try {
       const branchRequest = await this.findOne(id);
-      if (!branchRequest) {
-        throw new NotFoundException(`BranchRequest with Id ${id} not found`);
-      }
+
       const updatedBranchRequest = await this.branchRequestRepository.update(
         id,
         updateBranchRequestDto,
@@ -288,9 +275,7 @@ export class BranchRequestService {
   async remove(id: string) {
     try {
       const branchRequest = await this.findOne(id);
-      if (!branchRequest) {
-        throw new NotFoundException(`BranchRequest with Id ${id} not found`);
-      }
+
       await this.branchRequestRepository.softRemove({ id });
       return branchRequest;
     } catch (error) {
