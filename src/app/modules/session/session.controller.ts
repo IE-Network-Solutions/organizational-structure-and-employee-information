@@ -16,6 +16,7 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 import { Session } from './entities/session.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { ApiTags } from '@nestjs/swagger';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('session')
 @ApiTags('session')
@@ -60,6 +61,7 @@ export class SessionController {
     return this.sessionService.removeSession(id);
   }
   @Get('/active/session')
+  @ExcludeAuthGuard()
   getActiveSession(@Headers('tenantId') tenantId: string) {
     return this.sessionService.getActiveSession(tenantId);
   }
