@@ -50,7 +50,6 @@ import { EmployeeInformation } from '../../employee-information/entities/employe
 import { CreateEmployeeInformationDto } from '../../employee-information/dto/create-employee-information.dto';
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
-import { HashAlgorithmType } from 'firebase-admin/lib/auth/user-import-builder';
 
 @Injectable()
 export class UserService {
