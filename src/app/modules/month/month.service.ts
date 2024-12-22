@@ -176,4 +176,23 @@ export class MonthService {
       throw new BadRequestException(error.message);
     }
   }
+
+  async activatePreviousActiveMonth(tenantId: string): Promise<Month> {
+    try {
+      const activeMonth = await this.geActiveMonth(tenantId);
+
+      if (!activeMonth) {
+        throw new BadRequestException('Active month not found');
+      }
+
+      const date = new Date(activeMonth.endDate);
+      //  date.setDate(date.getDate() - 1);
+      const previousMonth = await this.monthRepository.findOne({
+        where: { startDate: date, tenantId, active: false },
+      });
+      return previousMonth;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 }

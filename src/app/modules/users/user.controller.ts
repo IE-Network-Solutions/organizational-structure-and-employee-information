@@ -81,11 +81,11 @@ export class UserController {
     @Body() body: any,
     @Req() request: Request,
   ) {
-    const profileImage = files.find(
+    const profileImage = files?.find(
       (file) => file.fieldname === 'profileImage',
     );
 
-    const documentName = files.find(
+    const documentName = files?.find(
       (file) => file.fieldname === 'documentName',
     );
 
@@ -200,28 +200,13 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  // @Get('many')
-  // findBulkUsers(@Body() user: any): Promise<User[]> {
-  //   return this.userService.findOne(id);
-  // }
-
-  // @Patch(':id')
-  // update(
-  //   @Req() request: Request,
-  //   @Param('id') id: string,
-  //   @Body() updateUserDto: UpdateUserDto,
-  // ) {
-  //   const tenantId = request['tenantId'];
-  //   return this.userService.update(id, tenantId, updateUserDto);
-  // }
-
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('profileImage')) // Matches the field name of the file
+  @UseInterceptors(FileInterceptor('profileImage'))
   async update(
     @Req() request: Request,
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @UploadedFile() profileImage?: Express.Multer.File, // Optional file parameter
+    @UploadedFile() profileImage?: Express.Multer.File,
   ) {
     try {
       const tenantId = request['tenantId'];
@@ -244,13 +229,6 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
-
-  // @Post('/assign-permission-to-user')
-  // assignPermissionToRole(
-  //   @Body() createUserPermissionDto: CreateUserPermissionDto,
-  // ) {
-  //   return this.usersService.assignPermissionToUser(createUserPermissionDto);
-  // }
 
   @Get('/permissions/:userId')
   findPermissionsByUserId(@Param('userId') id: string) {
@@ -335,30 +313,4 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
-
-
-  @Get('/export/firebase/user')
-  @ExcludeTenantGuard()
-  @ExcludeAuthGuard()
-  exportUser() {
-  
-    return this.userService.exportUsers();
-  }
-
-  @Get('/import/firebase/user')
-  @ExcludeTenantGuard()
-  @ExcludeAuthGuard()
-  importUsersddjjd() {
-  
-    return this.userService.importUsersFromFile();
-  }
-
-  @Delete('/delete/firebase/user')
-  @ExcludeTenantGuard()
-  @ExcludeAuthGuard()
-  deleteUSerfirbase() {
-  
-    return this.userService.deleteAllFirebaseUsers();
-  }
-
 }

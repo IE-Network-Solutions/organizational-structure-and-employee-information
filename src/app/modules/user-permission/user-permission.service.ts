@@ -9,6 +9,7 @@ import { CreateUserPermissionDto } from './dto/create-user-permission.dto';
 import { UserPermissionRepository } from './user-permission-repository';
 import { UserPermissionInterface } from './user-permission-interface';
 import { UpdateUserPermissionDto } from './dto/update-user-permission.dto';
+import { CreateUserPermissionBulkDto } from './dto/assign-bulk-user-permission';
 
 @Injectable()
 export class UserPermissionService implements UserPermissionInterface {
@@ -132,5 +133,21 @@ export class UserPermissionService implements UserPermissionInterface {
       }
       throw error;
     }
+  }
+
+  async assignPermissionToUserOnSeed(
+    createUserPermissionBulkDto: CreateUserPermissionBulkDto,
+    tenantId: string,
+  ): Promise<any> {
+    const assignedPermissions = await Promise.all(
+      createUserPermissionBulkDto.userId.map(async (userId) => {
+        const permissionAssign = new CreateUserPermissionDto();
+        permissionAssign.userId = userId;
+        permissionAssign.permissionId =
+          createUserPermissionBulkDto.permissionId;
+        await this.assignPermissionToUser(permissionAssign, tenantId);
+      }),
+    );
+    return assignedPermissions;
   }
 }

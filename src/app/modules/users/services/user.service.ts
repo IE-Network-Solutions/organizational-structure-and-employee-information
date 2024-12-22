@@ -2,6 +2,8 @@ import { DataSource, In } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -50,8 +52,6 @@ import { CreateEmployeeJobInformationDto } from '../../employee-job-information/
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
 import { HashAlgorithmType } from 'firebase-admin/lib/auth/user-import-builder';
 
-
-
 @Injectable()
 export class UserService {
   private readonly emailServerUrl: string;
@@ -66,10 +66,10 @@ export class UserService {
     private readonly rolePermissionService: RolePermissionService,
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
+    @Inject(forwardRef(() => DepartmentsService))
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -139,7 +139,8 @@ export class UserService {
         createEmployeeJobInformationDto,
         createEmployeeDocumentDto,
       } = createBulkRequestDto;
-      if (profileImage) {
+
+      if (profileImage && profileImage.buffer) {
         const uploadedImagePath =
           await this.fileUploadService.uploadFileToServer(
             tenantId,
@@ -198,8 +199,8 @@ export class UserService {
 
         await this.employeeDocumentService.create(
           createEmployeeDocumentDto,
-          documentName,
           tenantId,
+          documentName,
         );
       }
 
@@ -309,11 +310,13 @@ export class UserService {
 
     return users;
   }
+
   async findOne(id: string): Promise<User> {
     try {
       const user = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.employeeDocument', 'employeeDocument')
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
@@ -323,18 +326,17 @@ export class UserService {
           'employeeJobInformation.employementType',
           'employementType',
         )
-        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
-
         .leftJoinAndSelect(
           'employeeJobInformation.workSchedule',
           'workSchedule',
         )
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect('user.userPermissions', 'userPermissions')
+        .leftJoinAndSelect('userPermissions.permission', 'permission')
         .where('user.id = :id', { id })
         .getOne();
       user['reportingTo'] = await this.findReportingToUser(id);
@@ -352,7 +354,7 @@ export class UserService {
     id: string,
     tenantId: string,
     updateUserDto: UpdateUserDto,
-    profileImage?: Express.Multer.File, // Add this optional parameter
+    profileImage?: Express.Multer.File,
   ) {
     try {
       const user = await this.userRepository.findOneOrFail({
@@ -379,6 +381,7 @@ export class UserService {
         updateUserDto.profileImage = uploadedImagePath['viewImage'];
         updateUserDto.profileImageDownload = uploadedImagePath['image'];
       }
+
       if (updateUserDto.permission) {
         const createPremission = new CreateUserPermissionDto();
         createPremission.permissionId = updateUserDto.permission
@@ -401,10 +404,8 @@ export class UserService {
 
       await this.userRepository.update({ id }, updateUserDto);
 
-   
       return await this.userRepository.findOneOrFail({ where: { id } });
     } catch (error) {
-      console.log(error.message,"message1")
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
@@ -789,7 +790,6 @@ export class UserService {
           bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
           bulkCreate.createRolePermissionDto = createRolePermissionDto;
           bulkCreate.createUserPermissionDto = createUserPermissionDto;
-
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
@@ -813,160 +813,4 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
-
-  async  deleteAllFirebaseUsers() {
-    const admin = require('firebase-admin');
-    // Initialize Firebase Admin SDK if not already initialized
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-      });
-    }
-
-    const deleteUsersBatch = async (nextPageToken?: string) => {
-      const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
-
-      // Map delete promises
-      const deletePromises = listUsersResult.users.map((user) =>
-        admin.auth().deleteUser(user.uid)
-      );
-
-      // Wait for all deletions in the current batch
-      await Promise.all(deletePromises);
-
-      console.log(`Deleted ${listUsersResult.users.length} users`);
-
-      // If there's a nextPageToken, process the next batch
-      if (listUsersResult.pageToken) {
-        await deleteUsersBatch(listUsersResult.pageToken);
-      }
-    };
-
-    try {
-      await deleteUsersBatch();
-      console.log('All users have been successfully deleted.');
-    } catch (error) {
-      console.error('Error deleting users:', error);
-    }
-  }
-
- // Call the function
-
-  //   async getTenantDomain(
-
-  //     tenantId: string,
-
-  //   ) {
-  // try{
-  //     const response = await this.httpService
-  //       .post(`${this.tenantUrl}/client/${tenantId}`)
-  //       .toPromise();
-
-  //     return response.data;
-  // }catch(error){
-  //   throw new BadRequestException(error.message)
-  // }
-  //   }
-
-
-  async exportUsers() {
-    const users = [];
-    let nextPageToken;
-  
-    // Fetch all users in a loop
-    do {
-      const result = await admin.auth().listUsers(1000, nextPageToken);
-      users.push(...result.users);
-      nextPageToken = result.pageToken;
-    } while (nextPageToken);
-  
-    // Map users to the desired structure
-    const mappedUsers = users.map(user => ({
-      uid: user.uid,
-      email: user.email,
-      emailVerified: user.emailVerified,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      phoneNumber: user.phoneNumber,
-      disabled: user.disabled,
-      customClaims: user.customClaims,
-      passwordHash: user.passwordHash,
-      passwordSalt: user.passwordSalt, 
-    }));
-  
-    // Write the mapped users to a JSON file
-    const fs = require('fs');
-    fs.writeFileSync('users.json', JSON.stringify(mappedUsers, null, 2));
-  
-    console.log('Users exported successfully!');
-    return mappedUsers;
-  }
-
-
-async  importUsersFromFile(): Promise<void> {
-  const filePath = path.resolve(
-    'C:\\Users\\selam\\Desktop\\pep\\organizational-structure-and-employee-information\\users.json'
-  );
-
-  try {
-    // Read and parse the JSON file containing user data
-    const fileData = fs.readFileSync(filePath, 'utf-8');
-    const users = JSON.parse(fileData);
-
-    // Validate data format
-    if (!Array.isArray(users)) {
-      console.error('Invalid data format: The file should contain an array of users.');
-      throw new Error('Invalid data format.');
-    }
-
-    // Prepare user data for import
-    const usersForImport = users.map((user) => ({
-      uid: user.uid,
-      email: user.email,
-      emailVerified: user.emailVerified || false,
-      displayName: user.displayName || null,
-      disabled: user.disabled || false,
-      password: "123456", // Assuming password is optional but can be set
-    }));
-
-    // Process users in chunks of 1000
-    const chunkSize = 1000;
-    for (let i = 0; i < usersForImport.length; i += chunkSize) {
-      const chunk = usersForImport.slice(i, i + chunkSize);
-
-      try {
-        // Import users
-        const result = await admin.auth().importUsers(chunk);
-        console.log(`Successfully imported ${result.successCount} users out of ${chunk.length}`);
-
-        if (result.failureCount > 0) {
-          console.error('Failed to import some users:', result.errors);
-        }
-
-        const successfullyImportedUids = chunk
-          .filter((user, index) => result.errors[index] === undefined) 
-          .map((user) => user.uid); 
-
-        for (const uid of successfullyImportedUids) {
-          const user = usersForImport.find((u) => u.uid === uid);
-          if (user && user.password) {
-            try {
-              await admin.auth().updateUser(uid, { password: "%TGBnhy6" });
-              console.log(`Successfully updated password for user ${uid}`);
-            } catch (error) {
-              console.error(`Error updating password for user ${uid}:`, error.message);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error importing users for this chunk:', error.message, error.stack);
-      }
-    }
-  } catch (error) {
-    console.error('Error processing user import:', error.message, error.stack);
-  }
-}
-
-  
-  
 }

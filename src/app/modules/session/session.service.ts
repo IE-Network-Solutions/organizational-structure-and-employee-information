@@ -169,6 +169,7 @@ export class SessionService {
     try {
       const session = await this.sessionRepository.findOneOrFail({
         where: { tenantId: tenantId, active: true },
+        relations: ['months'],
       });
       return session;
     } catch (error) {
