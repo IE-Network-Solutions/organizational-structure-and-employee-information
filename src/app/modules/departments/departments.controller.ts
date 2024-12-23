@@ -64,7 +64,11 @@ export class DepartmentsController {
     @Body('departmentTobeShiftedId') departmentTobeShiftedId: string,
   ): Promise<Department> {
     const tenantId = req['tenantId'];
-    return await this.departmentsService.removeDepartmentWithShift(departmentTobeDeletedId, departmentTobeShiftedId, tenantId);
+    return await this.departmentsService.removeDepartmentWithShift(
+      departmentTobeDeletedId,
+      departmentTobeShiftedId,
+      tenantId,
+    );
   }
 
   @Get('/tenant/departments')

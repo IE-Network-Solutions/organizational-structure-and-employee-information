@@ -236,6 +236,7 @@ export class RoleService implements RoleInterface {
     try {
       return await this.roleRepository.findOneOrFail({
         where: { slug: slug, tenantId: tenantId },
+        relations: ['user'],
       });
     } catch (error) {
       throw new BadRequestException(error.message);

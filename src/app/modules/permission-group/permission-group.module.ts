@@ -8,6 +8,7 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
 import { PermissionGroupRepository } from './permission-group-reposiory';
 import { RoleModule } from '../role/role.module';
 import { RolePermissionModule } from '../role-permission/role-permission.module';
+import { UserPermissionModule } from '../user-permission/user-permission.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { RolePermissionModule } from '../role-permission/role-permission.module'
     PermissionModule,
     RoleModule,
     RolePermissionModule,
+    UserPermissionModule,
   ],
 
   controllers: [PermissionGroupController],
