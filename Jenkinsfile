@@ -6,7 +6,7 @@ pipeline {
         REPO_URL = 'https://github.com/IE-Network-Solutions/organizational-structure-and-employee-information.git'
         BRANCH_NAME = 'production'
         REPO_DIR = 'osei-backend'
-        SSH_CREDENTIALS_ID = 'peptest'
+        SSH_CREDENTIALS_ID = 'pepproduction'
     }
 
     stages {
