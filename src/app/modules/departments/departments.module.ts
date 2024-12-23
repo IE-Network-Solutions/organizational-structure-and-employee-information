@@ -8,7 +8,11 @@ import { UserModule } from '../users/user.module';
 import { EmployeeJobInformationModule } from '../employee-job-information/employee-job-information.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Department]), forwardRef(() => UserModule), EmployeeJobInformationModule],
+  imports: [
+    TypeOrmModule.forFeature([Department]),
+    forwardRef(() => UserModule),
+    EmployeeJobInformationModule,
+  ],
 
   controllers: [DepartmentsController],
   providers: [DepartmentsService, PaginationService],

@@ -101,21 +101,31 @@ describe('DepartmentsController', () => {
   it('should remove a department', async () => {
     const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
     const result = await controller.removeDepartment(
-      req, 'be21f28b-4651-4d6f-8f08-d8128da64ee5', 'be21f28b-4651-4d6f-8f08-d8128da64ee5'
+      req,
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
     );
     expect(result).toEqual(departmentData());
     expect(service.removeDepartmentWithShift).toHaveBeenCalledWith(
-     'be21f28b-4651-4d6f-8f08-d8128da64ee5', 'be21f28b-4651-4d6f-8f08-d8128da64ee5', req['tenantId']
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      req['tenantId'],
     );
   });
 
   it('should throw not found exception for remove of non-existent department', async () => {
     const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
-    jest.spyOn(service, 'removeDepartmentWithShift').mockImplementationOnce(() => {
-      throw new NotFoundException(`Department with Id 4567 not found`);
-    });
-    await expect(controller.removeDepartment(req, 'be21f28b-4651-4d6f-8f08-d8128da64ee5', 'be21f28b-4651-4d6f-8f08-d8128da64ee5')).rejects.toThrow(
-      NotFoundException,
-    );
+    jest
+      .spyOn(service, 'removeDepartmentWithShift')
+      .mockImplementationOnce(() => {
+        throw new NotFoundException(`Department with Id 4567 not found`);
+      });
+    await expect(
+      controller.removeDepartment(
+        req,
+        'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+        'be21f28b-4651-4d6f-8f08-d8128da64ee5',
+      ),
+    ).rejects.toThrow(NotFoundException);
   });
 });

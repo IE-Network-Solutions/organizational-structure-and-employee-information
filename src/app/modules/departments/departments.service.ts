@@ -222,38 +222,46 @@ export class DepartmentsService {
   async removeDepartmentWithShift(
     departmentTobeDeletedId: string,
     departmentTobeShiftedId: string,
-    tenantId: string
+    tenantId: string,
   ): Promise<Department> {
     const department = await this.findOneDepartment(departmentTobeDeletedId);
-  
+
     if (!department) {
-      throw new NotFoundException(`Department with Id ${departmentTobeDeletedId} not found`);
+      throw new NotFoundException(
+        `Department with Id ${departmentTobeDeletedId} not found`,
+      );
     }
 
     const users = await this.userService.findAllUsersByDepartment(
       tenantId,
-      departmentTobeDeletedId
+      departmentTobeDeletedId,
     );
-  
+
     if (users && users.length > 0) {
       for (const user of users) {
-        await this.employeeJobInformationService.update(user.employeeJobInformation[0].id, {departmentId: departmentTobeShiftedId});
+        await this.employeeJobInformationService.update(
+          user.employeeJobInformation[0].id,
+          { departmentId: departmentTobeShiftedId },
+        );
       }
     }
 
-    const descendants = await this.departmentRepository.findDescendants(department);
+    const descendants = await this.departmentRepository.findDescendants(
+      department,
+    );
 
     if (descendants?.length > 0) {
       for (const dep of descendants) {
         if (dep.id !== departmentTobeDeletedId) {
-          const descendantUsers = await this.userService.findAllUsersByDepartment(
-            tenantId,
-            dep.id
-          );
-    
+          const descendantUsers =
+            await this.userService.findAllUsersByDepartment(tenantId, dep.id);
+
           if (descendantUsers && descendantUsers.length > 0) {
             for (const user of descendantUsers) {
-              await this.employeeJobInformationService.update(user.employeeJobInformation[0].id, {departmentId: departmentTobeShiftedId});
+              await this.employeeJobInformationService.update(
+                user.employeeJobInformation[0].id,
+                { departmentId: departmentTobeShiftedId },
+              );
             }
           }
 
@@ -263,7 +271,7 @@ export class DepartmentsService {
     }
 
     await this.departmentRepository.softRemove(department);
-  
+
     return department;
   }
 

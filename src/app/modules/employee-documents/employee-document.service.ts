@@ -29,12 +29,14 @@ export class EmployeeDocumentService {
     documentName?: Express.Multer.File,
   ) {
     if (documentName && documentName.buffer) {
-      const uploadedDocumentPath = await this.fileUploadService.uploadFileToServer(tenantId, documentName);
+      const uploadedDocumentPath =
+        await this.fileUploadService.uploadFileToServer(tenantId, documentName);
 
       createEmployeeDocumentsDto['documentName'] =
         uploadedDocumentPath['viewImage'];
 
-      createEmployeeDocumentsDto['documentLink'] = uploadedDocumentPath['image'];
+      createEmployeeDocumentsDto['documentLink'] =
+        uploadedDocumentPath['image'];
 
       const employeeDocument = this.employeeDocumentRepository.create(
         createEmployeeDocumentsDto,

@@ -5,9 +5,7 @@ import { Department } from './entities/department.entity';
 import { TreeRepository } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import {
-  departmentData,
-} from './tests/department.data';
+import { departmentData } from './tests/department.data';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/services/user.service';
