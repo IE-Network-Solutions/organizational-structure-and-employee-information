@@ -129,21 +129,19 @@ export class CalendarsService {
     tenantId: string,
   ): Promise<Calendar> {
     try {
-      const Calendar = await this.findOneCalendar(id);
-      if (!Calendar) {
+      const calendar = await this.findOneCalendar(id);
+      if (!calendar) {
         throw new NotFoundException(`Calendar with Id ${id} not found`);
       }
-
+      if (updateCalendarDto.sessions && updateCalendarDto.sessions.length > 0) {
+        const session = updateCalendarDto.sessions;
+        delete updateCalendarDto.sessions;
+        await this.sessionService.updateBulkSession(session, tenantId);
+      }
       const updatedCalendar = await this.calendarRepository.update(
         id,
         updateCalendarDto,
       );
-      if (updateCalendarDto.sessions.length > 0) {
-        await this.sessionService.updateBulkSession(
-          updateCalendarDto.sessions,
-          tenantId,
-        );
-      }
 
       return await this.findOneCalendar(id);
     } catch (error) {
