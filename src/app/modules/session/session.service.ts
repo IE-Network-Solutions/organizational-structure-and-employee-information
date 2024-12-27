@@ -138,14 +138,12 @@ export class SessionService {
       if (!session) {
         throw new NotFoundException(`Session Not Found`);
       }
-
-      await this.sessionRepository.update({ id }, updateSessionDto);
       if (updateSessionDto.months && updateSessionDto.months.length > 0) {
-        await this.monthService.updateBulkMonth(
-          updateSessionDto.months,
-          tenantId,
-        );
+        const months = updateSessionDto.months;
+        delete updateSessionDto.months;
+        await this.monthService.updateBulkMonth(months, tenantId);
       }
+      await this.sessionRepository.update({ id }, updateSessionDto);
 
       return await this.findOneSession(id);
     } catch (error) {

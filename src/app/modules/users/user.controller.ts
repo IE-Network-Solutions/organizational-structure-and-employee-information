@@ -313,4 +313,11 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
+  
+  @Get('/all/users-id')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+  getAllUSerIds() {
+    return this.userService.getAllUSerIds();
+  }
 }
