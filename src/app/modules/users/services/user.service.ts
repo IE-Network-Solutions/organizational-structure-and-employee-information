@@ -812,4 +812,17 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
+
+  async getAllUSerIds() {
+    try {
+      const users = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.firstName']) 
+      .getMany();
+
+      return users;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 }

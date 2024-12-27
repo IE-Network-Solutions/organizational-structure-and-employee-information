@@ -53,7 +53,6 @@ describe('PermissionGroupService', () => {
           provide: UserPermissionService,
           useValue: mock<UserPermissionService>(),
         },
-        
       ],
     }).compile();
 

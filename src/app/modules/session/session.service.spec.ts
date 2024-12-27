@@ -147,6 +147,7 @@ describe('SessionService', () => {
   });
 
   describe('updateSession', () => {
+    const id= 'month-id'
     it('should update and return the updated month', async () => {
       sessionRepository.findOne.mockResolvedValue(sessionMock() as Session);
       sessionRepository.update.mockResolvedValue({ affected: 1 } as any);
@@ -158,7 +159,7 @@ describe('SessionService', () => {
       );
 
       expect(sessionRepository.update).toHaveBeenCalledWith(
-        { id: 'month-id' },
+        { id },
         sessionMock(),
       );
       expect(result).toEqual(sessionMock());
