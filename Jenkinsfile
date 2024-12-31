@@ -8,7 +8,7 @@ pipeline {
         REPO_DIR = 'osei-backend'
         SSH_CREDENTIALS_ID = 'peptest'
     }
-
+ 
     stages {
         stage('Prepare Repository') {
             steps {
