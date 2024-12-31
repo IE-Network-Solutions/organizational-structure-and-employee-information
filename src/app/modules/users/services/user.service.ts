@@ -812,6 +812,17 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
+  async getAllUser(tenantId: string) {
+    try {
+      const user = await this.userRepository.find({
+        where: {tenantId: tenantId },
+        relations: ['employeeInformation'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   async getAllUSerIds() {
     try {
