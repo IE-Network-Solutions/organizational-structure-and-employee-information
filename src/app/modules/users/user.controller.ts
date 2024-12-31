@@ -320,4 +320,10 @@ export class UserController {
   getAllUSerIds() {
     return this.userService.getAllUSerIds();
   }
+  @Get('/simple-info/all-user-with-tenant')
+  @ExcludeAuthGuard()
+  getAllUser(@Req() request: Request, @Param('userId') userId: string) {
+    const tenantId = request['tenantId'];
+    return this.userService.getAllUser(tenantId);
+  }
 }
