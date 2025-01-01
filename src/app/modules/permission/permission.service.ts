@@ -38,22 +38,32 @@ export class PermissionService implements PermissionInterface {
       throw new ConflictException(error.message);
     }
   }
+
   async findAll(
     paginationOptions: PaginationDto,
     searchFilterDTO: SearchFilterDTO,
   ): Promise<Pagination<Permission>> {
+    
     const options: IPaginationOptions = {
       page: paginationOptions.page,
       limit: paginationOptions.limit,
     };
+    
     const queryBuilder = await this.permissionRepository.createQueryBuilder(
       'permission',
     );
-    await applySearchFilterUtils(
-      queryBuilder,
-      searchFilterDTO,
-      this.permissionRepository,
-    );
+
+    if (searchFilterDTO.columnName === 'name') {
+      searchFilterDTO.query = searchFilterDTO.query.toLowerCase();
+    }
+
+    if (searchFilterDTO.columnName === 'permissionGroupId') {
+      queryBuilder.innerJoin('permission.permissionGroups', 'permissionGroup');
+      queryBuilder.andWhere('permissionGroup.id = :query', { query: searchFilterDTO.query });
+    } else {
+      await applySearchFilterUtils(queryBuilder, searchFilterDTO, this.permissionRepository);
+    }
+
     return await this.paginationService.paginate<Permission>(
       queryBuilder,
       options,
