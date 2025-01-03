@@ -40,6 +40,17 @@ export class BasicSalaryService {
     return this.basicSalaryRepository.find({ relations: ['user', 'jobInfo'] });
   }
 
+  async getActiveBasicSalaries(): Promise<
+    { userId: string; basicSalary: number }[]
+  > {
+    const salaries = await this.basicSalaryRepository.find({
+      where: { status: true },
+      select: ['userId', 'basicSalary'],
+    });
+
+    return salaries;
+  }
+
   findAllByUserId(userId: string): Promise<BasicSalary[]> {
     return this.basicSalaryRepository.find({
       where: { user: { id: userId } },

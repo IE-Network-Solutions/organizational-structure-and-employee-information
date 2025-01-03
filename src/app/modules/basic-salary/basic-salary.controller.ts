@@ -26,6 +26,11 @@ export class BasicSalaryController {
     return this.basicSalaryService.findAll();
   }
 
+  @Get('active')
+  async getActiveBasicSalaries() {
+    return this.basicSalaryService.getActiveBasicSalaries();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.basicSalaryService.findOne(id);
