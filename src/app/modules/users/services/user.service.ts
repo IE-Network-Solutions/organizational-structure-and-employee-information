@@ -815,7 +815,7 @@ export class UserService {
   async getAllUser(tenantId: string) {
     try {
       const user = await this.userRepository.find({
-        where: {tenantId: tenantId },
+        where: { tenantId: tenantId },
         relations: ['employeeInformation'],
       });
       return user;
@@ -827,13 +827,29 @@ export class UserService {
   async getAllUSerIds() {
     try {
       const users = await this.userRepository
-      .createQueryBuilder('user')
-      .select(['user.id', 'user.firstName']) 
-      .getMany();
+        .createQueryBuilder('user')
+        .select(['user.id', 'user.firstName'])
+        .getMany();
 
       return users;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  async findOneUserJobInfo(userId: string) {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .withDeleted()
+      .leftJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+        'employeeJobInformation.isPositionActive = :isPositionActive',
+        { isPositionActive: true },
+      )
+      .where('user.id = :id', { id: userId })
+      .getOne();
+
+    return user;
   }
 }
