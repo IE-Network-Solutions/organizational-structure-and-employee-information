@@ -313,7 +313,7 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.getOneUSer(userId, tenantId);
   }
-  
+
   @Get('/all/users-id')
   @ExcludeAuthGuard()
   @ExcludeTenantGuard()
@@ -325,5 +325,17 @@ export class UserController {
   getAllUser(@Req() request: Request, @Param('userId') userId: string) {
     const tenantId = request['tenantId'];
     return this.userService.getAllUser(tenantId);
+  }
+  @Get('/all/departments-users/:userId')
+  @ExcludeAuthGuard()
+  findSingleUserDepartmentUsers(
+    @Req() request: Request,
+    @Param('userId') userId: string,
+  ) {
+    const tenantId = request['tenantId'];
+    return this.userDepartmentService.findSingleUserDepartmentUsers(
+      userId,
+      tenantId,
+    );
   }
 }
