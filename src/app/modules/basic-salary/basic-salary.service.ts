@@ -4,29 +4,17 @@ import { UpdateBasicSalaryDto } from './dto/update-basic-salary.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BasicSalary } from './entities/basic-salary.entity';
 import { Repository } from 'typeorm';
-import { UserService } from '../users/services/user.service';
-import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
+
 
 @Injectable()
 export class BasicSalaryService {
   constructor(
     @InjectRepository(BasicSalary)
     private readonly basicSalaryRepository: Repository<BasicSalary>,
-    private readonly employeeJobInformationService: EmployeeJobInformationService,
-    private readonly user: UserService,
   ) {}
   async create(
     createBasicSalaryDto: CreateBasicSalaryDto,
   ): Promise<BasicSalary> {
-    const user = await this.user.findOne(createBasicSalaryDto.userId);
-    const jobInfo = await this.employeeJobInformationService.findOne(
-      createBasicSalaryDto.jobInfoId,
-    );
-
-    if (!user || !jobInfo) {
-      throw new NotFoundException('User or Job Info not found');
-    }
-
     const existingSalaries = await this.basicSalaryRepository.find({
       where: { user: { id: createBasicSalaryDto.userId } },
     });
@@ -41,8 +29,8 @@ export class BasicSalaryService {
     const basicSalary = this.basicSalaryRepository.create({
       basicSalary: createBasicSalaryDto.basicSalary,
       status: true,
-      user,
-      jobInfo,
+      userId: createBasicSalaryDto.userId,
+      jobInfoId: createBasicSalaryDto.jobInfoId,
     });
 
     return this.basicSalaryRepository.save(basicSalary);
@@ -72,25 +60,21 @@ export class BasicSalaryService {
   ): Promise<BasicSalary> {
     const basicSalary = await this.findOne(id);
 
-    const user = updateBasicSalaryDto.userId
-      ? await this.user.findOne(updateBasicSalaryDto.userId)
-      : basicSalary.user;
-
-    const jobInfo = updateBasicSalaryDto.jobInfoId
-      ? await this.employeeJobInformationService.findOne(
-          updateBasicSalaryDto.jobInfoId,
-        )
-      : basicSalary.jobInfo;
-
-    if (!user || !jobInfo) {
-      throw new NotFoundException('User or Job Info not found');
+    if (!basicSalary) {
+      throw new NotFoundException('Basic Salary not found');
     }
 
     basicSalary.basicSalary =
       updateBasicSalaryDto.basicSalary ?? basicSalary.basicSalary;
     basicSalary.status = updateBasicSalaryDto.status ?? basicSalary.status;
-    basicSalary.user = user;
-    basicSalary.jobInfo = jobInfo;
+
+    if (updateBasicSalaryDto.userId) {
+      basicSalary.userId = updateBasicSalaryDto.userId;
+    }
+
+    if (updateBasicSalaryDto.jobInfoId) {
+      basicSalary.jobInfoId = updateBasicSalaryDto.jobInfoId;
+    }
 
     return this.basicSalaryRepository.save(basicSalary);
   }

@@ -5,11 +5,17 @@ import { EmployeeJobInformation } from '../../employee-job-information/entities/
 
 @Entity()
 export class BasicSalary extends BaseModel {
-  @Column()
+  @Column({ type: 'decimal', nullable: true })
   basicSalary: number;
+
+  @Column({ type: 'uuid' })
+  jobInfoId: string;
 
   @Column({ type: 'boolean', default: true })
   status: boolean;
+
+  @Column({ type: 'uuid' })
+  userId: string;
 
   @ManyToOne(() => User, (user) => user.basicSalaries)
   user: User;

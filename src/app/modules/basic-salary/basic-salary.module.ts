@@ -4,16 +4,11 @@ import { BasicSalaryController } from './basic-salary.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BasicSalary } from './entities/basic-salary.entity';
 
-import { EmployeeJobInformationModule } from '../employee-job-information/employee-job-information.module';
-import { UserModule } from '../users/user.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([BasicSalary]),
-    EmployeeJobInformationModule,
-    UserModule,
-  ],
+  imports: [TypeOrmModule.forFeature([BasicSalary])],
   controllers: [BasicSalaryController],
   providers: [BasicSalaryService],
+  exports: [BasicSalaryService],
 })
 export class BasicSalaryModule {}
