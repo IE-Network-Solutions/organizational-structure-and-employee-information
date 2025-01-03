@@ -12,6 +12,7 @@ import {
   paginationResultEmployeeJobInformationData,
 } from '../employee-job-information/tests/employee-job-information.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { BasicSalaryService } from '../basic-salary/basic-salary.service';
 
 describe('EmployeeJobInformationService', () => {
   let employeeJobInformationService: EmployeeJobInformationService;
@@ -34,6 +35,10 @@ describe('EmployeeJobInformationService', () => {
         {
           provide: employeeJobInformationToken,
           useValue: mock<Repository<EmployeeJobInformation>>(),
+        },
+        {
+          provide: BasicSalaryService,
+          useValue: mock<BasicSalaryService>(),
         },
       ],
     }).compile();
