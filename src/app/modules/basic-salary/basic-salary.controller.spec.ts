@@ -1,0 +1,40 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { BasicSalaryController } from './basic-salary.controller';
+import { BasicSalaryService } from './basic-salary.service';
+import { UserService } from '../users/services/user.service';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
+import { mock } from 'jest-mock-extended';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BasicSalary } from './entities/basic-salary.entity';
+
+describe('BasicSalaryController', () => {
+  let controller: BasicSalaryController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [BasicSalaryController],
+      providers: [
+        BasicSalaryService,
+        {
+          provide: getRepositoryToken(BasicSalary),
+          useValue: mock<Repository<BasicSalary>>(),
+        },
+        {
+          provide: UserService,
+          useValue: mock<UserService>(),
+        },
+        {
+          provide: EmployeeJobInformationService,
+          useValue: mock<EmployeeJobInformationService>(),
+        },
+      ],
+    }).compile();
+
+    controller = module.get<BasicSalaryController>(BasicSalaryController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});

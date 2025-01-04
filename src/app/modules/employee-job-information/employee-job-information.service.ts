@@ -1,5 +1,3 @@
-import { Nationality } from './../nationality/entities/nationality.entity';
-// import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
 import {
   ConflictException,
   Injectable,
@@ -14,14 +12,15 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { UpdateEmployeeJobInformationDto } from './dto/update-employee-job-information.dto';
 import { EmployeeJobInformation } from './entities/employee-job-information.entity';
 import { User } from '../users/entities/user.entity';
+import { BasicSalaryService } from '../basic-salary/basic-salary.service';
 
 @Injectable()
 export class EmployeeJobInformationService {
   constructor(
     @InjectRepository(EmployeeJobInformation)
     private employeeJobInformationRepository: Repository<EmployeeJobInformation>,
-    // private userRepository: Repository<User>,
     private readonly paginationService: PaginationService,
+    private readonly basicSalaryService: BasicSalaryService, // Inject BasicSalaryService
   ) {}
   async create(
     createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
@@ -47,7 +46,19 @@ export class EmployeeJobInformationService {
       tenantId,
     });
     try {
-      return await this.employeeJobInformationRepository.save(user);
+      const savedJobInfo = await this.employeeJobInformationRepository.save(
+        user,
+      );
+      if (createEmployeeJobInformationDto.basicSalary) {
+        await this.basicSalaryService.create({
+          basicSalary: createEmployeeJobInformationDto.basicSalary,
+          status: true,
+          userId: savedJobInfo.userId,
+          jobInfoId: savedJobInfo.id,
+        });
+      }
+
+      return savedJobInfo;
     } catch (error) {
       throw new ConflictException(error.message);
     }

@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { BaseModel } from '../../../../database/base.model';
 import { IsEnum } from 'class-validator';
@@ -17,6 +18,7 @@ import { EmployeeTermination } from '../../employee-termination/entities/employe
 import { EmployementContractType } from '@root/src/core/enum/employement-contract-type.enum';
 import { JobAction } from '../enum/job-action.enum';
 import { JobPosition } from '@root/src/app/modules/job-position/entities/job-position.entity';
+import { BasicSalary } from '../../basic-salary/entities/basic-salary.entity';
 
 @Entity()
 export class EmployeeJobInformation extends BaseModel {
@@ -101,4 +103,7 @@ export class EmployeeJobInformation extends BaseModel {
   @ManyToOne(() => JobPosition, { nullable: true })
   @JoinColumn({ name: 'positionId' }) // This maps positionId in the DB
   position: JobPosition;
+
+  @OneToMany(() => BasicSalary, (basicSalary) => basicSalary.jobInfo)
+  basicSalaries: BasicSalary[];
 }

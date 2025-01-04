@@ -1,6 +1,5 @@
 import { Global, Module } from '@nestjs/common';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
-
 import { WorkSchedulesModule } from './modules/work-schedules/work-schedules.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { BranchesModule } from './modules/branchs/branches.module';
@@ -25,6 +24,7 @@ import { CronJobLogModule } from './modules/cron-job-log/cron-job-log.module';
 import { SessionModule } from './modules/session/session.module';
 import { MonthModule } from './modules/month/month.module';
 import { BranchRequestModule } from './modules/branch-request/branch-request.module';
+import { BasicSalaryModule } from './modules/basic-salary/basic-salary.module';
 @Global()
 @Module({
   imports: [
@@ -54,6 +54,7 @@ import { BranchRequestModule } from './modules/branch-request/branch-request.mod
     SessionModule,
     MonthModule,
     BranchRequestModule,
+    BasicSalaryModule,
   ],
 })
 export class CoreModule {}

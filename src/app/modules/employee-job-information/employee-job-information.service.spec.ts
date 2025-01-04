@@ -15,6 +15,7 @@ import {
 import { NotFoundException } from '@nestjs/common';
 import { employeeInformationData } from '../employee-information/tests/employee-information.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
+import { BasicSalaryService } from '../basic-salary/basic-salary.service';
 
 describe('EmployeeJobInformationService', () => {
   let employeeJobInformationService: EmployeeJobInformationService;
@@ -37,6 +38,10 @@ describe('EmployeeJobInformationService', () => {
         {
           provide: employeeJobInformationToken,
           useValue: mock<Repository<EmployeeJobInformation>>(),
+        },
+        {
+          provide: BasicSalaryService,
+          useValue: mock<BasicSalaryService>(),
         },
       ],
     }).compile();
