@@ -65,7 +65,7 @@ stage('Pull Latest Changes') {
                         if (output.contains('No changes in database schema were found')) {
                             echo 'No database schema changes found, skipping migration.'
                         } else {
-                            sh "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:run'"
+                            sh "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:force'"
                         }
                     }
                 }
