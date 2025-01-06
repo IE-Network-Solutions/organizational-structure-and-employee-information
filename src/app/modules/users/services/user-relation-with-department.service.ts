@@ -46,6 +46,24 @@ export class UserDepartmentService {
     }
   }
 
+  async findSingleUserDepartmentUsers(userId: string, tenantId: string) {
+    try {
+      const user = await this.userService.findOneUserJobInfo(userId);
+      const departmentId = user.employeeJobInformation[0].departmentId;
+
+      const users = await this.userService.findAllUsersByDepartment(
+        tenantId,
+        departmentId,
+      );
+      return users;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
+
   async dissolveDepartment(
     dissolveDepartmentDto: DissolveDepartmentDto,
     tenantId: string,

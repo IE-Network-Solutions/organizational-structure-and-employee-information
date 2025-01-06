@@ -147,7 +147,7 @@ describe('SessionService', () => {
   });
 
   describe('updateSession', () => {
-    const id= 'month-id'
+    const id = 'month-id';
     it('should update and return the updated month', async () => {
       sessionRepository.findOne.mockResolvedValue(sessionMock() as Session);
       sessionRepository.update.mockResolvedValue({ affected: 1 } as any);
