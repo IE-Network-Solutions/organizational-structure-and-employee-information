@@ -58,14 +58,14 @@ stage('Pull Latest Changes') {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                     script {
                         def output = sh(
-                            script: "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:force || true'",
+                            script: "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:run || true'",
                             returnStdout: true
                         ).trim()
                         echo output
                         if (output.contains('No changes in database schema were found')) {
                             echo 'No database schema changes found, skipping migration.'
                         } else {
-                            sh "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:force'"
+                            sh "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:run'"
                         }
                     }
                 }
