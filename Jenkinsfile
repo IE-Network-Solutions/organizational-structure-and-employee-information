@@ -58,7 +58,7 @@ stage('Pull Latest Changes') {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                     script {
                         def output = sh(
-                            script: "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:generate-run || true'",
+                            script: "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:run || true'",
                             returnStdout: true
                         ).trim()
                         echo output
