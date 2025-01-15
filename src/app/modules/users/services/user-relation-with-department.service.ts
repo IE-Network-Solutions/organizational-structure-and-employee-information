@@ -76,32 +76,6 @@ export class UserDepartmentService {
         dissolveDepartmentDto,
         tenantId,
       );
-      if (departments) {
-        for (const department of departmentToDelete) {
-          const departmentUsers = await this.userRepository.find({
-            where: {
-              employeeJobInformation: {
-                departmentId: department,
-                tenantId: tenantId,
-              },
-            },
-            relations: ['employeeJobInformation'],
-          });
-
-          if (departmentUsers) {
-            for (const user of departmentUsers) {
-              for (const departmentUser of user.employeeJobInformation) {
-                const updatedData = new UpdateEmployeeJobInformationDto();
-                updatedData.departmentId = dissolveDepartmentDto.id;
-                await this.employeeJobInformationService.update(
-                  departmentUser.id,
-                  updatedData,
-                );
-              }
-            }
-          }
-        }
-      }
       return departments;
     } catch (error) {
       if (error instanceof NotFoundException) {
