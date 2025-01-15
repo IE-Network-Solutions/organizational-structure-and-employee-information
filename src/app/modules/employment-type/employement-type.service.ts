@@ -115,7 +115,12 @@ export class EmployementTypeService {
   ) {
     let employees = await this.employeeTypeRepository
       .createQueryBuilder('employeeType')
-      .leftJoin('employeeType.employeeJobInformation', 'employeeJobInformation') // Join employeeJobInformation
+      .leftJoin(
+        'employeeType.employeeJobInformation',
+        'employeeJobInformation',
+        'employeeJobInformation.isPositionActive = :isPositionActive',
+        { isPositionActive: true },
+      )
       .leftJoin('employeeJobInformation.user', 'user')
       .select('employeeType.name', 'name')
       .addSelect('employeeType.id', 'id')
