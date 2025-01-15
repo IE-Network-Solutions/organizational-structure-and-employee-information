@@ -2,11 +2,10 @@ import { EmployementContractType } from '@root/src/core/enum/employement-contrac
 import {
   IsOptional,
   IsString,
-  IsUUID,
   IsBoolean,
   IsEnum,
   IsDateString,
-  IsJSON,
+  IsNumber,
 } from 'class-validator';
 import { JobAction } from '../enum/job-action.enum';
 
@@ -58,4 +57,8 @@ export class CreateEmployeeJobInformationDto {
   @IsOptional()
   @IsString()
   userId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  basicSalary?: number;
 }

@@ -36,7 +36,7 @@ export async function applySearchFilterUtils(
       );
     } else {
       queryBuilder = queryBuilder.andWhere(
-        `${metadata.tableName}.${columnName} LIKE :query`,
+        `LOWER(${metadata.tableName}.${columnName}) LIKE LOWER(:query)`,
         { query: `%${query}%` },
       );
     }

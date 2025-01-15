@@ -8,7 +8,7 @@ pipeline {
         REPO_DIR = 'osei-backend'
         SSH_CREDENTIALS_ID = 'peptest'
     }
-
+ 
     stages {
         stage('Prepare Repository') {
             steps {
@@ -23,20 +23,25 @@ pipeline {
                 }
             }
         }
-        stage('Pull Latest Changes') {
-            steps {
-                sshagent (credentials: [SSH_CREDENTIALS_ID]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no $REMOTE_SERVER '
-                        if [ ! -d "$REPO_DIR/.git" ]; then
-                            git clone $REPO_URL -b $BRANCH_NAME $REPO_DIR
-                        else
-                            cd $REPO_DIR && git reset --hard HEAD && git pull origin $BRANCH_NAME
-                        fi'
-                    """
-                }
-            }
+stage('Pull Latest Changes') {
+    steps {
+        sshagent (credentials: [SSH_CREDENTIALS_ID]) {
+            sh """
+                ssh -o StrictHostKeyChecking=no $REMOTE_SERVER '
+                if [ ! -d "$REPO_DIR/.git" ]; then
+                    git clone $REPO_URL -b $BRANCH_NAME $REPO_DIR
+                else
+                    cd $REPO_DIR
+                    git config user.email "jenkins-ci@example.com"
+                    git config user.name "Jenkins CI"
+                    git reset --hard HEAD
+                    git pull origin $BRANCH_NAME
+                fi'
+            """
         }
+    }
+}
+
         stage('Install Dependencies') {
             steps {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
@@ -53,7 +58,7 @@ pipeline {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
                     script {
                         def output = sh(
-                            script: "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:generate-run || true'",
+                            script: "ssh -o StrictHostKeyChecking=no $REMOTE_SERVER 'cd ~/$REPO_DIR && npm run migration:run || true'",
                             returnStdout: true
                         ).trim()
                         echo output
