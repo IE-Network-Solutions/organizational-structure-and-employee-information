@@ -39,6 +39,7 @@ import { Department } from '../departments/entities/department.entity';
 import { UserDepartmentService } from './services/user-relation-with-department.service';
 import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dto';
 import { ImportEmployeeDto } from './dto/import-user.dto';
+import { FilterEmailDto } from './dto/email.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -335,6 +336,19 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userDepartmentService.findSingleUserDepartmentUsers(
       userId,
+      tenantId,
+    );
+  }
+
+  @Post('/email')
+  @ExcludeAuthGuard()
+  findUserByEmail(
+    @Req() request: Request,
+    @Body() email: FilterEmailDto,
+  ) {
+    const tenantId = request['tenantId'];
+    return this.userService.findUserByEmail(
+      email,
       tenantId,
     );
   }
