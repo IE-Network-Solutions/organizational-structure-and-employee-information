@@ -50,6 +50,7 @@ import { EmployeeInformation } from '../../employee-information/entities/employe
 import { CreateEmployeeInformationDto } from '../../employee-information/dto/create-employee-information.dto';
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
+import { FilterEmailDto } from '../dto/email.dto';
 
 @Injectable()
 export class UserService {
@@ -852,5 +853,15 @@ export class UserService {
 
     return user;
   }
+  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: email.email },
+      });
 
+      return user;
+    } catch (error) {
+      throw new NotFoundException('User Not Found');
+    }
+  }
 }
