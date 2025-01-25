@@ -275,6 +275,18 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userDepartmentService.findAllDepartments(tenantId);
   }
+  @Get('/child/departments/:departmentId')
+  @ExcludeAuthGuard()
+  findAllChildDepartmentsWithUsers(
+    @Req() request: Request,
+    @Param('departmentId') departmentId: string,
+  ): Promise<Department[]> {
+    const tenantId = request['tenantId'];
+    return this.userDepartmentService.findAllChildDepartmentsWithUsers(
+      tenantId,
+      departmentId,
+    );
+  }
 
   @Post('/department/dissolve')
   dissolveDepartment(
@@ -342,15 +354,8 @@ export class UserController {
 
   @Post('/email')
   @ExcludeAuthGuard()
-  findUserByEmail(
-    @Req() request: Request,
-    @Body() email: FilterEmailDto,
-  ) {
+  findUserByEmail(@Req() request: Request, @Body() email: FilterEmailDto) {
     const tenantId = request['tenantId'];
-    return this.userService.findUserByEmail(
-      email,
-      tenantId,
-    );
+    return this.userService.findUserByEmail(email, tenantId);
   }
-
 }

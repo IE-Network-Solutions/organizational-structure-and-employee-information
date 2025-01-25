@@ -853,17 +853,15 @@ export class UserService {
 
     return user;
   }
-  async findUserByEmail(email: FilterEmailDto,tenantId:string) {
-    try{
+  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: email.email },
+      });
 
-    const user = await this.userRepository.findOne({where:{email:email.email}})
-   
-    return user;
+      return user;
+    } catch (error) {
+      throw new NotFoundException('User Not Found');
     }
-    catch(error){
-      throw new NotFoundException('User Not Found')
-    }
-
-   
   }
 }
