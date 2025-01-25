@@ -46,6 +46,35 @@ export class UserDepartmentService {
     }
   }
 
+  async findAllChildDepartmentsWithUsers(
+    tenantId: string,
+    departmentId: string,
+  ): Promise<Department[]> {
+    try {
+      const departments = await this.departmentService.findAllChildDepartments(
+        tenantId,
+        departmentId,
+      );
+      if (departments?.length > 0) {
+        for (const department of departments) {
+          const users = await this.userService.findAllUsersByDepartment(
+            tenantId,
+            department.id,
+          );
+          department['users'] = users;
+        }
+
+        return departments;
+      }
+      return departments;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
+
   async findSingleUserDepartmentUsers(userId: string, tenantId: string) {
     try {
       const user = await this.userService.findOneUserJobInfo(userId);

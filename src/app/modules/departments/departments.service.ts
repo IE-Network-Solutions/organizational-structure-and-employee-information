@@ -140,6 +140,18 @@ export class DepartmentsService {
       throw new NotFoundException(`Department  not found`);
     }
   }
+  async findAllChildDepartments(
+    tenantId: string,
+    departmentId: string,
+  ): Promise<Department[]> {
+    try {
+      return await this.departmentRepository.find({
+        where: { parent: { id: departmentId } },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Department  not found`);
+    }
+  }
   async updateDepartment(
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,

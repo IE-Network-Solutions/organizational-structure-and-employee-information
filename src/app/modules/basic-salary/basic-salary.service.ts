@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BasicSalary } from './entities/basic-salary.entity';
 import { Repository } from 'typeorm';
 
-
 @Injectable()
 export class BasicSalaryService {
   constructor(
