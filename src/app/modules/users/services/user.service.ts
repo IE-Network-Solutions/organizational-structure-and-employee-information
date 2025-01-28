@@ -824,6 +824,17 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
+  async getAllUsersWithNetPay(tenantId: string):Promise<User[]> {
+    try {
+      const user = await this.userRepository.find({
+        where: { tenantId: tenantId },
+        relations: ['employeeInformation','basicSalaries'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   async getAllUSerIds() {
     try {
