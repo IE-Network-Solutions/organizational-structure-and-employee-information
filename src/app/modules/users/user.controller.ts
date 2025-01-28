@@ -339,6 +339,14 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.getAllUser(tenantId);
   }
+
+  
+  @Get('/simple-info/all-user-net-pay/with-tenant')
+  @ExcludeAuthGuard()
+  getAllUsersWithNetPay(@Req() request: Request) {
+    const tenantId = request['tenantId'];
+    return this.userService.getAllUsersWithNetPay(tenantId);
+  }
   @Get('/all/departments-users/:userId')
   @ExcludeAuthGuard()
   findSingleUserDepartmentUsers(
