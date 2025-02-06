@@ -11,6 +11,8 @@ import { BasicSalaryService } from './basic-salary.service';
 import { CreateBasicSalaryDto } from './dto/create-basic-salary.dto';
 import { UpdateBasicSalaryDto } from './dto/update-basic-salary.dto';
 import { BasicSalary } from './entities/basic-salary.entity';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
+
 
 @Controller('basic-salary')
 export class BasicSalaryController {
@@ -27,6 +29,7 @@ export class BasicSalaryController {
   }
 
   @Get('active')
+  @ExcludeAuthGuard()
   async getActiveBasicSalaries() {
     return this.basicSalaryService.getActiveBasicSalaries();
   }

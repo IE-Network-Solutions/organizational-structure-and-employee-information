@@ -248,6 +248,13 @@ export class UserService {
           'employeeJobInformation.isPositionActive = :isPositionActive',
           { isPositionActive: true },
         )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect(
@@ -321,6 +328,12 @@ export class UserService {
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
+        )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
         )
         .leftJoinAndSelect(
           'employeeJobInformation.employementType',
@@ -818,6 +831,17 @@ export class UserService {
       const user = await this.userRepository.find({
         where: { tenantId: tenantId },
         relations: ['employeeInformation'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async getAllUsersWithNetPay(tenantId: string): Promise<User[]> {
+    try {
+      const user = await this.userRepository.find({
+        where: { tenantId: tenantId },
+        relations: ['employeeInformation', 'basicSalaries'],
       });
       return user;
     } catch (error) {
