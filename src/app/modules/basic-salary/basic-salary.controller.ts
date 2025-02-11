@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Headers,
 } from '@nestjs/common';
 import { BasicSalaryService } from './basic-salary.service';
 import { CreateBasicSalaryDto } from './dto/create-basic-salary.dto';
@@ -19,19 +20,19 @@ export class BasicSalaryController {
   constructor(private readonly basicSalaryService: BasicSalaryService) {}
 
   @Post()
-  create(@Body() createBasicSalaryDto: CreateBasicSalaryDto) {
-    return this.basicSalaryService.create(createBasicSalaryDto);
+  create(@Body() createBasicSalaryDto: CreateBasicSalaryDto, @Headers('tenantId') tenantId: string) {
+    return this.basicSalaryService.create(createBasicSalaryDto, tenantId);
   }
 
   @Get()
-  findAll() {
-    return this.basicSalaryService.findAll();
+  findAll(@Headers('tenantId') tenantId: string) {
+    return this.basicSalaryService.findAll(tenantId);
   }
 
   @Get('active')
   @ExcludeAuthGuard()
-  async getActiveBasicSalaries() {
-    return this.basicSalaryService.getActiveBasicSalaries();
+  async getActiveBasicSalaries(  @Headers('tenantId') tenantId: string,) {
+    return this.basicSalaryService.getActiveBasicSalaries(tenantId);
   }
 
   @Get(':id')
