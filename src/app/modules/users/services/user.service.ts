@@ -841,7 +841,7 @@ export class UserService {
     try {
       const user = await this.userRepository.find({
         where: { tenantId: tenantId },
-        relations: ['employeeInformation','basicSalaries','employeeJobInformation'],
+        relations: ['employeeInformation','basicSalaries','employeeJobInformation','employeeJobInformation.position'],
       });
       return user;
     } catch (error) {
