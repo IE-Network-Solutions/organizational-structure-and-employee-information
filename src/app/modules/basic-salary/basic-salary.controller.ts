@@ -13,7 +13,6 @@ import { CreateBasicSalaryDto } from './dto/create-basic-salary.dto';
 import { UpdateBasicSalaryDto } from './dto/update-basic-salary.dto';
 import { BasicSalary } from './entities/basic-salary.entity';
 import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
-import { tenantId } from '@root/dist/app/modules/branch-request/tests/branchRequest.data';
 
 
 @Controller('basic-salary')
