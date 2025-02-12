@@ -1,29 +1,27 @@
 {
-  apps: [
+  "apps": [
     {
-      name: "osei-service-1",
-      script: "node dist/main.js",
-      args: "--port=8001",
-      instances: 1,
-      exec_mode: "fork",
-      autorestart: true,
-      restart_delay: 5000,
-      env: {
-        NODE_ENV: "production",
-        PORT: 8001
+      "name": "osei-service-1",
+      "script": "dist/main.js",
+      "instances": 1,
+      "exec_mode": "fork",
+      "autorestart": true,
+      "restart_delay": 5000,
+      "env_production": {
+        "NODE_ENV": "production",
+        "PORT": "8001"
       }
     },
     {
-      name: "osei-service-2",
-      script: "node dist/main.js",
-      args: "--port=8002",
-      instances: 1,
-      exec_mode: "fork",
-      autorestart: true,
-      restart_delay: 5000,
-      env: {
-        NODE_ENV: "production",
-        PORT: 8002
+      "name": "osei-service-2",
+      "script": "dist/main.js",
+      "instances": 1,
+      "exec_mode": "fork",
+      "autorestart": true,
+      "restart_delay": 5000,
+      "env_production": {
+        "NODE_ENV": "production",
+        "PORT": "8002"
       }
     }
   ]
