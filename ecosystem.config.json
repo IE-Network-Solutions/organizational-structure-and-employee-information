@@ -1,15 +1,30 @@
-{
-  "apps": [
+module.exports = {
+  apps: [
     {
-      "name": "osei-backend",
-      "script": "node dist/main.js",
-      "instances": 1,
-      "autorestart": true,
-      "watch": false,
-      "time": true,
-      "env": {
-        "NODE_ENV": "production"
+      name: "osei-service-1",
+      script: "server.js",
+      args: "--port=8001",
+      instances: 1,
+      exec_mode: "fork",
+      autorestart: true,
+      restart_delay: 5000,
+      env: {
+        NODE_ENV: "production",
+        PORT: 8001
+      }
+    },
+    {
+      name: "osei-service-2",
+      script: "server.js",
+      args: "--port=8002",
+      instances: 1,
+      exec_mode: "fork",
+      autorestart: true,
+      restart_delay: 5000,
+      env: {
+        NODE_ENV: "production",
+        PORT: 8002
       }
     }
   ]
-}
+};
