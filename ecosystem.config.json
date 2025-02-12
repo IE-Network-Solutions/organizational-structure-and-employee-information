@@ -2,7 +2,7 @@
   apps: [
     {
       name: "osei-service-1",
-      script: "server.js",
+      script: "node dist/main.js",
       args: "--port=8001",
       instances: 1,
       exec_mode: "fork",
@@ -15,7 +15,7 @@
     },
     {
       name: "osei-service-2",
-      script: "server.js",
+      script: "node dist/main.js",
       args: "--port=8002",
       instances: 1,
       exec_mode: "fork",
