@@ -1,27 +1,14 @@
 {
   "apps": [
     {
-      "name": "osei-service-1",
-      "script": "dist/main.js",
+      "name": "org-emp-backend",
+      "script": "node dist/main.js",
       "instances": 1,
-      "exec_mode": "fork",
       "autorestart": true,
-      "restart_delay": 5000,
-      "env_production": {
-        "NODE_ENV": "production",
-        "PORT": "8001"
-      }
-    },
-    {
-      "name": "osei-service-2",
-      "script": "dist/main.js",
-      "instances": 1,
-      "exec_mode": "fork",
-      "autorestart": true,
-      "restart_delay": 5000,
-      "env_production": {
-        "NODE_ENV": "production",
-        "PORT": "8002"
+      "watch": false,
+      "time": true,
+      "env": {
+        "NODE_ENV": "production"
       }
     }
   ]
