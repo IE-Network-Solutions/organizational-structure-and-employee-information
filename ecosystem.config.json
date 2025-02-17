@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "osei-backend",
+      "name": "org-emp-backend",
       "script": "node dist/main.js",
       "instances": 1,
       "autorestart": true,

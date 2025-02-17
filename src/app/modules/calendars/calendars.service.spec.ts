@@ -126,7 +126,7 @@ describe('CalendarsService', () => {
         .mockResolvedValue(undefined);
 
       jest
-        .spyOn(service, 'findActiveCalander')
+        .spyOn(service, 'findActiveCalendar')
         .mockResolvedValue(calendarData());
       jest.spyOn(service, 'findOneCalendar').mockResolvedValue(calendarData());
 

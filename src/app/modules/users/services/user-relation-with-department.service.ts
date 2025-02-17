@@ -46,6 +46,53 @@ export class UserDepartmentService {
     }
   }
 
+  async findAllChildDepartmentsWithUsers(
+    tenantId: string,
+    departmentId: string,
+  ): Promise<Department[]> {
+    try {
+      const departments = await this.departmentService.findAllChildDepartments(
+        tenantId,
+        departmentId,
+      );
+      if (departments?.length > 0) {
+        for (const department of departments) {
+          const users = await this.userService.findAllUsersByDepartment(
+            tenantId,
+            department.id,
+          );
+          department['users'] = users;
+        }
+
+        return departments;
+      }
+      return departments;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async findSingleUserDepartmentUsers(userId: string, tenantId: string) {
+    try {
+      const user = await this.userService.findOneUserJobInfo(userId);
+      const departmentId = user.employeeJobInformation[0].departmentId;
+
+      const users = await this.userService.findAllUsersByDepartment(
+        tenantId,
+        departmentId,
+      );
+      return users;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
+
   async dissolveDepartment(
     dissolveDepartmentDto: DissolveDepartmentDto,
     tenantId: string,
@@ -58,32 +105,6 @@ export class UserDepartmentService {
         dissolveDepartmentDto,
         tenantId,
       );
-      if (departments) {
-        for (const department of departmentToDelete) {
-          const departmentUsers = await this.userRepository.find({
-            where: {
-              employeeJobInformation: {
-                departmentId: department,
-                tenantId: tenantId,
-              },
-            },
-            relations: ['employeeJobInformation'],
-          });
-
-          if (departmentUsers) {
-            for (const user of departmentUsers) {
-              for (const departmentUser of user.employeeJobInformation) {
-                const updatedData = new UpdateEmployeeJobInformationDto();
-                updatedData.departmentId = dissolveDepartmentDto.id;
-                await this.employeeJobInformationService.update(
-                  departmentUser.id,
-                  updatedData,
-                );
-              }
-            }
-          }
-        }
-      }
       return departments;
     } catch (error) {
       if (error instanceof NotFoundException) {

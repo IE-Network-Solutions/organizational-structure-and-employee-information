@@ -2,7 +2,10 @@ import { DataSource, In } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { EmployeeDocumentService } from '../../employee-documents/employee-document.service';
@@ -47,6 +50,7 @@ import { EmployeeInformation } from '../../employee-information/entities/employe
 import { CreateEmployeeInformationDto } from '../../employee-information/dto/create-employee-information.dto';
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
+import { FilterEmailDto } from '../dto/email.dto';
 
 @Injectable()
 export class UserService {
@@ -62,10 +66,10 @@ export class UserService {
     private readonly rolePermissionService: RolePermissionService,
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
+    @Inject(forwardRef(() => DepartmentsService))
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -73,6 +77,45 @@ export class UserService {
     // this.tenantUrl = this.configService.get<string>(
     //   'servicesUrl.tenantUrl',
     // );
+  }
+
+  async updateProfileImage(
+    tenantId: string,
+    userId: string,
+    profileImage: Express.Multer.File,
+  ) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId, tenantId },
+      });
+      if (!user) throw new NotFoundException('User not found');
+
+      const uploadedImagePath = await this.fileUploadService
+        .uploadFileToServer(tenantId, profileImage)
+        .catch((error) => {
+          if (error.code === 'ENOTFOUND') {
+            throw new ConflictException(
+              'File server is unreachable. Please try again later.',
+            );
+          }
+          throw new ConflictException(
+            'Failed to upload file. Please try again later.',
+          );
+        });
+
+      user.profileImage = uploadedImagePath['viewImage'];
+      user.profileImageDownload = uploadedImagePath['image'];
+      await this.userRepository.save(user);
+
+      return {
+        message: 'Profile image updated successfully',
+        profileImageUrl: user.profileImage,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating the profile image. Please try again.',
+      );
+    }
   }
 
   async create(
@@ -96,7 +139,8 @@ export class UserService {
         createEmployeeJobInformationDto,
         createEmployeeDocumentDto,
       } = createBulkRequestDto;
-      if (profileImage) {
+
+      if (profileImage && profileImage.buffer) {
         const uploadedImagePath =
           await this.fileUploadService.uploadFileToServer(
             tenantId,
@@ -155,8 +199,8 @@ export class UserService {
 
         await this.employeeDocumentService.create(
           createEmployeeDocumentDto,
-          documentName,
           tenantId,
+          documentName,
         );
       }
 
@@ -204,6 +248,13 @@ export class UserService {
           'employeeJobInformation.isPositionActive = :isPositionActive',
           { isPositionActive: true },
         )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect(
@@ -248,6 +299,59 @@ export class UserService {
     }
   }
 
+  async findAllWithOutFilter(
+   
+    paginationOptions: PaginationDto,
+    tenantId: string,
+  ) {
+    try {
+  
+      const options: IPaginationOptions = {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+      };
+      let queryBuilder = await this.userRepository
+        .createQueryBuilder('user')
+
+        .withDeleted()
+        .leftJoinAndSelect(
+          'user.employeeJobInformation',
+          'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
+        .leftJoinAndSelect('employeeJobInformation.department', 'department')
+        .andWhere('user.tenantId = :tenantId', { tenantId });
+  
+      const paginatedData = await this.paginationService.paginate<User>(
+        queryBuilder,
+        options,
+      );
+
+      return paginatedData;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User not found.`);
+      }
+      throw error;
+    }
+  }
   async findAllUsersByDepartment(tenantId: string, departmentId: string) {
     const users = await this.userRepository
       .createQueryBuilder('user')
@@ -266,32 +370,39 @@ export class UserService {
 
     return users;
   }
+
   async findOne(id: string): Promise<User> {
     try {
       const user = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.employeeDocument', 'employeeDocument')
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
         )
         .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+        .leftJoinAndSelect(
           'employeeJobInformation.employementType',
           'employementType',
         )
-        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
-
         .leftJoinAndSelect(
           'employeeJobInformation.workSchedule',
           'workSchedule',
         )
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect('user.userPermissions', 'userPermissions')
+        .leftJoinAndSelect('userPermissions.permission', 'permission')
         .where('user.id = :id', { id })
         .getOne();
       user['reportingTo'] = await this.findReportingToUser(id);
@@ -305,28 +416,68 @@ export class UserService {
     }
   }
 
-  async update(id: string, tenantId: string, updateUserDto: UpdateUserDto) {
+  async update(
+    id: string,
+    tenantId: string,
+    updateUserDto: UpdateUserDto,
+    profileImage?: Express.Multer.File,
+  ) {
     try {
-      const createPremission = new CreateUserPermissionDto();
-      createPremission.permissionId = updateUserDto.permission
-        ? updateUserDto.permission
-        : [];
-      createPremission.userId = id;
-      delete updateUserDto.permission;
-      await this.userRepository.findOneOrFail({ where: { id: id } });
-      await this.userRepository.update({ id }, updateUserDto);
-      if (
-        createPremission.permissionId.length > 0 &&
-        createPremission.permissionId
-      ) {
-        await this.userPermissionService.update(id, createPremission, tenantId);
+      const user = await this.userRepository.findOneOrFail({
+        where: { id, tenantId },
+      });
+      if (!user) {
+        throw new NotFoundException('User Not Found');
       }
-      return await this.userRepository.findOneOrFail({ where: { id: id } });
+
+      if (profileImage) {
+        const uploadedImagePath = await this.fileUploadService
+          .uploadFileToServer(tenantId, profileImage)
+          .catch((error) => {
+            if (error.code === 'ENOTFOUND') {
+              throw new ConflictException(
+                'File server is unreachable. Please try again later.',
+              );
+            }
+            throw new ConflictException(
+              'Failed to upload file. Please try again later.',
+            );
+          });
+
+        updateUserDto.profileImage = uploadedImagePath['viewImage'];
+        updateUserDto.profileImageDownload = uploadedImagePath['image'];
+      }
+
+      if (updateUserDto.permission) {
+        const createPremission = new CreateUserPermissionDto();
+        createPremission.permissionId = updateUserDto.permission
+          ? updateUserDto.permission
+          : [];
+        createPremission.userId = id;
+        delete updateUserDto.permission;
+
+        if (
+          createPremission.permissionId.length > 0 &&
+          createPremission.permissionId
+        ) {
+          await this.userPermissionService.update(
+            id,
+            createPremission,
+            tenantId,
+          );
+        }
+      }
+
+      await this.userRepository.update({ id }, updateUserDto);
+
+      return await this.userRepository.findOneOrFail({ where: { id } });
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
-      throw error;
+      throw new InternalServerErrorException(
+        'An error occurred while updating the user. Please try again.',
+      );
     }
   }
 
@@ -682,9 +833,9 @@ export class UserService {
           employeeInformation.dateOfBirth = user.dateOfBirth || null;
           employeeInformation.bankInformation =
             JSON.stringify(singleBankInformation) || null;
-          JSON.parse(employeeInformation.bankInformation);
           employeeInformation.addresses = JSON.stringify(userAddress) || null;
           JSON.parse(employeeInformation.addresses);
+          JSON.parse(employeeInformation.bankInformation);
           const employeeJobInformation = new CreateEmployeeJobInformationDto();
           employeeJobInformation.branchId = user.branchId;
           employeeJobInformation.departmentId = user.departmentId;
@@ -705,7 +856,6 @@ export class UserService {
           bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
           bulkCreate.createRolePermissionDto = createRolePermissionDto;
           bulkCreate.createUserPermissionDto = createUserPermissionDto;
-
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
@@ -729,58 +879,66 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
+  async getAllUser(tenantId: string) {
+    try {
+      const user = await this.userRepository.find({
+        where: { tenantId: tenantId },
+        relations: ['employeeInformation'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async getAllUsersWithNetPay(tenantId: string): Promise<User[]> {
+    try {
+      const user = await this.userRepository.find({
+        where: { tenantId: tenantId },
+        relations: ['employeeInformation','basicSalaries','employeeJobInformation','employeeJobInformation.position'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
-  // async  deleteAllFirebaseUsers() {
-  //   const admin = require('firebase-admin');
-  //   // Initialize Firebase Admin SDK if not already initialized
-  //   if (!admin.apps.length) {
-  //     admin.initializeApp({
-  //       credential: admin.credential.applicationDefault(),
-  //     });
-  //   }
+  async getAllUSerIds() {
+    try {
+      const users = await this.userRepository
+        .createQueryBuilder('user')
+        .select(['user.id', 'user.firstName'])
+        .getMany();
 
-  //   const deleteUsersBatch = async (nextPageToken?: string) => {
-  //     const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
+      return users;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
-  //     // Map delete promises
-  //     const deletePromises = listUsersResult.users.map((user) =>
-  //       admin.auth().deleteUser(user.uid)
-  //     );
+  async findOneUserJobInfo(userId: string) {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .withDeleted()
+      .leftJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+        'employeeJobInformation.isPositionActive = :isPositionActive',
+        { isPositionActive: true },
+      )
+      .where('user.id = :id', { id: userId })
+      .getOne();
 
-  //     // Wait for all deletions in the current batch
-  //     await Promise.all(deletePromises);
+    return user;
+  }
+  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: email.email },
+      });
 
-  //     console.log(`Deleted ${listUsersResult.users.length} users`);
-
-  //     // If there's a nextPageToken, process the next batch
-  //     if (listUsersResult.pageToken) {
-  //       await deleteUsersBatch(listUsersResult.pageToken);
-  //     }
-  //   };
-
-  //   try {
-  //     await deleteUsersBatch();
-  //     console.log('All users have been successfully deleted.');
-  //   } catch (error) {
-  //     console.error('Error deleting users:', error);
-  //   }
-  // }
-
-  // Call the function
-
-  //   async getTenantDomain(
-
-  //     tenantId: string,
-
-  //   ) {
-  // try{
-  //     const response = await this.httpService
-  //       .post(`${this.tenantUrl}/client/${tenantId}`)
-  //       .toPromise();
-
-  //     return response.data;
-  // }catch(error){
-  //   throw new BadRequestException(error.message)
-  // }
-  //   }
+      return user;
+    } catch (error) {
+      throw new NotFoundException('User Not Found');
+    }
+  }
 }

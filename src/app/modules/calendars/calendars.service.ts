@@ -39,7 +39,7 @@ export class CalendarsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const calendar = await this.findActiveCalander(tenantId);
+      const calendar = await this.findActiveCalendar(tenantId);
 
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
@@ -129,21 +129,19 @@ export class CalendarsService {
     tenantId: string,
   ): Promise<Calendar> {
     try {
-      const Calendar = await this.findOneCalendar(id);
-      if (!Calendar) {
+      const calendar = await this.findOneCalendar(id);
+      if (!calendar) {
         throw new NotFoundException(`Calendar with Id ${id} not found`);
       }
-
+      if (updateCalendarDto.sessions && updateCalendarDto.sessions.length > 0) {
+        const session = updateCalendarDto.sessions;
+        delete updateCalendarDto.sessions;
+        await this.sessionService.updateBulkSession(session, tenantId);
+      }
       const updatedCalendar = await this.calendarRepository.update(
         id,
         updateCalendarDto,
       );
-      if (updateCalendarDto.sessions.length > 0) {
-        await this.sessionService.updateBulkSession(
-          updateCalendarDto.sessions,
-          tenantId,
-        );
-      }
 
       return await this.findOneCalendar(id);
     } catch (error) {
@@ -162,11 +160,17 @@ export class CalendarsService {
     await this.calendarRepository.softRemove({ id });
     return Calendar;
   }
-  async findActiveCalander(tenantId: string): Promise<Calendar> {
+  async findActiveCalendar(tenantId: string): Promise<Calendar> {
     try {
-      return await this.calendarRepository.findOne({
+      const activeCalendar = await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
+        relations: ['sessions', 'sessions.months'],
       });
+      if (!activeCalendar) {
+        return null;
+      }
+
+      return activeCalendar;
     } catch (error) {
       throw new NotFoundException(`There Is No Active Calendar.`);
     }
