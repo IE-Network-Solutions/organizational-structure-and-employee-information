@@ -121,6 +121,12 @@ export class UserDepartmentService {
               for (const departmentUser of user.employeeJobInformation) {
                 const updatedData = new UpdateEmployeeJobInformationDto();
                 updatedData.departmentId = dissolveDepartmentDto.id;
+                if(departmentUser.userId===dissolveDepartmentDto.teamLeader){
+                  updatedData.departmentLeadOrNot=true
+
+                }
+                updatedData.departmentLeadOrNot=false
+
                 await this.employeeJobInformationService.update(
                   departmentUser.id,
                   updatedData,
