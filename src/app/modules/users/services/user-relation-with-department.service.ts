@@ -51,6 +51,7 @@ export class UserDepartmentService {
     tenantId: string,
   ): Promise<Department> {
     try {
+    
       
       const departmentToDelete = dissolveDepartmentDto.departmentToDelete;
       delete dissolveDepartmentDto.departmentToDelete;
