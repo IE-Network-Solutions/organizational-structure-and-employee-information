@@ -52,6 +52,7 @@ export class UserDepartmentService {
   ): Promise<Department> {
     try {
       console.log("test automation")
+      console.log("test automation")
       const departmentToDelete = dissolveDepartmentDto.departmentToDelete;
       delete dissolveDepartmentDto.departmentToDelete;
       const departments = await this.departmentService.updateDepartment(
