@@ -4,6 +4,7 @@ import { UpdateBasicSalaryDto } from './dto/update-basic-salary.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BasicSalary } from './entities/basic-salary.entity';
 import { Repository } from 'typeorm';
+import { tenantId } from '../branchs/tests/branch.data';
 
 @Injectable()
 export class BasicSalaryService {
@@ -12,7 +13,7 @@ export class BasicSalaryService {
     private readonly basicSalaryRepository: Repository<BasicSalary>,
   ) {}
   async create(
-    createBasicSalaryDto: CreateBasicSalaryDto,
+    createBasicSalaryDto: CreateBasicSalaryDto,tenantId:string
   ): Promise<BasicSalary> {
     const existingSalaries = await this.basicSalaryRepository.find({
       where: { user: { id: createBasicSalaryDto.userId } },
@@ -30,20 +31,21 @@ export class BasicSalaryService {
       status: true,
       userId: createBasicSalaryDto.userId,
       jobInfoId: createBasicSalaryDto.jobInfoId,
+      tenantId:tenantId
     });
 
     return this.basicSalaryRepository.save(basicSalary);
   }
 
-  findAll(): Promise<BasicSalary[]> {
-    return this.basicSalaryRepository.find({ relations: ['user', 'jobInfo'] });
+  findAll(tenantId:string): Promise<BasicSalary[]> {
+    return this.basicSalaryRepository.find({where:{tenantId:tenantId}, relations: ['user', 'jobInfo'] });
   }
 
-  async getActiveBasicSalaries(): Promise<
+  async getActiveBasicSalaries(tenantId:string): Promise<
     { userId: string; basicSalary: number }[]
   > {
     const salaries = await this.basicSalaryRepository.find({
-      where: { status: true },
+      where: { status: true ,tenantId:tenantId},
       select: ['userId', 'basicSalary'],
     });
 

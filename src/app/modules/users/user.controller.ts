@@ -194,6 +194,17 @@ export class UserController {
       tenantId,
     );
   }
+  @Get('/all-users/all')
+  async findAllWithOutFilter(
+    @Req() request: Request,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = request['tenantId'];
+    return await this.userService.findAllWithOutFilter(
+      paginationOptions,
+      tenantId,
+    );
+  }
 
   @Get(':id')
   @ExcludeAuthGuard()

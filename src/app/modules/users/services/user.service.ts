@@ -299,6 +299,59 @@ export class UserService {
     }
   }
 
+  async findAllWithOutFilter(
+   
+    paginationOptions: PaginationDto,
+    tenantId: string,
+  ) {
+    try {
+  
+      const options: IPaginationOptions = {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+      };
+      let queryBuilder = await this.userRepository
+        .createQueryBuilder('user')
+
+        .withDeleted()
+        .leftJoinAndSelect(
+          'user.employeeJobInformation',
+          'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
+        .leftJoinAndSelect('employeeJobInformation.department', 'department')
+        .andWhere('user.tenantId = :tenantId', { tenantId });
+  
+      const paginatedData = await this.paginationService.paginate<User>(
+        queryBuilder,
+        options,
+      );
+
+      return paginatedData;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User not found.`);
+      }
+      throw error;
+    }
+  }
   async findAllUsersByDepartment(tenantId: string, departmentId: string) {
     const users = await this.userRepository
       .createQueryBuilder('user')
@@ -841,7 +894,7 @@ export class UserService {
     try {
       const user = await this.userRepository.find({
         where: { tenantId: tenantId },
-        relations: ['employeeInformation', 'basicSalaries'],
+        relations: ['employeeInformation','basicSalaries','employeeJobInformation','employeeJobInformation.position'],
       });
       return user;
     } catch (error) {

@@ -55,7 +55,7 @@ export class EmployeeJobInformationService {
           status: true,
           userId: savedJobInfo.userId,
           jobInfoId: savedJobInfo.id,
-        });
+        },tenantId);
       }
 
       return savedJobInfo;
