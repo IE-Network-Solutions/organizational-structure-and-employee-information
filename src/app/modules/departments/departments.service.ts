@@ -148,9 +148,13 @@ export class DepartmentsService {
     try {
       const department = await this.findOneDepartment(id);
       if(updateDepartmentDto.name){
-        if(department.name === updateDepartmentDto.name){ 
-          throw new NotFoundException(`Department with Name ${department.name} Already exist`);
-        }
+        const departmentWithName = await this.departmentRepository.findOne({
+          where: { name: updateDepartmentDto.name, tenantId: tenantId },
+        });
+        if (departmentWithName && departmentWithName.id !== id) {
+          throw new BadRequestException(
+            `Department with name '${updateDepartmentDto.name}' already exists`,
+          );
       }
       if (department && !parentDepartment) {
         if (department.level !== 0) {
