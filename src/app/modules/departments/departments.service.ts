@@ -156,6 +156,7 @@ export class DepartmentsService {
             `Department with name '${updateDepartmentDto.name}' already exists`,
           );
       }
+      }
       if (department && !parentDepartment) {
         if (department.level !== 0) {
           const parent = await this.departmentRepository.findAncestorsTree(
