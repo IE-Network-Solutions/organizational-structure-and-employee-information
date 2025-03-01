@@ -23,6 +23,7 @@ import { BranchesModule } from '../branchs/branches.module';
 import { WorkSchedulesModule } from '../work-schedules/work-schedules.module';
 import { PaginationModule } from '@root/src/core/pagination/pagination.module';
 import { DepartmentsService } from '../departments/departments.service';
+import { DelegationModule } from '../delegations/delegations.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { DepartmentsService } from '../departments/departments.service';
     BranchesModule,
     HttpModule.register({}),
     forwardRef(() => DepartmentsModule),
+    DelegationModule
   ],
   controllers: [UserController],
   providers: [UserService, UserDepartmentService],

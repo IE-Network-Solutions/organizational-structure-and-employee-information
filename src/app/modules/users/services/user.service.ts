@@ -51,6 +51,7 @@ import { CreateEmployeeInformationDto } from '../../employee-information/dto/cre
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
 import { FilterEmailDto } from '../dto/email.dto';
+import { DelegationService } from '../../delegations/delegations.service';
 
 @Injectable()
 export class UserService {
@@ -70,6 +71,7 @@ export class UserService {
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
+    private readonly delegationService: DelegationService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -405,7 +407,7 @@ export class UserService {
         .leftJoinAndSelect('userPermissions.permission', 'permission')
         .where('user.id = :id', { id })
         .getOne();
-      user['reportingTo'] = await this.findReportingToUser(id);
+      user['reportingTo'] = await this.assignReportsTo(id);
 
       return { ...user };
     } catch (error) {
@@ -939,6 +941,24 @@ export class UserService {
       return user;
     } catch (error) {
       throw new NotFoundException('User Not Found');
+    }
+  }
+  async assignReportsTo(userId:string) {
+    try {
+      let reportingToUser= await this.findReportingToUser(userId);
+      const getDelegation= await this.delegationService.findUserOnLeaveById(reportingToUser.id);
+      if(getDelegation  ){
+        if( getDelegation.delegatee.id!==userId){
+        reportingToUser=getDelegation.delegatee;  
+        }
+        else{
+          reportingToUser = await this.findReportingToUser(getDelegation.delegatorId);   
+        }
+      }
+     
+      return reportingToUser;
+    } catch (error) {
+      return null
     }
   }
 }
