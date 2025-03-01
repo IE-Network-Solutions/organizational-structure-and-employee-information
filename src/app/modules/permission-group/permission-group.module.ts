@@ -6,11 +6,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PermissionGroup } from './entities/permission-group.entity';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { PermissionGroupRepository } from './permission-group-reposiory';
+import { RoleModule } from '../role/role.module';
+import { RolePermissionModule } from '../role-permission/role-permission.module';
+import { UserPermissionModule } from '../user-permission/user-permission.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PermissionGroup, PermissionGroupRepository]),
     PermissionModule,
+    RoleModule,
+    RolePermissionModule,
+    UserPermissionModule,
   ],
 
   controllers: [PermissionGroupController],

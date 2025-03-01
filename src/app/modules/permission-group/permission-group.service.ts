@@ -19,6 +19,11 @@ import { PermissionGroupRepository } from './permission-group-reposiory';
 import { PermissionGroupInterface } from './permission-group-interface';
 import * as permissionData from '../../../core/utils/permission.json';
 import { UpdateResult } from 'typeorm';
+import { RoleService } from '../role/role.service';
+import { CreateRoleDto } from '../role/dto/create-role.dto';
+import { UpdateRoleDto } from '../role/dto/update-role.dto';
+import { RolePermissionService } from '../role-permission/role-permission.service';
+import { UserPermissionService } from '../user-permission/user-permission.service';
 
 @Injectable()
 export class PermissionGroupService implements PermissionGroupInterface {
@@ -27,6 +32,9 @@ export class PermissionGroupService implements PermissionGroupInterface {
     private readonly permissionGroupRepository: PermissionGroupRepository,
     private readonly paginationService: PaginationService,
     private readonly permissionService: PermissionService,
+    private readonly roleService: RoleService,
+    private readonly rolePermissionService: RolePermissionService,
+    private readonly userPermissionService: UserPermissionService,
   ) {}
 
   async create(
@@ -65,10 +73,29 @@ export class PermissionGroupService implements PermissionGroupInterface {
   ): Promise<PermissionGroup> {
     const existingGroup = await this.permissionGroupRepository.findOne({
       where: { name: permissionGroupDto.name },
+      relations: ['permissions'],
     });
-    return existingGroup || this.create(permissionGroupDto);
-  }
 
+    if (existingGroup) {
+      const existingPermissionIds = existingGroup.permissions.map(
+        (perm) => perm.id,
+      );
+      const newPermissionIds = permissionGroupDto.permissions.filter(
+        (id) => !existingPermissionIds.includes(id),
+      );
+
+      if (newPermissionIds.length > 0) {
+        await this.permissionGroupRepository
+          .createQueryBuilder()
+          .relation(PermissionGroup, 'permissions')
+          .of(existingGroup.id)
+          .add(newPermissionIds);
+      }
+
+      return existingGroup;
+    }
+    return this.create(permissionGroupDto);
+  }
   async findAll(
     paginationOptions: PaginationDto,
     searchFilterDTO: SearchFilterDTO,
@@ -132,29 +159,63 @@ export class PermissionGroupService implements PermissionGroupInterface {
     return await this.permissionGroupRepository.softDelete(group.id);
   }
 
-  async permissionSeeder() {
+  async permissionSeeder(tenantId: string) {
     try {
-      const allGroupPermissions = await Promise.all(
-        permissionData.map(async (data) => {
-          const group = await this.getOrCreate({
-            name: data.group,
-            description: data.group,
-          });
-          const permissions = await Promise.all(
-            data.permissions.map((perm) =>
-              this.permissionService
-                .create({
-                  name: perm.name,
-                  slug: perm.slug,
-                  description: perm.slug,
-                  permissionGroupId: group.id,
-                })
-                .catch(() => null),
-            ),
-          );
-          return { group, permissions: permissions.filter(Boolean) };
-        }),
-      );
+      const allGroupPermissions = [];
+
+      for (const data of permissionData) {
+        const validPermissions = [];
+
+        for (const perm of data.permissions) {
+          try {
+            const createdPermission = await this.permissionService.create({
+              name: perm.name,
+              slug: perm.slug,
+              description: perm.slug,
+            });
+
+            if (createdPermission) {
+              for (const roleSlug of perm.roles) {
+                const role = await this.roleService.findRoleBySlug(
+                  roleSlug,
+                  tenantId,
+                );
+                if (role) {
+                  await this.rolePermissionService.createRoleWithPermissions(
+                    role.id,
+                    [createdPermission.id],
+                    tenantId,
+                  );
+                  if (role.user.length) {
+                    try {
+                      const userId = role.user.map((item) => item.id);
+                      await this.userPermissionService.assignPermissionToUserOnSeed(
+                        {
+                          userId: userId,
+                          permissionId: [createdPermission.id],
+                        },
+                        tenantId,
+                      );
+                    } catch (error) {}
+                  }
+                }
+              }
+
+              validPermissions.push(createdPermission.id);
+            }
+          } catch (error) {
+            continue;
+          }
+        }
+
+        const group = await this.getOrCreate({
+          name: data.group,
+          description: data.group,
+          permissions: validPermissions,
+        });
+
+        allGroupPermissions.push({ group, permissions: validPermissions });
+      }
 
       return allGroupPermissions;
     } catch (error) {

@@ -12,12 +12,14 @@ import {
   Req,
   UploadedFiles,
   BadRequestException,
+  InternalServerErrorException,
+  UploadedFile,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { User } from './entities/user.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUserPermissionDto } from '../user-permission/dto/create-user-permission.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -37,6 +39,7 @@ import { Department } from '../departments/entities/department.entity';
 import { UserDepartmentService } from './services/user-relation-with-department.service';
 import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dto';
 import { ImportEmployeeDto } from './dto/import-user.dto';
+import { FilterEmailDto } from './dto/email.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -46,6 +49,32 @@ export class UserController {
     private readonly userDepartmentService: UserDepartmentService,
   ) {}
 
+  @Post('update-profile-image')
+  @UseInterceptors(FileInterceptor('profileImage')) // Matches the field name of the file
+  async updateProfileImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { userId: string },
+    @Req() request: Request,
+  ) {
+    const tenantId = request['tenantId'];
+    const { userId } = body;
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+
+    if (!file) {
+      throw new BadRequestException('Profile image file is required');
+    }
+
+    try {
+      return await this.userService.updateProfileImage(tenantId, userId, file);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating the profile image. Please try again.',
+      );
+    }
+  }
+
   @Post()
   @UseInterceptors(AnyFilesInterceptor())
   async create(
@@ -53,11 +82,11 @@ export class UserController {
     @Body() body: any,
     @Req() request: Request,
   ) {
-    const profileImage = files.find(
+    const profileImage = files?.find(
       (file) => file.fieldname === 'profileImage',
     );
 
-    const documentName = files.find(
+    const documentName = files?.find(
       (file) => file.fieldname === 'documentName',
     );
 
@@ -165,6 +194,17 @@ export class UserController {
       tenantId,
     );
   }
+  @Get('/all-users/all')
+  async findAllWithOutFilter(
+    @Req() request: Request,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = request['tenantId'];
+    return await this.userService.findAllWithOutFilter(
+      paginationOptions,
+      tenantId,
+    );
+  }
 
   @Get(':id')
   @ExcludeAuthGuard()
@@ -172,19 +212,28 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  // @Get('many')
-  // findBulkUsers(@Body() user: any): Promise<User[]> {
-  //   return this.userService.findOne(id);
-  // }
-
   @Patch(':id')
-  update(
+  @UseInterceptors(FileInterceptor('profileImage'))
+  async update(
     @Req() request: Request,
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() profileImage?: Express.Multer.File,
   ) {
-    const tenantId = request['tenantId'];
-    return this.userService.update(id, tenantId, updateUserDto);
+    try {
+      const tenantId = request['tenantId'];
+      const updatedUser = await this.userService.update(
+        id,
+        tenantId,
+        updateUserDto,
+        profileImage,
+      );
+      return updatedUser;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating the user. Please try again.',
+      );
+    }
   }
 
   @Delete(':id')
@@ -192,13 +241,6 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
-
-  // @Post('/assign-permission-to-user')
-  // assignPermissionToRole(
-  //   @Body() createUserPermissionDto: CreateUserPermissionDto,
-  // ) {
-  //   return this.usersService.assignPermissionToUser(createUserPermissionDto);
-  // }
 
   @Get('/permissions/:userId')
   findPermissionsByUserId(@Param('userId') id: string) {
@@ -244,6 +286,18 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userDepartmentService.findAllDepartments(tenantId);
   }
+  @Get('/child/departments/:departmentId')
+  @ExcludeAuthGuard()
+  findAllChildDepartmentsWithUsers(
+    @Req() request: Request,
+    @Param('departmentId') departmentId: string,
+  ): Promise<Department[]> {
+    const tenantId = request['tenantId'];
+    return this.userDepartmentService.findAllChildDepartmentsWithUsers(
+      tenantId,
+      departmentId,
+    );
+  }
 
   @Post('/department/dissolve')
   dissolveDepartment(
@@ -256,7 +310,6 @@ export class UserController {
       tenantId,
     );
   }
-
   @Post('/department/merge')
   mergeDepartment(
     @Req() request: Request,
@@ -285,13 +338,42 @@ export class UserController {
     return this.userService.getOneUSer(userId, tenantId);
   }
 
-  //   @Post('users/delete/all/all')
-  // @ExcludeAuthGuard()
-  // @ExcludeTenantGuard()
-  //   delete(
+  @Get('/all/users-id')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+  getAllUSerIds() {
+    return this.userService.getAllUSerIds();
+  }
+  @Get('/simple-info/all-user/with-tenant')
+  @ExcludeAuthGuard()
+  getAllUser(@Req() request: Request) {
+    const tenantId = request['tenantId'];
+    return this.userService.getAllUser(tenantId);
+  }
 
-  //   ) {
+  
+  @Get('/simple-info/all-user-net-pay/with-tenant')
+  getAllUsersWithNetPay(@Req() request: Request) {
+    const tenantId = request['tenantId'];
+    return this.userService.getAllUsersWithNetPay(tenantId);
+  }
+  @Get('/all/departments-users/:userId')
+  @ExcludeAuthGuard()
+  findSingleUserDepartmentUsers(
+    @Req() request: Request,
+    @Param('userId') userId: string,
+  ) {
+    const tenantId = request['tenantId'];
+    return this.userDepartmentService.findSingleUserDepartmentUsers(
+      userId,
+      tenantId,
+    );
+  }
 
-  //     return this.userService.deleteAllFirebaseUsers();
-  //   }
+  @Post('/email')
+  @ExcludeAuthGuard()
+  findUserByEmail(@Req() request: Request, @Body() email: FilterEmailDto) {
+    const tenantId = request['tenantId'];
+    return this.userService.findUserByEmail(email, tenantId);
+  }
 }

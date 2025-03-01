@@ -31,6 +31,12 @@ export const employeeJobInformationData = (): EmployeeJobInformation => {
     department: { id: '1', name: 'Engineering' } as any, // mock as needed
     workSchedule: { id: '1', name: '9-5' } as any, // mock as needed
     position: { id: '1', name: 'Software Engineer' } as JobPosition,
+    basicSalaries: {
+      BasicSalary: 1234,
+      status: 'Active',
+      userId: '11',
+      jobInfoId: '11',
+    } as any,
   };
 };
 
