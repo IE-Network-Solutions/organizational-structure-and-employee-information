@@ -56,4 +56,9 @@ export class DelegationController {
   remove(@Param('id') id: string) {
     return this.delegationService.remove(id);
   }
+
+  @Delete('/leave-request/:leaveRequestId')
+  removeDelegationByRequestId(@Param('leaveRequestId') leaveRequestId: string,@Headers('tenantId') tenantId: string) {
+    return this.delegationService.removeDelegationByRequestId(leaveRequestId,tenantId);
+  }
 }

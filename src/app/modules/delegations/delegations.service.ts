@@ -144,4 +144,16 @@ const orderDirection = 'ASC';
     }
   
   }
+
+  async removeDelegationByRequestId(leaveRequestId: string,tenantId:string): Promise<Delegation> {
+    try {
+      const delegation = await this.findDelegationByLeaveRequestId(leaveRequestId,tenantId);
+      await this.delegationRepository.softRemove(delegation);
+      return delegation;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+
+    }
+  
+  }
 }
