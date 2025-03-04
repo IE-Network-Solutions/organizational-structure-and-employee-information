@@ -161,7 +161,16 @@ export class DepartmentsService {
   ): Promise<Department> {
     try {
       const department = await this.findOneDepartment(id);
-
+      if(updateDepartmentDto.name){
+        const departmentWithName = await this.departmentRepository.findOne({
+          where: { name: updateDepartmentDto.name, tenantId: tenantId },
+        });
+        if (departmentWithName && departmentWithName.id !== id) {
+          throw new BadRequestException(
+            `Department with name '${updateDepartmentDto.name}' already exists`,
+          );
+      }
+      }
       if (department && !parentDepartment) {
         if (department.level !== 0) {
           const parent = await this.departmentRepository.findAncestorsTree(
@@ -170,6 +179,7 @@ export class DepartmentsService {
           parentDepartment = parent.parent;
         }
       }
+    
       department.name = updateDepartmentDto.name;
       department.branchId = updateDepartmentDto.branchId;
       department.description = updateDepartmentDto.description;
