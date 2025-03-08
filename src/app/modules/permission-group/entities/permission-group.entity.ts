@@ -13,6 +13,9 @@ export class PermissionGroup extends BaseModel {
   @Column({ nullable: true })
   tenantId: string;
 
+  @Column({ nullable: true, default: false })
+  isBasic: boolean;
+
   @ManyToMany(() => Permission, (permissions) => permissions.permissionGroups, {
     cascade: true,
   })
