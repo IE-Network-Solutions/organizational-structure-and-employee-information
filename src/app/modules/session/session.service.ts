@@ -89,7 +89,7 @@ export class SessionService {
       };
       const queryBuilder = this.sessionRepository
         .createQueryBuilder('Session')
-        .leftJoinAndSelect('Session.months','months')
+        .leftJoinAndSelect('Session.months', 'months')
         .where('Session.tenantId = :tenantId', { tenantId });
 
       const paginatedData = await this.paginationService.paginate<Session>(
