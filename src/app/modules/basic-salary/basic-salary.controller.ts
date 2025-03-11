@@ -14,13 +14,15 @@ import { UpdateBasicSalaryDto } from './dto/update-basic-salary.dto';
 import { BasicSalary } from './entities/basic-salary.entity';
 import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
-
 @Controller('basic-salary')
 export class BasicSalaryController {
   constructor(private readonly basicSalaryService: BasicSalaryService) {}
 
   @Post()
-  create(@Body() createBasicSalaryDto: CreateBasicSalaryDto, @Headers('tenantId') tenantId: string) {
+  create(
+    @Body() createBasicSalaryDto: CreateBasicSalaryDto,
+    @Headers('tenantId') tenantId: string,
+  ) {
     return this.basicSalaryService.create(createBasicSalaryDto, tenantId);
   }
 
@@ -31,7 +33,7 @@ export class BasicSalaryController {
 
   @Get('active')
   @ExcludeAuthGuard()
-  async getActiveBasicSalaries(  @Headers('tenantId') tenantId: string,) {
+  async getActiveBasicSalaries(@Headers('tenantId') tenantId: string) {
     return this.basicSalaryService.getActiveBasicSalaries(tenantId);
   }
 

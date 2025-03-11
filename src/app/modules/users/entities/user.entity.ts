@@ -112,10 +112,6 @@ export class User extends BaseModel {
   @OneToMany(() => BasicSalary, (basicSalary) => basicSalary.user)
   basicSalaries: BasicSalary[];
 
-
-  @OneToMany(
-    () => Delegation,
-    (delegate) => delegate.user,
-  )
+  @OneToMany(() => Delegation, (delegate) => delegate.user)
   delegation: Delegation;
 }

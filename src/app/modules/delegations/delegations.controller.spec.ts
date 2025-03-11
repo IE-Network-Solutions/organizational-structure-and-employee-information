@@ -1,7 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DelegationService } from './delegations.service';
 import { DelegationController } from './delegations.controller';
-import { createDelegationData, delegationData, deleteDelegationData, findOneNotFoundReturnValue, paginationResultDelegationData, updateDelegationData } from './tests/delegation.data';
+import {
+  createDelegationData,
+  delegationData,
+  deleteDelegationData,
+  findOneNotFoundReturnValue,
+  paginationResultDelegationData,
+  updateDelegationData,
+} from './tests/delegation.data';
 import { CreateDelegationDto } from './dto/create-delegation.dto';
 import { UpdateDelegationDto } from './dto/update-delegation.dto';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
@@ -19,16 +26,18 @@ describe('DelegationController', () => {
           provide: DelegationService,
           useValue: {
             create: jest.fn().mockResolvedValue(delegationData()),
-            findAll: jest.fn().mockResolvedValue(paginationResultDelegationData()),
+            findAll: jest
+              .fn()
+              .mockResolvedValue(paginationResultDelegationData()),
             findOne: jest.fn().mockResolvedValue(delegationData()),
             update: jest.fn().mockResolvedValue(updateDelegationData()),
             remove: jest.fn().mockResolvedValue(deleteDelegationData()),
           },
         },
-         {
-                  provide: PaginationService,
-                  useValue: mock<PaginationService>(),
-                },
+        {
+          provide: PaginationService,
+          useValue: mock<PaginationService>(),
+        },
       ],
     }).compile();
 
@@ -39,5 +48,4 @@ describe('DelegationController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
-
 });

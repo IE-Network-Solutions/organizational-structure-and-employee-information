@@ -46,7 +46,7 @@ import { DelegationModule } from '../delegations/delegations.module';
     BranchesModule,
     HttpModule.register({}),
     forwardRef(() => DepartmentsModule),
-    DelegationModule
+    DelegationModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserDepartmentService],

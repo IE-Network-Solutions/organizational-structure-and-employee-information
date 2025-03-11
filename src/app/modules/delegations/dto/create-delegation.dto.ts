@@ -1,4 +1,10 @@
-import { IsUUID, IsBoolean, IsOptional, IsDateString, IsString } from 'class-validator';
+import {
+  IsUUID,
+  IsBoolean,
+  IsOptional,
+  IsDateString,
+  IsString,
+} from 'class-validator';
 
 export class CreateDelegationDto {
   @IsUUID()

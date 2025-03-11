@@ -74,8 +74,7 @@ export class UserService {
 
     private readonly delegationService: DelegationService,
 
-    private readonly httpService:HttpService,
-
+    private readonly httpService: HttpService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -306,17 +305,15 @@ export class UserService {
   }
 
   async findAllWithOutFilter(
-   
     paginationOptions: PaginationDto,
     tenantId: string,
   ) {
     try {
-  
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      let queryBuilder = await this.userRepository
+      const queryBuilder = await this.userRepository
         .createQueryBuilder('user')
 
         .withDeleted()
@@ -344,7 +341,7 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
-  
+
       const paginatedData = await this.paginationService.paginate<User>(
         queryBuilder,
         options,
@@ -899,7 +896,12 @@ export class UserService {
     try {
       const user = await this.userRepository.find({
         where: { tenantId: tenantId },
-        relations: ['employeeInformation','basicSalaries','employeeJobInformation','employeeJobInformation.position'],
+        relations: [
+          'employeeInformation',
+          'basicSalaries',
+          'employeeJobInformation',
+          'employeeJobInformation.position',
+        ],
       });
       return user;
     } catch (error) {
@@ -946,22 +948,25 @@ export class UserService {
       throw new NotFoundException('User Not Found');
     }
   }
-  async assignReportsTo(userId:string) {
+  async assignReportsTo(userId: string) {
     try {
-      let reportingToUser= await this.findReportingToUser(userId);
-      const getDelegation= await this.delegationService.findUserOnLeaveById(reportingToUser.id);
-      if(getDelegation  ){
-        if( getDelegation.delegatee.id!==userId){
-        reportingToUser=getDelegation.delegatee;  
-        }
-        else{
-          reportingToUser = await this.findReportingToUser(getDelegation.delegatorId);   
+      let reportingToUser = await this.findReportingToUser(userId);
+      const getDelegation = await this.delegationService.findUserOnLeaveById(
+        reportingToUser.id,
+      );
+      if (getDelegation) {
+        if (getDelegation.delegatee.id !== userId) {
+          reportingToUser = getDelegation.delegatee;
+        } else {
+          reportingToUser = await this.findReportingToUser(
+            getDelegation.delegatorId,
+          );
         }
       }
-     
+
       return reportingToUser;
     } catch (error) {
-      return null
+      return null;
     }
   }
 }

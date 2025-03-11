@@ -17,9 +17,9 @@ export const delegationData = (): Delegation => {
     tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
     updatedAt: new Date('2022-10-22T07:11:42Z'),
     createdAt: new Date('2022-10-22T07:11:42Z'),
-    delegatee:null,
-    delegator:null,
-    user:null,
+    delegatee: null,
+    delegator: null,
+    user: null,
   };
 };
 
@@ -33,7 +33,7 @@ export const createDelegationData = (): CreateDelegationDto => {
     endDate: new Date('2022-10-25T07:11:42Z'),
     status: false,
     reason: 'Covering for a sick colleague',
-    leaveRequestId:'b5d7f842-817d-46c2-b5fd-05c4a1e6a957',
+    leaveRequestId: 'b5d7f842-817d-46c2-b5fd-05c4a1e6a957',
   };
 };
 
