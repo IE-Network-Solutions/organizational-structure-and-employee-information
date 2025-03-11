@@ -71,7 +71,11 @@ export class UserService {
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
+
     private readonly delegationService: DelegationService,
+
+    private readonly httpService:HttpService,
+
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -730,8 +734,7 @@ export class UserService {
     tenantId: string,
     domainUrl?: string,
   ) {
-    //const password = generateRandom6DigitNumber();
-    const password = '%TGBnhy6';
+    const password = generateRandom6DigitNumber();
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password.toString(),
@@ -739,29 +742,29 @@ export class UserService {
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
     const expiresIn = 24 * 60 * 60 * 1000;
     await admin.auth().createCustomToken(userRecord.uid, { expiresIn });
-    // const emailTemplatePath = path.join(
-    //   process.cwd(),
-    //   'src',
-    //   'core',
-    //   'templates',
-    //   'welcome-email-template.html',
-    // );
+    const emailTemplatePath = path.join(
+      process.cwd(),
+      'src',
+      'core',
+      'templates',
+      'welcome-email-template.html',
+    );
 
-    // let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
+    let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
 
-    // emailHtml = emailHtml.replace('{{email}}', email);
-    // emailHtml = emailHtml.replace('{{name}}', firstName);
-    // emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
-    // emailHtml = emailHtml.replace('{{password}}', password.toString());
-    // const emailBody = new CreateEmailDto();
-    // emailBody.to = email;
-    // emailBody.subject =
-    //   'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
-    // emailBody.html = emailHtml;
+    emailHtml = emailHtml.replace('{{email}}', email);
+    emailHtml = emailHtml.replace('{{name}}', firstName);
+    emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
+    emailHtml = emailHtml.replace('{{password}}', password.toString());
+    const emailBody = new CreateEmailDto();
+    emailBody.to = email;
+    emailBody.subject =
+      'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
+    emailBody.html = emailHtml;
 
-    // const response = await this.httpService
-    //   .post(`${this.emailServerUrl}/email`, emailBody)
-    //   .toPromise();
+    const response = await this.httpService
+      .post(`${this.emailServerUrl}/email`, emailBody)
+      .toPromise();
 
     return userRecord;
   }
