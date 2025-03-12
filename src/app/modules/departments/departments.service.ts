@@ -88,7 +88,6 @@ export class DepartmentsService {
     try {
       const departments = await this.departmentRepository.find({
         where: { tenantId: tenantId },
-
         relations: ['employeeJobInformation'],
       });
       if (departments?.length > 0) {
@@ -102,11 +101,10 @@ export class DepartmentsService {
                   'employeeJobInformation.user.role',
                 ],
               });
-            departmentTree.employeeJobInformation =
-              departmentTree.employeeJobInformation.filter(
-                (info) => info.departmentLeadOrNot === true,
+              departmentTree.employeeJobInformation = departmentTree.employeeJobInformation.filter(
+                (info) => info.departmentLeadOrNot === true && info.isPositionActive === true
               );
-            return departmentTree;
+        return departmentTree;
           }),
         );
 

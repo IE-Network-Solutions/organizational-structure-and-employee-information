@@ -23,20 +23,30 @@ export class EmployeeInformationFormService {
 
   async create(
     createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
-    tenantId: string,
+    tenantId: string
   ) {
-    // Retrieve the existing form by title
-    const existingForm = await this.getEmployeeFormByFormTitle(
-      createEmployeeInformationFormDto.formTitle,
+    let existingForm = await this.getEmployeeFormByFormTitle(
+      createEmployeeInformationFormDto.formTitle
     );
-
-    await this.employeeInformationFormRepository.update(
-      { id: existingForm.id },
-      { form: existingForm.form },
-    );
-
-    return await this.findOne(existingForm.id);
+  
+    if (existingForm) {
+      await this.employeeInformationFormRepository.update(
+        { id: existingForm.id },
+        { form: createEmployeeInformationFormDto.form,tenantId },
+      );
+  
+      return await this.findOne(existingForm.id);
+    }
+  
+    const newForm = this.employeeInformationFormRepository.create({
+      formTitle: createEmployeeInformationFormDto.formTitle,
+      form: createEmployeeInformationFormDto.form,
+      tenantId,
+    });
+  
+    return await this.employeeInformationFormRepository.save(newForm);
   }
+  
 
   async findAll(
     tenantId: string,
@@ -44,12 +54,13 @@ export class EmployeeInformationFormService {
   ): Promise<Pagination<EmployeeInformationForm>> {
     try {
       const options: IPaginationOptions = {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
+        page: paginationOptions?.page || 1, // Default to page 1 if not provided
+        limit: paginationOptions?.limit || 0, // 0 means fetch all records
       };
       const queryBuilder = await this.employeeInformationFormRepository
         .createQueryBuilder('employee_information_form')
         .where('employee_information_form.tenantId = :tenantId', { tenantId });
+        // console.log(queryBuilder,"*************************")
       return await this.paginationService.paginate<EmployeeInformationForm>(
         queryBuilder,
         options,

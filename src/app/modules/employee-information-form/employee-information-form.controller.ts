@@ -13,7 +13,7 @@ import { EmployeeInformationFormService } from './employee-information-form.serv
 import { CreateEmployeeInformationFormDto } from './dto/create-employee-information-form.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { EmployeeInformationForm } from './entities/employee-information-form.entity';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 
 @Controller('employee-information-form')
@@ -26,8 +26,9 @@ export class EmployeeInformationFormsController {
   @Post()
   create(
     @Body() createEmployeeInformationFormDto: CreateEmployeeInformationFormDto,
-    tenantId: string,
+    @Req() request: Request,
   ) {
+    const tenantId = request['tenantId'];
     return this.employeeInformationFormService.create(
       createEmployeeInformationFormDto,
       tenantId,
@@ -35,6 +36,11 @@ export class EmployeeInformationFormsController {
   }
 
   @Get()
+  @ApiHeader({
+    name: 'tenantId',
+    description: 'Tenant ID for identifying the organization',
+    required: true,
+  })
   async findAll(
     @Req() request: Request,
     @Query() paginationOptions?: PaginationDto,
