@@ -51,6 +51,7 @@ import { CreateEmployeeInformationDto } from '../../employee-information/dto/cre
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
 import { FilterEmailDto } from '../dto/email.dto';
+import { DelegationService } from '../../delegations/delegations.service';
 
 @Injectable()
 export class UserService {
@@ -70,6 +71,10 @@ export class UserService {
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
+
+    private readonly delegationService: DelegationService,
+
+    private readonly httpService: HttpService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -300,17 +305,15 @@ export class UserService {
   }
 
   async findAllWithOutFilter(
-   
     paginationOptions: PaginationDto,
     tenantId: string,
   ) {
     try {
-  
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      let queryBuilder = await this.userRepository
+      const queryBuilder = await this.userRepository
         .createQueryBuilder('user')
 
         .withDeleted()
@@ -338,7 +341,7 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
-  
+
       const paginatedData = await this.paginationService.paginate<User>(
         queryBuilder,
         options,
@@ -405,7 +408,11 @@ export class UserService {
         .leftJoinAndSelect('userPermissions.permission', 'permission')
         .where('user.id = :id', { id })
         .getOne();
-      user['reportingTo'] = await this.findReportingToUser(id);
+
+      if (!user) {
+        throw new NotFoundException(`User with id ${id} not found.`);
+      }
+      user['reportingTo'] = await this.assignReportsTo(id);
 
       return { ...user };
     } catch (error) {
@@ -728,8 +735,7 @@ export class UserService {
     tenantId: string,
     domainUrl?: string,
   ) {
-    //const password = generateRandom6DigitNumber();
-    const password = '%TGBnhy6';
+    const password = generateRandom6DigitNumber();
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password.toString(),
@@ -737,29 +743,29 @@ export class UserService {
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
     const expiresIn = 24 * 60 * 60 * 1000;
     await admin.auth().createCustomToken(userRecord.uid, { expiresIn });
-    // const emailTemplatePath = path.join(
-    //   process.cwd(),
-    //   'src',
-    //   'core',
-    //   'templates',
-    //   'welcome-email-template.html',
-    // );
+    const emailTemplatePath = path.join(
+      process.cwd(),
+      'src',
+      'core',
+      'templates',
+      'welcome-email-template.html',
+    );
 
-    // let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
+    let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
 
-    // emailHtml = emailHtml.replace('{{email}}', email);
-    // emailHtml = emailHtml.replace('{{name}}', firstName);
-    // emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
-    // emailHtml = emailHtml.replace('{{password}}', password.toString());
-    // const emailBody = new CreateEmailDto();
-    // emailBody.to = email;
-    // emailBody.subject =
-    //   'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
-    // emailBody.html = emailHtml;
+    emailHtml = emailHtml.replace('{{email}}', email);
+    emailHtml = emailHtml.replace('{{name}}', firstName);
+    emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
+    emailHtml = emailHtml.replace('{{password}}', password.toString());
+    const emailBody = new CreateEmailDto();
+    emailBody.to = email;
+    emailBody.subject =
+      'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
+    emailBody.html = emailHtml;
 
-    // const response = await this.httpService
-    //   .post(`${this.emailServerUrl}/email`, emailBody)
-    //   .toPromise();
+    const response = await this.httpService
+      .post(`${this.emailServerUrl}/email`, emailBody)
+      .toPromise();
 
     return userRecord;
   }
@@ -894,7 +900,12 @@ export class UserService {
     try {
       const user = await this.userRepository.find({
         where: { tenantId: tenantId },
-        relations: ['employeeInformation','basicSalaries','employeeJobInformation','employeeJobInformation.position'],
+        relations: [
+          'employeeInformation',
+          'basicSalaries',
+          'employeeJobInformation',
+          'employeeJobInformation.position',
+        ],
       });
       return user;
     } catch (error) {
@@ -939,6 +950,27 @@ export class UserService {
       return user;
     } catch (error) {
       throw new NotFoundException('User Not Found');
+    }
+  }
+  async assignReportsTo(userId: string) {
+    try {
+      let reportingToUser = await this.findReportingToUser(userId);
+      const getDelegation = await this.delegationService.findUserOnLeaveById(
+        reportingToUser.id,
+      );
+      if (getDelegation) {
+        if (getDelegation.delegatee.id !== userId) {
+          reportingToUser = getDelegation.delegatee;
+        } else {
+          reportingToUser = await this.findReportingToUser(
+            getDelegation.delegatorId,
+          );
+        }
+      }
+
+      return reportingToUser;
+    } catch (error) {
+      return null;
     }
   }
 }
