@@ -101,10 +101,13 @@ export class DepartmentsService {
                   'employeeJobInformation.user.role',
                 ],
               });
-              departmentTree.employeeJobInformation = departmentTree.employeeJobInformation.filter(
-                (info) => info.departmentLeadOrNot === true && info.isPositionActive === true
+            departmentTree.employeeJobInformation =
+              departmentTree.employeeJobInformation.filter(
+                (info) =>
+                  info.departmentLeadOrNot === true &&
+                  info.isPositionActive === true,
               );
-        return departmentTree;
+            return departmentTree;
           }),
         );
 

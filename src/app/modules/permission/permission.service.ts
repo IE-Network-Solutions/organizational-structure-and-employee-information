@@ -45,7 +45,6 @@ export class PermissionService implements PermissionInterface {
       return [];
     }
 
-
     const validPermissions = await this.permissionRepository.find({
       where: { id: In(permissionIds) },
     });

@@ -20,8 +20,6 @@ export class RolePermissionService implements RolePermissionInterface {
     private readonly rolePermissionRepository: RolePermissionRepository,
     private readonly paginationService: PaginationService,
     private readonly permissionService: PermissionService,
-
-    
   ) {}
   async createRoleWithPermissions(
     roleId: string,
@@ -31,19 +29,20 @@ export class RolePermissionService implements RolePermissionInterface {
     try {
       const allPermissions = await this.permissionService.findAllPermission();
       const checkPermissionExist = (id: string) => {
-        return allPermissions?.some((item) => item.id === id); 
+        return allPermissions?.some((item) => item.id === id);
       };
-      
+
       const assignedPermissions = permissionIds
-        .filter(checkPermissionExist) 
+        .filter(checkPermissionExist)
         .map((permissionId) =>
           this.rolePermissionRepository.create({
             roleId,
             permissionId,
             tenantId,
-          })
+          }),
         );
       return await this.rolePermissionRepository.save(assignedPermissions);
+      
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -95,17 +94,17 @@ export class RolePermissionService implements RolePermissionInterface {
       await this.rolePermissionRepository.delete({ role: { id: roleId } });
       const allPermissions = await this.permissionService.findAllPermission();
       const checkPermissionExist = (id: string) => {
-        return allPermissions?.some((item) => item.id === id); 
+        return allPermissions?.some((item) => item.id === id);
       };
-      
+
       const assignedPermissions = permissionIds
-        .filter(checkPermissionExist) 
+        .filter(checkPermissionExist)
         .map((permissionId) =>
           this.rolePermissionRepository.create({
             roleId,
             permissionId,
             tenantId,
-          })
+          }),
         );
       // const assignedPermissions = permissionIds.map((permissionId) => {
       //   return this.rolePermissionRepository.create({
