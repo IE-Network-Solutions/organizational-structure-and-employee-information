@@ -85,20 +85,18 @@ export class BranchRequestService {
 
   async findAllBranchRequestWithApprover(
     paginationOptions: PaginationDto,
-    tenantId: string,
     userId: string,
+    tenantId: string,
   ): Promise<{ items: BranchRequest[]; meta: any; links: any }> {
     try {
       const options: IPaginationOptions = {
         page: paginationOptions.page || 1,
         limit: paginationOptions.limit || 10,
       };
-
       const query = this.branchRequestRepository
         .createQueryBuilder('branchrequest')
         .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch')
         .leftJoinAndSelect('branchrequest.requestBranch', 'requestBranch')
-        .where('branchrequest.tenantId = :tenantId', { tenantId })
         .orderBy(
           `branchrequest.${paginationOptions.orderBy || 'createdAt'}`,
           paginationOptions.orderDirection || 'DESC',
@@ -108,7 +106,7 @@ export class BranchRequestService {
         await this.paginationService.paginate<BranchRequest>(query, options);
 
       const branchRequests = paginatedData.items;
-
+      // Handle empty results
       if (!branchRequests.length) {
         return {
           items: [],
@@ -117,48 +115,52 @@ export class BranchRequestService {
         };
       }
 
-      const response = await this.httpService
-        .get(`${this.orgStructureServerUrl}/approver/branchCurrentApprover`, {
-          params: {
-            branchRequests: JSON.stringify(branchRequests),
-          },
-          headers: { tenantId },
-        })
-        .toPromise();
+      let responseData;
+      try {
+        const response = await this.httpService
+          .get(`${this.orgStructureServerUrl}/approver/branchCurrentApprover`, {
+            params: { branchRequests: JSON.stringify(branchRequests) },
+            headers: { tenantId },
+          })
+          .toPromise();
 
-      const responseData = response.data;
-      const filteredLastTrueApprovals = responseData.items.filter(
-        (item) => item.last === true,
-      );
+        responseData = response?.data;
+        if (!responseData || !responseData.items) {
+          throw new Error('Invalid response from approver API');
+        }
+      } catch (apiError) {
+        throw new BadRequestException('Failed to fetch approver data.');
+      }
+
+      // Ensure items exist before filtering
+      const filteredLastTrueApprovals =
+        responseData?.items?.filter((item) => item.last === true) || [];
+
       for (const approverRequest of filteredLastTrueApprovals) {
-        const approverAction = approverRequest.approverAction;
-        if (approverAction == 'Rejected') {
+        try {
+          const approverAction = approverRequest.approverAction;
           const updateapproverRequestDto = {
-            status: BranchRequestStatus.DECLINED,
-          };
-          const result = await this.update(
-            approverRequest.id,
-            updateapproverRequestDto,
-          );
-        } else {
-          const updateapproverRequestDto = {
-            status: BranchRequestStatus.APPROVED,
-          };
-          const result = await this.update(
-            approverRequest.id,
-            updateapproverRequestDto,
-          );
-          const updateEmployeeJobInformationDto = {
-            branchId: approverRequest.requestBranchId,
+            status:
+              approverAction === 'Rejected'
+                ? BranchRequestStatus.DECLINED
+                : BranchRequestStatus.APPROVED,
           };
 
-          const updateBranch =
+          await this.update(approverRequest.id, updateapproverRequestDto);
+
+          if (approverAction !== 'Rejected') {
+            const updateEmployeeJobInformationDto = {
+              branchId: approverRequest.requestBranchId,
+            };
+
             await this.employeeJobInformationService.updatebranchRequest(
               approverRequest.userId,
               updateEmployeeJobInformationDto,
             );
-        }
+          }
+        } catch (updateError) {}
       }
+
       if (responseData?.items?.length > 0) {
         const filteredData = responseData.items
           .map((approver) => ({
@@ -183,8 +185,7 @@ export class BranchRequestService {
       };
     } catch (error) {
       throw new BadRequestException(
-        'Error retrieving branch requests',
-        error.message,
+        `Error retrieving branch requests: ${error.message || 'Unknown error'}`,
       );
     }
   }

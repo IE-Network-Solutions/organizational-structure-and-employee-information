@@ -69,8 +69,7 @@ export class DelegationController {
     @Body() updateDelegationDto: UpdateDelegationDto,
     @Headers('tenantId') tenantId: string,
   ) {
-  
-  return this.delegationService.updateDelegationByLeaveRequestId(
+    return this.delegationService.updateDelegationByLeaveRequestId(
       leaveRequestId,
       updateDelegationDto,
       tenantId,
