@@ -408,6 +408,10 @@ export class UserService {
         .leftJoinAndSelect('userPermissions.permission', 'permission')
         .where('user.id = :id', { id })
         .getOne();
+
+      if (!user) {
+        throw new NotFoundException(`User with id ${id} not found.`);
+      }
       user['reportingTo'] = await this.assignReportsTo(id);
 
       return { ...user };
