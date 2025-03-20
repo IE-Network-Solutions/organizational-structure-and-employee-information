@@ -9,6 +9,7 @@ import {
   Query,
   Req,
   BadRequestException,
+  Headers,
 } from '@nestjs/common';
 import { BranchRequestService } from './branch-request.service';
 import { CreateBranchRequestDto } from './dto/create-branch-request.dto';
@@ -51,17 +52,12 @@ export class BranchRequestController {
     @Param('userId') userId: string,
     @Req() req: Request,
     @Query() paginationOptions: PaginationDto,
+    @Headers('tenantId') tanantId: string,
   ): Promise<{ items: BranchRequest[]; meta: any; links: any }> {
-    const tenantId = req['tenantId'];
-
-    if (!tenantId) {
-      throw new BadRequestException('Tenant ID is missing in the request.');
-    }
-
     return this.branchRequestService.findAllBranchRequestWithApprover(
       paginationOptions,
-      tenantId,
       userId,
+      tanantId,
     );
   }
 
