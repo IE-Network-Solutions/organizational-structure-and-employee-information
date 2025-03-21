@@ -51,6 +51,7 @@ import { CreateEmployeeInformationDto } from '../../employee-information/dto/cre
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
 import { FilterEmailDto } from '../dto/email.dto';
+import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
 
 @Injectable()
 export class UserService {
@@ -71,6 +72,7 @@ export class UserService {
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
     private readonly httpService:HttpService,
+    private readonly firebaseAuthService:FirebaseAuthService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -130,6 +132,7 @@ export class UserService {
     await queryRunner.connect();
 
     await queryRunner.startTransaction();
+    let firebaseRecordId:string=null;
 
     try {
       const {
@@ -161,6 +164,7 @@ export class UserService {
         tenantId,
         //  tenant.domainUrl
       );
+      firebaseRecordId=userRecord.uid;
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -209,6 +213,9 @@ export class UserService {
 
       return await this.findOne(result.id);
     } catch (error) {
+      if(firebaseRecordId){
+      await admin.auth().deleteUser(firebaseRecordId);
+      }
       await queryRunner.rollbackTransaction();
       throw new ConflictException(error.message);
     } finally {
@@ -692,25 +699,30 @@ export class UserService {
     }
   }
 
-  async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
+  async createFromTenant(createUserDto: CreateUserDto, tenantId:string, role: string) {
+    let firebaseRecordId:string=null;
+   
+    try{
     const createRoleDto = new CreateRoleDto();
     createRoleDto.name = role;
     createRoleDto.description = role;
     const createRole = await this.rolesService.createFirstRole(
       createRoleDto,
       tenantId,
-    );
+    ); console.log(createRole,"createUserDto")
     if (createRole) {
       createUserDto.roleId = createRole.id;
       const user = this.userRepository.create({ ...createUserDto, tenantId });
       const password = createUserDto.email + generateRandom4DigitNumber();
+      const domainRegistered = await this.addAuthorizedDomain(createUserDto.domainUrl);
+      console.log(domainRegistered,"domainRegistered")
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
         createUserDto.firstName,
         tenantId,
         createUserDto.domainUrl,
       );
-
+       firebaseRecordId=userRecord.uid;
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -721,6 +733,11 @@ export class UserService {
     } else {
       throw new NotFoundException('Role Not Found');
     }
+  }catch(error){
+    if(firebaseRecordId){
+      await admin.auth().deleteUser(firebaseRecordId);
+      }
+  }
   }
 
   async createUserToFirebase(
@@ -729,6 +746,9 @@ export class UserService {
     tenantId: string,
     domainUrl?: string,
   ) {
+
+
+    
     const password = generateRandom6DigitNumber();
     const userRecord = await admin.auth().createUser({
       email: email,
@@ -760,8 +780,26 @@ export class UserService {
     const response = await this.httpService
       .post(`${this.emailServerUrl}/email`, emailBody)
       .toPromise();
-
+console.log(userRecord,"userRecord")
     return userRecord;
+  }
+
+
+
+  async addAuthorizedDomain(domain: string) {
+
+try {
+  const  firebaseAuth = await this.firebaseAuthService.addAuthorizedDomain(domain)
+  return firebaseAuth
+
+  
+} catch (error) {
+  throw new BadRequestException(error.message);
+  
+}
+
+
+
   }
   async activateUser(userId: string, tenantId: string): Promise<User> {
     try {

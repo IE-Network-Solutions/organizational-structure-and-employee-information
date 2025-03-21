@@ -221,7 +221,7 @@ export class RoleService implements RoleInterface {
     }
   }
 
-  async createFirstRole(createRoleDto: CreateRoleDto, tenantId) {
+  async createFirstRole(createRoleDto: CreateRoleDto, tenantId:string) {
     const slug = createRoleDto.name
       .toLowerCase() // Convert all letters to lowercase
       .replace(/\s+/g, '_');
@@ -230,7 +230,10 @@ export class RoleService implements RoleInterface {
       tenantId,
       ...createRoleDto,
     });
-    return await this.roleRepository.save(createRole);
+   
+    const j= await this.roleRepository.save(createRole);
+    console.log(createRole,"jjjjjjjjj");
+    return j
   }
   async findRoleBySlug(slug: string, tenantId: string) {
     try {

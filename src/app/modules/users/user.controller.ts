@@ -41,6 +41,7 @@ import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dt
 import { ImportEmployeeDto } from './dto/import-user.dto';
 import { FilterEmailDto } from './dto/email.dto';
 
+
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
@@ -269,14 +270,16 @@ export class UserController {
   @Post('/create-first-user-for-tenant')
   @ExcludeAuthGuard()
   async createFromTenant(@Body() body: any, @Req() request: Request) {
-    const { createUserDto } = body;
-    const role = createUserDto.role;
-    delete createUserDto.role;
+    console.log(body,"log");
+    // const { createUserDto } = body;
+   // console.log(createUserDto,"log");
+    // const role = createUserDto.role;
+    // delete createUserDto.role;
     const tenantId = request['tenantId'];
     return await this.userService.createFromTenant(
-      createUserDto,
+      body,
       tenantId,
-      role,
+      body.role,
     );
   }
 
@@ -376,4 +379,6 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.findUserByEmail(email, tenantId);
   }
+
 }
+
