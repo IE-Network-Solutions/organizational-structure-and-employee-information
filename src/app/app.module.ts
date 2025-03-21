@@ -39,7 +39,7 @@ configuration values obtained from a ConfigService. */
         password: configService.get<string>('db.password'),
         database: configService.get<string>('db.name'),
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      //  synchronize: configService.get<boolean>('db.synchronize'),
+       synchronize: configService.get<boolean>('db.synchronize'),
         subscribers: [
           CalendarSubscriber,
           BranchSubscriber,
@@ -59,10 +59,10 @@ configuration values obtained from a ConfigService. */
       provide: APP_GUARD,
       useClass: TenantGuard,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}
