@@ -713,8 +713,8 @@ export class UserService {
     if (createRole) {
       createUserDto.roleId = createRole.id;
       const user = this.userRepository.create({ ...createUserDto, tenantId });
-      const url=createUserDto.domainUrl.replace("https://", "");
-      const domainRegistered = await this.addAuthorizedDomain(url);
+      // const url=createUserDto.domainUrl.replace("https://", "");
+      // const domainRegistered = await this.addAuthorizedDomain(url);
       const password = createUserDto.email + generateRandom4DigitNumber();
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
