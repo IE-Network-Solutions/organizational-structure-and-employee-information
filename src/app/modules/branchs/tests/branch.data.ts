@@ -27,8 +27,6 @@ export const createbranchData = (): CreateBranchDto => {
     location: 'addis ababa',
     contactNumber: '34567890',
     contactEmail: 's@s.com',
-
-    //   tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
   };
 };
 export const deletebranchData = () => {
