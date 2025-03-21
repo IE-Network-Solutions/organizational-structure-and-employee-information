@@ -19,7 +19,6 @@ import { EmployeeJobInformationService } from '../employee-job-information/emplo
 
 @Injectable()
 export class BranchRequestService {
-  private readonly orgStructureServerUrl: string;
   private readonly approvalUrl: string;
 
   constructor(
@@ -31,9 +30,6 @@ export class BranchRequestService {
     private configService: ConfigService,
     private httpService: HttpService,
   ) {
-    this.orgStructureServerUrl = this.configService.get<string>(
-      'servicesUrl.org_structureUrl',
-    );
     this.approvalUrl = this.configService.get<string>(
       'servicesUrl.approvalUrl',
     );
@@ -98,6 +94,7 @@ export class BranchRequestService {
         page: paginationOptions.page || 1,
         limit: paginationOptions.limit || 10,
       };
+
       const query = this.branchRequestRepository
         .createQueryBuilder('branchrequest')
         .leftJoinAndSelect('branchrequest.currentBranch', 'currentBranch')
@@ -111,6 +108,7 @@ export class BranchRequestService {
         await this.paginationService.paginate<BranchRequest>(query, options);
 
       const branchRequests = paginatedData.items;
+
       // Handle empty results
       if (!branchRequests.length) {
         return {
@@ -163,7 +161,12 @@ export class BranchRequestService {
               updateEmployeeJobInformationDto,
             );
           }
-        } catch (updateError) {}
+        } catch (updateError) {
+          console.error(
+            `Error updating request ${approverRequest.id}:`,
+            updateError,
+          );
+        }
       }
 
       if (responseData?.items?.length > 0) {
