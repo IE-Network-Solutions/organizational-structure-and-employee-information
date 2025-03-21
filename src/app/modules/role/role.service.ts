@@ -231,9 +231,8 @@ export class RoleService implements RoleInterface {
       ...createRoleDto,
     });
    
-    const j= await this.roleRepository.save(createRole);
-    console.log(createRole,"jjjjjjjjj");
-    return j
+ return await this.roleRepository.save(createRole);
+   
   }
   async findRoleBySlug(slug: string, tenantId: string) {
     try {
