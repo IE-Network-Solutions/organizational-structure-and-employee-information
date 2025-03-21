@@ -42,6 +42,7 @@ export const configuration = () => ({
 
     emailUrl: process.env.EMAIL_SERVER_URL,
     org_structureUrl: process.env.ORG_STRUCTURE_MODULE,
+    approvalUrl: process.env.APPROVAL_MODULE,
 
     //tenantUrl:process.env.TENANT_URL
   },
