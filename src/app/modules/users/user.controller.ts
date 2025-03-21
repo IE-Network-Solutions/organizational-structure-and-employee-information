@@ -270,16 +270,14 @@ export class UserController {
   @Post('/create-first-user-for-tenant')
   @ExcludeAuthGuard()
   async createFromTenant(@Body() body: any, @Req() request: Request) {
-    console.log(body,"log");
-    // const { createUserDto } = body;
-   // console.log(createUserDto,"log");
-    // const role = createUserDto.role;
-    // delete createUserDto.role;
+    const { createUserDto } = body;
+    const role = createUserDto.role;
+    delete createUserDto.role;
     const tenantId = request['tenantId'];
     return await this.userService.createFromTenant(
-      body,
+      createUserDto,
       tenantId,
-      body.role,
+      role,
     );
   }
 

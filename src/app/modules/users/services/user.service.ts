@@ -699,30 +699,29 @@ export class UserService {
     }
   }
 
-  async createFromTenant(createUserDto: CreateUserDto, tenantId:string, role: string) {
-    let firebaseRecordId:string=null;
-   
-    try{
+
+
+
+  async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
     const createRoleDto = new CreateRoleDto();
     createRoleDto.name = role;
     createRoleDto.description = role;
     const createRole = await this.rolesService.createFirstRole(
       createRoleDto,
       tenantId,
-    ); console.log(createRole,"createUserDto")
+    );
     if (createRole) {
       createUserDto.roleId = createRole.id;
       const user = this.userRepository.create({ ...createUserDto, tenantId });
-      const password = createUserDto.email + generateRandom4DigitNumber();
       const domainRegistered = await this.addAuthorizedDomain(createUserDto.domainUrl);
-      console.log(domainRegistered,"domainRegistered")
+      const password = createUserDto.email + generateRandom4DigitNumber();
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
         createUserDto.firstName,
         tenantId,
         createUserDto.domainUrl,
       );
-       firebaseRecordId=userRecord.uid;
+
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -733,11 +732,6 @@ export class UserService {
     } else {
       throw new NotFoundException('Role Not Found');
     }
-  }catch(error){
-    if(firebaseRecordId){
-      await admin.auth().deleteUser(firebaseRecordId);
-      }
-  }
   }
 
   async createUserToFirebase(
