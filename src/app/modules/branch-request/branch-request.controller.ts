@@ -52,12 +52,13 @@ export class BranchRequestController {
     @Param('userId') userId: string,
     @Req() req: Request,
     @Query() paginationOptions: PaginationDto,
-    @Headers('tenantId') tanantId: string,
   ): Promise<{ items: BranchRequest[]; meta: any; links: any }> {
+    const tenantId = req['tenantId'];
+
     return this.branchRequestService.findAllBranchRequestWithApprover(
       paginationOptions,
       userId,
-      tanantId,
+      tenantId,
     );
   }
 
