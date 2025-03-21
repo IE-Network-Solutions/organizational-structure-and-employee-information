@@ -52,7 +52,7 @@ export class BranchRequestController {
     @Param('userId') userId: string,
     @Req() req: Request,
     @Query() paginationOptions: PaginationDto,
-    @Headers('tenantId') tanantId?: string,
+    @Headers('tenantId') tanantId: string,
   ): Promise<{ items: BranchRequest[]; meta: any; links: any }> {
     return this.branchRequestService.findAllBranchRequestWithApprover(
       paginationOptions,
