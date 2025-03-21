@@ -774,7 +774,6 @@ export class UserService {
     const response = await this.httpService
       .post(`${this.emailServerUrl}/email`, emailBody)
       .toPromise();
-console.log(userRecord,"userRecord")
     return userRecord;
   }
 
