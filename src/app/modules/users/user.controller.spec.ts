@@ -34,6 +34,7 @@ import { UserService } from './services/user.service';
 import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserDepartmentService } from './services/user-relation-with-department.service';
+import { DelegationService } from '../delegations/delegations.service';
 
 describe('UserController', () => {
   let userController: UserController;
@@ -79,6 +80,11 @@ describe('UserController', () => {
           provide: PaginationService,
           useValue: mock<PaginationService>(),
         },
+        {
+          provide: DelegationService,
+          useValue: mock<DelegationService>(),
+        },
+
         {
           provide: EmployeeInformationService,
           useValue: mock<EmployeeInformationService>(),

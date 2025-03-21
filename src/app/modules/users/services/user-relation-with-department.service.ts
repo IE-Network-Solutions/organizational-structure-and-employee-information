@@ -98,8 +98,6 @@ export class UserDepartmentService {
     tenantId: string,
   ): Promise<Department> {
     try {
-    
-      
       const departmentToDelete = dissolveDepartmentDto.departmentToDelete;
       delete dissolveDepartmentDto.departmentToDelete;
       const departments = await this.departmentService.updateDepartment(
@@ -144,11 +142,12 @@ export class UserDepartmentService {
               for (const departmentUser of user.employeeJobInformation) {
                 const updatedData = new UpdateEmployeeJobInformationDto();
                 updatedData.departmentId = dissolveDepartmentDto.id;
-                if(departmentUser.userId===dissolveDepartmentDto.teamLeader){
-                  updatedData.departmentLeadOrNot=true
-
+                if (
+                  departmentUser.userId === dissolveDepartmentDto.teamLeader
+                ) {
+                  updatedData.departmentLeadOrNot = true;
                 }
-                updatedData.departmentLeadOrNot=false
+                updatedData.departmentLeadOrNot = false;
 
                 await this.employeeJobInformationService.update(
                   departmentUser.id,
