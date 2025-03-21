@@ -99,7 +99,6 @@ describe('BranchRequestController', () => {
           userId,
           req,
           pagination,
-          req.tanantId,
         );
 
       expect(
