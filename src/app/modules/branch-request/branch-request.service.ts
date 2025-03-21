@@ -20,6 +20,8 @@ import { EmployeeJobInformationService } from '../employee-job-information/emplo
 @Injectable()
 export class BranchRequestService {
   private readonly orgStructureServerUrl: string;
+  private readonly approvalUrl: string;
+
   constructor(
     @InjectRepository(BranchRequest)
     private branchRequestRepository: Repository<BranchRequest>,
@@ -31,6 +33,9 @@ export class BranchRequestService {
   ) {
     this.orgStructureServerUrl = this.configService.get<string>(
       'servicesUrl.org_structureUrl',
+    );
+    this.approvalUrl = this.configService.get<string>(
+      'servicesUrl.approvalUrl',
     );
   }
 
@@ -118,7 +123,7 @@ export class BranchRequestService {
       let responseData;
       try {
         const response = await this.httpService
-          .get(`${this.orgStructureServerUrl}/approver/branchCurrentApprover`, {
+          .get(`${this.approvalUrl}/approver/branchCurrentApprover`, {
             params: { branchRequests: JSON.stringify(branchRequests) },
             headers: { tenantId },
           })
