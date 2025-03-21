@@ -48,6 +48,7 @@ export const userDataSave = () => {
     createdAt: new Date('2022-10-22T07:11:42Z'),
     updatedAt: new Date('2022-10-22T07:11:42Z'),
     role: null,
+    reportingTo: null,
     userPermissions: [],
   };
 };

@@ -17,6 +17,8 @@ import { checkIfDataExists } from '@root/src/core/utils/checkIfDataExists.util';
 import { UpdatePermissionGroupDto } from '../permission-group/dto/update-permission-group.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PermissionInterface } from './permission-interface';
+import { In } from 'typeorm';
+import { tenantId } from '../branchs/tests/branch.data';
 
 @Injectable()
 export class PermissionService implements PermissionInterface {
@@ -37,6 +39,16 @@ export class PermissionService implements PermissionInterface {
     } catch (error) {
       throw new ConflictException(error.message);
     }
+  }
+  async findValidPermissions(permissionIds: string[]): Promise<Permission[]> {
+    if (!permissionIds || permissionIds.length === 0) {
+      return [];
+    }
+
+    const validPermissions = await this.permissionRepository.find({
+      where: { id: In(permissionIds) },
+    });
+    return validPermissions;
   }
 
   async findAll(
@@ -83,6 +95,17 @@ export class PermissionService implements PermissionInterface {
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`Permission with id ${id} not found.`);
+      }
+      throw error;
+    }
+  }
+
+  async findAllPermission(): Promise<Permission[]> {
+    try {
+      return await this.permissionRepository.find();
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`Permission not found.`);
       }
       throw error;
     }
