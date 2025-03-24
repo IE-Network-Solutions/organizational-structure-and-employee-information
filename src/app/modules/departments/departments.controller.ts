@@ -45,7 +45,7 @@ export class DepartmentsController {
   }
 
 
-  @Get('child-departments/departments/all-levels:departmentId')
+  @Get('child-departments/departments/all-levels/:departmentId')
   async findAllChildDepartmentsWithAllLevels(@Req() req: Request,@Param('departmentId') departmentId: string) {
     const tenantId = req['tenantId'];
     return await this.departmentsService.findAllChildDepartmentsWithAllLevels(tenantId,departmentId);
