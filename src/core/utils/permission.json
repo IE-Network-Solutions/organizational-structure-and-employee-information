@@ -160,7 +160,7 @@
           { "name": "Manage Leave Management", "slug": "manage_leave_management", "roles": ["admin", "owner"] }       ,
 
 
-          { "name": "Manage Timesheet Settings", "slug": "manage_timesheet_settings", "roles": ["admin", "owner"] },
+          { "name": "Manage Timesheet Settings", "slug": "manage_timesheet_settings", "roles": ["admin", "owner"] }
         
 
         
