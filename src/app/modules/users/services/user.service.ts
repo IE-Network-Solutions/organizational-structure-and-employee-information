@@ -741,6 +741,9 @@ export class UserService {
 
       return await this.userRepository.save(user);
     } else {
+      if(firebaseRecordId){
+        await admin.auth().deleteUser(firebaseRecordId);
+        }
       throw new NotFoundException('Role Not Found');
     }}catch(error){
       if(firebaseRecordId){
