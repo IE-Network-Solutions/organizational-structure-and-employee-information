@@ -30,6 +30,7 @@ export class JobPositionService {
     createJobPositionDto: CreateJobPositionDto,
   ): Promise<JobPosition> {
     try {
+      console.log(createJobPositionDto,"createJobPositionDto")
       // Check if the job position already exists for the tenant
       const existingJobPosition = await this.jobpositionRepository.findOne({
         where: { name: createJobPositionDto.name, tenantId: tenantId },
