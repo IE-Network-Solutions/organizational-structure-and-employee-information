@@ -391,6 +391,8 @@ export class UserService {
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
         )
         .leftJoinAndSelect(
           'user.basicSalaries',
