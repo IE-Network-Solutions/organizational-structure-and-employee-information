@@ -270,7 +270,6 @@
         
 
 
-        { "name": "Manage Planning And Reporting", "slug": "manage_planning_reporting", "roles": ["owner"] },
         { "name": "Manage Okr Settings", "slug": "manage_okr_settings", "roles": ["owner"] }
         
         ]
@@ -421,7 +420,7 @@
         "group": "Basic Permission",
         "permissions": [
           { "name": "View Organization", "slug": "view_organization", "roles": ["owner"] },
-          { "name": "View Organization Chart", "slug": "view Organization Chart", "roles": ["owner"] },
+          { "name": "View Organization Chart", "slug": "view_Organization Chart", "roles": ["owner"] },
           { "name": "View Employee Attendance", "slug": "view_employee_attendance", "roles": ["admin", "owner"] },
           { "name": "View My Timesheet", "slug": "view_my_timesheet", "roles": ["admin", "owner"] },
 
@@ -434,7 +433,9 @@
 
           { "name": "View My Training", "slug": "view_incentive", "roles": ["owner"] },
           { "name": "View Payroll", "slug": "view_payroll", "roles": ["owner"] },
-          { "name": "View My Payroll", "slug": "view_my_payroll", "roles": ["owner"] }       
+          { "name": "View My Payroll", "slug": "view_my_payroll", "roles": ["owner"] }       ,
+          { "name": "Manage Planning And Reporting", "slug": "manage_planning_reporting", "roles": ["owner"] }
+
         ]
       }
       
