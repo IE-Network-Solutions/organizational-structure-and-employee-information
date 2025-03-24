@@ -158,7 +158,7 @@
         
 
           { "name": "View Timesheet", "slug": "view_timesheet", "roles": ["admin", "owner"] },
-          { "name": "View Employee Attendancer", "slug": "view_employee_attendance", "roles": ["admin", "owner"] },
+          { "name": "View Employee Attendance", "slug": "view_employee_attendance", "roles": ["admin", "owner"] },
           { "name": "Manage Leave Management", "slug": "manage_leave_management", "roles": ["admin", "owner"] }       ,
 
 
@@ -422,6 +422,28 @@
           { "name": "View Variable Pay", "slug": "view_variable_pay", "roles": ["owner"] },
           { "name": "Manage Incentive Settings", "slug": "manage_incentive_settings", "roles": ["owner"] }
          
+        ]
+      },
+
+
+      {
+        "group": "Basic Permission",
+        "permissions": [
+          { "name": "View Organization", "slug": "view_organization", "roles": ["owner"] },
+          { "name": "View Organization Chart", "slug": "view Organization Chart", "roles": ["owner"] },
+          { "name": "View Employee Attendance", "slug": "view_employee_attendance", "roles": ["admin", "owner"] },
+          { "name": "View My Timesheet", "slug": "view_my_timesheet", "roles": ["admin", "owner"] },
+
+
+          { "name": "View Okr", "slug": "view_okr", "roles": ["owner"] },
+          { "name": "View Okr Dashboard", "slug": "view_okr_dashboard", "roles": ["owner"] },
+          { "name": "View Okr Overview", "slug": "view_okr_overview", "roles": ["owner"] },
+          { "name": "View Learning Growth", "slug": "view_learning_growth", "roles": ["owner"] },         
+         
+
+          { "name": "View My Training", "slug": "view_incentive", "roles": ["owner"] },
+          { "name": "View Payroll", "slug": "view_payroll", "roles": ["owner"] },
+          { "name": "View My Payroll", "slug": "view_my_payroll", "roles": ["owner"] }       
         ]
       }
       
