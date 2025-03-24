@@ -20,8 +20,7 @@
           { "name": "Assign Working Schedule to Organization", "slug": "assign-working-schedule-organization", "roles": ["owner"] },
 
 
-          { "name": "View Organization", "slug": "view_organization", "roles": ["owner"] },
-          { "name": "View Organization Chart", "slug": "view Organization Chart", "roles": ["owner"] },
+
           { "name": "View organization Settings", "slug": "view_organization_settings", "roles": ["owner"] }
 
 
@@ -158,13 +157,11 @@
         
 
           { "name": "View Timesheet", "slug": "view_timesheet", "roles": ["admin", "owner"] },
-          { "name": "View Employee Attendance", "slug": "view_employee_attendance", "roles": ["admin", "owner"] },
           { "name": "Manage Leave Management", "slug": "manage_leave_management", "roles": ["admin", "owner"] }       ,
 
 
           { "name": "Manage Timesheet Settings", "slug": "manage_timesheet_settings", "roles": ["admin", "owner"] },
         
-          { "name": "View My Timesheet", "slug": "view_my_timesheet", "roles": ["admin", "owner"] }
 
         
         
@@ -271,9 +268,6 @@
         { "name": "Create OKR Rule", "slug": "create-okr-rule", "roles": ["admin", "owner"] }     ,
         
         
-        { "name": "View Okr", "slug": "view_okr", "roles": ["owner"] },
-        { "name": "View Okr Dashboard", "slug": "view_okr_dashboard", "roles": ["owner"] },
-        { "name": "View Okr Overview", "slug": "view_okr_overview", "roles": ["owner"] },
 
 
         { "name": "Manage Planning And Reporting", "slug": "manage_planning_reporting", "roles": ["owner"] },
@@ -316,7 +310,6 @@
 
 
           { "name": "View Learning Growth", "slug": "view_learning_growth", "roles": ["owner"] },
-          { "name": "View My Training", "slug": "view_my_training", "roles": ["owner"] },
           { "name": "Manage Training", "slug": "manage_training", "roles": ["owner"] },
   
   
@@ -394,10 +387,8 @@
       {
         "group": "Payroll Management",
         "permissions": [
-          { "name": "View Payroll", "slug": "view_payroll", "roles": ["owner"] },
           { "name": "View Employee Information", "slug": "view_employee_information", "roles": ["owner"] },
           { "name": "View Payroll Overview", "slug": "view_payroll_overview", "roles": ["owner"] },
-          { "name": "View My Payroll", "slug": "view_my_payroll", "roles": ["owner"] },
           { "name": "Manage Payroll Settings", "slug": "manage_payroll_settings", "roles": ["owner"] }
          
         ]
