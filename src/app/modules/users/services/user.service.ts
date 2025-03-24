@@ -710,7 +710,9 @@ export class UserService {
 
 
 
-  async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
+  async createFromTenant(createUserDto: CreateUserDto, tenantId:string, role: string) {
+    let firebaseRecordId:string=null;
+    try{
     const createRoleDto = new CreateRoleDto();
     createRoleDto.name = role;
     createRoleDto.description = role;
@@ -730,7 +732,7 @@ export class UserService {
         tenantId,
         createUserDto.domainUrl,
       );
-
+      firebaseRecordId=userRecord.uid;
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -740,6 +742,11 @@ export class UserService {
       return await this.userRepository.save(user);
     } else {
       throw new NotFoundException('Role Not Found');
+    }}catch(error){
+      if(firebaseRecordId){
+        await admin.auth().deleteUser(firebaseRecordId);
+        }
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -783,6 +790,8 @@ export class UserService {
     const response = await this.httpService
       .post(`${this.emailServerUrl}/email`, emailBody)
       .toPromise();
+
+
     return userRecord;
   }
 
