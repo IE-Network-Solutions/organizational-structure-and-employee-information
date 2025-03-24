@@ -1,5 +1,8 @@
 import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
+
+
+
 export class CreateJobPositionDto {
   @IsString()
   @IsNotEmpty()
@@ -9,7 +12,4 @@ export class CreateJobPositionDto {
   @IsNotEmpty()
   description: string;
 
-  @IsString()
-  @IsOptional()
-  tenantId: string;
 }
