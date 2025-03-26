@@ -5,16 +5,11 @@ import { Department } from './entities/department.entity';
 import { TreeRepository } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { CreateDepartmentDto } from './dto/create-department.dto';
-import { UpdateDepartmentDto } from './dto/update-department.dto';
-import {
-  createdepartmentData,
-  departmentData,
-  updatedepartmentData,
-  createdepartmentDataOnCreate,
-  departmentsData,
-} from './tests/department.data';
-import { MockProxy } from 'jest-mock-extended';
+import { departmentData } from './tests/department.data';
+import { mock, MockProxy } from 'jest-mock-extended';
+import { User } from '../users/entities/user.entity';
+import { UserService } from '../users/services/user.service';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 describe('DepartmentsService', () => {
   let service: DepartmentsService;
@@ -29,6 +24,18 @@ describe('DepartmentsService', () => {
         {
           provide: getRepositoryToken(Department),
           useClass: TreeRepository,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useClass: User,
+        },
+        {
+          provide: UserService,
+          useValue: mock<UserService>(),
+        },
+        {
+          provide: EmployeeJobInformationService,
+          useValue: mock<EmployeeJobInformationService>(),
         },
       ],
     }).compile();

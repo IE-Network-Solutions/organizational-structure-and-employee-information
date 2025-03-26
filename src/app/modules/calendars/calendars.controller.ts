@@ -9,6 +9,7 @@ import {
   Query,
   Req,
   Headers,
+  Put,
 } from '@nestjs/common';
 import { CalendarsService } from './calendars.service';
 import { CreateCalendarDto } from './dto/create-calendar.dto';
@@ -52,7 +53,7 @@ export class CalendarsController {
     return await this.calendarsService.findOneCalendar(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   async updateCalendar(
     @Headers('tenantId') tenantId: string,
     @Param('id') id: string,
@@ -74,6 +75,6 @@ export class CalendarsController {
   @ExcludeAuthGuard()
   async findActiveCalander(@Req() req: Request): Promise<Calendar> {
     const tenantId = req['tenantId'];
-    return await this.calendarsService.findActiveCalander(tenantId);
+    return await this.calendarsService.findActiveCalendar(tenantId);
   }
 }

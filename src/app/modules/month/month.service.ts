@@ -62,9 +62,13 @@ export class MonthService {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
+
       const queryBuilder = this.monthRepository
         .createQueryBuilder('Month')
-        .where('Month.tenantId = :tenantId', { tenantId });
+        .leftJoinAndSelect('Month.session', 'session')
+        .leftJoinAndSelect('session.calendar', 'calendar')
+        .where('Month.tenantId = :tenantId', { tenantId })
+        .andWhere('calendar.isActive = :isActive', { isActive: true });
 
       const paginatedData = await this.paginationService.paginate<Month>(
         queryBuilder,
@@ -172,6 +176,25 @@ export class MonthService {
       const updateMonth = new UpdateMonthDto();
       updateMonth.active = true;
       return await this.updateMonth(monthToBeUpdatedId, updateMonth, tenantId);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async activatePreviousActiveMonth(tenantId: string): Promise<Month> {
+    try {
+      const activeMonth = await this.geActiveMonth(tenantId);
+
+      if (!activeMonth) {
+        throw new BadRequestException('Active month not found');
+      }
+
+      const date = new Date(activeMonth.endDate);
+      //  date.setDate(date.getDate() - 1);
+      const previousMonth = await this.monthRepository.findOne({
+        where: { startDate: date, tenantId, active: false },
+      });
+      return previousMonth;
     } catch (error) {
       throw new BadRequestException(error.message);
     }

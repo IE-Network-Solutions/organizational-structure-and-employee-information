@@ -1,6 +1,12 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateDepartmentDto } from './create-department.dto';
-import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { UpdateDepartmentChildDto } from './update-department-child.dto';
 
@@ -14,6 +20,9 @@ export class DissolveDepartmentDto {
   description?: string;
   @IsString()
   branchId: string;
+  @IsOptional()
+  @IsUUID()
+  teamLeader?: string;
 
   @IsArray()
   @IsString({ each: true })

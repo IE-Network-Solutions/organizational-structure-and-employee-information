@@ -89,6 +89,7 @@ export class SessionService {
       };
       const queryBuilder = this.sessionRepository
         .createQueryBuilder('Session')
+        .leftJoinAndSelect('Session.months', 'months')
         .where('Session.tenantId = :tenantId', { tenantId });
 
       const paginatedData = await this.paginationService.paginate<Session>(
@@ -138,14 +139,12 @@ export class SessionService {
       if (!session) {
         throw new NotFoundException(`Session Not Found`);
       }
-
-      await this.sessionRepository.update({ id }, updateSessionDto);
       if (updateSessionDto.months && updateSessionDto.months.length > 0) {
-        await this.monthService.updateBulkMonth(
-          updateSessionDto.months,
-          tenantId,
-        );
+        const months = updateSessionDto.months;
+        delete updateSessionDto.months;
+        await this.monthService.updateBulkMonth(months, tenantId);
       }
+      await this.sessionRepository.update({ id }, updateSessionDto);
 
       return await this.findOneSession(id);
     } catch (error) {
@@ -169,6 +168,7 @@ export class SessionService {
     try {
       const session = await this.sessionRepository.findOneOrFail({
         where: { tenantId: tenantId, active: true },
+        relations: ['months'],
       });
       return session;
     } catch (error) {

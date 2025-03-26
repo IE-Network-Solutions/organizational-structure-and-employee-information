@@ -17,6 +17,8 @@ import { EmployeeInformation } from '../../employee-information/entities/employe
 import { OffboardingEmployeeTask } from '../../offboarding-employee-task/entities/offboarding-employee-task.entity';
 import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
 import { OffboardingTasksTemplate } from '../../offboarding-tasks-template/entities/offboarding-tasks-template..entity';
+import { BasicSalary } from '../../basic-salary/entities/basic-salary.entity';
+import { Delegation } from '../../delegations/entities/delegation.entity';
 @Entity()
 export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
@@ -106,4 +108,10 @@ export class User extends BaseModel {
     },
   )
   employeeTermination?: EmployeeTermination[];
+
+  @OneToMany(() => BasicSalary, (basicSalary) => basicSalary.user)
+  basicSalaries: BasicSalary[];
+
+  @OneToMany(() => Delegation, (delegate) => delegate.user)
+  delegation: Delegation;
 }

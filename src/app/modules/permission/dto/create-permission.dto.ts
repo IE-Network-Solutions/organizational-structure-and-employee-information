@@ -13,7 +13,7 @@ export class CreatePermissionDto {
   @IsNotEmpty()
   description: string;
 
-  @IsString()
-  @IsNotEmpty()
-  permissionGroupId: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // permissionGroupId: string;
 }

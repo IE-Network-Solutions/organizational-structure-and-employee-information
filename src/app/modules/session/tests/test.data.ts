@@ -47,7 +47,7 @@ export const sessionMock = (): Session => {
     endDate: new Date('2024-03-31T23:59:59Z'),
     active: true,
     tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
-    months: [monthMock()], // Ensuring valid relation
+    months: [], // Ensuring valid relation
     createdAt: new Date('2023-12-01T07:00:00Z'),
     updatedAt: new Date('2023-12-01T07:00:00Z'),
   } as Session;

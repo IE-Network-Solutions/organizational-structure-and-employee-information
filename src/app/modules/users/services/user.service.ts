@@ -2,6 +2,8 @@ import { DataSource, In } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -48,6 +50,9 @@ import { EmployeeInformation } from '../../employee-information/entities/employe
 import { CreateEmployeeInformationDto } from '../../employee-information/dto/create-employee-information.dto';
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
+import { FilterEmailDto } from '../dto/email.dto';
+import { DelegationService } from '../../delegations/delegations.service';
+import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
 
 @Injectable()
 export class UserService {
@@ -63,10 +68,15 @@ export class UserService {
     private readonly rolePermissionService: RolePermissionService,
     private readonly fileUploadService: FileUploadService,
     private readonly userPermissionService: UserPermissionService,
+    @Inject(forwardRef(() => DepartmentsService))
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
+
+    private readonly delegationService: DelegationService,
+
     private readonly httpService: HttpService,
+    private readonly firebaseAuthService:FirebaseAuthService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -126,6 +136,7 @@ export class UserService {
     await queryRunner.connect();
 
     await queryRunner.startTransaction();
+    let firebaseRecordId:string=null;
 
     try {
       const {
@@ -136,7 +147,8 @@ export class UserService {
         createEmployeeJobInformationDto,
         createEmployeeDocumentDto,
       } = createBulkRequestDto;
-      if (profileImage) {
+
+      if (profileImage && profileImage.buffer) {
         const uploadedImagePath =
           await this.fileUploadService.uploadFileToServer(
             tenantId,
@@ -156,6 +168,7 @@ export class UserService {
         tenantId,
         //  tenant.domainUrl
       );
+      firebaseRecordId=userRecord.uid;
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -195,8 +208,8 @@ export class UserService {
 
         await this.employeeDocumentService.create(
           createEmployeeDocumentDto,
-          documentName,
           tenantId,
+          documentName,
         );
       }
 
@@ -204,6 +217,9 @@ export class UserService {
 
       return await this.findOne(result.id);
     } catch (error) {
+      if(firebaseRecordId){
+      await admin.auth().deleteUser(firebaseRecordId);
+      }
       await queryRunner.rollbackTransaction();
       throw new ConflictException(error.message);
     } finally {
@@ -244,6 +260,13 @@ export class UserService {
           'employeeJobInformation.isPositionActive = :isPositionActive',
           { isPositionActive: true },
         )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect(
@@ -288,6 +311,57 @@ export class UserService {
     }
   }
 
+  async findAllWithOutFilter(
+    paginationOptions: PaginationDto,
+    tenantId: string,
+  ) {
+    try {
+      const options: IPaginationOptions = {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+      };
+      const queryBuilder = await this.userRepository
+        .createQueryBuilder('user')
+
+        .withDeleted()
+        .leftJoinAndSelect(
+          'user.employeeJobInformation',
+          'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
+        .leftJoinAndSelect('employeeJobInformation.department', 'department')
+        .andWhere('user.tenantId = :tenantId', { tenantId });
+
+      const paginatedData = await this.paginationService.paginate<User>(
+        queryBuilder,
+        options,
+      );
+
+      return paginatedData;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User not found.`);
+      }
+      throw error;
+    }
+  }
   async findAllUsersByDepartment(tenantId: string, departmentId: string) {
     const users = await this.userRepository
       .createQueryBuilder('user')
@@ -306,35 +380,48 @@ export class UserService {
 
     return users;
   }
+
   async findOne(id: string): Promise<User> {
     try {
       const user = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.employeeDocument', 'employeeDocument')
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
         )
         .leftJoinAndSelect(
           'employeeJobInformation.employementType',
           'employementType',
         )
-        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
         .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
-
         .leftJoinAndSelect(
           'employeeJobInformation.workSchedule',
           'workSchedule',
         )
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect('user.userPermissions', 'userPermissions')
+        .leftJoinAndSelect('userPermissions.permission', 'permission')
         .where('user.id = :id', { id })
         .getOne();
-      user['reportingTo'] = await this.findReportingToUser(id);
+
+      if (!user) {
+        throw new NotFoundException(`User with id ${id} not found.`);
+      }
+      user['reportingTo'] = await this.assignReportsTo(id);
 
       return { ...user };
     } catch (error) {
@@ -349,14 +436,14 @@ export class UserService {
     id: string,
     tenantId: string,
     updateUserDto: UpdateUserDto,
-    profileImage?: Express.Multer.File, // Add this optional parameter
+    profileImage?: Express.Multer.File,
   ) {
     try {
       const user = await this.userRepository.findOneOrFail({
         where: { id, tenantId },
       });
-      if(!user){
-        throw new NotFoundException("User Not Found")
+      if (!user) {
+        throw new NotFoundException('User Not Found');
       }
 
       if (profileImage) {
@@ -373,30 +460,31 @@ export class UserService {
             );
           });
 
-          updateUserDto.profileImage = uploadedImagePath['viewImage'];
-          updateUserDto.profileImageDownload = uploadedImagePath['image'];
+        updateUserDto.profileImage = uploadedImagePath['viewImage'];
+        updateUserDto.profileImageDownload = uploadedImagePath['image'];
       }
-      await this.userRepository.update({ id }, updateUserDto);
 
       if (updateUserDto.permission) {
-      const createPremission = new CreateUserPermissionDto();
-      createPremission.permissionId = updateUserDto.permission
-        ? updateUserDto.permission
-        : [];
-      createPremission.userId = id;
-      delete updateUserDto.permission;
-     
-      if (
-        createPremission.permissionId.length > 0 &&
-        createPremission.permissionId
-      ) {
-        await this.userPermissionService.update(id, createPremission, tenantId);
+        const createPremission = new CreateUserPermissionDto();
+        createPremission.permissionId = updateUserDto.permission
+          ? updateUserDto.permission
+          : [];
+        createPremission.userId = id;
+        delete updateUserDto.permission;
+
+        if (
+          createPremission.permissionId.length > 0 &&
+          createPremission.permissionId
+        ) {
+          await this.userPermissionService.update(
+            id,
+            createPremission,
+            tenantId,
+          );
+        }
       }
-    }
 
-    
-     
-
+      await this.userRepository.update({ id }, updateUserDto);
 
       return await this.userRepository.findOneOrFail({ where: { id } });
     } catch (error) {
@@ -619,7 +707,12 @@ export class UserService {
     }
   }
 
-  async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
+
+
+
+  async createFromTenant(createUserDto: CreateUserDto, tenantId:string, role: string) {
+    let firebaseRecordId:string=null;
+    try{
     const createRoleDto = new CreateRoleDto();
     createRoleDto.name = role;
     createRoleDto.description = role;
@@ -630,6 +723,8 @@ export class UserService {
     if (createRole) {
       createUserDto.roleId = createRole.id;
       const user = this.userRepository.create({ ...createUserDto, tenantId });
+      const url=createUserDto.domainUrl.replace("https://", "");
+      const domainRegistered = await this.addAuthorizedDomain(url);
       const password = createUserDto.email + generateRandom4DigitNumber();
       const userRecord = await this.createUserToFirebase(
         createUserDto.email,
@@ -637,7 +732,7 @@ export class UserService {
         tenantId,
         createUserDto.domainUrl,
       );
-
+      firebaseRecordId=userRecord.uid;
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -646,7 +741,15 @@ export class UserService {
 
       return await this.userRepository.save(user);
     } else {
+      if(firebaseRecordId){
+        await admin.auth().deleteUser(firebaseRecordId);
+        }
       throw new NotFoundException('Role Not Found');
+    }}catch(error){
+      if(firebaseRecordId){
+        await admin.auth().deleteUser(firebaseRecordId);
+        }
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -656,8 +759,10 @@ export class UserService {
     tenantId: string,
     domainUrl?: string,
   ) {
-    //const password = generateRandom6DigitNumber();
-    const password = '%TGBnhy6';
+
+
+    
+    const password = generateRandom6DigitNumber();
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password.toString(),
@@ -665,31 +770,50 @@ export class UserService {
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
     const expiresIn = 24 * 60 * 60 * 1000;
     await admin.auth().createCustomToken(userRecord.uid, { expiresIn });
-    // const emailTemplatePath = path.join(
-    //   process.cwd(),
-    //   'src',
-    //   'core',
-    //   'templates',
-    //   'welcome-email-template.html',
-    // );
+    const emailTemplatePath = path.join(
+      process.cwd(),
+      'src',
+      'core',
+      'templates',
+      'welcome-email-template.html',
+    );
 
-    // let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
+    let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
 
-    // emailHtml = emailHtml.replace('{{email}}', email);
-    // emailHtml = emailHtml.replace('{{name}}', firstName);
-    // emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
-    // emailHtml = emailHtml.replace('{{password}}', password.toString());
-    // const emailBody = new CreateEmailDto();
-    // emailBody.to = email;
-    // emailBody.subject =
-    //   'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
-    // emailBody.html = emailHtml;
+    emailHtml = emailHtml.replace('{{email}}', email);
+    emailHtml = emailHtml.replace('{{name}}', firstName);
+    emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
+    emailHtml = emailHtml.replace('{{password}}', password.toString());
+    const emailBody = new CreateEmailDto();
+    emailBody.to = email;
+    emailBody.subject =
+      'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
+    emailBody.html = emailHtml;
 
-    // const response = await this.httpService
-    //   .post(`${this.emailServerUrl}/email`, emailBody)
-    //   .toPromise();
+    const response = await this.httpService
+      .post(`${this.emailServerUrl}/email`, emailBody)
+      .toPromise();
+
 
     return userRecord;
+  }
+
+
+
+  async addAuthorizedDomain(domain: string) {
+
+try {
+  const  firebaseAuth = await this.firebaseAuthService.addAuthorizedDomain(domain)
+  return firebaseAuth
+
+  
+} catch (error) {
+  throw new BadRequestException(error.message);
+  
+}
+
+
+
   }
   async activateUser(userId: string, tenantId: string): Promise<User> {
     try {
@@ -784,7 +908,6 @@ export class UserService {
           bulkCreate.createEmployeeJobInformationDto = employeeJobInformation;
           bulkCreate.createRolePermissionDto = createRolePermissionDto;
           bulkCreate.createUserPermissionDto = createUserPermissionDto;
-
           const userCreated = await this.create(tenantId, bulkCreate);
           createdUsers.push(userCreated);
         } catch (error) {
@@ -808,58 +931,92 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
+  async getAllUser(tenantId: string) {
+    try {
+      const user = await this.userRepository.find({
+        where: { tenantId: tenantId },
+        relations: ['employeeInformation'],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async getAllUsersWithNetPay(tenantId: string): Promise<User[]> {
+    try {
+      const user = await this.userRepository.find({
+        where: { tenantId: tenantId },
+        relations: [
+          'employeeInformation',
+          'basicSalaries',
+          'employeeJobInformation',
+          'employeeJobInformation.position',
+        ],
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
-  // async  deleteAllFirebaseUsers() {
-  //   const admin = require('firebase-admin');
-  //   // Initialize Firebase Admin SDK if not already initialized
-  //   if (!admin.apps.length) {
-  //     admin.initializeApp({
-  //       credential: admin.credential.applicationDefault(),
-  //     });
-  //   }
+  async getAllUSerIds() {
+    try {
+      const users = await this.userRepository
+        .createQueryBuilder('user')
+        .select(['user.id', 'user.firstName'])
+        .getMany();
 
-  //   const deleteUsersBatch = async (nextPageToken?: string) => {
-  //     const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
+      return users;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
-  //     // Map delete promises
-  //     const deletePromises = listUsersResult.users.map((user) =>
-  //       admin.auth().deleteUser(user.uid)
-  //     );
+  async findOneUserJobInfo(userId: string) {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .withDeleted()
+      .leftJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+        'employeeJobInformation.isPositionActive = :isPositionActive',
+        { isPositionActive: true },
+      )
+      .where('user.id = :id', { id: userId })
+      .getOne();
 
-  //     // Wait for all deletions in the current batch
-  //     await Promise.all(deletePromises);
+    return user;
+  }
+  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: email.email },
+      });
 
-  //     console.log(`Deleted ${listUsersResult.users.length} users`);
+      return user;
+    } catch (error) {
+      throw new NotFoundException('User Not Found');
+    }
+  }
+  async assignReportsTo(userId: string) {
+    try {
+      let reportingToUser = await this.findReportingToUser(userId);
+      const getDelegation = await this.delegationService.findUserOnLeaveById(
+        reportingToUser.id,
+      );
+      if (getDelegation) {
+        if (getDelegation.delegatee.id !== userId) {
+          reportingToUser = getDelegation.delegatee;
+        } else {
+          reportingToUser = await this.findReportingToUser(
+            getDelegation.delegatorId,
+          );
+        }
+      }
 
-  //     // If there's a nextPageToken, process the next batch
-  //     if (listUsersResult.pageToken) {
-  //       await deleteUsersBatch(listUsersResult.pageToken);
-  //     }
-  //   };
-
-  //   try {
-  //     await deleteUsersBatch();
-  //     console.log('All users have been successfully deleted.');
-  //   } catch (error) {
-  //     console.error('Error deleting users:', error);
-  //   }
-  // }
-
-  // Call the function
-
-  //   async getTenantDomain(
-
-  //     tenantId: string,
-
-  //   ) {
-  // try{
-  //     const response = await this.httpService
-  //       .post(`${this.tenantUrl}/client/${tenantId}`)
-  //       .toPromise();
-
-  //     return response.data;
-  // }catch(error){
-  //   throw new BadRequestException(error.message)
-  // }
-  //   }
+      return reportingToUser;
+    } catch (error) {
+      return null;
+    }
+  }
 }

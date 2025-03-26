@@ -6,16 +6,18 @@ import {
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { Department } from './entities/department.entity';
 import { TreeRepository } from 'typeorm';
+import { UserService } from '../users/services/user.service';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 @Injectable()
 export class DepartmentsService {
   constructor(
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
-    private paginationService: PaginationService,
+    private userService: UserService,
+    private employeeJobInformationService: EmployeeJobInformationService,
   ) {}
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
@@ -86,7 +88,6 @@ export class DepartmentsService {
     try {
       const departments = await this.departmentRepository.find({
         where: { tenantId: tenantId },
-
         relations: ['employeeJobInformation'],
       });
       if (departments?.length > 0) {
@@ -102,7 +103,9 @@ export class DepartmentsService {
               });
             departmentTree.employeeJobInformation =
               departmentTree.employeeJobInformation.filter(
-                (info) => info.departmentLeadOrNot === true,
+                (info) =>
+                  info.departmentLeadOrNot === true &&
+                  info.isPositionActive === true,
               );
             return departmentTree;
           }),
@@ -138,6 +141,31 @@ export class DepartmentsService {
       throw new NotFoundException(`Department  not found`);
     }
   }
+  async findAllChildDepartments(
+    tenantId: string,
+    departmentId: string,
+  ): Promise<Department[]> {
+    try {
+      return await this.departmentRepository.find({
+        where: { parent: { id: departmentId } },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Department  not found`);
+    }
+  }
+
+  async findAllChildDepartmentsWithAllLevels(
+    tenantId: string,
+    departmentId: string,
+  ): Promise<Department[]> {
+    try {
+      const department = await this.departmentRepository.findOne({
+        where: { id: departmentId }}  )
+      return await this.departmentRepository.findDescendants(department);
+    } catch (error) {
+      throw new NotFoundException(`Department  not found`);
+    }
+  }
   async updateDepartment(
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
@@ -147,7 +175,16 @@ export class DepartmentsService {
   ): Promise<Department> {
     try {
       const department = await this.findOneDepartment(id);
-
+      if (updateDepartmentDto.name) {
+        const departmentWithName = await this.departmentRepository.findOne({
+          where: { name: updateDepartmentDto.name, tenantId: tenantId },
+        });
+        if (departmentWithName && departmentWithName.id !== id) {
+          throw new BadRequestException(
+            `Department with name '${updateDepartmentDto.name}' already exists`,
+          );
+        }
+      }
       if (department && !parentDepartment) {
         if (department.level !== 0) {
           const parent = await this.departmentRepository.findAncestorsTree(
@@ -156,6 +193,7 @@ export class DepartmentsService {
           parentDepartment = parent.parent;
         }
       }
+
       department.name = updateDepartmentDto.name;
       department.branchId = updateDepartmentDto.branchId;
       department.description = updateDepartmentDto.description;
@@ -212,6 +250,62 @@ export class DepartmentsService {
         await this.departmentRepository.softRemove(dep);
       }
     }
+    await this.departmentRepository.softRemove(department);
+
+    return department;
+  }
+
+  async removeDepartmentWithShift(
+    departmentTobeDeletedId: string,
+    departmentTobeShiftedId: string,
+    tenantId: string,
+  ): Promise<Department> {
+    const department = await this.findOneDepartment(departmentTobeDeletedId);
+
+    if (!department) {
+      throw new NotFoundException(
+        `Department with Id ${departmentTobeDeletedId} not found`,
+      );
+    }
+
+    const users = await this.userService.findAllUsersByDepartment(
+      tenantId,
+      departmentTobeDeletedId,
+    );
+
+    if (users && users.length > 0) {
+      for (const user of users) {
+        await this.employeeJobInformationService.update(
+          user.employeeJobInformation[0].id,
+          { departmentId: departmentTobeShiftedId },
+        );
+      }
+    }
+
+    const descendants = await this.departmentRepository.findDescendants(
+      department,
+    );
+
+    if (descendants?.length > 0) {
+      for (const dep of descendants) {
+        if (dep.id !== departmentTobeDeletedId) {
+          const descendantUsers =
+            await this.userService.findAllUsersByDepartment(tenantId, dep.id);
+
+          if (descendantUsers && descendantUsers.length > 0) {
+            for (const user of descendantUsers) {
+              await this.employeeJobInformationService.update(
+                user.employeeJobInformation[0].id,
+                { departmentId: departmentTobeShiftedId },
+              );
+            }
+          }
+
+          await this.departmentRepository.softRemove(dep);
+        }
+      }
+    }
+
     await this.departmentRepository.softRemove(department);
 
     return department;

@@ -39,8 +39,8 @@ export class EmployeeDocumentController {
         documentName.map(async (docName) => {
           return await this.employeeDocumentService.create(
             createEmployeeDocumentsDto,
-            docName,
             request['tenantId'],
+            docName,
           );
         }),
       );

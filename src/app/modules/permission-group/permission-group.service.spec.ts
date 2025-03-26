@@ -14,6 +14,9 @@ import {
 } from './tests/permission-group.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 import { searchFilter } from '@root/src/core/commonTestData/search-filter.data';
+import { RolePermissionService } from '../role-permission/role-permission.service';
+import { RoleService } from '../role/role.service';
+import { UserPermissionService } from '../user-permission/user-permission.service';
 
 describe('PermissionGroupService', () => {
   let permissionGroupService: PermissionGroupService;
@@ -35,8 +38,20 @@ describe('PermissionGroupService', () => {
           useValue: mock<PermissionService>(),
         },
         {
+          provide: RolePermissionService,
+          useValue: mock<RolePermissionService>(),
+        },
+        {
+          provide: RoleService,
+          useValue: mock<RoleService>(),
+        },
+        {
           provide: permissionGroupToken,
           useValue: mock<Repository<PermissionGroup>>(),
+        },
+        {
+          provide: UserPermissionService,
+          useValue: mock<UserPermissionService>(),
         },
       ],
     }).compile();
