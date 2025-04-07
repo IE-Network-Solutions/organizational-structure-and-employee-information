@@ -547,9 +547,10 @@ export class UserService {
           );
           if (department) {
             return await this.findTeamLeadOrNot(department.id);
+          }else{
+            return null
           }
         }
-        return await this.findTeamLeadOrNot(jobInfo.departmentId);
       }
     } catch (error) {
       throw error;
