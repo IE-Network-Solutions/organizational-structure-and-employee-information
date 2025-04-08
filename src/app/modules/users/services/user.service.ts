@@ -528,7 +528,8 @@ export class UserService {
         .leftJoinAndSelect('user.role', 'role')
         .where('user.id = :id', { id });
 
-      const user = await queryBuilder.getOne();
+      const user = await queryBuilder.getOne();    
+        
 
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found.`);
@@ -547,9 +548,14 @@ export class UserService {
           );
           if (department) {
             return await this.findTeamLeadOrNot(department.id);
+          }else{
+            return null
           }
         }
-        return await this.findTeamLeadOrNot(jobInfo.departmentId);
+        else{
+          return await this.findTeamLeadOrNot(jobInfo.departmentId);
+
+        }
       }
     } catch (error) {
       throw error;
