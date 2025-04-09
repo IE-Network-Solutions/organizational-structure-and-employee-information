@@ -207,6 +207,19 @@ export class UserController {
     );
   }
 
+  @Get('/all-users/all/payroll-data')
+  async findAllPayRollUsers(
+    @Req() request: Request,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = request['tenantId'];
+    return await this.userService.findAllPayRollUsers(
+      paginationOptions,
+      tenantId,
+    );
+  }
+  
+
   @Get(':id')
   @ExcludeAuthGuard()
   findOne(@Param('id') id: string): Promise<User> {
