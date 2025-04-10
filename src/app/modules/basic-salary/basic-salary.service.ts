@@ -3,7 +3,7 @@ import { CreateBasicSalaryDto } from './dto/create-basic-salary.dto';
 import { UpdateBasicSalaryDto } from './dto/update-basic-salary.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BasicSalary } from './entities/basic-salary.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { tenantId } from '../branchs/tests/branch.data';
 
 @Injectable()
@@ -49,7 +49,17 @@ export class BasicSalaryService {
     tenantId: string,
   ): Promise<{ userId: string; basicSalary: number }[]> {
     const salaries = await this.basicSalaryRepository.find({
-      where: { status: true, tenantId: tenantId },
+      where: { status: true, tenantId: tenantId ,user:{deletedAt  :null}},
+      select: ['userId', 'basicSalary'],
+    });
+
+    return salaries;
+  }
+  async getActiveBasicSalariesOfActiveUsers(
+    tenantId: string,
+  ): Promise<{ userId: string; basicSalary: number }[]> {
+    const salaries = await this.basicSalaryRepository.find({
+      where: { status: true, tenantId: tenantId ,user:{deletedAt:IsNull(),employeeJobInformation:{isPositionActive:true}}},
       select: ['userId', 'basicSalary'],
     });
 
