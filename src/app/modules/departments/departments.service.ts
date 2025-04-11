@@ -160,12 +160,39 @@ export class DepartmentsService {
   ): Promise<Department[]> {
     try {
       const department = await this.departmentRepository.findOne({
-        where: { id: departmentId }}  )
+        where: { id: departmentId,tenantId },  
+      });
       return await this.departmentRepository.findDescendants(department);
     } catch (error) {
       throw new NotFoundException(`Department  not found`);
     }
   }
+
+
+  
+  async findAllChildDepartmentsWithAllLevelsUsers(
+    tenantId: string,
+    departmentId: string,
+  ): Promise<any> {
+    const rootDepartment = await this.departmentRepository.findOne({
+      where: { id: departmentId, tenantId },
+    });
+  
+    if (!rootDepartment) {
+      throw new NotFoundException(`Department not found`);
+    }
+    const descendantDepartments = await this.departmentRepository.findDescendants(rootDepartment);
+    const departmentIds = descendantDepartments.map((d) => d.id);
+    departmentIds.push(rootDepartment.id);
+      const users = await this.userService.findAllUsersByAllDepartment(
+      tenantId,
+      departmentIds,
+    );  
+  
+    return users;
+  }
+  
+
   async updateDepartment(
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
