@@ -431,17 +431,22 @@ export class UserService {
     return users;
   }
 
-  async findAllUsersByAllDepartment(tenantId: string, departmentIds:string[]) {
+  async findAllUsersByAllDepartment(tenantId: string, departmentIds: string[]) {
     const users = await this.userRepository
       .createQueryBuilder('user')
-      .innerJoinAndSelect('user.employeeJobInformation', 'employeeJobInformation')
-      .where('employeeJobInformation.departmentId IN (:...departmentIds)', { departmentIds })
+      .innerJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+      )
+      .where('employeeJobInformation.departmentId IN (:...departmentIds)', {
+        departmentIds,
+      })
       .andWhere('employeeJobInformation.isPositionActive = true')
       .andWhere('user.deletedAt IS NULL')
       .andWhere('employeeJobInformation.deletedAt IS NULL')
       .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId })
       .getMany();
-  
+
     return users;
   }
 

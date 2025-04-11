@@ -8,6 +8,6 @@ export class JobPosition extends BaseModel {
   name: string;
   @Column({ nullable: true })
   description: string;
-@Column()
+  @Column()
   tenantId: string;
 }
