@@ -49,7 +49,7 @@ export class BasicSalaryService {
     tenantId: string,
   ): Promise<{ userId: string; basicSalary: number }[]> {
     const salaries = await this.basicSalaryRepository.find({
-      where: { status: true, tenantId: tenantId ,user:{deletedAt  :null}},
+      where: { status: true, tenantId: tenantId, user: { deletedAt: null } },
       select: ['userId', 'basicSalary'],
     });
 
@@ -59,7 +59,14 @@ export class BasicSalaryService {
     tenantId: string,
   ): Promise<{ userId: string; basicSalary: number }[]> {
     const salaries = await this.basicSalaryRepository.find({
-      where: { status: true, tenantId: tenantId ,user:{deletedAt:IsNull(),employeeJobInformation:{isPositionActive:true}}},
+      where: {
+        status: true,
+        tenantId: tenantId,
+        user: {
+          deletedAt: IsNull(),
+          employeeJobInformation: { isPositionActive: true },
+        },
+      },
       select: ['userId', 'basicSalary'],
     });
 

@@ -38,8 +38,12 @@ export class BasicSalaryController {
   }
 
   @Get('active/users')
-  async getActiveBasicSalariesOfActiveUsers(@Headers('tenantId') tenantId: string) {
-    return this.basicSalaryService.getActiveBasicSalariesOfActiveUsers(tenantId);
+  async getActiveBasicSalariesOfActiveUsers(
+    @Headers('tenantId') tenantId: string,
+  ) {
+    return this.basicSalaryService.getActiveBasicSalariesOfActiveUsers(
+      tenantId,
+    );
   }
 
   @Get(':id')

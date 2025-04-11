@@ -47,7 +47,7 @@ import { FireBaseAuthModule } from '@root/src/core/firebaseAuth/firebase-auth.mo
     HttpModule.register({}),
     forwardRef(() => DepartmentsModule),
     DelegationModule,
-    FireBaseAuthModule
+    FireBaseAuthModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserDepartmentService],

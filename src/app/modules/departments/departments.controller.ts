@@ -39,16 +39,39 @@ export class DepartmentsController {
   }
 
   @Get('child-departments/departments/:departmentId')
-  async findAllChildDepartments(@Req() req: Request,@Param('departmentId') departmentId: string) {
+  async findAllChildDepartments(
+    @Req() req: Request,
+    @Param('departmentId') departmentId: string,
+  ) {
     const tenantId = req['tenantId'];
-    return await this.departmentsService.findAllChildDepartments(tenantId,departmentId);
+    return await this.departmentsService.findAllChildDepartments(
+      tenantId,
+      departmentId,
+    );
   }
 
-
   @Get('child-departments/departments/all-levels/:departmentId')
-  async findAllChildDepartmentsWithAllLevels(@Req() req: Request,@Param('departmentId') departmentId: string) {
+  async findAllChildDepartmentsWithAllLevels(
+    @Req() req: Request,
+    @Param('departmentId') departmentId: string,
+  ) {
     const tenantId = req['tenantId'];
-    return await this.departmentsService.findAllChildDepartmentsWithAllLevels(tenantId,departmentId);
+    return await this.departmentsService.findAllChildDepartmentsWithAllLevels(
+      tenantId,
+      departmentId,
+    );
+  }
+
+  @Get('child-departments/departments/all-levels/users/:departmentId')
+  async findAllChildDepartmentsWithAllLevelsUsers(
+    @Req() req: Request,
+    @Param('departmentId') departmentId: string,
+  ) {
+    const tenantId = req['tenantId'];
+    return await this.departmentsService.findAllChildDepartmentsWithAllLevelsUsers(
+      tenantId,
+      departmentId,
+    );
   }
 
   @Get(':id')

@@ -26,7 +26,7 @@ export class JobPositionController {
   constructor(private readonly jobPositionService: JobPositionService) {}
 
   @Post()
-   @ExcludeAuthGuard()
+  @ExcludeAuthGuard()
   create(
     @Req() request: Request,
     @Body() createJobPositionDto: CreateJobPositionDto,

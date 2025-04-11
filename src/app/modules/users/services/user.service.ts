@@ -76,7 +76,7 @@ export class UserService {
     private readonly delegationService: DelegationService,
 
     private readonly httpService: HttpService,
-    private readonly firebaseAuthService:FirebaseAuthService,
+    private readonly firebaseAuthService: FirebaseAuthService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -136,7 +136,7 @@ export class UserService {
     await queryRunner.connect();
 
     await queryRunner.startTransaction();
-    let firebaseRecordId:string=null;
+    let firebaseRecordId: string = null;
 
     try {
       const {
@@ -168,7 +168,7 @@ export class UserService {
         tenantId,
         //  tenant.domainUrl
       );
-      firebaseRecordId=userRecord.uid;
+      firebaseRecordId = userRecord.uid;
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -217,8 +217,8 @@ export class UserService {
 
       return await this.findOne(result.id);
     } catch (error) {
-      if(firebaseRecordId){
-      await admin.auth().deleteUser(firebaseRecordId);
+      if (firebaseRecordId) {
+        await admin.auth().deleteUser(firebaseRecordId);
       }
       await queryRunner.rollbackTransaction();
       throw new ConflictException(error.message);
@@ -363,7 +363,6 @@ export class UserService {
     }
   }
 
-
   async findAllPayRollUsers(
     paginationOptions: PaginationDto,
     tenantId: string,
@@ -427,6 +426,25 @@ export class UserService {
         departmentId,
       })
       .andWhere('user.tenantId = :tenantId', { tenantId })
+      .getMany();
+
+    return users;
+  }
+
+  async findAllUsersByAllDepartment(tenantId: string, departmentIds: string[]) {
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+      )
+      .where('employeeJobInformation.departmentId IN (:...departmentIds)', {
+        departmentIds,
+      })
+      .andWhere('employeeJobInformation.isPositionActive = true')
+      .andWhere('user.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId })
       .getMany();
 
     return users;
@@ -579,8 +597,7 @@ export class UserService {
         .leftJoinAndSelect('user.role', 'role')
         .where('user.id = :id', { id });
 
-      const user = await queryBuilder.getOne();    
-        
+      const user = await queryBuilder.getOne();
 
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found.`);
@@ -599,13 +616,11 @@ export class UserService {
           );
           if (department) {
             return await this.findTeamLeadOrNot(department.id);
-          }else{
-            return null
+          } else {
+            return null;
           }
-        }
-        else{
+        } else {
           return await this.findTeamLeadOrNot(jobInfo.departmentId);
-
         }
       }
     } catch (error) {
@@ -764,48 +779,50 @@ export class UserService {
     }
   }
 
-
-
-
-  async createFromTenant(createUserDto: CreateUserDto, tenantId:string, role: string) {
-    let firebaseRecordId:string=null;
-    try{
-    const createRoleDto = new CreateRoleDto();
-    createRoleDto.name = role;
-    createRoleDto.description = role;
-    const createRole = await this.rolesService.createFirstRole(
-      createRoleDto,
-      tenantId,
-    );
-    if (createRole) {
-      createUserDto.roleId = createRole.id;
-      const user = this.userRepository.create({ ...createUserDto, tenantId });
-      const url=createUserDto.domainUrl.replace("https://", "");
-      const domainRegistered = await this.addAuthorizedDomain(url);
-      const password = createUserDto.email + generateRandom4DigitNumber();
-      const userRecord = await this.createUserToFirebase(
-        createUserDto.email,
-        createUserDto.firstName,
+  async createFromTenant(
+    createUserDto: CreateUserDto,
+    tenantId: string,
+    role: string,
+  ) {
+    let firebaseRecordId: string = null;
+    try {
+      const createRoleDto = new CreateRoleDto();
+      createRoleDto.name = role;
+      createRoleDto.description = role;
+      const createRole = await this.rolesService.createFirstRole(
+        createRoleDto,
         tenantId,
-        createUserDto.domainUrl,
       );
-      firebaseRecordId=userRecord.uid;
-      user.firebaseId = userRecord.uid;
+      if (createRole) {
+        createUserDto.roleId = createRole.id;
+        const user = this.userRepository.create({ ...createUserDto, tenantId });
+        const url = createUserDto.domainUrl.replace('https://', '');
+        const domainRegistered = await this.addAuthorizedDomain(url);
+        const password = createUserDto.email + generateRandom4DigitNumber();
+        const userRecord = await this.createUserToFirebase(
+          createUserDto.email,
+          createUserDto.firstName,
+          tenantId,
+          createUserDto.domainUrl,
+        );
+        firebaseRecordId = userRecord.uid;
+        user.firebaseId = userRecord.uid;
 
-      const valuesToCheck = { email: user.email };
+        const valuesToCheck = { email: user.email };
 
-      await checkIfDataExists(valuesToCheck, this.userRepository);
+        await checkIfDataExists(valuesToCheck, this.userRepository);
 
-      return await this.userRepository.save(user);
-    } else {
-      if(firebaseRecordId){
-        await admin.auth().deleteUser(firebaseRecordId);
+        return await this.userRepository.save(user);
+      } else {
+        if (firebaseRecordId) {
+          await admin.auth().deleteUser(firebaseRecordId);
         }
-      throw new NotFoundException('Role Not Found');
-    }}catch(error){
-      if(firebaseRecordId){
+        throw new NotFoundException('Role Not Found');
+      }
+    } catch (error) {
+      if (firebaseRecordId) {
         await admin.auth().deleteUser(firebaseRecordId);
-        }
+      }
       throw new BadRequestException(error.message);
     }
   }
@@ -816,9 +833,6 @@ export class UserService {
     tenantId: string,
     domainUrl?: string,
   ) {
-
-
-    
     const password = generateRandom6DigitNumber();
     const userRecord = await admin.auth().createUser({
       email: email,
@@ -851,26 +865,18 @@ export class UserService {
       .post(`${this.emailServerUrl}/email`, emailBody)
       .toPromise();
 
-
     return userRecord;
   }
 
-
-
   async addAuthorizedDomain(domain: string) {
-
-try {
-  const  firebaseAuth = await this.firebaseAuthService.addAuthorizedDomain(domain)
-  return firebaseAuth
-
-  
-} catch (error) {
-  throw new BadRequestException(error.message);
-  
-}
-
-
-
+    try {
+      const firebaseAuth = await this.firebaseAuthService.addAuthorizedDomain(
+        domain,
+      );
+      return firebaseAuth;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
   async activateUser(userId: string, tenantId: string): Promise<User> {
     try {
