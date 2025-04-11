@@ -161,9 +161,8 @@ export class BranchRequestService {
             );
           }
         } catch (updateError) {
-          console.error(
-            `Error updating request ${approverRequest.id}:`,
-            updateError,
+          throw new BadRequestException(
+            `Error updating approver request: ${updateError.message}`,
           );
         }
       }

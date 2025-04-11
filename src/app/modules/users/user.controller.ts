@@ -41,7 +41,6 @@ import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dt
 import { ImportEmployeeDto } from './dto/import-user.dto';
 import { FilterEmailDto } from './dto/email.dto';
 
-
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
@@ -218,7 +217,6 @@ export class UserController {
       tenantId,
     );
   }
-  
 
   @Get(':id')
   @ExcludeAuthGuard()
@@ -389,6 +387,4 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.findUserByEmail(email, tenantId);
   }
-
 }
-

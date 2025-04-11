@@ -36,11 +36,10 @@ export const configuration = () => ({
     client_email: process.env.CLIENT_EMAIL,
   },
 
-
   firebaseAuth: {
-   firebaseAuthUrl: process.env.FIREBASE_AUTH_URL,
-   googleapis: process.env.GOOGLE_APIS,
-   identity_tool_kit: process.env.IDENTITY_TOOL_KIT,
+    firebaseAuthUrl: process.env.FIREBASE_AUTH_URL,
+    googleapis: process.env.GOOGLE_APIS,
+    identity_tool_kit: process.env.IDENTITY_TOOL_KIT,
   },
 
   servicesUrl: {
