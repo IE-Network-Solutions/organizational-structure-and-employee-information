@@ -41,7 +41,6 @@ import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dt
 import { ImportEmployeeDto } from './dto/import-user.dto';
 import { FilterEmailDto } from './dto/email.dto';
 
-
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
@@ -202,6 +201,18 @@ export class UserController {
   ): Promise<Pagination<User>> {
     const tenantId = request['tenantId'];
     return await this.userService.findAllWithOutFilter(
+      paginationOptions,
+      tenantId,
+    );
+  }
+
+  @Get('/all-users/all/payroll-data')
+  async findAllPayRollUsers(
+    @Req() request: Request,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = request['tenantId'];
+    return await this.userService.findAllPayRollUsers(
       paginationOptions,
       tenantId,
     );
@@ -376,6 +387,4 @@ export class UserController {
     const tenantId = request['tenantId'];
     return this.userService.findUserByEmail(email, tenantId);
   }
-
 }
-

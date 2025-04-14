@@ -8,6 +8,7 @@ import {
   OneToOne,
   Generated,
   Unique,
+  JoinColumn,
 } from 'typeorm';
 import { Role } from '../../role/entities/role.entity';
 import { UserPermission } from '../../user-permission/entities/user-permission.entity';
@@ -110,6 +111,7 @@ export class User extends BaseModel {
   employeeTermination?: EmployeeTermination[];
 
   @OneToMany(() => BasicSalary, (basicSalary) => basicSalary.user)
+  @JoinColumn({ name: 'userId' })
   basicSalaries: BasicSalary[];
 
   @OneToMany(() => Delegation, (delegate) => delegate.user)
