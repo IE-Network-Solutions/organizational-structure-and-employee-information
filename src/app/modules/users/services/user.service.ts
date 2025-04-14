@@ -501,6 +501,21 @@ export class UserService {
     }
   }
 
+  async revokeUserSession(uid: string) {
+    try {  
+      await admin.auth().revokeRefreshTokens(uid);
+      
+      const user = await admin.auth().getUser(uid);
+  
+      return {
+        message: 'User session revoked successfully',
+        tokensValidAfterTime: user.tokensValidAfterTime,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to revoke user session');
+    }
+  }
+
   async update(
     id: string,
     tenantId: string,
@@ -552,7 +567,12 @@ export class UserService {
           );
         }
       }
-
+       if(updateUserDto?.roleId || updateUserDto?.permission ){
+        const firebaseUid = user?.firebaseId;
+        if (firebaseUid) {
+          await this.revokeUserSession(firebaseUid);
+        }
+       }
       await this.userRepository.update({ id }, updateUserDto);
 
       return await this.userRepository.findOneOrFail({ where: { id } });
