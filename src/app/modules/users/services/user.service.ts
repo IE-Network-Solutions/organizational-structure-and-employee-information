@@ -51,6 +51,8 @@ import { CreateEmployeeInformationDto } from '../../employee-information/dto/cre
 import { CreateEmployeeJobInformationDto } from '../../employee-job-information/dto/create-employee-job-information.dto';
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
 import { FilterEmailDto } from '../dto/email.dto';
+import { DelegationService } from '../../delegations/delegations.service';
+import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
 
 @Injectable()
 export class UserService {
@@ -70,6 +72,11 @@ export class UserService {
     private readonly departmentService: DepartmentsService,
     private readonly rolesService: RoleService,
     private readonly configService: ConfigService,
+
+    private readonly delegationService: DelegationService,
+
+    private readonly httpService: HttpService,
+    private readonly firebaseAuthService: FirebaseAuthService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -129,6 +136,7 @@ export class UserService {
     await queryRunner.connect();
 
     await queryRunner.startTransaction();
+    let firebaseRecordId: string = null;
 
     try {
       const {
@@ -160,6 +168,7 @@ export class UserService {
         tenantId,
         //  tenant.domainUrl
       );
+      firebaseRecordId = userRecord.uid;
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -208,6 +217,9 @@ export class UserService {
 
       return await this.findOne(result.id);
     } catch (error) {
+      if (firebaseRecordId) {
+        await admin.auth().deleteUser(firebaseRecordId);
+      }
       await queryRunner.rollbackTransaction();
       throw new ConflictException(error.message);
     } finally {
@@ -300,17 +312,15 @@ export class UserService {
   }
 
   async findAllWithOutFilter(
-   
     paginationOptions: PaginationDto,
     tenantId: string,
   ) {
     try {
-  
       const options: IPaginationOptions = {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      let queryBuilder = await this.userRepository
+      const queryBuilder = await this.userRepository
         .createQueryBuilder('user')
 
         .withDeleted()
@@ -338,7 +348,57 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
-  
+
+      const paginatedData = await this.paginationService.paginate<User>(
+        queryBuilder,
+        options,
+      );
+
+      return paginatedData;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User not found.`);
+      }
+      throw error;
+    }
+  }
+
+  async findAllPayRollUsers(
+    paginationOptions: PaginationDto,
+    tenantId: string,
+  ) {
+    try {
+      const options: IPaginationOptions = {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+      };
+      const queryBuilder = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect(
+          'user.employeeJobInformation',
+          'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
+        .leftJoinAndSelect('employeeJobInformation.department', 'department')
+        .andWhere('user.tenantId = :tenantId', { tenantId });
+
       const paginatedData = await this.paginationService.paginate<User>(
         queryBuilder,
         options,
@@ -371,6 +431,25 @@ export class UserService {
     return users;
   }
 
+  async findAllUsersByAllDepartment(tenantId: string, departmentIds: string[]) {
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+      )
+      .where('employeeJobInformation.departmentId IN (:...departmentIds)', {
+        departmentIds,
+      })
+      .andWhere('employeeJobInformation.isPositionActive = true')
+      .andWhere('user.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId })
+      .getMany();
+
+    return users;
+  }
+
   async findOne(id: string): Promise<User> {
     try {
       const user = await this.userRepository
@@ -381,6 +460,8 @@ export class UserService {
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
         )
         .leftJoinAndSelect(
           'user.basicSalaries',
@@ -405,7 +486,11 @@ export class UserService {
         .leftJoinAndSelect('userPermissions.permission', 'permission')
         .where('user.id = :id', { id })
         .getOne();
-      user['reportingTo'] = await this.findReportingToUser(id);
+
+      if (!user) {
+        throw new NotFoundException(`User with id ${id} not found.`);
+      }
+      user['reportingTo'] = await this.assignReportsTo(id);
 
       return { ...user };
     } catch (error) {
@@ -551,9 +636,12 @@ export class UserService {
           );
           if (department) {
             return await this.findTeamLeadOrNot(department.id);
+          } else {
+            return null;
           }
+        } else {
+          return await this.findTeamLeadOrNot(jobInfo.departmentId);
         }
-        return await this.findTeamLeadOrNot(jobInfo.departmentId);
       }
     } catch (error) {
       throw error;
@@ -711,34 +799,51 @@ export class UserService {
     }
   }
 
-  async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
-    const createRoleDto = new CreateRoleDto();
-    createRoleDto.name = role;
-    createRoleDto.description = role;
-    const createRole = await this.rolesService.createFirstRole(
-      createRoleDto,
-      tenantId,
-    );
-    if (createRole) {
-      createUserDto.roleId = createRole.id;
-      const user = this.userRepository.create({ ...createUserDto, tenantId });
-      const password = createUserDto.email + generateRandom4DigitNumber();
-      const userRecord = await this.createUserToFirebase(
-        createUserDto.email,
-        createUserDto.firstName,
+  async createFromTenant(
+    createUserDto: CreateUserDto,
+    tenantId: string,
+    role: string,
+  ) {
+    let firebaseRecordId: string = null;
+    try {
+      const createRoleDto = new CreateRoleDto();
+      createRoleDto.name = role;
+      createRoleDto.description = role;
+      const createRole = await this.rolesService.createFirstRole(
+        createRoleDto,
         tenantId,
-        createUserDto.domainUrl,
       );
+      if (createRole) {
+        createUserDto.roleId = createRole.id;
+        const user = this.userRepository.create({ ...createUserDto, tenantId });
+        const url = createUserDto.domainUrl.replace('https://', '');
+        const domainRegistered = await this.addAuthorizedDomain(url);
+        const password = createUserDto.email + generateRandom4DigitNumber();
+        const userRecord = await this.createUserToFirebase(
+          createUserDto.email,
+          createUserDto.firstName,
+          tenantId,
+          createUserDto.domainUrl,
+        );
+        firebaseRecordId = userRecord.uid;
+        user.firebaseId = userRecord.uid;
 
-      user.firebaseId = userRecord.uid;
+        const valuesToCheck = { email: user.email };
 
-      const valuesToCheck = { email: user.email };
+        await checkIfDataExists(valuesToCheck, this.userRepository);
 
-      await checkIfDataExists(valuesToCheck, this.userRepository);
-
-      return await this.userRepository.save(user);
-    } else {
-      throw new NotFoundException('Role Not Found');
+        return await this.userRepository.save(user);
+      } else {
+        if (firebaseRecordId) {
+          await admin.auth().deleteUser(firebaseRecordId);
+        }
+        throw new NotFoundException('Role Not Found');
+      }
+    } catch (error) {
+      if (firebaseRecordId) {
+        await admin.auth().deleteUser(firebaseRecordId);
+      }
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -748,8 +853,7 @@ export class UserService {
     tenantId: string,
     domainUrl?: string,
   ) {
-    //const password = generateRandom6DigitNumber();
-    const password = '%TGBnhy6';
+    const password = generateRandom6DigitNumber();
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password.toString(),
@@ -757,31 +861,42 @@ export class UserService {
     await admin.auth().updateUser(userRecord.uid, { displayName: tenantId });
     const expiresIn = 24 * 60 * 60 * 1000;
     await admin.auth().createCustomToken(userRecord.uid, { expiresIn });
-    // const emailTemplatePath = path.join(
-    //   process.cwd(),
-    //   'src',
-    //   'core',
-    //   'templates',
-    //   'welcome-email-template.html',
-    // );
+    const emailTemplatePath = path.join(
+      process.cwd(),
+      'src',
+      'core',
+      'templates',
+      'welcome-email-template.html',
+    );
 
-    // let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
+    let emailHtml = fs.readFileSync(emailTemplatePath, 'utf-8');
 
-    // emailHtml = emailHtml.replace('{{email}}', email);
-    // emailHtml = emailHtml.replace('{{name}}', firstName);
-    // emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
-    // emailHtml = emailHtml.replace('{{password}}', password.toString());
-    // const emailBody = new CreateEmailDto();
-    // emailBody.to = email;
-    // emailBody.subject =
-    //   'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
-    // emailBody.html = emailHtml;
+    emailHtml = emailHtml.replace('{{email}}', email);
+    emailHtml = emailHtml.replace('{{name}}', firstName);
+    emailHtml = emailHtml.replace('{{domainUrl}}', domainUrl);
+    emailHtml = emailHtml.replace('{{password}}', password.toString());
+    const emailBody = new CreateEmailDto();
+    emailBody.to = email;
+    emailBody.subject =
+      'Excited to Have You on Board – Get Started with Selamnew Workspace! ';
+    emailBody.html = emailHtml;
 
-    // const response = await this.httpService
-    //   .post(`${this.emailServerUrl}/email`, emailBody)
-    //   .toPromise();
+    const response = await this.httpService
+      .post(`${this.emailServerUrl}/email`, emailBody)
+      .toPromise();
 
     return userRecord;
+  }
+
+  async addAuthorizedDomain(domain: string) {
+    try {
+      const firebaseAuth = await this.firebaseAuthService.addAuthorizedDomain(
+        domain,
+      );
+      return firebaseAuth;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
   async activateUser(userId: string, tenantId: string): Promise<User> {
     try {
@@ -914,7 +1029,12 @@ export class UserService {
     try {
       const user = await this.userRepository.find({
         where: { tenantId: tenantId },
-        relations: ['employeeInformation','basicSalaries','employeeJobInformation','employeeJobInformation.position'],
+        relations: [
+          'employeeInformation',
+          'basicSalaries',
+          'employeeJobInformation',
+          'employeeJobInformation.position',
+        ],
       });
       return user;
     } catch (error) {
@@ -959,6 +1079,27 @@ export class UserService {
       return user;
     } catch (error) {
       throw new NotFoundException('User Not Found');
+    }
+  }
+  async assignReportsTo(userId: string) {
+    try {
+      let reportingToUser = await this.findReportingToUser(userId);
+      const getDelegation = await this.delegationService.findUserOnLeaveById(
+        reportingToUser.id,
+      );
+      if (getDelegation) {
+        if (getDelegation.delegatee.id !== userId) {
+          reportingToUser = getDelegation.delegatee;
+        } else {
+          reportingToUser = await this.findReportingToUser(
+            getDelegation.delegatorId,
+          );
+        }
+      }
+
+      return reportingToUser;
+    } catch (error) {
+      return null;
     }
   }
 }

@@ -206,6 +206,18 @@ export class UserController {
     );
   }
 
+  @Get('/all-users/all/payroll-data')
+  async findAllPayRollUsers(
+    @Req() request: Request,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = request['tenantId'];
+    return await this.userService.findAllPayRollUsers(
+      paginationOptions,
+      tenantId,
+    );
+  }
+
   @Get(':id')
   @ExcludeAuthGuard()
   findOne(@Param('id') id: string): Promise<User> {
@@ -351,7 +363,6 @@ export class UserController {
     return this.userService.getAllUser(tenantId);
   }
 
-  
   @Get('/simple-info/all-user-net-pay/with-tenant')
   getAllUsersWithNetPay(@Req() request: Request) {
     const tenantId = request['tenantId'];

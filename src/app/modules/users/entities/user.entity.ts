@@ -8,6 +8,7 @@ import {
   OneToOne,
   Generated,
   Unique,
+  JoinColumn,
 } from 'typeorm';
 import { Role } from '../../role/entities/role.entity';
 import { UserPermission } from '../../user-permission/entities/user-permission.entity';
@@ -18,6 +19,7 @@ import { OffboardingEmployeeTask } from '../../offboarding-employee-task/entitie
 import { EmployeeTermination } from '../../employee-termination/entities/employee-termination.entity';
 import { OffboardingTasksTemplate } from '../../offboarding-tasks-template/entities/offboarding-tasks-template..entity';
 import { BasicSalary } from '../../basic-salary/entities/basic-salary.entity';
+import { Delegation } from '../../delegations/entities/delegation.entity';
 @Entity()
 export class User extends BaseModel {
   @Column({ length: 500, type: 'varchar' })
@@ -109,5 +111,9 @@ export class User extends BaseModel {
   employeeTermination?: EmployeeTermination[];
 
   @OneToMany(() => BasicSalary, (basicSalary) => basicSalary.user)
+  @JoinColumn({ name: 'userId' })
   basicSalaries: BasicSalary[];
+
+  @OneToMany(() => Delegation, (delegate) => delegate.user)
+  delegation: Delegation;
 }

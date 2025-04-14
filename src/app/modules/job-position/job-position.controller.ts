@@ -18,6 +18,7 @@ import { Request } from 'express'; // Explicitly type the request object
 import { JobPosition } from './entities/job-position.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { SearchFilterDTO } from '@root/src/core/commonDto/search-filter-dto';
+import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
 
 @Controller('positions')
 @ApiTags('Job-Position')
@@ -25,6 +26,7 @@ export class JobPositionController {
   constructor(private readonly jobPositionService: JobPositionService) {}
 
   @Post()
+  @ExcludeAuthGuard()
   create(
     @Req() request: Request,
     @Body() createJobPositionDto: CreateJobPositionDto,
@@ -63,6 +65,7 @@ export class JobPositionController {
   }
 
   @Delete(':id')
+  @ExcludeAuthGuard()
   remove(@Param('id') id: string) {
     return this.jobPositionService.remove(id);
   }

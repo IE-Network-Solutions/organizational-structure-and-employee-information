@@ -23,8 +23,6 @@ export class BasicSalary extends BaseModel {
   @ManyToOne(() => EmployeeJobInformation, (jobInfo) => jobInfo.basicSalaries)
   jobInfo: EmployeeJobInformation;
 
-  @Column({ type: 'uuid',nullable:true })
+  @Column({ type: 'uuid', nullable: true })
   tenantId: string;
-
-
 }

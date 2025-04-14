@@ -6,10 +6,6 @@ export class CreateJobPositionDto {
   name: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
-
-  @IsString()
   @IsOptional()
-  tenantId: string;
+  description?: string;
 }

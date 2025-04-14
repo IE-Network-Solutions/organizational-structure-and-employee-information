@@ -23,7 +23,8 @@ import { BranchesModule } from '../branchs/branches.module';
 import { WorkSchedulesModule } from '../work-schedules/work-schedules.module';
 import { PaginationModule } from '@root/src/core/pagination/pagination.module';
 import { DepartmentsService } from '../departments/departments.service';
-
+import { DelegationModule } from '../delegations/delegations.module';
+import { FireBaseAuthModule } from '@root/src/core/firebaseAuth/firebase-auth.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
@@ -45,6 +46,8 @@ import { DepartmentsService } from '../departments/departments.service';
     BranchesModule,
     HttpModule.register({}),
     forwardRef(() => DepartmentsModule),
+    DelegationModule,
+    FireBaseAuthModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserDepartmentService],

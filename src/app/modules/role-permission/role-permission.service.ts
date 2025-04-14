@@ -11,8 +11,7 @@ import { PaginationService } from '@root/src/core/pagination/pagination.service'
 import { RolePermission } from './entities/role-permission.entity';
 import { RolePermissionInterface } from './role-permission-interface';
 import { RolePermissionRepository } from './role-permission-repository';
-import { Permission } from '../permission/entities/permission.entity';
-import { error } from 'console';
+import { PermissionService } from '../permission/permission.service';
 
 @Injectable()
 export class RolePermissionService implements RolePermissionInterface {
@@ -20,6 +19,7 @@ export class RolePermissionService implements RolePermissionInterface {
     @InjectRepository(RolePermission)
     private readonly rolePermissionRepository: RolePermissionRepository,
     private readonly paginationService: PaginationService,
+    private readonly permissionService: PermissionService,
   ) {}
   async createRoleWithPermissions(
     roleId: string,
@@ -27,13 +27,20 @@ export class RolePermissionService implements RolePermissionInterface {
     tenantId: string,
   ): Promise<RolePermission[]> {
     try {
-      const assignedPermissions = permissionIds.map((permissionId) => {
-        return this.rolePermissionRepository.create({
-          role: { id: roleId },
-          permissions: { id: permissionId },
-          tenantId: tenantId,
-        });
-      });
+      const allPermissions = await this.permissionService.findAllPermission();
+      const checkPermissionExist = (id: string) => {
+        return allPermissions?.some((item) => item.id === id);
+      };
+
+      const assignedPermissions = permissionIds
+        .filter(checkPermissionExist)
+        .map((permissionId) =>
+          this.rolePermissionRepository.create({
+            roleId,
+            permissionId,
+            tenantId,
+          }),
+        );
       return await this.rolePermissionRepository.save(assignedPermissions);
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -84,13 +91,27 @@ export class RolePermissionService implements RolePermissionInterface {
   ): Promise<any> {
     try {
       await this.rolePermissionRepository.delete({ role: { id: roleId } });
-      const assignedPermissions = permissionIds.map((permissionId) => {
-        return this.rolePermissionRepository.create({
-          role: { id: roleId },
-          permissions: { id: permissionId },
-          tenantId: tenantId,
-        });
-      });
+      const allPermissions = await this.permissionService.findAllPermission();
+      const checkPermissionExist = (id: string) => {
+        return allPermissions?.some((item) => item.id === id);
+      };
+
+      const assignedPermissions = permissionIds
+        .filter(checkPermissionExist)
+        .map((permissionId) =>
+          this.rolePermissionRepository.create({
+            roleId,
+            permissionId,
+            tenantId,
+          }),
+        );
+      // const assignedPermissions = permissionIds.map((permissionId) => {
+      //   return this.rolePermissionRepository.create({
+      //     role: { id: roleId },
+      //     permissions: { id: permissionId },
+      //     tenantId: tenantId,
+      //   });
+      // });
       return await this.rolePermissionRepository.save(assignedPermissions);
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {

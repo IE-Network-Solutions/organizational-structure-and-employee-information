@@ -3,7 +3,7 @@ import { CreateBasicSalaryDto } from './dto/create-basic-salary.dto';
 import { UpdateBasicSalaryDto } from './dto/update-basic-salary.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BasicSalary } from './entities/basic-salary.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { tenantId } from '../branchs/tests/branch.data';
 
 @Injectable()
@@ -13,7 +13,8 @@ export class BasicSalaryService {
     private readonly basicSalaryRepository: Repository<BasicSalary>,
   ) {}
   async create(
-    createBasicSalaryDto: CreateBasicSalaryDto,tenantId:string
+    createBasicSalaryDto: CreateBasicSalaryDto,
+    tenantId: string,
   ): Promise<BasicSalary> {
     const existingSalaries = await this.basicSalaryRepository.find({
       where: { user: { id: createBasicSalaryDto.userId } },
@@ -31,21 +32,41 @@ export class BasicSalaryService {
       status: true,
       userId: createBasicSalaryDto.userId,
       jobInfoId: createBasicSalaryDto.jobInfoId,
-      tenantId:tenantId
+      tenantId: tenantId,
     });
 
     return this.basicSalaryRepository.save(basicSalary);
   }
 
-  findAll(tenantId:string): Promise<BasicSalary[]> {
-    return this.basicSalaryRepository.find({where:{tenantId:tenantId}, relations: ['user', 'jobInfo'] });
+  findAll(tenantId: string): Promise<BasicSalary[]> {
+    return this.basicSalaryRepository.find({
+      where: { tenantId: tenantId },
+      relations: ['user', 'jobInfo'],
+    });
   }
 
-  async getActiveBasicSalaries(tenantId:string): Promise<
-    { userId: string; basicSalary: number }[]
-  > {
+  async getActiveBasicSalaries(
+    tenantId: string,
+  ): Promise<{ userId: string; basicSalary: number }[]> {
     const salaries = await this.basicSalaryRepository.find({
-      where: { status: true ,tenantId:tenantId},
+      where: { status: true, tenantId: tenantId, user: { deletedAt: null } },
+      select: ['userId', 'basicSalary'],
+    });
+
+    return salaries;
+  }
+  async getActiveBasicSalariesOfActiveUsers(
+    tenantId: string,
+  ): Promise<{ userId: string; basicSalary: number }[]> {
+    const salaries = await this.basicSalaryRepository.find({
+      where: {
+        status: true,
+        tenantId: tenantId,
+        user: {
+          deletedAt: IsNull(),
+          employeeJobInformation: { isPositionActive: true },
+        },
+      },
       select: ['userId', 'basicSalary'],
     });
 

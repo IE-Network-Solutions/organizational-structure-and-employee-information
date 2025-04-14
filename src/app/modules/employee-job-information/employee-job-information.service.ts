@@ -50,12 +50,15 @@ export class EmployeeJobInformationService {
         user,
       );
       if (createEmployeeJobInformationDto.basicSalary) {
-        await this.basicSalaryService.create({
-          basicSalary: createEmployeeJobInformationDto.basicSalary,
-          status: true,
-          userId: savedJobInfo.userId,
-          jobInfoId: savedJobInfo.id,
-        },tenantId);
+        await this.basicSalaryService.create(
+          {
+            basicSalary: createEmployeeJobInformationDto.basicSalary,
+            status: true,
+            userId: savedJobInfo.userId,
+            jobInfoId: savedJobInfo.id,
+          },
+          tenantId,
+        );
       }
 
       return savedJobInfo;
