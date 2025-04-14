@@ -177,7 +177,7 @@ export class DepartmentsService {
           parentDepartment = parent.parent;
         }
       }
-    
+      
       department.name = updateDepartmentDto.name;
       department.branchId = updateDepartmentDto.branchId;
       department.description = updateDepartmentDto.description;
