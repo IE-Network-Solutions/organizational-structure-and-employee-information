@@ -8,4 +8,8 @@ export class CreateJobPositionDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  tenantId?: string;
 }

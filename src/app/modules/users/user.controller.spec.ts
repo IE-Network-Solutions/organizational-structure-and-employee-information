@@ -35,6 +35,7 @@ import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserDepartmentService } from './services/user-relation-with-department.service';
 import { DelegationService } from '../delegations/delegations.service';
+import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
 
 describe('UserController', () => {
   let userController: UserController;
@@ -80,6 +81,7 @@ describe('UserController', () => {
           provide: PaginationService,
           useValue: mock<PaginationService>(),
         },
+
         {
           provide: DelegationService,
           useValue: mock<DelegationService>(),
@@ -128,6 +130,10 @@ describe('UserController', () => {
         {
           provide: ConfigService,
           useValue: mock<ConfigService>(),
+        },
+        {
+          provide: FirebaseAuthService,
+          useValue: mock<FirebaseAuthService>(),
         },
       ],
     }).compile();
