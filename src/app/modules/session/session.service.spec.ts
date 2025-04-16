@@ -127,7 +127,7 @@ describe('SessionService', () => {
       const result = await sessionService.findOneSession('month-id');
 
       expect(sessionRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 'month-id' },
+        where: { id: 'month-id' },relations:["months"]
       });
       expect(result).toEqual(sessionMock());
     });
@@ -141,7 +141,7 @@ describe('SessionService', () => {
         NotFoundException,
       );
       expect(sessionRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 'invalid-id' },
+        where: { id: 'invalid-id' },relations:["months"]
       });
     });
   });
