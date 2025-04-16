@@ -13,7 +13,6 @@ import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { MonthService } from '../month/month.service';
 import { CreateMonthDto } from '../month/dto/create-month.dto';
-import { create } from 'domain';
 
 @Injectable()
 export class SessionService {
@@ -24,6 +23,7 @@ export class SessionService {
     private readonly paginationService: PaginationService,
     private readonly monthService: MonthService,
   ) {}
+
   async createSession(
     createSessionDto: CreateSessionDto,
     tenantId: string,
@@ -54,21 +54,29 @@ export class SessionService {
       const savedSession = queryRunner
         ? await queryRunner.manager.save(Session, createdSession)
         : await this.sessionRepository.save(createdSession);
-      if (createSessionDto.months.length > 0) {
+
+      if (createSessionDto.months && createSessionDto.months.length > 0) {
         await Promise.all(
           createSessionDto.months.map(async (month) => {
-            const eachMonth = new CreateMonthDto();
-            eachMonth.description = month.description;
-            eachMonth.endDate = month.endDate;
-            eachMonth.startDate = month.startDate;
-            eachMonth.sessionId = savedSession.id;
-            eachMonth.name = month.name;
+            if (month["id"]) {
+              const monthId = month["id"];
+              delete month["id"];
+              await this.monthService.updateMonth(monthId, month, tenantId);
+              return;
+            } else {
+              const eachMonth = new CreateMonthDto();
+              eachMonth.description = month.description;
+              eachMonth.endDate = month.endDate;
+              eachMonth.startDate = month.startDate;
+              eachMonth.sessionId = savedSession.id;
+              eachMonth.name = month.name;
 
-            const savedMonth = await this.monthService.createMonth(
-              eachMonth,
-              tenantId,
-              queryRunner,
-            );
+              await this.monthService.createMonth(
+                eachMonth,
+                tenantId,
+                queryRunner,
+              );
+            }
           }),
         );
       }
@@ -78,6 +86,7 @@ export class SessionService {
       throw new BadRequestException(error.message);
     }
   }
+
   async findAllSessions(
     tenantId: string,
     paginationOptions?: PaginationDto,
@@ -106,29 +115,46 @@ export class SessionService {
   async findOneSession(id: string): Promise<Session> {
     try {
       const session = await this.sessionRepository.findOne({
-        where: { id: id },
+        where: { id },
+        relations: ['months'],
       });
+  
       return session;
     } catch (error) {
       throw new NotFoundException(`Session Not Found`);
     }
   }
+
   async updateBulkSession(
     updateSessionDto: UpdateSessionDto[],
     tenantId: string,
+    calendarId: string,
   ): Promise<Session[]> {
     try {
-      const session = await Promise.all(
-        updateSessionDto.map(
-          async (item) => await this.updateSession(item.id, item, tenantId),
-        ),
+      const sessions = await Promise.all(
+        updateSessionDto.map(async (item) => {
+          const createDto = new  CreateSessionDto();
+          createDto.calendarId=calendarId
+          createDto.description=item.description
+          createDto.name=item.name
+          createDto.startDate=item.startDate  
+          createDto.endDate=item.endDate 
+          createDto.months  =item.months  
+          if (item.id) {
+
+            return await this.updateSession(item.id, createDto, tenantId);
+          } else {
+            return await this.createSession(createDto, tenantId);
+          }
+        }),
       );
 
-      return session;
+      return sessions;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
+
   async updateSession(
     id: string,
     updateSessionDto: UpdateSessionDto,
@@ -151,6 +177,7 @@ export class SessionService {
       throw new BadRequestException(error.message);
     }
   }
+
   async removeSession(id: string): Promise<Session> {
     try {
       const session = await this.findOneSession(id);
@@ -167,7 +194,7 @@ export class SessionService {
   async getActiveSession(tenantId: string): Promise<Session> {
     try {
       const session = await this.sessionRepository.findOneOrFail({
-        where: { tenantId: tenantId, active: true },
+        where: { tenantId, active: true },
         relations: ['months'],
       });
       return session;
@@ -175,6 +202,7 @@ export class SessionService {
       throw new BadRequestException(error.message);
     }
   }
+
   async getActiveSessionOfAllTenants(): Promise<Session> {
     try {
       const session = await this.sessionRepository.findOneOrFail({
@@ -191,12 +219,12 @@ export class SessionService {
     tenantId: string,
   ): Promise<Session> {
     try {
-      const activeMonth = await this.getActiveSession(tenantId);
+      const activeSession = await this.getActiveSession(tenantId);
 
-      if (activeMonth) {
+      if (activeSession) {
         const updateSession = new UpdateSessionDto();
         updateSession.active = false;
-        await this.updateSession(activeMonth.id, updateSession, tenantId);
+        await this.updateSession(activeSession.id, updateSession, tenantId);
       }
       const updateSession = new UpdateSessionDto();
       updateSession.active = true;
