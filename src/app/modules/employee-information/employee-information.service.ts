@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -92,21 +93,39 @@ export class EmployeeInformationService {
     }
   }
 
+  async findByUSerWithDeletedOne(userId: string) {
+    try {
+      const user = await this.employeeInformationRepository.findOne({
+        where: { userId: userId },  withDeleted: true,
+      });
+      console.log(user,"user")  
+      return user
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`EmployeeInformation Not Found.`);
+      }
+      throw error;
+    }
+  }
+
   async update(
     id: string,
     updateEmployeeInformationDto: UpdateEmployeeInformationDto,
   ) {
     try {
-      await this.employeeInformationRepository.findOneOrFail({
-        where: { id: id },
-      });
-      await this.employeeInformationRepository.update(
+ 
+console.log(id,"id")  
+      console.log(updateEmployeeInformationDto,"updateEmployeeInformationDto")
+   const ggg =   await this.employeeInformationRepository.update(
         { id },
         updateEmployeeInformationDto,
       );
-      return await this.employeeInformationRepository.findOneOrFail({
+      console.log(ggg,"ggggggggggggggg")
+    const hhhhhhhh = await this.employeeInformationRepository.findOneOrFail({
         where: { id: id },
       });
+      console.log(hhhhhhhh,"hhhhhhhhhhhhh")
+      return hhhhhhhh
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);
