@@ -98,7 +98,6 @@ export class EmployeeInformationService {
       const user = await this.employeeInformationRepository.findOne({
         where: { userId: userId },  withDeleted: true,
       });
-      console.log(user,"user")  
       return user
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
@@ -111,21 +110,17 @@ export class EmployeeInformationService {
   async update(
     id: string,
     updateEmployeeInformationDto: UpdateEmployeeInformationDto,
+
   ) {
-    try {
- 
-console.log(id,"id")  
-      console.log(updateEmployeeInformationDto,"updateEmployeeInformationDto")
-   const ggg =   await this.employeeInformationRepository.update(
+    try {  
+ await this.employeeInformationRepository.update(
         { id },
         updateEmployeeInformationDto,
       );
-      console.log(ggg,"ggggggggggggggg")
-    const hhhhhhhh = await this.employeeInformationRepository.findOneOrFail({
+   return await this.employeeInformationRepository.findOneOrFail({
         where: { id: id },
       });
-      console.log(hhhhhhhh,"hhhhhhhhhhhhh")
-      return hhhhhhhh
+    
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);

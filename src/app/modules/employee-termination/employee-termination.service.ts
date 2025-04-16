@@ -184,7 +184,6 @@ export class EmployeeTerminationService {
       joinedDate: createEmployeeJobInformationDto['joinedDate'],
  
     };
-    console.log(employeeInformation, "employeeInformation")
     updateEmployeeInformation["deletedAt"] = null;
     await this.employeenformationService.update(
       employeeInformation.id,
