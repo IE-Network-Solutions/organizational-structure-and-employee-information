@@ -136,7 +136,7 @@ export class CalendarsService {
       if (updateCalendarDto.sessions && updateCalendarDto.sessions.length > 0) {
         const session = updateCalendarDto.sessions;
         delete updateCalendarDto.sessions;
-        await this.sessionService.updateBulkSession(session, tenantId);
+        await this.sessionService.updateBulkSession(session, tenantId, id);
       }
       const updatedCalendar = await this.calendarRepository.update(
         id,
