@@ -425,7 +425,6 @@
         "permissions": [
           { "name": "View Organization", "slug": "view_organization", "roles": ["owner"] },
           { "name": "View Organization Chart", "slug": "view_organization_chart", "roles": ["owner"] },
-          { "name": "View Employee Attendance", "slug": "view_employee_attendance", "roles": ["admin", "owner"] },
           { "name": "View My Timesheet", "slug": "view_my_timesheet", "roles": ["admin", "owner"] },
           { "name": "View Timesheet", "slug": "view_timesheet", "roles": ["admin", "owner","user"] },
 
