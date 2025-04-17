@@ -108,7 +108,6 @@ export class BranchRequestService {
         await this.paginationService.paginate<BranchRequest>(query, options);
 
       const branchRequests = paginatedData.items;
-
       // Handle empty results
       if (!branchRequests.length) {
         return {

@@ -37,19 +37,18 @@ export class EmployeeTerminationService {
     tenantId: string,
   ): Promise<EmployeeTermination> {
     try {
+     const employeeTermination = await this.employeeTerminationRepository.findOne({where: {userId: createEmployeeTerminationDto.userId, isActive: true,tenantId}}); 
+     if(employeeTermination){
+      throw new HttpException(
+        'Employee Termination already exists',
+        409,
+      );  }   
       const createEmployeeTermination =
         await this.employeeTerminationRepository.create({
           ...createEmployeeTerminationDto,
           tenantId: tenantId,
         });
-      const valuesToCheck = {
-        isActive: 'true',
-        userId: createEmployeeTerminationDto.userId,
-      };
-      await checkIfDataExistsInEveryColumn(
-        valuesToCheck,
-        this.employeeTerminationRepository,
-      );
+ 
       const check = await this.employeeTerminationRepository.save(
         createEmployeeTermination,
       );
@@ -171,31 +170,25 @@ export class EmployeeTerminationService {
         },
       });
 
-      if (!termination) {
-        await this.userService.activateUser(userId, tenantId);
-        await this.employeeJobInformationService.create(
-          createEmployeeJobInformationDto,
-          tenantId,
-        );
-
-        const employeeInformation =
-          await this.employeenformationService.findOne(userId);
-        const updateEmployeeInformation: UpdateEmployeeInformationDto = {
-          joinedDate: createEmployeeJobInformationDto['joinedDate'],
-        };
-
-        await this.employeenformationService.update(
-          employeeInformation.id,
-          updateEmployeeInformation,
-        );
-      } else {
+      if (termination) {
         await this.update(termination.id, { isActive: false });
-        await this.userService.activateUser(userId, tenantId);
-        await this.employeeJobInformationService.create(
-          createEmployeeJobInformationDto,
-          tenantId,
-        );
       }
+      await this.userService.activateUser(userId, tenantId);
+      await this.employeeJobInformationService.create(
+        createEmployeeJobInformationDto,
+        tenantId,
+      );
+      const employeeInformation =
+      await this.employeenformationService.findByUSerWithDeletedOne(userId);
+    const updateEmployeeInformation: UpdateEmployeeInformationDto = {
+      joinedDate: createEmployeeJobInformationDto['joinedDate'],
+ 
+    };
+    updateEmployeeInformation["deletedAt"] = null;
+    await this.employeenformationService.update(
+      employeeInformation.id,
+      updateEmployeeInformation,
+    );
 
       await queryRunner.commitTransaction();
       return user;
