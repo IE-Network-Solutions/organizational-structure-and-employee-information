@@ -271,7 +271,9 @@
         
 
 
-        { "name": "Manage Okr Settings", "slug": "manage_okr_settings", "roles": ["owner"] }
+        { "name": "Manage Okr Settings", "slug": "manage_okr_settings", "roles": ["owner"] },
+        { "name": "View Plan By Department", "slug": "view-all-status-plan", "roles": ["owner"] }
+
         
         ]
       },
@@ -437,7 +439,7 @@
           { "name": "View Learning Growth", "slug": "view_learning_growth", "roles":  ["owner","admin","user"] },         
          
 
-          { "name": "View My Training", "slug": "view_my_training", "roles":  ["owner","admin","user"] },
+          { "name": "View My Training", "slug": "view_incentive", "roles":  ["owner","admin","user"] },
           { "name": "View Payroll", "slug": "view_payroll", "roles":  ["owner","admin","user"] },
           { "name": "View My Payroll", "slug": "view_my_payroll", "roles": ["owner","admin","user"] }       ,
           { "name": "Manage Planning And Reporting", "slug": "manage_planning_reporting", "roles": ["owner"] },
