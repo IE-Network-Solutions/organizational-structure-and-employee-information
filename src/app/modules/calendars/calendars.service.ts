@@ -60,6 +60,7 @@ export class CalendarsService {
             session.startDate = singleSession.startDate;
             session.name = singleSession.name;
             session.months = singleSession.months;
+            session.active  = singleSession.active || false ;
             const createMonth = await this.sessionService.createSession(
               session,
               tenantId,
