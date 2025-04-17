@@ -160,7 +160,9 @@
           { "name": "Manage Leave Management", "slug": "manage_leave_management", "roles": ["admin", "owner"] }       ,
 
 
-          { "name": "Manage Timesheet Settings", "slug": "manage_timesheet_settings", "roles": ["admin", "owner"] }
+          { "name": "Manage Timesheet Settings", "slug": "manage_timesheet_settings", "roles": ["admin", "owner"] },
+          { "name": "View Employee Attendance", "slug": "view_employee_attendance", "roles": ["admin", "owner"] }
+
         
 
         
@@ -334,6 +336,10 @@
 
 
           { "name": "View Feedback", "slug": "view_feedback", "roles": ["owner"] },
+          { "name": "View All Employees Feedback", "slug": "view-all-employees-feedback", "roles": ["owner","admin"] },
+          { "name": "Create Feedback", "slug": "create-feedback", "roles": ["owner","admin"] },
+
+
           { "name": "View Feedback Conversation", "slug": "view_feedback_conversation", "roles": ["owner"] },
           { "name": "View Feedback List", "slug": "view_feedback_list", "roles": ["owner"] },
 
@@ -420,9 +426,10 @@
         "group": "Basic Permission",
         "permissions": [
           { "name": "View Organization", "slug": "view_organization", "roles": ["owner"] },
-          { "name": "View Organization Chart", "slug": "view_Organization Chart", "roles": ["owner"] },
-          { "name": "View Employee Attendance", "slug": "view_employee_attendance", "roles": ["admin", "owner"] },
+          { "name": "View Organization Chart", "slug": "view_organization_chart", "roles": ["owner"] },
           { "name": "View My Timesheet", "slug": "view_my_timesheet", "roles": ["admin", "owner"] },
+          { "name": "View Timesheet", "slug": "view_timesheet", "roles": ["admin", "owner","user"] },
+
 
 
           { "name": "View Okr", "slug": "view_okr", "roles": ["owner"] },
