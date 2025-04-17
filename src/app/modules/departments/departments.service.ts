@@ -86,35 +86,55 @@ export class DepartmentsService {
 
   async findUserTree(tenantId: string): Promise<Department> {
     try {
-      const departments = await this.departmentRepository.find({
-        where: { tenantId: tenantId },
-        relations: ['employeeJobInformation'],
+      const departmentData = await this.departmentRepository.find({
+        where: { tenantId },
+        relations: ['employeeJobInformation', 'employeeJobInformation.user', 'employeeJobInformation.user.role'],
       });
-      if (departments?.length > 0) {
-        const departmentTrees = await Promise.all(
-          departments.map(async (department) => {
-            const departmentTree =
-              await this.departmentRepository.findDescendantsTree(department, {
-                relations: [
-                  'employeeJobInformation',
-                  'employeeJobInformation.user',
-                  'employeeJobInformation.user.role',
-                ],
-              });
-            departmentTree.employeeJobInformation =
-              departmentTree.employeeJobInformation.filter(
-                (info) =>
-                  info.departmentLeadOrNot === true &&
-                  info.isPositionActive === true,
-              );
-            return departmentTree;
-          }),
-        );
 
-        return departmentTrees.filter((item) => item.level === 0)[0];
-      } else {
+      if (!departmentData?.length) {
         throw new NotFoundException('No Department Was Created.');
       }
+
+      // Filter employeeJobInformation to include only departmentLeadOrNot === true
+      departmentData.forEach((department) => {
+        if (department.employeeJobInformation) {
+          department.employeeJobInformation = department.employeeJobInformation.filter(
+            (info) => info.departmentLeadOrNot === true && info.isPositionActive === true
+          );
+        }
+      });
+
+      const departmentTrees = await Promise.all(
+        departmentData.map(async (department) => {
+          const departmentTree =
+            await this.departmentRepository.findDescendantsTree(department, {
+              relations: [
+                'employeeJobInformation',
+                'employeeJobInformation.user',
+                'employeeJobInformation.user.role',
+              ],
+            });
+          
+          // Filter employeeJobInformation for each department in the tree
+          const filterEmployeeInfo = (dept: Department): Department => {
+            if (dept.employeeJobInformation) {
+              dept.employeeJobInformation = dept.employeeJobInformation.filter(
+                (info) => info.departmentLeadOrNot === true && info.isPositionActive === true
+              );
+            }
+            
+            if (dept.department && dept.department.length > 0) {
+              dept.department = dept.department.map(filterEmployeeInfo);
+            }
+            
+            return dept;
+          };
+          
+          return filterEmployeeInfo(departmentTree);
+        }),
+      );
+
+      return departmentTrees.filter((item) => item.level === 0)[0];
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -141,19 +161,6 @@ export class DepartmentsService {
       throw new NotFoundException(`Department  not found`);
     }
   }
-  async findAllChildDepartments(
-    tenantId: string,
-    departmentId: string,
-  ): Promise<Department[]> {
-    try {
-      return await this.departmentRepository.find({
-        where: { parent: { id: departmentId } },
-      });
-    } catch (error) {
-      throw new NotFoundException(`Department  not found`);
-    }
-  }
-
   async findAllChildDepartmentsWithAllLevels(
     tenantId: string,
     departmentId: string,
@@ -190,7 +197,18 @@ export class DepartmentsService {
 
     return users;
   }
-
+  async findAllChildDepartments(
+    tenantId: string,
+    departmentId: string,
+  ): Promise<Department[]> {
+    try {
+      return await this.departmentRepository.find({
+        where: { parent: { id: departmentId } },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Department  not found`);
+    }
+  }
   async updateDepartment(
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
@@ -200,7 +218,7 @@ export class DepartmentsService {
   ): Promise<Department> {
     try {
       const department = await this.findOneDepartment(id);
-      if (updateDepartmentDto.name) {
+      if(updateDepartmentDto.name){
         const departmentWithName = await this.departmentRepository.findOne({
           where: { name: updateDepartmentDto.name, tenantId: tenantId },
         });
@@ -208,7 +226,7 @@ export class DepartmentsService {
           throw new BadRequestException(
             `Department with name '${updateDepartmentDto.name}' already exists`,
           );
-        }
+      }
       }
       if (department && !parentDepartment) {
         if (department.level !== 0) {
@@ -218,7 +236,7 @@ export class DepartmentsService {
           parentDepartment = parent.parent;
         }
       }
-
+    
       department.name = updateDepartmentDto.name;
       department.branchId = updateDepartmentDto.branchId;
       department.description = updateDepartmentDto.description;

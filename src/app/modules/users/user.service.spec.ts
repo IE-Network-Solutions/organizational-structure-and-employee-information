@@ -29,6 +29,7 @@ import { RoleService } from '../role/role.service';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { DelegationService } from '../delegations/delegations.service';
+import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
 
 jest.mock('firebase-admin', () => {
   return {
@@ -81,6 +82,7 @@ describe('UserService', () => {
           provide: PaginationService,
           useValue: mock<PaginationService>(),
         },
+        
         {
           provide: DelegationService,
           useValue: mock<DelegationService>(),
@@ -89,6 +91,11 @@ describe('UserService', () => {
           provide: DelegationService,
           useValue: mock<DelegationService>(),
         },
+        {
+          provide: FirebaseAuthService,
+          useValue: mock<FirebaseAuthService>(),
+        },
+
         {
           provide: DelegationService,
           useValue: mock<DelegationService>(),
