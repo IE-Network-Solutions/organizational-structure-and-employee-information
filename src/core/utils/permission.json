@@ -334,6 +334,10 @@
 
 
           { "name": "View Feedback", "slug": "view_feedback", "roles": ["owner"] },
+          { "name": "View All Employees Feedback", "slug": "view-all-employees-feedback", "roles": ["owner","admin"] },
+          { "name": "Create Feedback", "slug": "create-feedback", "roles": ["owner","admin"] },
+
+
           { "name": "View Feedback Conversation", "slug": "view_feedback_conversation", "roles": ["owner"] },
           { "name": "View Feedback List", "slug": "view_feedback_list", "roles": ["owner"] },
 
