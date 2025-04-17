@@ -70,6 +70,7 @@ export class SessionService {
               eachMonth.startDate = month.startDate;
               eachMonth.sessionId = savedSession.id;
               eachMonth.name = month.name;
+              eachMonth.active  = month.active || false 
 
               await this.monthService.createMonth(
                 eachMonth,
