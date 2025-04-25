@@ -385,7 +385,7 @@ export class UserController {
   @ExcludeAuthGuard()
   findUserByEmail(@Req() request: Request, @Body() email: FilterEmailDto) {
     const tenantId = request['tenantId'];
-    return this.userService.findUserByEmail(email);
+    return this.userService.findUserByEmail(email,tenantId)
   }
 
 
@@ -393,6 +393,6 @@ export class UserController {
   @ExcludeAuthGuard()
   @ExcludeTenantGuard()
   findUserByEmailWithOutTenantID(@Body() email: FilterEmailDto) {
-    return this.userService.findUserByEmail(email);
+    return this.userService.findUserByEmailWithOutTenantID(email);
   }
 }
