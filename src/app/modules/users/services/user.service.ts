@@ -1070,7 +1070,7 @@ export class UserService {
 
     return user;
   }
-  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
+  async findUserByEmail(email: FilterEmailDto) {
     try {
       const user = await this.userRepository.findOne({
         where: { email: email.email },
