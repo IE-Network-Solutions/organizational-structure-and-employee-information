@@ -223,7 +223,8 @@ export class UserController {
   findOne(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(id);
   }
-  @Get('without-tenant/:id')
+  @Get(':id/without-tenant')
+  @ExcludeAuthGuard()
   @ExcludeTenantGuard()
   findOneWithoutTenant(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(id);
