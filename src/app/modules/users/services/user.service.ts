@@ -1113,4 +1113,25 @@ export class UserService {
       return null;
     }
   }
+
+  async getAllUsersJoinedDate(tenantId: string) {
+    try {
+      const users = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .where('user.tenantId = :tenantId', { tenantId })
+        .select([
+          'user.id',
+          'employeeInformation.joinedDate'
+        ])
+        .getMany();
+
+      return users.map(user => ({
+        userId: user.id,
+        joinedDate: user.employeeInformation?.joinedDate || null
+      }));
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 }
