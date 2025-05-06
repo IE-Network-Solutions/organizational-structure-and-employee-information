@@ -217,7 +217,7 @@ stage('Run migrations') {
 
         stage('Run migrations on Server 2') {
             when {
-                expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == 'preview' }
+                expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'preview'" }
             }
             steps {
                 script {
