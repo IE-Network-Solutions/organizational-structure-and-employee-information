@@ -187,23 +187,54 @@ when {
             }
         }
 
-        stage('Run Migrations') {
+stage('Run migrations') {
+    parallel {
+        stage('Run migrations on Server 1') {
+            when {
+                expression { env.REMOTE_SERVER_1 != null }
+            }
             steps {
-                sshagent (credentials: [SSH_CREDENTIALS_ID_1]) {
-                    script {
+                script {
+                    def output = sh(
+                        script: """
+                            ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_1 '
+                            cd $REPO_DIR && npm run migration:generate-run || true'
+                        """,
+                        returnStdout: true
+                    ).trim()
+                    echo "Migration Output on Server 1: ${output}"
+                    if (output.contains('No changes in database schema were found')) {
+                        echo 'No database schema changes found, skipping migration.'
+                    } else {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_1 '
+                            cd $REPO_DIR && npm run migration:run'
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Run migrations on Server 2') {
+            when {
+                expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == 'preview' }
+            }
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
                         def output = sh(
                             script: """
-                                ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_1 '
+                                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_2 '
                                 cd $REPO_DIR && npm run migration:generate-run || true'
                             """,
                             returnStdout: true
                         ).trim()
-                        echo "Migration Output: ${output}"
+                        echo "Migration Output on Server 2: ${output}"
                         if (output.contains('No changes in database schema were found')) {
                             echo 'No database schema changes found, skipping migration.'
                         } else {
                             sh """
-                                ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_1 '
+                                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_2 '
                                 cd $REPO_DIR && npm run migration:run'
                             """
                         }
@@ -211,6 +242,9 @@ when {
                 }
             }
         }
+    }
+}
+
 
 stage('Run Nest.js App') {
     parallel {
