@@ -29,6 +29,10 @@ pipeline {
                             env.REMOTE_SERVER_1 = REMOTE_SERVER_PROD
                             env.SECRETS_PATH = '/home/ubuntu/staging-secrets/.osei-env'
                             env.BACKEND_ENV_PATH = '/home/ubuntu/backend-env/staging-env'
+                        } else if (branchName.contains('preview')) {
+                            env.REMOTE_SERVER_2 = REMOTE_SERVER_PROD2
+                            env.SECRETS_PATH = '/home/ubuntu/preview-secrets/.osei-env'
+                            env.BACKEND_ENV_PATH = '/home/ubuntu/backend-env/preview-env'
                         }
                     }
                 }
@@ -234,9 +238,9 @@ stage('Run Nest.js App') {
             }
         }
 
-        stage('Start App on Server 2') {
+        stage('Start App on Server 2-balancer') {
             when {
-                expression { env.REMOTE_SERVER_2 != null }
+                expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'develop'" }
             }
             steps {
                 withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
@@ -246,6 +250,24 @@ stage('Run Nest.js App') {
                             npm run build &&
                             sudo pm2 delete osei-backend || true &&
                             sudo npm run start:prod
+                        '
+                    """
+                }
+            }
+        }
+
+ stage('Start App on Server 2-preview') {
+            when {
+                expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'preview'" }
+            }
+            steps {
+                withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
+                    sh """
+                        sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} '
+                            cd $REPO_DIR &&
+                            npm run build &&
+                            sudo pm2 delete osei-backend-preview || true &&
+                            sudo npm run start:preview
                         '
                     """
                 }
