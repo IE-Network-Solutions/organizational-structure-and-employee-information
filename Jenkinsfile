@@ -42,6 +42,9 @@ pipeline {
         stage('Fetch Environment Variables') {
             parallel {
                 stage('Fetch Variables from Server 1') {
+when {
+                        expression { env.REMOTE_SERVER_1 != null }
+                    }
                     steps {
                         script {
                             sshagent([env.SSH_CREDENTIALS_ID_1]) {
@@ -74,6 +77,9 @@ pipeline {
         stage('Prepare Repository') {
             parallel {
                 stage('Prepare Repository on Server 1') {
+when {
+                        expression { env.REMOTE_SERVER_1 != null }
+                    }
                     steps {
                         sshagent([env.SSH_CREDENTIALS_ID_1]) {
                             sh """
@@ -108,6 +114,9 @@ pipeline {
         stage('Pull Latest Changes') {
             parallel {
                 stage('Pull Latest Changes from Server 1') {
+when {
+                        expression { env.REMOTE_SERVER_1 != null }
+                    }
                     steps {
                         sshagent([env.SSH_CREDENTIALS_ID_1]) {
                             sh """
@@ -144,6 +153,9 @@ pipeline {
         stage('Install Dependencies') {
             parallel {
                 stage('Install Dependencies on Server 1') {
+when {
+                        expression { env.REMOTE_SERVER_1 != null }
+                    }
                     steps {
                         script {
                             def envPath = env.BACKEND_ENV_PATH
