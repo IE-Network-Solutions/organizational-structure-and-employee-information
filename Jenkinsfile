@@ -42,7 +42,7 @@ pipeline {
         stage('Fetch Environment Variables') {
             parallel {
                 stage('Fetch Variables from Server 1') {
-when {
+                    when {
                         expression { env.REMOTE_SERVER_1 != null }
                     }
                     steps {
@@ -77,7 +77,7 @@ when {
         stage('Prepare Repository') {
             parallel {
                 stage('Prepare Repository on Server 1') {
-when {
+                    when {
                         expression { env.REMOTE_SERVER_1 != null }
                     }
                     steps {
@@ -114,7 +114,7 @@ when {
         stage('Pull Latest Changes') {
             parallel {
                 stage('Pull Latest Changes from Server 1') {
-when {
+                    when {
                         expression { env.REMOTE_SERVER_1 != null }
                     }
                     steps {
@@ -153,7 +153,7 @@ when {
         stage('Install Dependencies') {
             parallel {
                 stage('Install Dependencies on Server 1') {
-when {
+                    when {
                         expression { env.REMOTE_SERVER_1 != null }
                     }
                     steps {
@@ -187,141 +187,139 @@ when {
             }
         }
 
-stage('Run migrations') {
-    parallel {
-        stage('Run migrations on Server 1') {
-            when {
-                expression { env.REMOTE_SERVER_1 != null }
-            }
-            steps {
-                script {
-                    def output = sh(
-                        script: """
-                            ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_1 '
-                            cd $REPO_DIR && npm run migration:generate-run || true'
-                        """,
-                        returnStdout: true
-                    ).trim()
-                    echo "Migration Output on Server 1: ${output}"
-                    if (output.contains('No changes in database schema were found')) {
-                        echo 'No database schema changes found, skipping migration.'
-                    } else {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_1 '
-                            cd $REPO_DIR && npm run migration:run'
-                        """
+        stage('Run migrations') {
+            parallel {
+                stage('Run migrations on Server 1') {
+                    when {
+                        expression { env.REMOTE_SERVER_1 != null }
+                    }
+                    steps {
+                        script {
+                            def output = sh(
+                                script: """
+                                    ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_1 '
+                                    cd $REPO_DIR && npm run migration:generate-run || true'
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            echo "Migration Output on Server 1: ${output}"
+                            if (output.contains('No changes in database schema were found')) {
+                                echo 'No database schema changes found, skipping migration.'
+                            } else {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_1 '
+                                    cd $REPO_DIR && npm run migration:run'
+                                """
+                            }
+                        }
+                    }
+                }
+
+                stage('Run migrations on Server 2') {
+                    when {
+                        expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'preview'" }
+                    }
+                    steps {
+                        script {
+                            withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
+                                def output = sh(
+                                    script: """
+                                        sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_2 '
+                                        cd $REPO_DIR && npm run migration:generate-run || true'
+                                    """,
+                                    returnStdout: true
+                                ).trim()
+                                echo "Migration Output on Server 2: ${output}"
+                                if (output.contains('No changes in database schema were found')) {
+                                    echo 'No database schema changes found, skipping migration.'
+                                } else {
+                                    sh """
+                                        sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_2 '
+                                        cd $REPO_DIR && npm run migration:run'
+                                    """
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        stage('Run migrations on Server 2') {
-            when {
-                expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'preview'" }
-            }
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
-                        def output = sh(
-                            script: """
-                                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_2 '
-                                cd $REPO_DIR && npm run migration:generate-run || true'
-                            """,
-                            returnStdout: true
-                        ).trim()
-                        echo "Migration Output on Server 2: ${output}"
-                        if (output.contains('No changes in database schema were found')) {
-                            echo 'No database schema changes found, skipping migration.'
-                        } else {
+        stage('Run Nest.js App') {
+            parallel {
+                stage('Start App on Server 1-test/prod') {
+                    when {
+                        expression { env.BRANCH_NAME == "'develop'" || env.BRANCH_NAME == "'production'" }
+                    }
+                    steps {
+                        sshagent([env.SSH_CREDENTIALS_ID_1]) {
                             sh """
-                                sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $REMOTE_SERVER_2 '
-                                cd $REPO_DIR && npm run migration:run'
+                                ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} '
+                                    cd $REPO_DIR &&
+                                    npm run build &&
+                                    sudo pm2 delete osei-backend || true &&
+                                    sudo npm run start:prod
+                                '
+                            """
+                        }
+                    }
+                }
+
+                stage('Start App on Server 1-staging') {
+                    when {
+                        expression { env.BRANCH_NAME == "'staging'" }
+                    }
+                    steps {
+                        sshagent([env.SSH_CREDENTIALS_ID_1]) {
+                            sh """
+                                ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} '
+                                    cd $REPO_DIR &&
+                                    npm run build &&
+                                    sudo pm2 delete osei-backend-staging || true &&
+                                    sudo npm run start:stage
+                                '
+                            """
+                        }
+                    }
+                }
+
+                stage('Start App on Server 2-balancer') {
+                    when {
+                        expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'develop'" }
+                    }
+                    steps {
+                        withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
+                            sh """
+                                sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} '
+                                    cd $REPO_DIR &&
+                                    npm run build &&
+                                    sudo pm2 delete osei-backend || true &&
+                                    sudo npm run start:prod
+                                '
+                            """
+                        }
+                    }
+                }
+
+                stage('Start App on Server 2-preview') {
+                    when {
+                        expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'preview'" }
+                    }
+                    steps {
+                        withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
+                            sh """
+                                sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} '
+                                    cd $REPO_DIR &&
+                                    npm run build &&
+                                    sudo pm2 delete osei-backend-preview || true &&
+                                    sudo npm run start:preview
+                                '
                             """
                         }
                     }
                 }
             }
         }
-    }
-}
-
-
-stage('Run Nest.js App') {
-    parallel {
-        stage('Start App on Server 1') {
-            when {
-                expression { env.BRANCH_NAME == "'develop'" || env.BRANCH_NAME == "'production'" }
-            }
-            steps {
-                sshagent([env.SSH_CREDENTIALS_ID_1]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} '
-                            cd $REPO_DIR &&
-                            npm run build &&
-                            sudo pm2 delete osei-backend || true &&
-                            sudo npm run start:prod
-                        '
-                    """
-                }
-            }
-        }
-
-        stage('Start App on Server 1-staging') {
-            when {
-                expression { env.BRANCH_NAME == "'staging'" }
-            }
-            steps {
-                sshagent([env.SSH_CREDENTIALS_ID_1]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} '
-                            cd $REPO_DIR &&
-                            npm run build &&
-                            sudo pm2 delete osei-backend-staging || true &&
-                            sudo npm run start:stage
-                        '
-                    """
-                }
-            }
-        }
-
-        stage('Start App on Server 2-balancer') {
-            when {
-                expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'develop'" }
-            }
-            steps {
-                withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
-                    sh """
-                        sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} '
-                            cd $REPO_DIR &&
-                            npm run build &&
-                            sudo pm2 delete osei-backend || true &&
-                            sudo npm run start:prod
-                        '
-                    """
-                }
-            }
-        }
-
- stage('Start App on Server 2-preview') {
-            when {
-                expression { env.REMOTE_SERVER_2 != null && env.BRANCH_NAME == "'preview'" }
-            }
-            steps {
-                withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
-                    sh """
-                        sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} '
-                            cd $REPO_DIR &&
-                            npm run build &&
-                            sudo pm2 delete osei-backend-preview || true &&
-                            sudo npm run start:preview
-                        '
-                    """
-                }
-            }
-        }
-    }
-}
-
     }
 
     post {
@@ -367,14 +365,15 @@ stage('Run Nest.js App') {
                             <div class="details">
                                 <p><span class="label">Job:</span> ${env.JOB_NAME}</p>
                                 <p><span class="label">Build Number:</span> ${env.BUILD_NUMBER}</p>
-                                <p><span class="label">Console Output:</span> <a href="${env.BUILD_URL}console" class="link">View the console output</a></p>
+                                <p><span class="label">Console Output:</span> <a href="${env.BUILD_URL}console" class="link">View Output</a></p>
+                            </div>
+                            <div class="footer">
+                                Jenkins CI/CD System
                             </div>
                         </body>
                     </html>
                 """,
-                from: 'selamnew@ienetworksolutions.com',
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                to: 'yonas.t@ienetworksolutions.com, surafel@ienetworks.co, abeselom.g@ienetworksolutions.com'
+                mimeType: 'text/html'
             )
         }
     }
