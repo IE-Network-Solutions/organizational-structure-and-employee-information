@@ -224,6 +224,12 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
+  @Get('without-tenant/:id')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+  findOneWithoutTenant(@Param('id') id: string): Promise<User> {
+    return this.userService.findOne(id);
+  }
   @Patch(':id')
   @UseInterceptors(FileInterceptor('profileImage'))
   async update(
