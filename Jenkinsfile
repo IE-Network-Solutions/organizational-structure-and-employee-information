@@ -113,7 +113,7 @@ pipeline {
 
         stage('Pull Latest Changes') {
             parallel {
-                stage('Pull Latest Changes from Server 1') {
+                stage('Pull Latest Changes to Server 1') {
                     when {
                         expression { env.REMOTE_SERVER_1 != null }
                     }
@@ -130,7 +130,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Pull Latest Changes from Server 2') {
+                stage('Pull Latest Changes to Server 2') {
                     when {
                         expression { env.REMOTE_SERVER_2 != null }
                     }
