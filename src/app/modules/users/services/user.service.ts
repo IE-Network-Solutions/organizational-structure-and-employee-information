@@ -1070,7 +1070,18 @@ export class UserService {
 
     return user;
   }
-  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
+  async findUserByEmail(email: FilterEmailDto,tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: email.email,tenantId: tenantId },
+      });
+
+      return user;
+    } catch (error) {
+      throw new NotFoundException('User Not Found');
+    }
+  }
+  async findUserByEmailWithOutTenantID(email: FilterEmailDto) {
     try {
       const user = await this.userRepository.findOne({
         where: { email: email.email },
@@ -1100,6 +1111,27 @@ export class UserService {
       return reportingToUser;
     } catch (error) {
       return null;
+    }
+  }
+
+  async getAllUsersJoinedDate(tenantId: string) {
+    try {
+      const users = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .where('user.tenantId = :tenantId', { tenantId })
+        .select([
+          'user.id',
+          'employeeInformation.joinedDate'
+        ])
+        .getMany();
+
+      return users.map(user => ({
+        userId: user.id,
+        joinedDate: user.employeeInformation?.joinedDate || null
+      }));
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 }
