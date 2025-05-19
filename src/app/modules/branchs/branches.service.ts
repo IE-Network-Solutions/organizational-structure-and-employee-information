@@ -77,8 +77,21 @@ export class BranchesService {
   async updateBranch(
     id: string,
     updateBranchDto: UpdateBranchDto,
+    tenantId: string,
   ): Promise<Branch> {
     try {
+      const branchExist = await this.branchRepository.findOne({
+        where: { name: updateBranchDto.name, tenantId: tenantId },
+      });
+      const branchEmail = await this.branchRepository.findOne({
+        where: {
+          contactEmail: updateBranchDto.contactEmail,
+          tenantId: tenantId,
+        },
+      });
+      if (branchEmail || branchExist) {
+        throw new NotFoundException(`Branch with Email Or Name Already exist`);
+      }
       const branch = await this.findOneBranch(id);
       if (!branch) {
         throw new NotFoundException(`Branch with Id ${id} not found`);
