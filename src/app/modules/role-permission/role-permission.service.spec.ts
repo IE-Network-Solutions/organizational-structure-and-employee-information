@@ -30,9 +30,9 @@ describe('RolePermissionService', () => {
           provide: PaginationService,
           useValue: mock<PaginationService>(),
         },
-         {
-            provide: PermissionService,
-            useValue: mock<PermissionService>(),
+        {
+          provide: PermissionService,
+          useValue: mock<PermissionService>(),
         },
         {
           provide: rolePermissionToken,

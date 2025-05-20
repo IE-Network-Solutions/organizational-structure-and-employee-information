@@ -18,7 +18,12 @@
           { "name": "Delete Calendar", "slug": "delete-calendar", "roles": ["owner"] },
           { "name": "Assign Calendar to Organization", "slug": "assign-calendar-organization", "roles": ["owner"] },
           { "name": "Assign Working Schedule to Organization", "slug": "assign-working-schedule-organization", "roles": ["owner"] },
-          { "name": "View Organization Structure SideBar", "slug": "view-organization-structure-sidebar", "roles": ["owner"] }
+
+
+
+          { "name": "View organization Settings", "slug": "view_organization_settings", "roles": ["owner"] }
+
+
 
         ]
       },
@@ -75,7 +80,16 @@
           { "name": "Delete Approver", "slug": "delete-approver", "roles": ["admin", "owner"] },
           { "name": "Create Position", "slug": "create-position", "roles": ["admin", "owner"] },
           { "name": "Update Position", "slug": "update-position", "roles": ["admin", "owner"] },
-          { "name": "Delete Position", "slug": "delete-position", "roles": ["admin", "owner"] }
+          { "name": "Delete Position", "slug": "delete-position", "roles": ["admin", "owner"] },
+
+
+          { "name": "View Employees", "slug": "view_employees", "roles": ["owner"] },
+          { "name": "Manage Employees", "slug": "manage_employees", "roles": ["owner"] },
+          { "name": "Manage Department Requests", "slug": "manage_department_requests", "roles": ["owner"] }
+
+
+
+
         ]
       },
       
@@ -137,7 +151,23 @@
           { "name": "Create Approval Workflow", "slug": "create-approval-work-flow", "roles": ["admin", "owner"] },
           { "name": "Create Approver", "slug": "create-approver", "roles": ["admin", "owner"] },
           { "name": "Update Approver", "slug": "update-approver", "roles": ["admin", "owner"] },
-          { "name": "Delete Approver", "slug": "delete-approver", "roles": ["admin", "owner"] }        ]
+          { "name": "Delete Approver", "slug": "delete-approver", "roles": ["admin", "owner"] }   ,    
+        
+        
+        
+
+          { "name": "View Timesheet", "slug": "view_timesheet", "roles": ["admin", "owner"] },
+          { "name": "Manage Leave Management", "slug": "manage_leave_management", "roles": ["admin", "owner"] }       ,
+
+
+          { "name": "Manage Timesheet Settings", "slug": "manage_timesheet_settings", "roles": ["admin", "owner"] },
+          { "name": "View Employee Attendance", "slug": "view_employee_attendance", "roles": ["admin", "owner"] }
+
+        
+
+        
+        
+        ]
       },
       
       {
@@ -175,7 +205,17 @@
           { "name": "View Shortlisted Candidate", "slug": "view-shortlisted-candidate", "roles": ["owner", "admin"] },
           { "name": "Record Candidate Report", "slug": "record-candidate-report", "roles": ["owner", "admin"] },
           { "name": "Approve Candidate", "slug": "approve-candidate", "roles": ["admin", "owner"] },
-          { "name": "Decline Candidate", "slug": "decline-candidate", "roles": ["admin", "owner"] }
+          { "name": "Decline Candidate", "slug": "decline-candidate", "roles": ["admin", "owner"] },
+
+
+
+          { "name": "view_recruitment", "slug": "view_recruitment", "roles": ["owner"] },
+          { "name": "Manage Recruitment Jobs", "slug": "manage_recruitment_jobs", "roles": ["owner"] },
+          { "name": "Manage Recruitment Candidates", "slug": "manage_recruitment_candidates", "roles": ["owner"] },
+
+          { "name": "Manage Recruitment Talent Pool", "slug": "manage_recruitment_talent_pool", "roles": ["owner"] },
+          { "name": "Manage Recruitment Settings", "slug": "manage_recruitment_settings", "roles": ["owner"] }
+
         ]
       },
       
@@ -227,7 +267,13 @@
         { "name": "Create Appreciation Type", "slug": "create-appreciation-type", "roles": ["admin", "owner"] },
         { "name": "Update Appreciation Type", "slug": "update-appreciation-type", "roles": ["admin", "owner"] },
         { "name": "Delete Appreciation Type", "slug": "delete-appreciation-type", "roles": ["admin", "owner"] },
-        { "name": "Create OKR Rule", "slug": "create-okr-rule", "roles": ["admin", "owner"] }               
+        { "name": "Create OKR Rule", "slug": "create-okr-rule", "roles": ["admin", "owner"] }     ,
+        
+        
+
+
+        { "name": "Manage Okr Settings", "slug": "manage_okr_settings", "roles": ["owner"] }
+        
         ]
       },
       
@@ -261,7 +307,16 @@
       
           { "name": "Create TNA", "slug": "create-tna", "roles": ["owner", "admin"] },
           { "name": "Update TNA", "slug": "update-tna", "roles": ["owner", "admin"] },
-          { "name": "Delete TNA", "slug": "delete-tna", "roles": ["owner", "admin"] }
+          { "name": "Delete TNA", "slug": "delete-tna", "roles": ["owner", "admin"] },
+
+
+          { "name": "View Learning Growth", "slug": "view_learning_growth", "roles": ["owner"] },
+          { "name": "Manage Training", "slug": "manage_training", "roles": ["owner"] },
+  
+  
+          
+          { "name": "View Tna Review", "slug": "view_tna_review", "roles": ["owner"] },
+          { "name": "Manage Tna Settings", "slug": "manage_tna_settings", "roles": ["owner"] }
         ]
       },
       
@@ -275,7 +330,25 @@
           { "name": "Delete Form Category", "slug": "delete-form-category", "roles": ["owner"] },
           { "name": "Create Custom Fields", "slug": "create-custom-fields", "roles": ["admin", "owner"] },
           { "name": "Update Custom Fields", "slug": "update-custom-fields", "roles": ["admin", "owner"] },
-          { "name": "Delete Custom Fields", "slug": "delete-custom-fields", "roles": ["admin", "owner"] }
+          { "name": "Delete Custom Fields", "slug": "delete-custom-fields", "roles": ["admin", "owner"] },
+
+
+
+
+          { "name": "View Feedback", "slug": "view_feedback", "roles": ["owner"] },
+          { "name": "View All Employees Feedback", "slug": "view-all-employees-feedback", "roles": ["owner","admin"] },
+          { "name": "Create Feedback", "slug": "create-feedback", "roles": ["owner","admin"] },
+
+
+          { "name": "View Feedback Conversation", "slug": "view_feedback_conversation", "roles": ["owner"] },
+          { "name": "View Feedback List", "slug": "view_feedback_list", "roles": ["owner"] },
+
+          
+          { "name": "View Feedback Recognition", "slug": "view_feedback_recognition", "roles": ["owner"] },
+          { "name": "Manage Feedback Forms", "slug": "manage_feedback_forms", "roles": ["owner"] },
+          { "name": "Manage Feedback Settings", "slug": "manage_feedback_settings", "roles": ["owner"] }
+
+
         ]
       },
       
@@ -312,6 +385,64 @@
           { "name": "Assign Roles to User", "slug": "assign-roles-to-user", "roles": ["owner"] },
           { "name": "Revoke Roles from User", "slug": "revoke-roles-from-user", "roles": ["owner"] },
           { "name": "View User Roles", "slug": "view-user-roles", "roles": ["owner"] }
+        ]
+      },
+
+
+      {
+        "group": "Payroll Management",
+        "permissions": [
+          { "name": "View Employee Information", "slug": "view_employee_information", "roles": ["owner"] },
+          { "name": "View Payroll Overview", "slug": "view_payroll_overview", "roles": ["owner"] },
+          { "name": "Manage Payroll Settings", "slug": "manage_payroll_settings", "roles": ["owner"] }
+         
+        ]
+      },
+      {
+        "group": "Compensation & Benefit Management",
+        "permissions": [
+          { "name": "View Compensation", "slug": "view_compensation", "roles": ["owner"] },
+          { "name": "View Allowance", "slug": "view_allowance", "roles": ["owner"] },
+          { "name": "View Benefit", "slug": "view_benefit", "roles": ["owner"] },
+          { "name": "View Deduction", "slug": "view_deduction", "roles": ["owner"] },
+          { "name": "Manage Compensation Settings", "slug": "manage_compensation_settings", "roles": ["owner"] }
+         
+        ]
+      },
+
+      {
+        "group": "Incentive",
+        "permissions": [
+          { "name": "View Incentive", "slug": "view_incentive", "roles": ["owner"] },
+          { "name": "View Incentive Page", "slug": "view_incentive_page", "roles": ["owner"] },
+          { "name": "View Variable Pay", "slug": "view_variable_pay", "roles": ["owner"] },
+          { "name": "Manage Incentive Settings", "slug": "manage_incentive_settings", "roles": ["owner"] }
+         
+        ]
+      },
+
+
+      {
+        "group": "Basic Permission",
+        "permissions": [
+          { "name": "View Organization", "slug": "view_organization", "roles": ["owner"] },
+          { "name": "View Organization Chart", "slug": "view_organization_chart", "roles": ["owner"] },
+          { "name": "View My Timesheet", "slug": "view_my_timesheet", "roles": ["admin", "owner"] },
+          { "name": "View Timesheet", "slug": "view_timesheet", "roles": ["admin", "owner","user"] },
+
+
+
+          { "name": "View Okr", "slug": "view_okr", "roles": ["owner"] },
+          { "name": "View Okr Dashboard", "slug": "view_okr_dashboard", "roles": ["owner"] },
+          { "name": "View Okr Overview", "slug": "view_okr_overview", "roles": ["owner"] },
+          { "name": "View Learning Growth", "slug": "view_learning_growth", "roles": ["owner"] },         
+         
+
+          { "name": "View My Training", "slug": "view_incentive", "roles": ["owner"] },
+          { "name": "View Payroll", "slug": "view_payroll", "roles": ["owner"] },
+          { "name": "View My Payroll", "slug": "view_my_payroll", "roles": ["owner"] }       ,
+          { "name": "Manage Planning And Reporting", "slug": "manage_planning_reporting", "roles": ["owner"] }
+
         ]
       }
       

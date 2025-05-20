@@ -11,14 +11,24 @@ pipeline {
                         string(credentialsId: 'REMOTE_SERVER_PROD2', variable: 'REMOTE_SERVER_PROD2')
                     ]) {
                         def branchName = env.GIT_BRANCH ?: sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                        env.BRANCH_NAME = branchName
 
                         if (branchName.contains('develop')) {
                             env.SSH_CREDENTIALS_ID_1 = 'peptest'
                             env.REMOTE_SERVER_1 = REMOTE_SERVER_TEST
                             env.REMOTE_SERVER_2 = REMOTE_SERVER_PROD2
+                            env.SECRETS_PATH = '/home/ubuntu/secrets/.osei-env'
+                            env.BACKEND_ENV_PATH = '/home/ubuntu/backend-env'
                         } else if (branchName.contains('production')) {
                             env.SSH_CREDENTIALS_ID_1 = 'pepproduction'
                             env.REMOTE_SERVER_1 = REMOTE_SERVER_PROD
+                            env.SECRETS_PATH = '/home/ubuntu/secrets/.osei-env'
+                            env.BACKEND_ENV_PATH = '/home/ubuntu/backend-env'
+                        } else if (branchName.contains('staging')) {
+                            env.SSH_CREDENTIALS_ID_1 = 'pepproduction'
+                            env.REMOTE_SERVER_1 = REMOTE_SERVER_PROD
+                            env.SECRETS_PATH = '/home/ubuntu/staging-secrets/.osei-env'
+                            env.BACKEND_ENV_PATH = '/home/ubuntu/backend-env/staging-env'
                         }
                     }
                 }
@@ -31,20 +41,25 @@ pipeline {
                     steps {
                         script {
                             sshagent([env.SSH_CREDENTIALS_ID_1]) {
-                                env.REPO_URL = sh(script: "ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'grep REPO_URL /home/ubuntu/secrets/.osei-env | cut -d= -f2'", returnStdout: true).trim()
-                                env.BRANCH_NAME = sh(script: "ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'grep BRANCH_NAME /home/ubuntu/secrets/.osei-env | cut -d= -f2'", returnStdout: true).trim()
-                                env.REPO_DIR = sh(script: "ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'grep REPO_DIR /home/ubuntu/secrets/.osei-env | cut -d= -f2'", returnStdout: true).trim()
+                                def secretsPath = env.SECRETS_PATH
+                                env.REPO_URL = sh(script: "ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'grep REPO_URL ${secretsPath} | cut -d= -f2'", returnStdout: true).trim()
+                                env.BRANCH_NAME = sh(script: "ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'grep BRANCH_NAME ${secretsPath} | cut -d= -f2'", returnStdout: true).trim()
+                                env.REPO_DIR = sh(script: "ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'grep REPO_DIR ${secretsPath} | cut -d= -f2'", returnStdout: true).trim()
                             }
                         }
                     }
                 }
                 stage('Fetch Variables from Server 2') {
+                    when {
+                        expression { env.REMOTE_SERVER_2 != null }
+                    }
                     steps {
                         script {
                             withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
-                                env.REPO_URL = sh(script: "sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'grep REPO_URL /home/ubuntu/secrets/.osei-env | cut -d= -f2'", returnStdout: true).trim()
-                                env.BRANCH_NAME = sh(script: "sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'grep BRANCH_NAME /home/ubuntu/secrets/.osei-env | cut -d= -f2'", returnStdout: true).trim()
-                                env.REPO_DIR = sh(script: "sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'grep REPO_DIR /home/ubuntu/secrets/.osei-env | cut -d= -f2'", returnStdout: true).trim()
+                                def secretsPath = env.SECRETS_PATH
+                                env.REPO_URL = sh(script: "sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'grep REPO_URL ${secretsPath} | cut -d= -f2'", returnStdout: true).trim()
+                                env.BRANCH_NAME = sh(script: "sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'grep BRANCH_NAME ${secretsPath} | cut -d= -f2'", returnStdout: true).trim()
+                                env.REPO_DIR = sh(script: "sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'grep REPO_DIR ${secretsPath} | cut -d= -f2'", returnStdout: true).trim()
                             }
                         }
                     }
@@ -68,6 +83,9 @@ pipeline {
                     }
                 }
                 stage('Prepare Repository on Server 2') {
+                    when {
+                        expression { env.REMOTE_SERVER_2 != null }
+                    }
                     steps {
                         withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
                             sh """
@@ -100,6 +118,9 @@ pipeline {
                     }
                 }
                 stage('Pull Latest Changes from Server 2') {
+                    when {
+                        expression { env.REMOTE_SERVER_2 != null }
+                    }
                     steps {
                         withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
                             sh """
@@ -120,28 +141,37 @@ pipeline {
             parallel {
                 stage('Install Dependencies on Server 1') {
                     steps {
-                        sshagent([env.SSH_CREDENTIALS_ID_1]) {
-                            sh """
-                                ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'cp ~/backend-env/.osei-env ~/$REPO_DIR/.env'
-                                ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'cd ~/$REPO_DIR && npm install'
-                            """
+                        script {
+                            def envPath = env.BACKEND_ENV_PATH
+                            sshagent([env.SSH_CREDENTIALS_ID_1]) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'cp ${envPath}/.osei-env ~/$REPO_DIR/.env'
+                                    ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'cd ~/$REPO_DIR && npm install'
+                                """
+                            }
                         }
                     }
                 }
                 stage('Install Dependencies on Server 2') {
+                    when {
+                        expression { env.REMOTE_SERVER_2 != null }
+                    }
                     steps {
-                        withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
-                            sh """
-                                sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'cp ~/backend-env/.osei-env ~/$REPO_DIR/.env'
-                                sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'cd ~/$REPO_DIR && npm install'
-                            """
+                        script {
+                            def envPath = env.BACKEND_ENV_PATH
+                            withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
+                                sh """
+                                    sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'cp ${envPath}/.osei-env ~/$REPO_DIR/.env'
+                                    sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'cd ~/$REPO_DIR && npm install'
+                                """
+                            }
                         }
                     }
                 }
             }
         }
 
-   stage('Run Migrations') {
+        stage('Run Migrations') {
             steps {
                 sshagent (credentials: [SSH_CREDENTIALS_ID_1]) {
                     script {
@@ -166,24 +196,64 @@ pipeline {
             }
         }
 
-        stage('Run Nest.js App') {
-            parallel {
-                stage('Start App on Server 1') {
-                    steps {
-                        sshagent([env.SSH_CREDENTIALS_ID_1]) {
-                            sh "ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} 'cd $REPO_DIR && npm run build && sudo npm run start:prod'"
-                        }
-                    }
-                }
-                stage('Start App on Server 2') {
-                    steps {
-                        withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
-                            sh "sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} 'cd $REPO_DIR && npm run build && sudo npm run start:prod'"
-                        }
-                    }
+stage('Run Nest.js App') {
+    parallel {
+        stage('Start App on Server 1') {
+            when {
+                expression { env.BRANCH_NAME == "'develop'" || env.BRANCH_NAME == "'production'" }
+            }
+            steps {
+                sshagent([env.SSH_CREDENTIALS_ID_1]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} '
+                            cd $REPO_DIR &&
+                            npm run build &&
+                            sudo pm2 delete osei-backend || true &&
+                            sudo npm run start:prod
+                        '
+                    """
                 }
             }
         }
+
+        stage('Start App on Server 1-staging') {
+            when {
+                expression { env.BRANCH_NAME == "'staging'" }
+            }
+            steps {
+                sshagent([env.SSH_CREDENTIALS_ID_1]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_1} '
+                            cd $REPO_DIR &&
+                            npm run build &&
+                            sudo pm2 delete osei-backend-staging || true &&
+                            sudo npm run start:stage
+                        '
+                    """
+                }
+            }
+        }
+
+        stage('Start App on Server 2') {
+            when {
+                expression { env.REMOTE_SERVER_2 != null }
+            }
+            steps {
+                withCredentials([string(credentialsId: 'pepproduction2', variable: 'SERVER_PASSWORD')]) {
+                    sh """
+                        sshpass -p '$SERVER_PASSWORD' ssh -o StrictHostKeyChecking=no ${env.REMOTE_SERVER_2} '
+                            cd $REPO_DIR &&
+                            npm run build &&
+                            sudo pm2 delete osei-backend || true &&
+                            sudo npm run start:prod
+                        '
+                    """
+                }
+            }
+        }
+    }
+}
+
     }
 
     post {

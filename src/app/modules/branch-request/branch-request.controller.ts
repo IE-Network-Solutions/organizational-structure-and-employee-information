@@ -10,6 +10,7 @@ import {
   Req,
   BadRequestException,
   Headers,
+  Header,
 } from '@nestjs/common';
 import { BranchRequestService } from './branch-request.service';
 import { CreateBranchRequestDto } from './dto/create-branch-request.dto';
@@ -52,12 +53,12 @@ export class BranchRequestController {
     @Param('userId') userId: string,
     @Req() req: Request,
     @Query() paginationOptions: PaginationDto,
-    @Headers('tenantId') tanantId: string,
+    @Headers('tenantId') tenantId: string,
   ): Promise<{ items: BranchRequest[]; meta: any; links: any }> {
     return this.branchRequestService.findAllBranchRequestWithApprover(
       paginationOptions,
       userId,
-      tanantId,
+      tenantId,
     );
   }
 

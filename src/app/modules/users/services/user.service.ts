@@ -52,6 +52,7 @@ import { CreateEmployeeJobInformationDto } from '../../employee-job-information/
 import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-permission.dto';
 import { FilterEmailDto } from '../dto/email.dto';
 import { DelegationService } from '../../delegations/delegations.service';
+import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
 
 @Injectable()
 export class UserService {
@@ -75,6 +76,7 @@ export class UserService {
     private readonly delegationService: DelegationService,
 
     private readonly httpService: HttpService,
+    private readonly firebaseAuthService: FirebaseAuthService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -134,6 +136,7 @@ export class UserService {
     await queryRunner.connect();
 
     await queryRunner.startTransaction();
+    let firebaseRecordId: string = null;
 
     try {
       const {
@@ -165,6 +168,7 @@ export class UserService {
         tenantId,
         //  tenant.domainUrl
       );
+      firebaseRecordId = userRecord.uid;
       user.firebaseId = userRecord.uid;
 
       const valuesToCheck = { email: user.email };
@@ -184,6 +188,7 @@ export class UserService {
       await this.assignPermissionToUser(createUserPermissionDto, tenantId);
 
       createEmployeeInformationDto['userId'] = result.id;
+     createEmployeeInformationDto.joinedDate= createEmployeeJobInformationDto?.effectiveStartDate
 
       const employeeInformation = await this.employeeInformationService.create(
         createEmployeeInformationDto,
@@ -213,6 +218,9 @@ export class UserService {
 
       return await this.findOne(result.id);
     } catch (error) {
+      if (firebaseRecordId) {
+        await admin.auth().deleteUser(firebaseRecordId);
+      }
       await queryRunner.rollbackTransaction();
       throw new ConflictException(error.message);
     } finally {
@@ -355,6 +363,56 @@ export class UserService {
       throw error;
     }
   }
+
+  async findAllPayRollUsers(
+    paginationOptions: PaginationDto,
+    tenantId: string,
+  ) {
+    try {
+      const options: IPaginationOptions = {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+      };
+      const queryBuilder = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect(
+          'user.employeeJobInformation',
+          'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        .leftJoinAndSelect(
+          'user.basicSalaries',
+          'basicSalaries',
+          'basicSalaries.status = :status',
+          { status: true },
+        )
+
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
+        .leftJoinAndSelect('employeeJobInformation.department', 'department')
+        .andWhere('user.tenantId = :tenantId', { tenantId });
+
+      const paginatedData = await this.paginationService.paginate<User>(
+        queryBuilder,
+        options,
+      );
+
+      return paginatedData;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`User not found.`);
+      }
+      throw error;
+    }
+  }
   async findAllUsersByDepartment(tenantId: string, departmentId: string) {
     const users = await this.userRepository
       .createQueryBuilder('user')
@@ -374,6 +432,25 @@ export class UserService {
     return users;
   }
 
+  async findAllUsersByAllDepartment(tenantId: string, departmentIds: string[]) {
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+      )
+      .where('employeeJobInformation.departmentId IN (:...departmentIds)', {
+        departmentIds,
+      })
+      .andWhere('employeeJobInformation.isPositionActive = true')
+      .andWhere('user.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId })
+      .getMany();
+
+    return users;
+  }
+
   async findOne(id: string): Promise<User> {
     try {
       const user = await this.userRepository
@@ -384,6 +461,8 @@ export class UserService {
         .leftJoinAndSelect(
           'user.employeeJobInformation',
           'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
         )
         .leftJoinAndSelect(
           'user.basicSalaries',
@@ -420,6 +499,21 @@ export class UserService {
         throw new NotFoundException(`User with id ${id} not found.`);
       }
       throw error;
+    }
+  }
+
+  async revokeUserSession(uid: string) {
+    try {  
+      await admin.auth().revokeRefreshTokens(uid);
+      
+      const user = await admin.auth().getUser(uid);
+  
+      return {
+        message: 'User session revoked successfully',
+        tokensValidAfterTime: user.tokensValidAfterTime,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to revoke user session');
     }
   }
 
@@ -474,7 +568,12 @@ export class UserService {
           );
         }
       }
-
+       if(updateUserDto?.roleId || updateUserDto?.permission ){
+        const firebaseUid = user?.firebaseId;
+        if (firebaseUid) {
+          await this.revokeUserSession(firebaseUid);
+        }
+       }
       await this.userRepository.update({ id }, updateUserDto);
 
       return await this.userRepository.findOneOrFail({ where: { id } });
@@ -538,9 +637,12 @@ export class UserService {
           );
           if (department) {
             return await this.findTeamLeadOrNot(department.id);
+          } else {
+            return null;
           }
+        } else {
+          return await this.findTeamLeadOrNot(jobInfo.departmentId);
         }
-        return await this.findTeamLeadOrNot(jobInfo.departmentId);
       }
     } catch (error) {
       throw error;
@@ -698,34 +800,51 @@ export class UserService {
     }
   }
 
-  async createFromTenant(createUserDto: CreateUserDto, tenantId, role: string) {
-    const createRoleDto = new CreateRoleDto();
-    createRoleDto.name = role;
-    createRoleDto.description = role;
-    const createRole = await this.rolesService.createFirstRole(
-      createRoleDto,
-      tenantId,
-    );
-    if (createRole) {
-      createUserDto.roleId = createRole.id;
-      const user = this.userRepository.create({ ...createUserDto, tenantId });
-      const password = createUserDto.email + generateRandom4DigitNumber();
-      const userRecord = await this.createUserToFirebase(
-        createUserDto.email,
-        createUserDto.firstName,
+  async createFromTenant(
+    createUserDto: CreateUserDto,
+    tenantId: string,
+    role: string,
+  ) {
+    let firebaseRecordId: string = null;
+    try {
+      const createRoleDto = new CreateRoleDto();
+      createRoleDto.name = role;
+      createRoleDto.description = role;
+      const createRole = await this.rolesService.createFirstRole(
+        createRoleDto,
         tenantId,
-        createUserDto.domainUrl,
       );
+      if (createRole) {
+        createUserDto.roleId = createRole.id;
+        const user = this.userRepository.create({ ...createUserDto, tenantId });
+        const url = createUserDto.domainUrl.replace('https://', '');
+        const domainRegistered = await this.addAuthorizedDomain(url);
+        const password = createUserDto.email + generateRandom4DigitNumber();
+        const userRecord = await this.createUserToFirebase(
+          createUserDto.email,
+          createUserDto.firstName,
+          tenantId,
+          createUserDto.domainUrl,
+        );
+        firebaseRecordId = userRecord.uid;
+        user.firebaseId = userRecord.uid;
 
-      user.firebaseId = userRecord.uid;
+        const valuesToCheck = { email: user.email };
 
-      const valuesToCheck = { email: user.email };
+        await checkIfDataExists(valuesToCheck, this.userRepository);
 
-      await checkIfDataExists(valuesToCheck, this.userRepository);
-
-      return await this.userRepository.save(user);
-    } else {
-      throw new NotFoundException('Role Not Found');
+        return await this.userRepository.save(user);
+      } else {
+        if (firebaseRecordId) {
+          await admin.auth().deleteUser(firebaseRecordId);
+        }
+        throw new NotFoundException('Role Not Found');
+      }
+    } catch (error) {
+      if (firebaseRecordId) {
+        await admin.auth().deleteUser(firebaseRecordId);
+      }
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -768,6 +887,17 @@ export class UserService {
       .toPromise();
 
     return userRecord;
+  }
+
+  async addAuthorizedDomain(domain: string) {
+    try {
+      const firebaseAuth = await this.firebaseAuthService.addAuthorizedDomain(
+        domain,
+      );
+      return firebaseAuth;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
   async activateUser(userId: string, tenantId: string): Promise<User> {
     try {
@@ -941,7 +1071,18 @@ export class UserService {
 
     return user;
   }
-  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
+  async findUserByEmail(email: FilterEmailDto,tenantId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email: email.email,tenantId: tenantId },
+      });
+
+      return user;
+    } catch (error) {
+      throw new NotFoundException('User Not Found');
+    }
+  }
+  async findUserByEmailWithOutTenantID(email: FilterEmailDto) {
     try {
       const user = await this.userRepository.findOne({
         where: { email: email.email },
@@ -971,6 +1112,27 @@ export class UserService {
       return reportingToUser;
     } catch (error) {
       return null;
+    }
+  }
+
+  async getAllUsersJoinedDate(tenantId: string) {
+    try {
+      const users = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .where('user.tenantId = :tenantId', { tenantId })
+        .select([
+          'user.id',
+          'employeeInformation.joinedDate'
+        ])
+        .getMany();
+
+      return users.map(user => ({
+        userId: user.id,
+        joinedDate: user.employeeInformation?.joinedDate || null
+      }));
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 }

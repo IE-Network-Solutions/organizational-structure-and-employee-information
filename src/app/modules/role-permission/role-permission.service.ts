@@ -42,7 +42,6 @@ export class RolePermissionService implements RolePermissionInterface {
           }),
         );
       return await this.rolePermissionRepository.save(assignedPermissions);
-      
     } catch (error) {
       throw new BadRequestException(error.message);
     }

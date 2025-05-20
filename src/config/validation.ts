@@ -39,4 +39,10 @@ export const firebaseValidationSchema = Joi.object({
   DB_TYPE: Joi.string().required().valid('postgres', 'mysql'),
   DB_SYNCHRONIZE_ENTITIES: Joi.boolean().required(),
   APPROVAL_MODULE: Joi.boolean().required(),
+  FILE_SERVER_URL: Joi.string().required(),
+  TENANT_URL: Joi.string().required(),
+  EMAIL_SERVER_URL: Joi.string().required()
+  
 });
+
+

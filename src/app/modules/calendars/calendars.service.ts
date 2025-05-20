@@ -60,6 +60,7 @@ export class CalendarsService {
             session.startDate = singleSession.startDate;
             session.name = singleSession.name;
             session.months = singleSession.months;
+            session.active  = singleSession.active || false ;
             const createMonth = await this.sessionService.createSession(
               session,
               tenantId,
@@ -136,7 +137,7 @@ export class CalendarsService {
       if (updateCalendarDto.sessions && updateCalendarDto.sessions.length > 0) {
         const session = updateCalendarDto.sessions;
         delete updateCalendarDto.sessions;
-        await this.sessionService.updateBulkSession(session, tenantId);
+        await this.sessionService.updateBulkSession(session, tenantId, id);
       }
       const updatedCalendar = await this.calendarRepository.update(
         id,

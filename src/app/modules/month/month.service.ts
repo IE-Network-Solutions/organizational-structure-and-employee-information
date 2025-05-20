@@ -84,7 +84,7 @@ export class MonthService {
   async findOneMonth(id: string): Promise<Month> {
     try {
       const month = await this.monthRepository.findOne({
-        where: { id: id },
+        where: { id: id },relations: ['session','session.calendar'],
       });
       return month;
     } catch (error) {
@@ -115,12 +115,22 @@ export class MonthService {
   ): Promise<Month[]> {
     try {
       const months = await Promise.all(
-        updateMonthDto.map(
-          async (item) => await this.updateMonth(item.id, item, tenantId),
-        ),
+        updateMonthDto.map((item) => {
+          const createDto = new  CreateMonthDto();
+          createDto.description=item.description
+          createDto.name=item.name
+          createDto.startDate=item.startDate  
+          createDto.endDate=item.endDate 
+          if (item.id) {
+            return this.updateMonth(item.id, createDto, tenantId);
+          } else {
+            const createDto = item as CreateMonthDto; 
+            return this.createMonth(createDto, tenantId);
+          }
+        }),
       );
       return months;
-    } catch (error) {
+    }catch (error) {
       throw new BadRequestException(error.message);
     }
   }

@@ -206,12 +206,29 @@ export class UserController {
     );
   }
 
+  @Get('/all-users/all/payroll-data')
+  async findAllPayRollUsers(
+    @Req() request: Request,
+    @Query() paginationOptions?: PaginationDto,
+  ): Promise<Pagination<User>> {
+    const tenantId = request['tenantId'];
+    return await this.userService.findAllPayRollUsers(
+      paginationOptions,
+      tenantId,
+    );
+  }
+
   @Get(':id')
   @ExcludeAuthGuard()
   findOne(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(id);
   }
-
+  @Get(':id/without-tenant')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+  findOneWithoutTenant(@Param('id') id: string): Promise<User> {
+    return this.userService.findOne(id);
+  }
   @Patch(':id')
   @UseInterceptors(FileInterceptor('profileImage'))
   async update(
@@ -374,5 +391,18 @@ export class UserController {
   findUserByEmail(@Req() request: Request, @Body() email: FilterEmailDto) {
     const tenantId = request['tenantId'];
     return this.userService.findUserByEmail(email, tenantId);
+  }
+
+  @Post('/email/without-tenant')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+  findUserByEmailWithOutTenantID(@Body() email: FilterEmailDto) {
+    return this.userService.findUserByEmailWithOutTenantID(email);
+  }
+
+  @Get('get-all-users/joined-date')
+  getAllUsersJoinedDate(@Req() request: Request) {
+    const tenantId = request['tenantId'];
+    return this.userService.getAllUsersJoinedDate(tenantId);
   }
 }
