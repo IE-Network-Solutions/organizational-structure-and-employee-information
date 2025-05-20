@@ -80,29 +80,26 @@ export class BranchesService {
     tenantId: string,
   ): Promise<Branch> {
     try {
-      const branchExist = await this.branchRepository.findOne({
-        where: { name: updateBranchDto.name, tenantId: tenantId },
-      });
-      const branchEmail = await this.branchRepository.findOne({
-        where: {
-          contactEmail: updateBranchDto.contactEmail,
-          tenantId: tenantId,
-        },
-      });
-      if (branchEmail || branchExist) {
-        throw new NotFoundException(`Branch with Email Or Name Already exist`);
-      }
-      const branch = await this.findOneBranch(id);
-      if (!branch) {
+      const existingBranch = await this.findOneBranch(id);
+      if (!existingBranch) {
         throw new NotFoundException(`Branch with Id ${id} not found`);
       }
-      const updatedBranch = await this.branchRepository.update(
-        id,
-        updateBranchDto,
-      );
+
+      // Check for duplicate name only if the name is being changed
+      if (updateBranchDto.name && updateBranchDto.name !== existingBranch.name) {
+        const branchExist = await this.branchRepository.findOne({
+          where: { name: updateBranchDto.name, tenantId: tenantId },
+        });
+        
+        if (branchExist) {
+          throw new BadRequestException(`Branch with name '${updateBranchDto.name}' already exists`);
+        }
+      }
+
+      await this.branchRepository.update(id, updateBranchDto);
       return await this.findOneBranch(id);
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
       throw new BadRequestException(error);
