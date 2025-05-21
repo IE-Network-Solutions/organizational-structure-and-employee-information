@@ -51,8 +51,10 @@ export class BranchesController {
   async updateBranch(
     @Param('id') id: string,
     @Body() updateBranchDto: UpdateBranchDto,
+    @Req() req: Request,
   ): Promise<Branch> {
-    return await this.branchsService.updateBranch(id, updateBranchDto);
+    const tenantId = req['tenantId'];
+    return await this.branchsService.updateBranch(id, updateBranchDto, tenantId);
   }
 
   @Delete(':id')
