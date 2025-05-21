@@ -188,6 +188,7 @@ export class UserService {
       await this.assignPermissionToUser(createUserPermissionDto, tenantId);
 
       createEmployeeInformationDto['userId'] = result.id;
+     createEmployeeInformationDto.joinedDate= createEmployeeJobInformationDto?.effectiveStartDate
 
       const employeeInformation = await this.employeeInformationService.create(
         createEmployeeInformationDto,
