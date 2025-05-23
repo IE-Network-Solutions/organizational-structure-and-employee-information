@@ -188,6 +188,7 @@ export class UserService {
       await this.assignPermissionToUser(createUserPermissionDto, tenantId);
 
       createEmployeeInformationDto['userId'] = result.id;
+     createEmployeeInformationDto.joinedDate= createEmployeeJobInformationDto?.effectiveStartDate
 
       const employeeInformation = await this.employeeInformationService.create(
         createEmployeeInformationDto,
@@ -1120,12 +1121,15 @@ export class UserService {
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .where('user.tenantId = :tenantId', { tenantId })
-        .select(['user.id', 'employeeInformation.joinedDate'])
+        .select([
+          'user.id',
+          'employeeInformation.joinedDate'
+        ])
         .getMany();
 
-      return users.map((user) => ({
+      return users.map(user => ({
         userId: user.id,
-        joinedDate: user.employeeInformation?.joinedDate || null,
+        joinedDate: user.employeeInformation?.joinedDate || null
       }));
     } catch (error) {
       throw new BadRequestException(error.message);

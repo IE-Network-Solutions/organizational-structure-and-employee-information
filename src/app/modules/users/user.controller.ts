@@ -223,7 +223,12 @@ export class UserController {
   findOne(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(id);
   }
-
+  @Get(':id/without-tenant')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+  findOneWithoutTenant(@Param('id') id: string): Promise<User> {
+    return this.userService.findOne(id);
+  }
   @Patch(':id')
   @UseInterceptors(FileInterceptor('profileImage'))
   async update(
@@ -393,5 +398,11 @@ export class UserController {
   @ExcludeTenantGuard()
   findUserByEmailWithOutTenantID(@Body() email: FilterEmailDto) {
     return this.userService.findUserByEmailWithOutTenantID(email);
+  }
+
+  @Get('get-all-users/joined-date')
+  getAllUsersJoinedDate(@Req() request: Request) {
+    const tenantId = request['tenantId'];
+    return this.userService.getAllUsersJoinedDate(tenantId);
   }
 }
