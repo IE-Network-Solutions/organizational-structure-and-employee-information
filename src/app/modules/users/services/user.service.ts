@@ -502,11 +502,11 @@ export class UserService {
   }
 
   async revokeUserSession(uid: string) {
-    try {  
+    try {
       await admin.auth().revokeRefreshTokens(uid);
-      
+
       const user = await admin.auth().getUser(uid);
-  
+
       return {
         message: 'User session revoked successfully',
         tokensValidAfterTime: user.tokensValidAfterTime,
@@ -567,12 +567,12 @@ export class UserService {
           );
         }
       }
-       if(updateUserDto?.roleId || updateUserDto?.permission ){
+      if (updateUserDto?.roleId || updateUserDto?.permission) {
         const firebaseUid = user?.firebaseId;
         if (firebaseUid) {
           await this.revokeUserSession(firebaseUid);
         }
-       }
+      }
       await this.userRepository.update({ id }, updateUserDto);
 
       return await this.userRepository.findOneOrFail({ where: { id } });
@@ -1070,10 +1070,10 @@ export class UserService {
 
     return user;
   }
-  async findUserByEmail(email: FilterEmailDto,tenantId: string) {
+  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
     try {
       const user = await this.userRepository.findOne({
-        where: { email: email.email,tenantId: tenantId },
+        where: { email: email.email, tenantId: tenantId },
       });
 
       return user;
@@ -1111,6 +1111,24 @@ export class UserService {
       return reportingToUser;
     } catch (error) {
       return null;
+    }
+  }
+
+  async getAllUsersJoinedDate(tenantId: string) {
+    try {
+      const users = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .where('user.tenantId = :tenantId', { tenantId })
+        .select(['user.id', 'employeeInformation.joinedDate'])
+        .getMany();
+
+      return users.map((user) => ({
+        userId: user.id,
+        joinedDate: user.employeeInformation?.joinedDate || null,
+      }));
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 }

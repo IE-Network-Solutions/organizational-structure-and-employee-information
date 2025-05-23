@@ -29,8 +29,8 @@ export class AuthGuard implements CanActivate {
     try {
       // const decodedToken = await admin.auth().verifyIdToken(newToken);
       const decodedToken = await admin.auth().verifyIdToken(newToken, true);
-    // This ensures Firebase checks whether the token was revoked.
-    // If revoked, the request is rejected immediately.
+      // This ensures Firebase checks whether the token was revoked.
+      // If revoked, the request is rejected immediately.
       request.user = decodedToken;
 
       return true;

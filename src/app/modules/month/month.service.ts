@@ -116,21 +116,21 @@ export class MonthService {
     try {
       const months = await Promise.all(
         updateMonthDto.map((item) => {
-          const createDto = new  CreateMonthDto();
-          createDto.description=item.description
-          createDto.name=item.name
-          createDto.startDate=item.startDate  
-          createDto.endDate=item.endDate 
+          const createDto = new CreateMonthDto();
+          createDto.description = item.description;
+          createDto.name = item.name;
+          createDto.startDate = item.startDate;
+          createDto.endDate = item.endDate;
           if (item.id) {
             return this.updateMonth(item.id, createDto, tenantId);
           } else {
-            const createDto = item as CreateMonthDto; 
+            const createDto = item as CreateMonthDto;
             return this.createMonth(createDto, tenantId);
           }
         }),
       );
       return months;
-    }catch (error) {
+    } catch (error) {
       throw new BadRequestException(error.message);
     }
   }

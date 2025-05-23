@@ -58,9 +58,9 @@ export class SessionService {
       if (createSessionDto.months && createSessionDto.months.length > 0) {
         await Promise.all(
           createSessionDto.months.map(async (month) => {
-            if (month["id"]) {
-              const monthId = month["id"];
-              delete month["id"];
+            if (month['id']) {
+              const monthId = month['id'];
+              delete month['id'];
               await this.monthService.updateMonth(monthId, month, tenantId);
               return;
             } else {
@@ -70,7 +70,7 @@ export class SessionService {
               eachMonth.startDate = month.startDate;
               eachMonth.sessionId = savedSession.id;
               eachMonth.name = month.name;
-              eachMonth.active  = month.active || false 
+              eachMonth.active = month.active || false;
 
               await this.monthService.createMonth(
                 eachMonth,
@@ -119,7 +119,7 @@ export class SessionService {
         where: { id },
         relations: ['months'],
       });
-  
+
       return session;
     } catch (error) {
       throw new NotFoundException(`Session Not Found`);
@@ -134,15 +134,14 @@ export class SessionService {
     try {
       const sessions = await Promise.all(
         updateSessionDto.map(async (item) => {
-          const createDto = new  CreateSessionDto();
-          createDto.calendarId=calendarId
-          createDto.description=item.description
-          createDto.name=item.name
-          createDto.startDate=item.startDate  
-          createDto.endDate=item.endDate 
-          createDto.months  =item.months  
+          const createDto = new CreateSessionDto();
+          createDto.calendarId = calendarId;
+          createDto.description = item.description;
+          createDto.name = item.name;
+          createDto.startDate = item.startDate;
+          createDto.endDate = item.endDate;
+          createDto.months = item.months;
           if (item.id) {
-
             return await this.updateSession(item.id, createDto, tenantId);
           } else {
             return await this.createSession(createDto, tenantId);
