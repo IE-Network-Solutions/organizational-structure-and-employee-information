@@ -55,14 +55,14 @@ configuration values obtained from a ConfigService. */
     HealthModule,
   ],
   providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: TenantGuard,
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: TenantGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}
