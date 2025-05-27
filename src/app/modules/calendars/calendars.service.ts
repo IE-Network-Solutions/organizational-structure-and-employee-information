@@ -40,24 +40,17 @@ export class CalendarsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const currentYear = new Date().getFullYear();
-      const calendarYear = new Date(createCalendarDto.startDate).getFullYear();
+      
       
       // Check if there's already an active calendar
       const activeCalendar = await this.findActiveCalendar(tenantId);
 
-      // Only allow active calendar for current year
-      if (createCalendarDto.isActive && calendarYear !== currentYear) {
-        throw new BadRequestException('Can only create active calendar for current year');
-      }
-
-      // If trying to create active calendar but one already exists
-      if (createCalendarDto.isActive && activeCalendar) {
-        throw new BadRequestException('An active calendar already exists');
-      }
+      // Force isActive based on year
+      const isActive =!activeCalendar;
 
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
+        isActive: isActive,
         tenantId: tenantId,
       });
       const savedCalendar = await queryRunner.manager.save(
@@ -173,7 +166,7 @@ export class CalendarsService {
     await this.calendarRepository.softRemove({ id });
     return Calendar;
   }
-  async findActiveCalendar(tenantId: string): Promise<Calendar> {
+async findActiveCalendar(tenantId: string): Promise<Calendar> {
     try {
       const activeCalendar = await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
