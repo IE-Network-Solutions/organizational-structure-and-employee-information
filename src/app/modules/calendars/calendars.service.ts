@@ -19,6 +19,7 @@ import { SessionService } from '../session/session.service';
 import { CreateSessionDto } from '../session/dto/create-session.dto';
 import { tenantId } from '../branchs/tests/branch.data';
 import { UpdateSessionDto } from '../session/dto/update-session.dto';
+import { Between } from 'typeorm';
 
 @Injectable()
 export class CalendarsService {
@@ -39,17 +40,24 @@ export class CalendarsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const calendar = await this.findActiveCalendar(tenantId);
+      
+      
+      // Check if there's already an active calendar
+      const activeCalendar = await this.findActiveCalendar(tenantId);
+
+      // Force isActive based on year
+      const isActive =!activeCalendar;
 
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
-        isActive: true,
+        isActive: isActive,
         tenantId: tenantId,
       });
       const savedCalendar = await queryRunner.manager.save(
         Calendar,
         createCalendar,
       );
+
       if (createCalendarDto.sessions.length > 0) {
         await Promise.all(
           createCalendarDto.sessions.map(async (singleSession) => {
@@ -60,7 +68,7 @@ export class CalendarsService {
             session.startDate = singleSession.startDate;
             session.name = singleSession.name;
             session.months = singleSession.months;
-            session.active  = singleSession.active || false ;
+            session.active = singleSession.active || false;
             const createMonth = await this.sessionService.createSession(
               session,
               tenantId,
@@ -72,9 +80,6 @@ export class CalendarsService {
 
       await queryRunner.commitTransaction();
 
-      if (calendar) {
-        await this.calendarRepository.update(calendar.id, { isActive: false });
-      }
       if (savedCalendar) {
         const organizationData = new CreateOrganizationDto();
         organizationData.calendarId = savedCalendar.id;
@@ -161,7 +166,7 @@ export class CalendarsService {
     await this.calendarRepository.softRemove({ id });
     return Calendar;
   }
-  async findActiveCalendar(tenantId: string): Promise<Calendar> {
+async findActiveCalendar(tenantId: string): Promise<Calendar> {
     try {
       const activeCalendar = await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
