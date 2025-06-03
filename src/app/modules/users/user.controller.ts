@@ -14,6 +14,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
   UploadedFile,
+  Headers,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -350,8 +351,10 @@ export class UserController {
   }
 
   @Get('/simple-info/:userId')
-  getOneUser(@Req() request: Request, @Param('userId') userId: string) {
-    const tenantId = request['tenantId'];
+  getOneUser(
+    @Param('userId') userId: string,
+    @Headers('tenantId') tenantId: string,
+  ) {
     return this.userService.getOneUSer(userId, tenantId);
   }
 
