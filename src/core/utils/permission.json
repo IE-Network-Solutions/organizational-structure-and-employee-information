@@ -144,9 +144,10 @@
           { "name": "View Current Leave Status", "slug": "view-current-leave-status", "roles": ["user", "owner", "admin"] },
           { "name": "View Leave Availability", "slug": "view-leave-availability", "roles": ["user", "owner", "admin"] },
           { "name": "View Leave History", "slug": "view-leave-history", "roles": ["user", "owner", "admin"] },
+          { "name": "Submit Leave Request", "slug": "submit-leave-request", "roles": ["user", "owner", "admin"] },
           { "name": "Upload Leave Justification", "slug": "upload-leave-justification", "roles": ["user", "owner", "admin"] },
-
-       
+          { "name": "Update Leave Request", "slug": "update-leave-request", "roles": ["admin", "owner"] },
+          { "name": "Delete Leave Request", "slug": "delete-leave-request", "roles": ["admin", "owner"] },
           { "name": "Create Approval Workflow", "slug": "create-approval-work-flow", "roles": ["admin", "owner"] },
           { "name": "Create Approver", "slug": "create-approver", "roles": ["admin", "owner"] },
           { "name": "Update Approver", "slug": "update-approver", "roles": ["admin", "owner"] },
@@ -271,9 +272,7 @@
         
 
 
-        { "name": "Manage Okr Settings", "slug": "manage_okr_settings", "roles": ["owner"] },
-        { "name": "View Plan By Department", "slug": "view-all-status-plan", "roles": ["owner"] }
-
+        { "name": "Manage Okr Settings", "slug": "manage_okr_settings", "roles": ["owner"] }
         
         ]
       },
@@ -433,19 +432,16 @@
 
 
 
-          { "name": "View Okr", "slug": "view_okr", "roles":  ["owner","admin","user"] },
-          { "name": "View Okr Dashboard", "slug": "view_okr_dashboard", "roles":  ["owner","admin","user"] },
-          { "name": "View Okr Overview", "slug": "view_okr_overview", "roles":  ["owner","admin","user"] },
-          { "name": "View Learning Growth", "slug": "view_learning_growth", "roles":  ["owner","admin","user"] },         
+          { "name": "View Okr", "slug": "view_okr", "roles": ["owner"] },
+          { "name": "View Okr Dashboard", "slug": "view_okr_dashboard", "roles": ["owner"] },
+          { "name": "View Okr Overview", "slug": "view_okr_overview", "roles": ["owner"] },
+          { "name": "View Learning Growth", "slug": "view_learning_growth", "roles": ["owner"] },         
          
 
-          { "name": "View My Training", "slug": "view_incentive", "roles":  ["owner","admin","user"] },
-          { "name": "View Payroll", "slug": "view_payroll", "roles":  ["owner","admin","user"] },
-          { "name": "View My Payroll", "slug": "view_my_payroll", "roles": ["owner","admin","user"] }       ,
-          { "name": "Manage Planning And Reporting", "slug": "manage_planning_reporting", "roles": ["owner"] },
-          { "name": "Submit Leave Request", "slug": "submit-leave-request", "roles": ["user", "owner", "admin"] },
-          { "name": "Update Leave Request", "slug": "update-leave-request", "roles": ["admin", "owner"] },
-          { "name": "Delete Leave Request", "slug": "delete-leave-request", "roles": ["admin", "owner","user"] }
+          { "name": "View My Training", "slug": "view_incentive", "roles": ["owner"] },
+          { "name": "View Payroll", "slug": "view_payroll", "roles": ["owner"] },
+          { "name": "View My Payroll", "slug": "view_my_payroll", "roles": ["owner"] }       ,
+          { "name": "Manage Planning And Reporting", "slug": "manage_planning_reporting", "roles": ["owner"] }
 
         ]
       }

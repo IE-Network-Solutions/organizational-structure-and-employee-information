@@ -10,6 +10,8 @@ import {
 import { CreateClosedDatesDto } from './create-closed-dates.dto';
 import { Type } from 'class-transformer';
 import { CreateSessionDto } from '../../session/dto/create-session.dto';
+import { ApiProperty } from '@nestjs/swagger';
+
 export class CreateCalendarDto {
   @IsString()
   name: string;
@@ -31,4 +33,9 @@ export class CreateCalendarDto {
   @ValidateNested({ each: true })
   @Type(() => CreateSessionDto)
   sessions?: CreateSessionDto[];
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }
