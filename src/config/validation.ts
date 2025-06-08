@@ -41,8 +41,10 @@ export const firebaseValidationSchema = Joi.object({
   APPROVAL_MODULE: Joi.boolean().required(),
   FILE_SERVER_URL: Joi.string().required(),
   TENANT_URL: Joi.string().required(),
-  EMAIL_SERVER_URL: Joi.string().required()
-  
+  EMAIL_SERVER_URL: Joi.string().required(),
+  API_KEY: Joi.string().required(),
+  AUTH_DOMAIN: Joi.string().required(),
+  STORAGE_BUCKET: Joi.string().required(),
+  MESSAGING_SENDER_ID: Joi.string().required(),
+  APP_ID: Joi.string().required(),
 });
-
-
