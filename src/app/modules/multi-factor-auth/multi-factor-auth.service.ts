@@ -5,6 +5,7 @@ import { HttpService } from '@nestjs/axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FirebaseAuthService } from '../../../core/firebaseAuth/firbase-auth.service';
+import { RecaptchaService } from './recaptcha.service';
 
 @Injectable()
 export class MultiFactorAuthService {
@@ -14,18 +15,26 @@ export class MultiFactorAuthService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly firebaseAuthService: FirebaseAuthService,
+    private readonly recaptchaService: RecaptchaService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
     );
   }
 
-  async send2FACode(email: string, pass: string) {
+  async send2FACode(email: string, pass: string, recaptchaToken: string) {
     try {
+      // Verify reCAPTCHA first
+      const isRecaptchaValid = await this.recaptchaService.verifyToken(
+        recaptchaToken,
+      );
+      if (!isRecaptchaValid) {
+        throw new BadRequestException('reCAPTCHA verification failed');
+      }
+
       // Sign in user using FirebaseAuthService
       const signInResult =
         await this.firebaseAuthService.signInWithEmailAndPassword(email, pass);
-
 
       if (!signInResult || !signInResult.user.uid) {
         throw new BadRequestException('Invalid email or password');
