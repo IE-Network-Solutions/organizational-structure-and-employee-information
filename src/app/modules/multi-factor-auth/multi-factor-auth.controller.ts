@@ -14,7 +14,11 @@ export class MultiFactorAuthController {
   @ExcludeTenantGuard()
   @ExcludeAuthGuard()
   async send2FACode(@Body() body: Send2FACodeDto) {
-    return await this.multiFactorAuthService.send2FACode(body.email, body.pass);
+    return await this.multiFactorAuthService.send2FACode(
+      body.email,
+      body.pass,
+      body.recaptchaToken,
+    );
   }
 
   @Post('verify')

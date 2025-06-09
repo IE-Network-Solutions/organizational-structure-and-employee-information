@@ -21,6 +21,7 @@ describe('validationSchema', () => {
       STORAGE_BUCKET: 'storage_bucket',
       MESSAGING_SENDER_ID: 'messaging_sender_id',
       APP_ID: 'app_id',
+      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
     const result = validationSchema.validate(validConfig);
@@ -45,6 +46,7 @@ describe('validationSchema', () => {
       STORAGE_BUCKET: 'storage_bucket',
       MESSAGING_SENDER_ID: 'messaging_sender_id',
       APP_ID: 'app_id',
+      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
     expect(validationSchema.validate(invalidConfig).error).toBeDefined();
@@ -69,6 +71,7 @@ describe('validationSchema', () => {
       STORAGE_BUCKET: 'storage_bucket',
       MESSAGING_SENDER_ID: 'messaging_sender_id',
       APP_ID: 'app_id',
+      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
     expect(validationSchema.validate(invalidConfig).error).toBeDefined();
