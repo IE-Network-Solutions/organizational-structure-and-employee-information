@@ -34,7 +34,6 @@ export class RecaptchaService {
 
       return success && score >= SCORE_THRESHOLD && action === 'login';
     } catch (error) {
-      console.error('reCAPTCHA verification failed:', error);
       return false;
     }
   }
