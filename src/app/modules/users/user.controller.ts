@@ -342,6 +342,7 @@ export class UserController {
   }
 
   @Post('/resetPassword')
+  @ExcludeAuthGuard()
   resetPassword(
     @Req() request: Request,
     @Body() resetPasswordDto: ResetPasswordDto,
