@@ -41,6 +41,7 @@ import { UserDepartmentService } from './services/user-relation-with-department.
 import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dto';
 import { ImportEmployeeDto } from './dto/import-user.dto';
 import { FilterEmailDto } from './dto/email.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -338,6 +339,15 @@ export class UserController {
       dissolveDepartmentDto,
       tenantId,
     );
+  }
+
+  @Post('/resetPassword')
+  resetPassword(
+    @Req() request: Request,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<any> {
+    const tenantId = request['tenantId'];
+    return this.userService.resetPassword(resetPasswordDto, tenantId);
   }
 
   @Post('/import/users')

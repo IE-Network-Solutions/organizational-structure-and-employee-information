@@ -53,6 +53,7 @@ import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-p
 import { FilterEmailDto } from '../dto/email.dto';
 import { DelegationService } from '../../delegations/delegations.service';
 import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
 
 @Injectable()
 export class UserService {
@@ -1129,6 +1130,26 @@ export class UserService {
         userId: user.id,
         joinedDate: user.employeeInformation?.joinedDate || null,
       }));
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+    tenantId?: string,
+  ): Promise<any> {
+    try {
+      const actionCodeSettings = {
+        url: resetPasswordDto.url,
+        handleCodeInApp: true,
+      };
+
+      const resetLink = await admin
+        .auth()
+        .generatePasswordResetLink(resetPasswordDto.email, actionCodeSettings);
+
+      console.log('resetLink', resetLink);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
