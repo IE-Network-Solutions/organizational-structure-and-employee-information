@@ -343,12 +343,9 @@ export class UserController {
 
   @Post('/resetPassword')
   @ExcludeAuthGuard()
-  resetPassword(
-    @Req() request: Request,
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ): Promise<any> {
-    const tenantId = request['tenantId'];
-    return this.userService.resetPassword(resetPasswordDto, tenantId);
+  @ExcludeTenantGuard()
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<string> {
+    return this.userService.resetPassword(resetPasswordDto);
   }
 
   @Post('/import/users')
