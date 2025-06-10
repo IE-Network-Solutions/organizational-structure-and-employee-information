@@ -1137,10 +1137,7 @@ export class UserService {
     }
   }
 
-  async resetPassword(
-    resetPasswordDto: ResetPasswordDto,
-    tenantId?: string,
-  ): Promise<any> {
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<string> {
     try {
       const actionCodeSettings = {
         url: resetPasswordDto.url,
@@ -1165,9 +1162,7 @@ export class UserService {
             finalResetLink,
             resetPasswordDto.email,
           );
-          return {
-            message: 'Reset email sent successfully.',
-          };
+          return 'Reset email sent successfully.';
         } catch (error) {
           throw new BadRequestException(
             `Error Sending Email: ${error.message}`,
