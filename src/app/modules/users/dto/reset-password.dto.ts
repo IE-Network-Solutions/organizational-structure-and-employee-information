@@ -6,4 +6,7 @@ export class ResetPasswordDto {
 
   @IsString()
   url: string;
+
+  @IsString()
+  logeInTenantId: string;
 }
