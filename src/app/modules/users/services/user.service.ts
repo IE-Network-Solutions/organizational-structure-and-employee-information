@@ -1143,7 +1143,14 @@ export class UserService {
         url: resetPasswordDto.url,
         handleCodeInApp: true,
       };
-
+      const userData = await this.findUserByEmailWithOutTenantID({
+        email: resetPasswordDto?.email,
+      });
+      if (userData.tenantId !== resetPasswordDto?.loginTenantId) {
+        throw new BadRequestException(
+          'Invalid URL, please use the correct link',
+        );
+      }
       const resetLink = await admin
         .auth()
         .generatePasswordResetLink(resetPasswordDto.email, actionCodeSettings);
