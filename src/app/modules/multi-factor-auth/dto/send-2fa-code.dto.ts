@@ -12,4 +12,8 @@ export class Send2FACodeDto {
   @IsString()
   @IsNotEmpty()
   recaptchaToken: string;
+
+  @IsString()
+  @IsNotEmpty()
+  logeInTenantId: string;
 }

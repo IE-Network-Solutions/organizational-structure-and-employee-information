@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { FirebaseAuthService } from '../../../core/firebaseAuth/firbase-auth.service';
 import { RecaptchaService } from './recaptcha.service';
+import { UserService } from '../users/services/user.service';
 
 @Injectable()
 export class MultiFactorAuthService {
@@ -16,13 +17,19 @@ export class MultiFactorAuthService {
     private readonly configService: ConfigService,
     private readonly firebaseAuthService: FirebaseAuthService,
     private readonly recaptchaService: RecaptchaService,
+    private readonly userService: UserService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
     );
   }
 
-  async send2FACode(email: string, pass: string, recaptchaToken: string) {
+  async send2FACode(
+    email: string,
+    pass: string,
+    recaptchaToken: string,
+    logeInTenantId: string,
+  ) {
     try {
       // Verify reCAPTCHA first
       const isRecaptchaValid = await this.recaptchaService.verifyToken(
@@ -41,7 +48,13 @@ export class MultiFactorAuthService {
       }
 
       const uid = signInResult.user.uid;
+      const userData = await this.userService.findUserByFirbaseId(uid);
 
+      if (userData.tenantId !== logeInTenantId) {
+        throw new BadRequestException(
+          'Invalid URL, please use the correct link',
+        );
+      }
       // Generate 6-digit code
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const expires = new Date(Date.now() + 5 * 60000); // 5-minute expiry
