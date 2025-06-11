@@ -28,7 +28,7 @@ export class MultiFactorAuthService {
     email: string,
     pass: string,
     recaptchaToken: string,
-    logeInTenantId: string,
+    loginTenantId: string,
   ) {
     try {
       // Verify reCAPTCHA first
@@ -50,10 +50,8 @@ export class MultiFactorAuthService {
       const uid = signInResult.user.uid;
       const userData = await this.userService.findUserByFirbaseId(uid);
 
-      if (userData.tenantId !== logeInTenantId) {
-        throw new BadRequestException(
-          'Invalid URL, please use the correct link',
-        );
+      if (userData.tenantId !== loginTenantId) {
+        throw new BadRequestException('User does not belong to this tenant');
       }
       // Generate 6-digit code
       const code = Math.floor(100000 + Math.random() * 900000).toString();

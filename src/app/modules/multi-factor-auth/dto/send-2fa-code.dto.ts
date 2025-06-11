@@ -15,5 +15,5 @@ export class Send2FACodeDto {
 
   @IsString()
   @IsNotEmpty()
-  logeInTenantId: string;
+  loginTenantId: string;
 }

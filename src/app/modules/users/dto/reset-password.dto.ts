@@ -8,5 +8,5 @@ export class ResetPasswordDto {
   url: string;
 
   @IsString()
-  logeInTenantId: string;
+  loginTenantId: string;
 }
