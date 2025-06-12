@@ -1147,9 +1147,7 @@ export class UserService {
         email: resetPasswordDto?.email,
       });
       if (userData.tenantId !== resetPasswordDto?.loginTenantId) {
-        throw new BadRequestException(
-          'Invalid URL, please use the correct link',
-        );
+        throw new BadRequestException('User does not belong to this tenant');
       }
       const resetLink = await admin
         .auth()
