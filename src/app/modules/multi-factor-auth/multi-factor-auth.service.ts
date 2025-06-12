@@ -24,12 +24,7 @@ export class MultiFactorAuthService {
     );
   }
 
-  async send2FACode(
-    email: string,
-    pass: string,
-    recaptchaToken: string,
-    loginTenantId: string,
-  ) {
+  async send2FACode(email: string, pass: string, recaptchaToken: string) {
     try {
       // Verify reCAPTCHA first
       const isRecaptchaValid = await this.recaptchaService.verifyToken(
@@ -50,9 +45,6 @@ export class MultiFactorAuthService {
       const uid = signInResult.user.uid;
       const userData = await this.userService.findUserByFirbaseId(uid);
 
-      if (userData.tenantId !== loginTenantId) {
-        throw new BadRequestException('User does not belong to this tenant');
-      }
       // Generate 6-digit code
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const expires = new Date(Date.now() + 5 * 60000); // 5-minute expiry
