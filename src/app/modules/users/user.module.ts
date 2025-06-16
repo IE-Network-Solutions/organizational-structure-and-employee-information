@@ -25,6 +25,7 @@ import { PaginationModule } from '@root/src/core/pagination/pagination.module';
 import { DepartmentsService } from '../departments/departments.service';
 import { DelegationModule } from '../delegations/delegations.module';
 import { FireBaseAuthModule } from '@root/src/core/firebaseAuth/firebase-auth.module';
+import { OtherServiceDependenciesModule } from '../other-service-dependencies/other-service-dipendencies.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
@@ -48,6 +49,7 @@ import { FireBaseAuthModule } from '@root/src/core/firebaseAuth/firebase-auth.mo
     forwardRef(() => DepartmentsModule),
     DelegationModule,
     FireBaseAuthModule,
+    OtherServiceDependenciesModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserDepartmentService],
