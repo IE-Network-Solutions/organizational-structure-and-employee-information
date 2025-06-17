@@ -1,11 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { google } from 'googleapis';
 import { config } from 'dotenv';
+import * as admin from 'firebase-admin';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { ConfigService } from '@nestjs/config';
 
 config();
 
 @Injectable()
 export class FirebaseAuthService {
+  private readonly auth;
+
+  constructor(private readonly configService: ConfigService) {
+    const firebaseConfig = {
+      apiKey: this.configService.get<string>('firebase.api_key'),
+      authDomain: this.configService.get<string>('firebase.auth_domain'),
+      projectId: this.configService.get<string>('firebase.projectId'),
+      storageBucket: this.configService.get<string>('firebase.storage_bucket'),
+      messagingSenderId: this.configService.get<string>(
+        'firebase.messaging_sender_id',
+      ),
+      appId: this.configService.get<string>('firebase.app_id'),
+    };
+
+    const app = initializeApp(firebaseConfig);
+    this.auth = getAuth(app);
+  }
+
   private async getAccessToken(): Promise<string> {
     const auth = new google.auth.GoogleAuth({
       scopes: [
@@ -26,6 +48,7 @@ export class FirebaseAuthService {
     const accessToken = await client.getAccessToken();
     return accessToken.token;
   }
+
   async addAuthorizedDomain(domain: string) {
     const ProjectId = process.env.PROJECT_ID;
 
@@ -72,6 +95,58 @@ export class FirebaseAuthService {
       return await updateResponse.json();
     } catch (error) {
       throw new Error(`Failed to add domain: ${error.message}`);
+    }
+  }
+
+  async signInWithEmailAndPassword(email: string, password: string) {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        this.auth,
+        email,
+        password,
+      );
+      const user = userCredential.user;
+
+      return {
+        user: {
+          uid: user.uid,
+          email: user.email,
+          emailVerified: user.emailVerified,
+        },
+      };
+    } catch (error) {
+      // list out possible errors and write a custom error message for each
+      if (error.code === 'auth/invalid-credential') {
+        throw new BadRequestException('Invalid credentials');
+      }
+      if (error.code === 'auth/user-not-found') {
+        throw new BadRequestException('User not found');
+      }
+      if (error.code === 'auth/wrong-password') {
+        throw new BadRequestException('Wrong password');
+      }
+      if (error.code === 'auth/invalid-email') {
+        throw new BadRequestException('Invalid email');
+      }
+      if (error.code === 'auth/too-many-requests') {
+        throw new BadRequestException('Too many requests');
+      }
+      if (error.code === 'auth/user-disabled') {
+        throw new BadRequestException('User disabled');
+      }
+      if (error.code === 'auth/missing-password') {
+        throw new BadRequestException('Missing password');
+      }
+      if (error.code === 'auth/missing-email') {
+        throw new BadRequestException('Missing email');
+      }
+      if (error.code === 'auth/invalid-action-code') {
+        throw new BadRequestException('Invalid action code');
+      }
+      if (error.code === 'auth/expired-action-code') {
+        throw new BadRequestException('Expired action code');
+      }
+      throw new BadRequestException(error.message || 'Authentication failed');
     }
   }
 }

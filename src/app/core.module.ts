@@ -25,6 +25,7 @@ import { SessionModule } from './modules/session/session.module';
 import { MonthModule } from './modules/month/month.module';
 import { BranchRequestModule } from './modules/branch-request/branch-request.module';
 import { BasicSalaryModule } from './modules/basic-salary/basic-salary.module';
+import { MultiFactorAuthModule } from './modules/multi-factor-auth/multi-factor-auth.module';
 @Global()
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { BasicSalaryModule } from './modules/basic-salary/basic-salary.module';
     MonthModule,
     BranchRequestModule,
     BasicSalaryModule,
+    MultiFactorAuthModule
   ],
 })
 export class CoreModule {}

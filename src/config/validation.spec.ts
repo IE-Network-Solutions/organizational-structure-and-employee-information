@@ -16,6 +16,12 @@ describe('validationSchema', () => {
       DB_PASSWORD: 'password',
       DB_TYPE: 'postgres',
       DB_SYNCHRONIZE_ENTITIES: false,
+      API_KEY: 'api_key',
+      AUTH_DOMAIN: 'auth_domain',
+      STORAGE_BUCKET: 'storage_bucket',
+      MESSAGING_SENDER_ID: 'messaging_sender_id',
+      APP_ID: 'app_id',
+      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
     const result = validationSchema.validate(validConfig);
@@ -35,6 +41,12 @@ describe('validationSchema', () => {
       DB_NAME: 'mydb',
       DB_USER: 'postgres',
       DB_PASSWORD: 'password',
+      API_KEY: 'api_key',
+      AUTH_DOMAIN: 'auth_domain',
+      STORAGE_BUCKET: 'storage_bucket',
+      MESSAGING_SENDER_ID: 'messaging_sender_id',
+      APP_ID: 'app_id',
+      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
     expect(validationSchema.validate(invalidConfig).error).toBeDefined();
@@ -54,6 +66,12 @@ describe('validationSchema', () => {
       DB_USER: 'postgres',
       DB_PASSWORD: 'password',
       DB_SYNCHRONIZE_ENTITIES: false,
+      API_KEY: 'api_key',
+      AUTH_DOMAIN: 'auth_domain',
+      STORAGE_BUCKET: 'storage_bucket',
+      MESSAGING_SENDER_ID: 'messaging_sender_id',
+      APP_ID: 'app_id',
+      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
     expect(validationSchema.validate(invalidConfig).error).toBeDefined();
