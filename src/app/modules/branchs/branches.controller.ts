@@ -29,6 +29,17 @@ export class BranchesController {
     return await this.branchsService.createBranch(createBranchDto, tenantId);
   }
 
+
+  //   @Post('test-encryption')
+  // async testEncryption(@Body() data: any) {
+  //   console.log('Received data in controller:', data);
+  //   return {
+  //     message: 'Data received successfully',
+  //     receivedData: data,
+  //     timestamp: new Date().toISOString()
+  //   };
+  // }
+
   @Get()
   async findAllBranch(
     @Req() req: Request,
