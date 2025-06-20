@@ -56,11 +56,11 @@ export class EncryptionService {
   }
 
   decryptObject(encryptedText: string): any {
-    console.log("decryptObject called with:", encryptedText);
+    // console.log("decryptObject called with:", encryptedText);
     const decryptedText = this.decryptText(encryptedText);
-    console.log("decryptText result:", decryptedText);
+    // console.log("decryptText result:", decryptedText);
     const parsed = JSON.parse(decryptedText);
-    console.log("JSON.parse result:", parsed);
+    // console.log("JSON.parse result:", parsed);
     return parsed;
   }
 
