@@ -72,4 +72,5 @@ export class BranchesController {
   async removeBranch(@Param('id') id: string): Promise<Branch> {
     return await this.branchsService.removeBranch(id);
   }
+  
 }

@@ -42,7 +42,7 @@ describe('BranchesController', () => {
     }),
     updateBranch: jest
       .fn()
-      .mockImplementation((id: string, dto: UpdateBranchDto) => {
+      .mockImplementation((id: string, dto: UpdateBranchDto, tenantId: string) => {
         return Promise.resolve(updatebranchData());
       }),
     removeBranch: jest.fn().mockImplementation((id: string) => {
@@ -109,14 +109,17 @@ describe('BranchesController', () => {
 
   it('should update a branch', async () => {
     const updateBranchDto: UpdateBranchDto = updatebranchData();
+    const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
     const result = await controller.updateBranch(
       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
       updateBranchDto,
+      req,
     );
     expect(result).toEqual(updatebranchData());
     expect(service.updateBranch).toHaveBeenCalledWith(
       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
       updateBranchDto,
+      '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
     );
   });
 

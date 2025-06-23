@@ -125,17 +125,20 @@ describe('CalendarsService', () => {
         .fn()
         .mockResolvedValue(undefined);
 
+      // Mock findActiveCalendar to return null (no active calendar)
       jest
         .spyOn(service, 'findActiveCalendar')
-        .mockResolvedValue(calendarData());
-      jest.spyOn(service, 'findOneCalendar').mockResolvedValue(calendarData());
+        .mockResolvedValue(null);
+
+      // Also mock the repository's findOne method to return null for active calendar
+      repository.findOne = jest.fn().mockResolvedValue(null);
 
       const result = await service.createCalendar(dto, tenantId);
 
       expect(result).toEqual(createdCalendar);
       expect(repository.create).toHaveBeenCalledWith({
         ...dto,
-        isActive: true,
+        isActive: true, // Should be true when no active calendar exists
         tenantId,
       });
       expect(queryRunner.manager.save).toHaveBeenCalledWith(
