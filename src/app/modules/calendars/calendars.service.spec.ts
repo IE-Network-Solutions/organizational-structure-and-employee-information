@@ -130,6 +130,11 @@ describe('CalendarsService', () => {
         .spyOn(service, 'findActiveCalendar')
         .mockResolvedValue(null);
 
+      // Mock findOneCalendar to return the created calendar
+      jest
+        .spyOn(service, 'findOneCalendar')
+        .mockResolvedValue(createdCalendar);
+
       // Also mock the repository's findOne method to return null for active calendar
       repository.findOne = jest.fn().mockResolvedValue(null);
 
