@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selamnew Workspace Verification</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+      .code-box {
+        background: #ffffc5;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        padding: 15px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin: 25px 0;
+      }
+      .footer-links {
+        text-align: center;
+        margin: 30px 0;
+      }
+      .footer-links a {
+        color: #3498db;
+        text-decoration: none;
+        margin: 0 10px;
+        font-size: 14px;
+      }
+      .social-icons {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .social-icons img {
+        height: 24px;
+        margin: 0 8px;
+      }
+      .copyright {
+        text-align: center;
+        font-size: 12px;
+        color: #7f8c8d;
+        margin-top: 15px;
+      }
+      .support-note {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 20px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        Selamnew <span style="color: #3498db">Workspace</span>
+      </div>
+
+      <p>Hello,</p>
+
+      <p>
+        To keep your account secure, please use the verification code below to
+        complete your login:
+      </p>
+
+      <div class="code-box">{{verification_code}}</div>
+
+      <p>
+        This code will expire in {{expiry_time}} minutes and can only be used
+        once.
+      </p>
+
+      <div class="support-note">
+        <p>
+          <strong>Security Notice:</strong> If you did not try to log in, please
+          secure your account immediately by resetting your password or
+          contacting our support team.
+        </p>
+      </div>
+
+      <p>Cheers,<br />The Selamnew team</p>
+
+      <div class="copyright">
+        {{current_year}} Selamnew Workspace. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>

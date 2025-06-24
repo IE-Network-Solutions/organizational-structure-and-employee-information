@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FirebaseAuthService } from './firbase-auth.service';
 
 @Module({
+  imports: [HttpModule],
   providers: [FirebaseAuthService],
   exports: [FirebaseAuthService],
 })

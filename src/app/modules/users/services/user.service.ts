@@ -53,6 +53,8 @@ import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-p
 import { FilterEmailDto } from '../dto/email.dto';
 import { DelegationService } from '../../delegations/delegations.service';
 import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { OtherServiceDependenciesService } from '../../other-service-dependencies/other-service-dependencies.service';
 
 @Injectable()
 export class UserService {
@@ -77,6 +79,7 @@ export class UserService {
 
     private readonly httpService: HttpService,
     private readonly firebaseAuthService: FirebaseAuthService,
+    private readonly otherServiceDependenciesService: OtherServiceDependenciesService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -1129,6 +1132,50 @@ export class UserService {
         userId: user.id,
         joinedDate: user.employeeInformation?.joinedDate || null,
       }));
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<string> {
+    try {
+      const actionCodeSettings = {
+        url: resetPasswordDto.url,
+        handleCodeInApp: true,
+      };
+      const userData = await this.findUserByEmailWithOutTenantID({
+        email: resetPasswordDto?.email,
+      });
+      if (userData.tenantId !== resetPasswordDto?.loginTenantId) {
+        throw new BadRequestException('User does not belong to this tenant');
+      }
+      const resetLink = await admin
+        .auth()
+        .generatePasswordResetLink(resetPasswordDto.email, actionCodeSettings);
+
+      const url = new URL(resetLink, `${resetPasswordDto.url}`);
+      const oobCode = url.searchParams.get('oobCode');
+      const mode = url.searchParams.get('mode');
+      const apiKey = url.searchParams.get('apiKey');
+      const lang = url.searchParams.get('lang');
+
+      const finalResetLink = `${resetPasswordDto.url}?apiKey=${apiKey}&mode=${mode}&oobCode=${oobCode}&lang=${lang}`;
+
+      if (finalResetLink) {
+        try {
+          await this.otherServiceDependenciesService.sendResetPasswordEmail(
+            finalResetLink,
+            resetPasswordDto.email,
+          );
+          return 'Reset email sent successfully.';
+        } catch (error) {
+          throw new BadRequestException(
+            `Error Sending Email: ${error.message}`,
+          );
+        }
+      } else {
+        throw new BadRequestException(`Can Not Create Reset Link`);
+      }
     } catch (error) {
       throw new BadRequestException(error.message);
     }
