@@ -250,6 +250,9 @@ export class UserService {
             ? null
             : filterDto.deletedAt,
         searchString: filterDto.searchString,
+        ...(filterDto.gender && {
+          'employeeInformation.gender': filterDto.gender,
+        }),
       };
 
       const options: IPaginationOptions = {
@@ -284,6 +287,33 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
+
+      // Add gender filter
+      if (filterDto.gender) {
+        queryBuilder.andWhere('employeeInformation.gender = :gender', {
+          gender: filterDto.gender,
+        });
+      }
+
+      // Add joined date filters
+      if (filterDto.joinedDateAfter) {
+        queryBuilder.andWhere(
+          'employeeInformation.joinedDate >= :joinedDateAfter',
+          {
+            joinedDateAfter: new Date(filterDto.joinedDateAfter),
+          },
+        );
+      }
+
+      if (filterDto.joinedDateBefore) {
+        queryBuilder.andWhere(
+          'employeeInformation.joinedDate <= :joinedDateBefore',
+          {
+            joinedDateBefore: new Date(filterDto.joinedDateBefore),
+          },
+        );
+      }
+
       queryBuilder = await filterEntities(
         queryBuilder,
         userFilters,
