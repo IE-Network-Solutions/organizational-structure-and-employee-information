@@ -53,13 +53,16 @@ import { CreateRolePermissionDto } from '../../role-permission/dto/create-role-p
 import { FilterEmailDto } from '../dto/email.dto';
 import { DelegationService } from '../../delegations/delegations.service';
 import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { OtherServiceDependenciesService } from '../../other-service-dependencies/other-service-dependencies.service';
 
 @Injectable()
 export class UserService {
   private readonly emailServerUrl: string;
   // private readonly tenantUrl:string;
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @InjectDataSource() private dataSource: DataSource,
     private readonly paginationService: PaginationService,
     private readonly employeeInformationService: EmployeeInformationService,
@@ -77,6 +80,7 @@ export class UserService {
 
     private readonly httpService: HttpService,
     private readonly firebaseAuthService: FirebaseAuthService,
+    private readonly otherServiceDependenciesService: OtherServiceDependenciesService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
       'servicesUrl.emailUrl',
@@ -188,6 +192,8 @@ export class UserService {
       await this.assignPermissionToUser(createUserPermissionDto, tenantId);
 
       createEmployeeInformationDto['userId'] = result.id;
+      createEmployeeInformationDto.joinedDate =
+        createEmployeeJobInformationDto?.effectiveStartDate;
 
       const employeeInformation = await this.employeeInformationService.create(
         createEmployeeInformationDto,
@@ -244,6 +250,9 @@ export class UserService {
             ? null
             : filterDto.deletedAt,
         searchString: filterDto.searchString,
+        ...(filterDto.gender && {
+          'employeeInformation.gender': filterDto.gender,
+        }),
       };
 
       const options: IPaginationOptions = {
@@ -278,6 +287,33 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
+
+      // Add gender filter
+      if (filterDto.gender) {
+        queryBuilder.andWhere('employeeInformation.gender = :gender', {
+          gender: filterDto.gender,
+        });
+      }
+
+      // Add joined date filters
+      if (filterDto.joinedDateAfter) {
+        queryBuilder.andWhere(
+          'employeeInformation.joinedDate >= :joinedDateAfter',
+          {
+            joinedDateAfter: new Date(filterDto.joinedDateAfter),
+          },
+        );
+      }
+
+      if (filterDto.joinedDateBefore) {
+        queryBuilder.andWhere(
+          'employeeInformation.joinedDate <= :joinedDateBefore',
+          {
+            joinedDateBefore: new Date(filterDto.joinedDateBefore),
+          },
+        );
+      }
+
       queryBuilder = await filterEntities(
         queryBuilder,
         userFilters,
@@ -413,6 +449,7 @@ export class UserService {
     }
   }
   async findAllUsersByDepartment(tenantId: string, departmentId: string) {
+
     const users = await this.userRepository
       .createQueryBuilder('user')
       .withDeleted()
@@ -432,6 +469,7 @@ export class UserService {
   }
 
   async findAllUsersByAllDepartment(tenantId: string, departmentIds: string[]) {
+
     const users = await this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect(
@@ -502,11 +540,11 @@ export class UserService {
   }
 
   async revokeUserSession(uid: string) {
-    try {  
+    try {
       await admin.auth().revokeRefreshTokens(uid);
-      
+
       const user = await admin.auth().getUser(uid);
-  
+
       return {
         message: 'User session revoked successfully',
         tokensValidAfterTime: user.tokensValidAfterTime,
@@ -567,12 +605,12 @@ export class UserService {
           );
         }
       }
-       if(updateUserDto?.roleId || updateUserDto?.permission ){
+      if (updateUserDto?.roleId || updateUserDto?.permission) {
         const firebaseUid = user?.firebaseId;
         if (firebaseUid) {
           await this.revokeUserSession(firebaseUid);
         }
-       }
+      }
       await this.userRepository.update({ id }, updateUserDto);
 
       return await this.userRepository.findOneOrFail({ where: { id } });
@@ -1070,10 +1108,10 @@ export class UserService {
 
     return user;
   }
-  async findUserByEmail(email: FilterEmailDto,tenantId: string) {
+  async findUserByEmail(email: FilterEmailDto, tenantId: string) {
     try {
       const user = await this.userRepository.findOne({
-        where: { email: email.email,tenantId: tenantId },
+        where: { email: email.email, tenantId: tenantId },
       });
 
       return user;
@@ -1120,16 +1158,57 @@ export class UserService {
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .where('user.tenantId = :tenantId', { tenantId })
-        .select([
-          'user.id',
-          'employeeInformation.joinedDate'
-        ])
+        .select(['user.id', 'employeeInformation.joinedDate'])
         .getMany();
 
-      return users.map(user => ({
+      return users.map((user) => ({
         userId: user.id,
-        joinedDate: user.employeeInformation?.joinedDate || null
+        joinedDate: user.employeeInformation?.joinedDate || null,
       }));
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<string> {
+    try {
+      const actionCodeSettings = {
+        url: resetPasswordDto.url,
+        handleCodeInApp: true,
+      };
+      const userData = await this.findUserByEmailWithOutTenantID({
+        email: resetPasswordDto?.email,
+      });
+      if (userData.tenantId !== resetPasswordDto?.loginTenantId) {
+        throw new BadRequestException('User does not belong to this tenant');
+      }
+      const resetLink = await admin
+        .auth()
+        .generatePasswordResetLink(resetPasswordDto.email, actionCodeSettings);
+
+      const url = new URL(resetLink, `${resetPasswordDto.url}`);
+      const oobCode = url.searchParams.get('oobCode');
+      const mode = url.searchParams.get('mode');
+      const apiKey = url.searchParams.get('apiKey');
+      const lang = url.searchParams.get('lang');
+
+      const finalResetLink = `${resetPasswordDto.url}?apiKey=${apiKey}&mode=${mode}&oobCode=${oobCode}&lang=${lang}`;
+
+      if (finalResetLink) {
+        try {
+          await this.otherServiceDependenciesService.sendResetPasswordEmail(
+            finalResetLink,
+            resetPasswordDto.email,
+          );
+          return 'Reset email sent successfully.';
+        } catch (error) {
+          throw new BadRequestException(
+            `Error Sending Email: ${error.message}`,
+          );
+        }
+      } else {
+        throw new BadRequestException(`Can Not Create Reset Link`);
+      }
     } catch (error) {
       throw new BadRequestException(error.message);
     }

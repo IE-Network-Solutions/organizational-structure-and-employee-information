@@ -80,6 +80,12 @@ export class BasicSalaryService {
     });
   }
 
+  findBasicSalaryUserId(userId: string): Promise<BasicSalary | null> {
+    return this.basicSalaryRepository.findOne({
+      where: { userId },
+    });
+  }
+
   findOne(id: string): Promise<BasicSalary> {
     return this.basicSalaryRepository.findOne({
       where: { id },

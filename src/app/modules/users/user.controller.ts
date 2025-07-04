@@ -14,6 +14,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
   UploadedFile,
+  Headers,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -40,6 +41,7 @@ import { UserDepartmentService } from './services/user-relation-with-department.
 import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dto';
 import { ImportEmployeeDto } from './dto/import-user.dto';
 import { FilterEmailDto } from './dto/email.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -339,6 +341,13 @@ export class UserController {
     );
   }
 
+  @Post('/resetPassword')
+  @ExcludeAuthGuard()
+  @ExcludeTenantGuard()
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<string> {
+    return this.userService.resetPassword(resetPasswordDto);
+  }
+
   @Post('/import/users')
   @ExcludeAuthGuard()
   importUser(
@@ -350,8 +359,10 @@ export class UserController {
   }
 
   @Get('/simple-info/:userId')
-  getOneUser(@Req() request: Request, @Param('userId') userId: string) {
-    const tenantId = request['tenantId'];
+  getOneUser(
+    @Param('userId') userId: string,
+    @Headers('tenantId') tenantId: string,
+  ) {
     return this.userService.getOneUSer(userId, tenantId);
   }
 
