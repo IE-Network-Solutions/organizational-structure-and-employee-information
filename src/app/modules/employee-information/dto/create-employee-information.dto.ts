@@ -36,7 +36,8 @@ export class CreateEmployeeInformationDto {
 
   @IsOptional()
   @IsString()
-  userId: string;
+  userId?: string;
+
 
   @Validate(IsJSON, {
     message: 'address must be json',

@@ -56,7 +56,7 @@ import { MultiFactorAuthModule } from './modules/multi-factor-auth/multi-factor-
     MonthModule,
     BranchRequestModule,
     BasicSalaryModule,
-    MultiFactorAuthModule
+    MultiFactorAuthModule,
   ],
 })
 export class CoreModule {}
