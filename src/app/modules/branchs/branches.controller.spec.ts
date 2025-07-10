@@ -6,6 +6,7 @@ import { UpdateBranchDto } from './dto/update-branch.dto';
 import { Branch } from './entities/branch.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
+import { EncryptionService } from '@root/src/core/services/encryption.service';
 import {
   branchData,
   createbranchData,
@@ -50,6 +51,24 @@ describe('BranchesController', () => {
     }),
   };
 
+  const mockEncryptionService = {
+    encryptText: jest.fn().mockImplementation((text: string) => {
+      return 'encrypted-text';
+    }),
+    decryptText: jest.fn().mockImplementation((text: string) => {
+      return 'decrypted-text';
+    }),
+    encryptObject: jest.fn().mockImplementation((obj: any) => {
+      return 'encrypted-object';
+    }),
+    decryptObject: jest.fn().mockImplementation((text: string) => {
+      return { decrypted: 'object' };
+    }),
+    isEncrypted: jest.fn().mockImplementation((text: string) => {
+      return false;
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BranchesController],
@@ -57,6 +76,10 @@ describe('BranchesController', () => {
         {
           provide: BranchesService,
           useValue: mockBranchesService,
+        },
+        {
+          provide: EncryptionService,
+          useValue: mockEncryptionService,
         },
       ],
     }).compile();
