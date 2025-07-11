@@ -1,4 +1,6 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsDateString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { Gender } from '@root/src/core/enum/gender.enum';
 
 export class FilterDto {
   @IsOptional()
@@ -12,4 +14,14 @@ export class FilterDto {
   @IsOptional()
   @IsString()
   searchString?: string;
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  @IsEnum(Gender)
+  gender?: Gender;
+  @IsOptional()
+  @IsString()
+  joinedDateAfter?: string;
+  @IsOptional()
+  @IsString()
+  joinedDateBefore?: string;
 }

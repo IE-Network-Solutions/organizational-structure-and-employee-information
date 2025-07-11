@@ -27,12 +27,9 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      // const decodedToken = await admin.auth().verifyIdToken(newToken);
-      const decodedToken = await admin.auth().verifyIdToken(newToken, true);
-      // This ensures Firebase checks whether the token was revoked.
-      // If revoked, the request is rejected immediately.
+      const decodedToken = await admin.auth().verifyIdToken(newToken);
       request.user = decodedToken;
-
+      request.authToken = token;
       return true;
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired token');
