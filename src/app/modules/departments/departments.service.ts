@@ -2,20 +2,26 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Department } from './entities/department.entity';
-import { TreeRepository } from 'typeorm';
+import { TreeRepository, Repository } from 'typeorm';
 import { UserService } from '../users/services/user.service';
 import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class DepartmentsService {
   constructor(
     @InjectRepository(Department)
     private departmentRepository: TreeRepository<Department>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @Inject(forwardRef(() => UserService))
     private userService: UserService,
     private employeeJobInformationService: EmployeeJobInformationService,
   ) {}
@@ -311,10 +317,21 @@ export class DepartmentsService {
       );
     }
 
-    const users = await this.userService.findAllUsersByDepartment(
-      tenantId,
-      departmentTobeDeletedId,
-    );
+    // Use the directly injected userRepository instead of userService
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .withDeleted()
+      .leftJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+        'employeeJobInformation.isPositionActive = :isPositionActive',
+        { isPositionActive: true },
+      )
+      .where('employeeJobInformation.departmentId = :departmentId', {
+        departmentId: departmentTobeDeletedId,
+      })
+      .andWhere('user.tenantId = :tenantId', { tenantId })
+      .getMany();
 
     if (users && users.length > 0) {
       for (const user of users) {
@@ -332,8 +349,20 @@ export class DepartmentsService {
     if (descendants?.length > 0) {
       for (const dep of descendants) {
         if (dep.id !== departmentTobeDeletedId) {
-          const descendantUsers =
-            await this.userService.findAllUsersByDepartment(tenantId, dep.id);
+          const descendantUsers = await this.userRepository
+            .createQueryBuilder('user')
+            .withDeleted()
+            .leftJoinAndSelect(
+              'user.employeeJobInformation',
+              'employeeJobInformation',
+              'employeeJobInformation.isPositionActive = :isPositionActive',
+              { isPositionActive: true },
+            )
+            .where('employeeJobInformation.departmentId = :departmentId', {
+              departmentId: dep.id,
+            })
+            .andWhere('user.tenantId = :tenantId', { tenantId })
+            .getMany();
 
           if (descendantUsers && descendantUsers.length > 0) {
             for (const user of descendantUsers) {

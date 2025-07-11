@@ -58,6 +58,12 @@ export class BasicSalaryController {
     return this.basicSalaryService.findAllByUserId(userId);
   }
 
+  @Get('user/:userId')
+  async findBasicSalaryUserId(
+    @Param('userId') userId: string,
+  ): Promise<BasicSalary> {
+    return this.basicSalaryService.findBasicSalaryUserId(userId);
+  }
   @Patch(':id')
   update(
     @Param('id') id: string,

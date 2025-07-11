@@ -62,4 +62,9 @@ export class EmployeeJobInformationsController {
   remove(@Param('id') id: string) {
     return this.employeeJobInformationService.remove(id);
   }
+
+  @Patch('resign/:id')
+  submitResignation(@Param('id') id: string) {
+    return this.employeeJobInformationService.submitResignation(id);
+  }
 }
