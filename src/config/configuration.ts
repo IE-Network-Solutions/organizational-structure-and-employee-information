@@ -61,7 +61,7 @@ export const configuration = () => ({
     //tenantUrl:process.env.TENANT_URL
   },
   encryption: {
-    algorithm: process.env.ENCRYPTION_ALGORITHM || 'aes-256-cbc',
+    algorithm: process.env.ENCRYPTION_ALGORITHM || 'aes-256-gcm',
     key: process.env.ENCRYPTION_KEY,
     salt: process.env.ENCRYPTION_SALT || 'default-salt',
     iv: process.env.ENCRYPTION_IV,
