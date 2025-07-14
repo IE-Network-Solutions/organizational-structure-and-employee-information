@@ -40,9 +40,6 @@ export const configuration = () => ({
     messaging_sender_id: process.env.MESSAGING_SENDER_ID,
     app_id: process.env.APP_ID,
   },
-  recaptcha: {
-    secret_key: process.env.RECAPTCHA_SECRET_KEY,
-  },
 
   firebaseAuth: {
     firebaseAuthUrl: process.env.FIREBASE_AUTH_URL,
