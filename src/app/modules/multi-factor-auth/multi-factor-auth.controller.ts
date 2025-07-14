@@ -17,7 +17,6 @@ export class MultiFactorAuthController {
     return await this.multiFactorAuthService.send2FACode(
       body.email,
       body.pass,
-      body.recaptchaToken,
     );
   }
 
