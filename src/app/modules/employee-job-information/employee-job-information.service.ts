@@ -193,4 +193,34 @@ export class EmployeeJobInformationService {
       throw error;
     }
   }
+
+  async submitResignation(id: string) {
+    try {
+      const jobInfo = await this.employeeJobInformationRepository.findOneOrFail({
+        where: { id: id },
+      });
+
+      if (jobInfo.resignationSubmittedDate) {
+        throw new ConflictException('Resignation has already been submitted for this employee.');
+      }
+
+      const updateData = {
+        resignationSubmittedDate: new Date(),
+      };
+
+     return await this.employeeJobInformationRepository.update(
+        { id },
+        updateData
+      );
+
+    
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(
+          `EmployeeJobInformation with id ${id} not found.`,
+        );
+      }
+      throw error;
+    }
+  }
 }

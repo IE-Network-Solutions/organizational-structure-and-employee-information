@@ -61,7 +61,8 @@ export class UserService {
   private readonly emailServerUrl: string;
   // private readonly tenantUrl:string;
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @InjectDataSource() private dataSource: DataSource,
     private readonly paginationService: PaginationService,
     private readonly employeeInformationService: EmployeeInformationService,
@@ -249,6 +250,9 @@ export class UserService {
             ? null
             : filterDto.deletedAt,
         searchString: filterDto.searchString,
+        ...(filterDto.gender && {
+          'employeeInformation.gender': filterDto.gender,
+        }),
       };
 
       const options: IPaginationOptions = {
@@ -283,6 +287,33 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
+
+      // Add gender filter
+      if (filterDto.gender) {
+        queryBuilder.andWhere('employeeInformation.gender = :gender', {
+          gender: filterDto.gender,
+        });
+      }
+
+      // Add joined date filters
+      if (filterDto.joinedDateAfter) {
+        queryBuilder.andWhere(
+          'employeeInformation.joinedDate >= :joinedDateAfter',
+          {
+            joinedDateAfter: new Date(filterDto.joinedDateAfter),
+          },
+        );
+      }
+
+      if (filterDto.joinedDateBefore) {
+        queryBuilder.andWhere(
+          'employeeInformation.joinedDate <= :joinedDateBefore',
+          {
+            joinedDateBefore: new Date(filterDto.joinedDateBefore),
+          },
+        );
+      }
+
       queryBuilder = await filterEntities(
         queryBuilder,
         userFilters,
@@ -418,6 +449,7 @@ export class UserService {
     }
   }
   async findAllUsersByDepartment(tenantId: string, departmentId: string) {
+
     const users = await this.userRepository
       .createQueryBuilder('user')
       .withDeleted()
@@ -437,6 +469,7 @@ export class UserService {
   }
 
   async findAllUsersByAllDepartment(tenantId: string, departmentIds: string[]) {
+
     const users = await this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect(

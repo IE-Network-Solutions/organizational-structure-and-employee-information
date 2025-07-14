@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsDateString,
   IsNumber,
+  isDate,
 } from 'class-validator';
 import { JobAction } from '../enum/job-action.enum';
 
@@ -21,6 +22,10 @@ export class CreateEmployeeJobInformationDto {
   @IsOptional()
   @IsBoolean()
   isPositionActive: boolean;
+
+  @IsOptional()
+  @IsDateString()
+  resignationSubmittedDate: Date;
 
   @IsOptional()
   @IsDateString()

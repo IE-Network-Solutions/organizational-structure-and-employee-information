@@ -8,8 +8,4 @@ export class Send2FACodeDto {
   @IsString()
   @IsNotEmpty()
   pass: string;
-
-  @IsString()
-  @IsNotEmpty()
-  recaptchaToken: string;
 }
