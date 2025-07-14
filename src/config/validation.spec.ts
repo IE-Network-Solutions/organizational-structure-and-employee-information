@@ -24,7 +24,11 @@ describe('validationSchema', () => {
       RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
-    const result = validationSchema.validate(validConfig);
+    const result = validationSchema.validate(validConfig, { abortEarly: false });
+
+    if (result.error) {
+      console.log('Validation errors:', result.error.details);
+    }
 
     expect(result.error).toBeUndefined();
     expect(result.value).toEqual(validConfig);
