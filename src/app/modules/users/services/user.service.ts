@@ -55,6 +55,9 @@ import { DelegationService } from '../../delegations/delegations.service';
 import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { OtherServiceDependenciesService } from '../../other-service-dependencies/other-service-dependencies.service';
+import { ExportUserDto, DownloadFormat } from '../dto/export-user.dto';
+import * as PDFDocument from 'pdfkit';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class UserService {
@@ -1212,5 +1215,236 @@ export class UserService {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  async exportUserData(tenantId: string, exportUserDto: ExportUserDto): Promise<{ fileUrl: string }> {
+
+
+    let queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.employeeJobInformation', 'employeeJobInformation', 'employeeJobInformation.isPositionActive = :isPositionActive', { isPositionActive: true })
+      .leftJoinAndSelect('employeeJobInformation.position', 'position')
+      .leftJoinAndSelect('employeeJobInformation.department', 'department')
+      .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+      .leftJoinAndSelect('employeeJobInformation.basicSalaries', 'jobBasicSalaries')
+      .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+      .leftJoinAndSelect('user.role', 'role')
+      .andWhere('user.tenantId = :tenantId', { tenantId });
+
+    // Apply filters based on ExportUserDto fields
+    if (exportUserDto.employee_name) {
+      queryBuilder = queryBuilder.andWhere(
+        `(user.firstName ILIKE :name OR user.lastName ILIKE :name OR user.middleName ILIKE :name)`,
+        { name: `%${exportUserDto.employee_name}%` },
+      );
+    }
+    if (exportUserDto.allOffices) {
+      queryBuilder = queryBuilder.andWhere('employeeJobInformation.branchId = :branchId', { branchId: exportUserDto.allOffices });
+    }
+    if (exportUserDto.allJobs) {
+
+      queryBuilder = queryBuilder.andWhere('employeeJobInformation.positionId = :positionId', { positionId: exportUserDto.allJobs });
+    }
+    if (exportUserDto.allStatus) {
+      queryBuilder = queryBuilder.andWhere('user.status = :status', { status: exportUserDto.allStatus });
+    }
+    if (exportUserDto.gender) {
+      queryBuilder = queryBuilder.andWhere('employeeInformation.gender = :gender', { gender: exportUserDto.gender });
+    }
+    if (exportUserDto.joinedDate) {
+      if (exportUserDto.joinedDateType === 'after') {
+
+        queryBuilder = queryBuilder.andWhere('employeeInformation.joinedDate >= :joinedDate', { joinedDate: exportUserDto.joinedDate });
+      } else if (exportUserDto.joinedDateType === 'before') {
+        queryBuilder = queryBuilder.andWhere('employeeInformation.joinedDate <= :joinedDate', { joinedDate: exportUserDto.joinedDate });
+      }
+    }
+
+    const users = await queryBuilder.getMany();
+
+    // Prepare data for export (include salary details)
+    const exportData = users.map(user => {
+      const jobInfo = user.employeeJobInformation?.[0];
+      // Format joinedDate as dd-mm-YYYY
+      let formattedDate = '';
+      if (user.employeeInformation?.joinedDate) {
+        const d = new Date(user.employeeInformation.joinedDate);
+        const pad = (n) => n.toString().padStart(2, '0');
+        formattedDate = `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
+      }
+      // Get basicSalary with status true from jobInfo.basicSalaries
+      let basicSalary = '';
+      if (Array.isArray(jobInfo?.basicSalaries)) {
+        const salaryObj = jobInfo.basicSalaries.find(item => item && item.status === true);
+        basicSalary = salaryObj && salaryObj.basicSalary !== undefined && salaryObj.basicSalary !== null ? salaryObj.basicSalary.toString() : '';
+      }
+      return {
+        firstName: user.firstName,
+        middleName: user.middleName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role?.name,
+        jobTitle: jobInfo?.position?.name,
+        department: jobInfo?.department?.name,
+        branch: jobInfo?.branch?.name,
+        joinedDate: formattedDate,
+        basicSalary: basicSalary,
+      };
+    });
+
+
+    // Table columns (reduced widths)
+    const columns = [
+      { header: 'First Name', key: 'firstName', width: 11 },
+      { header: 'Middle Name', key: 'middleName', width: 11 },
+      { header: 'Last Name', key: 'lastName', width: 11 },
+      { header: 'Email', key: 'email', width: 16 },
+      { header: 'Role', key: 'role', width: 10 },
+      { header: 'Job Title', key: 'jobTitle', width: 12 },
+      { header: 'Department', key: 'department', width: 12 },
+      { header: 'Branch', key: 'branch', width: 12 },
+      { header: 'Joined Date', key: 'joinedDate', width: 12 },
+      { header: 'Basic Salary', key: 'basicSalary', width: 10 },
+    ];
+
+    let buffer: Buffer;
+    let fileName: string;
+    let mimetype: string;
+    // Generate a dynamic file name with timestamp
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+    if (exportUserDto.downloadFormat === DownloadFormat.EXCEL) {
+      // Excel export
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Users');
+      worksheet.columns = columns.map(col => ({ ...col })); // initially set columns
+      worksheet.addRows(exportData);
+      // Style header row
+      worksheet.getRow(1).eachCell(cell => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF1976D2' }, // Material blue 700
+        };
+        cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      });
+      // Set auto width for each column
+      worksheet.columns.forEach((column, colIdx) => {
+        let maxLength = 10; // minimum width
+        column.eachCell({ includeEmpty: true }, (cell, rowNumber) => {
+          const cellValue = cell.value ? cell.value.toString() : '';
+          maxLength = Math.max(maxLength, cellValue.length + 2); // +2 for padding
+        });
+        column.width = maxLength;
+      });
+      buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+      fileName = `users-${timestamp}.xlsx`;
+      mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    } else {
+      // PDF export (horizontal table, minimized font, full width)
+      const doc = new PDFDocument({ margin: 30, size: 'A4' });
+      const buffers: Buffer[] = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => {});
+      // Table settings
+      const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+      const totalColumnWidth = columns.reduce((sum, col) => sum + col.width, 0);
+      // Scale columns to fit page width
+      const scale = pageWidth / totalColumnWidth;
+      const scaledColumns = columns.map(col => ({ ...col, width: col.width * scale }));
+      const rowHeight = 18;
+      const headerFontSize = 7;
+      const dataFontSize = 6;
+      const cellPadding = 0.5; // reduce padding for more compact columns
+      let y = doc.y;
+      // Draw header row
+      let x = doc.page.margins.left;
+      scaledColumns.forEach(col => {
+        doc
+          .rect(x, y, col.width, rowHeight)
+          .fill('#1976D2')
+          .fillColor('#FFFFFF')
+          .font('Helvetica-Bold')
+          .fontSize(headerFontSize)
+          .text(col.header, x + cellPadding, y + 5, { width: col.width - 2 * cellPadding, align: 'center', continued: false });
+        x += col.width;
+      });
+      y += rowHeight;
+      // Draw data rows
+      exportData.forEach((row, idx) => {
+        x = doc.page.margins.left;
+        // Calculate max height for this row
+        const cellHeights = scaledColumns.map(col => {
+          const text = (row[col.key] !== undefined && row[col.key] !== null) ? row[col.key].toString() : '';
+          return doc.heightOfString(text, {
+            width: col.width - 2 * cellPadding,
+            font: 'Helvetica',
+            size: dataFontSize,
+          }) + 4; // add a little padding
+        });
+        const rowHeightAuto = Math.max(...cellHeights, 18); // minimum 18
+        scaledColumns.forEach((col, colIdx) => {
+          // Draw cell background
+          doc.save();
+          doc.rect(x, y, col.width, rowHeightAuto)
+            .fill(idx % 2 === 0 ? '#F5F5F5' : '#FFFFFF');
+          doc.restore();
+          // Draw cell text
+          const text = (row[col.key] !== undefined && row[col.key] !== null) ? row[col.key].toString() : '';
+          doc
+            .fillColor('black')
+            .font('Helvetica')
+            .fontSize(dataFontSize)
+            .text(
+              text,
+              x + cellPadding,
+              y + 2, // top padding
+              {
+                width: col.width - 2 * cellPadding,
+                align: 'center',
+                continued: false
+              }
+            );
+          x += col.width;
+        });
+        y += rowHeightAuto;
+        // Check for page break
+        if (y + 18 > doc.page.height - doc.page.margins.bottom) {
+          doc.addPage();
+          y = doc.y;
+        }
+      });
+      doc.end();
+      buffer = await new Promise<Buffer>((resolve) => {
+        doc.on('end', () => {
+          resolve(Buffer.concat(buffers));
+        });
+      });
+      fileName = `users-${timestamp}.pdf`;
+      mimetype = 'application/pdf';
+    }
+
+    // Create a mock Express.Multer.File object
+    const file: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: fileName,
+      encoding: '7bit',
+      mimetype,
+      size: buffer.length,
+      destination: '',
+      filename: fileName,
+      path: '',
+      buffer,
+      stream: undefined as any, // not needed for upload
+    };
+
+    // Upload to file server
+    const uploadResult = await this.fileUploadService.uploadFileToServer(tenantId, file);
+    // Prefer viewImage, fallback to image
+    const fileUrl = uploadResult?.viewImage || uploadResult?.image;
+    return { fileUrl };
   }
 }

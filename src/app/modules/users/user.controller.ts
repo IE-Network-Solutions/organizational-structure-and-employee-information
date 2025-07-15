@@ -42,6 +42,7 @@ import { DissolveDepartmentDto } from '../departments/dto/dissolve-department.dt
 import { ImportEmployeeDto } from './dto/import-user.dto';
 import { FilterEmailDto } from './dto/email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ExportUserDto } from './dto/export-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -356,6 +357,17 @@ export class UserController {
   ) {
     const tenantId = request['tenantId'];
     return this.userService.importUser(importEmployeeDto, tenantId);
+  }
+
+  @Post('/export')
+  // @ExcludeAuthGuard()
+  async exportUserData(
+    @Req() request: Request,
+    @Body() exportUserDto: ExportUserDto,
+  ) {
+    const tenantId = request['tenantId'];
+    const { fileUrl } = await this.userService.exportUserData(tenantId, exportUserDto);
+    return { fileUrl };
   }
 
   @Get('/simple-info/:userId')
