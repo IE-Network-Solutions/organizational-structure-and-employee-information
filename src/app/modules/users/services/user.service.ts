@@ -288,6 +288,30 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
 
+      // Multi-word, multi-field search
+      const { searchString } = filterDto;
+
+      if (searchString && searchString.trim() !== '') {
+        const words = searchString.trim().split(/\s+/);
+        words.forEach((word, idx) => {
+          const param = `searchWord${idx}`;
+
+          queryBuilder.andWhere(
+            `(user.firstName ILIKE :${param} OR user.middleName ILIKE :${param} OR user.lastName ILIKE :${param} OR user.email ILIKE :${param})`,
+            { [param]: `%${word}%` },
+          );
+        });
+
+        //  Add full name matching
+        if (words.length > 1) {
+          const fullNameParam = 'fullNameSearch';
+          queryBuilder.orWhere(
+            `CONCAT(user.firstName, ' ', user.lastName) ILIKE :${fullNameParam} OR CONCAT(user.lastName, ' ', user.firstName) ILIKE :${fullNameParam}`,
+            { [fullNameParam]: `%${searchString.trim()}%` },
+          );
+        }
+      }
+
       // Add gender filter
       if (filterDto.gender) {
         queryBuilder.andWhere('employeeInformation.gender = :gender', {
@@ -449,7 +473,6 @@ export class UserService {
     }
   }
   async findAllUsersByDepartment(tenantId: string, departmentId: string) {
-
     const users = await this.userRepository
       .createQueryBuilder('user')
       .withDeleted()
@@ -469,7 +492,6 @@ export class UserService {
   }
 
   async findAllUsersByAllDepartment(tenantId: string, departmentIds: string[]) {
-
     const users = await this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect(
