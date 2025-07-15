@@ -281,4 +281,5 @@ export class EmployeeInformationService {
       }
       throw error;
     }
-  }}
+  }
+}

@@ -366,7 +366,10 @@ export class UserController {
     @Body() exportUserDto: ExportUserDto,
   ) {
     const tenantId = request['tenantId'];
-    const { fileUrl } = await this.userService.exportUserData(tenantId, exportUserDto);
+    const { fileUrl } = await this.userService.exportUserData(
+      tenantId,
+      exportUserDto,
+    );
     return { fileUrl };
   }
 

@@ -101,8 +101,8 @@ export class DelegationService {
       });
       return delegation;
     } catch (error) {
-    return null;
-  }
+      return null;
+    }
   }
 
   async update(
@@ -162,8 +162,8 @@ export class DelegationService {
         leaveRequestId,
         tenantId,
       );
-      if(delegation){
-      await this.delegationRepository.softRemove(delegation);
+      if (delegation) {
+        await this.delegationRepository.softRemove(delegation);
       }
       return delegation;
     } catch (error) {

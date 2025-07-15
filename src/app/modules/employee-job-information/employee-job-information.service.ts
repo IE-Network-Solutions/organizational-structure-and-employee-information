@@ -196,24 +196,26 @@ export class EmployeeJobInformationService {
 
   async submitResignation(id: string) {
     try {
-      const jobInfo = await this.employeeJobInformationRepository.findOneOrFail({
-        where: { id: id },
-      });
+      const jobInfo = await this.employeeJobInformationRepository.findOneOrFail(
+        {
+          where: { id: id },
+        },
+      );
 
       if (jobInfo.resignationSubmittedDate) {
-        throw new ConflictException('Resignation has already been submitted for this employee.');
+        throw new ConflictException(
+          'Resignation has already been submitted for this employee.',
+        );
       }
 
       const updateData = {
         resignationSubmittedDate: new Date(),
       };
 
-     return await this.employeeJobInformationRepository.update(
+      return await this.employeeJobInformationRepository.update(
         { id },
-        updateData
+        updateData,
       );
-
-    
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(

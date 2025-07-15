@@ -39,10 +39,6 @@ export class ExportUserDto {
   @IsEnum(JoinedDateType)
   joinedDateType?: JoinedDateType;
 
-//   @IsEnum(DownloadFormat)
+  //   @IsEnum(DownloadFormat)
   downloadFormat: any;
-} 
-
-
-
-
+}

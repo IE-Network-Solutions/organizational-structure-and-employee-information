@@ -84,7 +84,8 @@ export class MonthService {
   async findOneMonth(id: string): Promise<Month> {
     try {
       const month = await this.monthRepository.findOne({
-        where: { id: id },relations: ['session','session.calendar'],
+        where: { id: id },
+        relations: ['session', 'session.calendar'],
       });
       return month;
     } catch (error) {

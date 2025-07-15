@@ -40,13 +40,11 @@ export class CalendarsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      
-      
       // Check if there's already an active calendar
       const activeCalendar = await this.findActiveCalendar(tenantId);
 
       // Force isActive based on year
-      const isActive =!activeCalendar;
+      const isActive = !activeCalendar;
 
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
@@ -166,7 +164,7 @@ export class CalendarsService {
     await this.calendarRepository.softRemove({ id });
     return Calendar;
   }
-async findActiveCalendar(tenantId: string): Promise<Calendar> {
+  async findActiveCalendar(tenantId: string): Promise<Calendar> {
     try {
       const activeCalendar = await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },

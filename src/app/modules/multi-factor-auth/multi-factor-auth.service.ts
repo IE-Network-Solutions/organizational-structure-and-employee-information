@@ -22,10 +22,8 @@ export class MultiFactorAuthService {
     );
   }
 
-  async send2FACode(email: string, pass: string, ) {
+  async send2FACode(email: string, pass: string) {
     try {
- 
-
       // Sign in user using FirebaseAuthService
       const signInResult =
         await this.firebaseAuthService.signInWithEmailAndPassword(email, pass);
