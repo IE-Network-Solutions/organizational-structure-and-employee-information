@@ -6,6 +6,7 @@ import { UpdateBranchDto } from './dto/update-branch.dto';
 import { Branch } from './entities/branch.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
+import { EncryptionService } from '@root/src/core/services/encryption.service';
 import {
   branchData,
   createbranchData,
@@ -42,11 +43,29 @@ describe('BranchesController', () => {
     }),
     updateBranch: jest
       .fn()
-      .mockImplementation((id: string, dto: UpdateBranchDto) => {
+      .mockImplementation((id: string, dto: UpdateBranchDto, tenantId: string) => {
         return Promise.resolve(updatebranchData());
       }),
     removeBranch: jest.fn().mockImplementation((id: string) => {
       return Promise.resolve(deletebranchData());
+    }),
+  };
+
+  const mockEncryptionService = {
+    encryptText: jest.fn().mockImplementation((text: string) => {
+      return 'encrypted-text';
+    }),
+    decryptText: jest.fn().mockImplementation((text: string) => {
+      return 'decrypted-text';
+    }),
+    encryptObject: jest.fn().mockImplementation((obj: any) => {
+      return 'encrypted-object';
+    }),
+    decryptObject: jest.fn().mockImplementation((text: string) => {
+      return { decrypted: 'object' };
+    }),
+    isEncrypted: jest.fn().mockImplementation((text: string) => {
+      return false;
     }),
   };
 
@@ -57,6 +76,10 @@ describe('BranchesController', () => {
         {
           provide: BranchesService,
           useValue: mockBranchesService,
+        },
+        {
+          provide: EncryptionService,
+          useValue: mockEncryptionService,
         },
       ],
     }).compile();
@@ -109,14 +132,17 @@ describe('BranchesController', () => {
 
   it('should update a branch', async () => {
     const updateBranchDto: UpdateBranchDto = updatebranchData();
+    const req = { tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c' } as any;
     const result = await controller.updateBranch(
       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
       updateBranchDto,
+      req,
     );
     expect(result).toEqual(updatebranchData());
     expect(service.updateBranch).toHaveBeenCalledWith(
       'be21f28b-4651-4d6f-8f08-d8128da64ee5',
       updateBranchDto,
+      '8f2e3691-423f-4f21-b676-ba3a932b7c7c',
     );
   });
 

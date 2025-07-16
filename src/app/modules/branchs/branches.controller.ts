@@ -16,10 +16,15 @@ import { Branch } from './entities/branch.entity';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { ApiTags } from '@nestjs/swagger';
+import { EncryptionService } from '@root/src/core/services/encryption.service';
+
 @Controller('branchs')
 @ApiTags('Branchs')
 export class BranchesController {
-  constructor(private readonly branchsService: BranchesService) {}
+  constructor(
+    private readonly branchsService: BranchesService,
+    private readonly encryptionService: EncryptionService,
+  ) {}
   @Post()
   async createBranch(
     @Req() req: Request,
@@ -27,6 +32,30 @@ export class BranchesController {
   ): Promise<Branch> {
     const tenantId = req['tenantId'];
     return await this.branchsService.createBranch(createBranchDto, tenantId);
+  }
+
+
+ @Post('test-encryption')
+  async testEncryption(@Body() data: any) {
+    // console.log('Received data in controller:', data);
+  }
+  @Post('encrypt-text')
+  async encryptText(@Body() body: { text: string | any }) {
+    // console.log('Original data to encrypt:', body.text);
+    
+    let encryptedText;
+    if (typeof body.text === 'string') {
+      encryptedText = this.encryptionService.encryptText(body.text);
+    } else {
+      // If it's an object, use encryptObject instead
+      encryptedText = this.encryptionService.encryptObject(body.text); 
+    }
+   // console.log('Encrypted text:', encryptedText);
+    // return {
+    //   originalData: body.text,
+    //   encryptedText: encryptedText,
+    //   timestamp: new Date().toISOString()
+    // };
   }
 
   @Get()
@@ -61,4 +90,5 @@ export class BranchesController {
   async removeBranch(@Param('id') id: string): Promise<Branch> {
     return await this.branchsService.removeBranch(id);
   }
+  
 }

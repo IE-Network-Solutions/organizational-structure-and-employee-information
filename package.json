@@ -13,6 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "pm2 start ecosystem.config.json --env production",
     "start:stage": "pm2 start stage-ecosystem.config.json --env production",
+    "start:preview": "pm2 start preview-ecosystem.config.json --env production",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
