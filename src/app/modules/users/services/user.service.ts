@@ -356,9 +356,9 @@ export class UserService {
         page: paginationOptions.page,
         limit: paginationOptions.limit,
       };
-      const queryBuilder = await this.userRepository
+  
+      const queryBuilder = this.userRepository
         .createQueryBuilder('user')
-
         .withDeleted()
         .leftJoinAndSelect(
           'user.employeeJobInformation',
@@ -372,7 +372,6 @@ export class UserService {
           'basicSalaries.status = :status',
           { status: true },
         )
-
         .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
         .leftJoinAndSelect('user.role', 'role')
         .leftJoinAndSelect(
@@ -384,12 +383,12 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.position', 'position')
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
-
+  
       const paginatedData = await this.paginationService.paginate<User>(
         queryBuilder,
         options,
       );
-
+  
       return paginatedData;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
@@ -398,6 +397,7 @@ export class UserService {
       throw error;
     }
   }
+  
 
   async findAllPayRollUsers(
     paginationOptions: PaginationDto,
