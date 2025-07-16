@@ -7,7 +7,7 @@ import { CreateMonthDto } from './dto/create-month.dto';
 import { UpdateMonthDto } from './dto/update-month.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Month } from './entities/month.entity';
-import { QueryRunner, Repository, LessThanOrEqual } from 'typeorm';
+import { QueryRunner, Repository, LessThanOrEqual, LessThan } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
@@ -202,23 +202,23 @@ export class MonthService {
       // Find the previous month by looking for the month that ends closest to (but not after) the active month starts
       
       // First try to find exact match using JavaScript comparison
-      const allMonths = await this.monthRepository.find({
-        where: { tenantId, active: false },
-        order: { endDate: 'DESC' }
-      });
+      // const allMonths = await this.monthRepository.find({
+      //   where: { tenantId, active: false },
+      //   order: { endDate: 'DESC' }
+      // });
       
-      const exactMatch = allMonths.find(m => m.endDate.getTime() === activeMonth.startDate.getTime());
+      // const exactMatch = allMonths.find(m => m.endDate.getTime() === activeMonth.startDate.getTime());
       
-      if (exactMatch) {
-        return exactMatch;
-      }
+      // if (exactMatch) {
+      //   return exactMatch;
+      // }
       
       // Fallback to database query if no exact match
       const previousMonth = await this.monthRepository.findOne({
         where: { 
           tenantId, 
           active: false,
-          endDate: LessThanOrEqual(activeMonth.startDate)
+          endDate: LessThan(activeMonth.startDate)
         },
         order: { endDate: 'DESC' } // Get the month that ends closest to active month start
       });
