@@ -201,30 +201,27 @@ export class MonthService {
 
       // Find the previous month by looking for the month that ends closest to (but not after) the active month starts
       
-      // First, let's see all available months for this tenant
+      // First try to find exact match using JavaScript comparison
       const allMonths = await this.monthRepository.find({
         where: { tenantId, active: false },
         order: { endDate: 'DESC' }
       });
       
-      // Let's also check for exact matches - get the most recent month they can be equal
       const exactMatch = allMonths.find(m => m.endDate.getTime() === activeMonth.startDate.getTime());
       
-      // If we found an exact match, use it; otherwise use the query
-      let previousMonth;
       if (exactMatch) {
-        previousMonth = exactMatch;
-      } else {
-        // Find the month that ends closest to (but not after) the active month starts
-        previousMonth = await this.monthRepository.findOne({
-          where: { 
-            tenantId, 
-            active: false,
-            endDate: LessThanOrEqual(activeMonth.startDate)
-          },
-          order: { endDate: 'DESC' } // Get the month that ends closest to active month start
-        });
+        return exactMatch;
       }
+      
+      // Fallback to database query if no exact match
+      const previousMonth = await this.monthRepository.findOne({
+        where: { 
+          tenantId, 
+          active: false,
+          endDate: LessThanOrEqual(activeMonth.startDate)
+        },
+        order: { endDate: 'DESC' } // Get the month that ends closest to active month start
+      });
       
       return previousMonth;
     } catch (error) {
