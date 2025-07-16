@@ -1,4 +1,4 @@
-import { validationSchema } from '@config/validation';
+import { firebaseValidationSchema } from '@config/validation';
 
 describe('validationSchema', () => {
   it('should validate the configuration object', () => {
@@ -23,7 +23,7 @@ describe('validationSchema', () => {
       APP_ID: 'app_id',
     };
 
-    const result = validationSchema.validate(validConfig);
+    const result = firebaseValidationSchema.validate(validConfig);
 
     expect(result.error).toBeUndefined();
     expect(result.value).toEqual(validConfig);
@@ -47,7 +47,7 @@ describe('validationSchema', () => {
       APP_ID: 'app_id',
     };
 
-    expect(validationSchema.validate(invalidConfig).error).toBeDefined();
+    expect(firebaseValidationSchema.validate(invalidConfig).error).toBeDefined();
   });
 
   it('should throw an error if configuration has invalid properties', () => {
@@ -71,6 +71,6 @@ describe('validationSchema', () => {
       APP_ID: 'app_id',
     };
 
-    expect(validationSchema.validate(invalidConfig).error).toBeDefined();
+    expect(firebaseValidationSchema.validate(invalidConfig).error).toBeDefined();
   });
 });
