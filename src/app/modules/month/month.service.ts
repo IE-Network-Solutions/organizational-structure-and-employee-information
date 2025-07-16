@@ -123,7 +123,7 @@ export class MonthService {
           createDto.endDate=item.endDate 
           if (item.id) {
             return this.updateMonth(item.id, createDto, tenantId);
-          } else {
+          }else {
             const createDto = item as CreateMonthDto; 
             return this.createMonth(createDto, tenantId);
           }

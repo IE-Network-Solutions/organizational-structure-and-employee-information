@@ -20,6 +20,7 @@ import { CreateSessionDto } from '../session/dto/create-session.dto';
 import { tenantId } from '../branchs/tests/branch.data';
 import { UpdateSessionDto } from '../session/dto/update-session.dto';
 import { Between } from 'typeorm';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 @Injectable()
 export class CalendarsService {
@@ -29,7 +30,7 @@ export class CalendarsService {
     private paginationService: PaginationService,
     private organizationsService: OrganizationsService,
     private sessionService: SessionService,
-
+    private employeeJobInformationService: EmployeeJobInformationService,
     private readonly connection: Connection,
   ) {}
   async createCalendar(
@@ -171,7 +172,7 @@ async findActiveCalendar(tenantId: string): Promise<Calendar> {
       const activeCalendar = await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
         relations: ['sessions', 'sessions.months'],
-      });
+      }); 
       if (!activeCalendar) {
         return null;
       }
@@ -181,6 +182,49 @@ async findActiveCalendar(tenantId: string): Promise<Calendar> {
       throw new NotFoundException(`There Is No Active Calendar.`);
     }
   }
+
+  async getActiveCalendarhired(tenantId: string) {
+    try {
+      const paginationOptions = new PaginationDto();
+      const employeeJobInformation = await this.employeeJobInformationService.findAll(paginationOptions);
+      const activeCalendar = await this.calendarRepository.findOne({
+        where: { isActive: true, tenantId: tenantId },
+        relations: ['sessions', 'sessions.months'],
+      });
+      const calendarStart = new Date(activeCalendar.startDate);
+      const calendarEnd = new Date(activeCalendar.endDate);
+
+      // Prepare months array
+      const months = [];
+      let current = new Date(calendarStart.getFullYear(), calendarStart.getMonth(), 1);
+      const end = new Date(calendarEnd.getFullYear(), calendarEnd.getMonth(), 1);
+      while (current <= end) {
+        months.push({
+          month: current.toLocaleString('default', { month: 'short' }),
+          year: current.getFullYear(),
+          hired: 0,
+        });
+        current.setMonth(current.getMonth() + 1);
+      }
+
+      // Count hires per month
+      employeeJobInformation.items.forEach(emp => {
+        const effStart = new Date(emp.effectiveStartDate);
+        if (effStart >= calendarStart && effStart <= calendarEnd) {
+          const month = effStart.toLocaleString('default', { month: 'short' });
+          const year = effStart.getFullYear();
+          const found = months.find(m => m.month === month && m.year === year);
+          if (found) found.hired += 1;
+        }
+      });
+
+      // Return in requested format (without year if you want)
+      return months.map(({ month, hired }) => ({ month, hired }));
+    } catch (error) {
+      throw new NotFoundException(`There Is No Active Calendar.`);
+    }
+  }
+
   async findActiveCalendarForAllTenants(): Promise<Calendar[]> {
     try {
       const calendar = await this.calendarRepository.find({

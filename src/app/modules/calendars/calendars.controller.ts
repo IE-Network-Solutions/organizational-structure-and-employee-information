@@ -77,4 +77,10 @@ export class CalendarsController {
     const tenantId = req['tenantId'];
     return await this.calendarsService.findActiveCalendar(tenantId);
   }
+
+  @Get('/active/getActiveCalendarhired')
+  async getActiveCalendarhired(@Req() req: Request) {
+    const tenantId = req['tenantId'];
+    return await this.calendarsService.getActiveCalendarhired(tenantId);
+  }
 }

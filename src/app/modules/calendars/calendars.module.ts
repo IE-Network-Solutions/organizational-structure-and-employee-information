@@ -8,9 +8,11 @@ import { Organization } from '../organizations/entities/organization.entity';
 import { CalendarSubscriber } from './subscribers/calendar.subscriber';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { SessionModule } from '../session/session.module';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
+import { EmployeeJobInformationModule } from '../employee-job-information/employee-job-information.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Calendar, Organization]), SessionModule],
+  imports: [TypeOrmModule.forFeature([Calendar, Organization]), SessionModule, EmployeeJobInformationModule],
 
   controllers: [CalendarsController],
   providers: [CalendarsService, PaginationService, OrganizationsService],
