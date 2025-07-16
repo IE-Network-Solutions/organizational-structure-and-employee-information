@@ -22,12 +22,6 @@ export const validationSchema = Joi.object({
   DB_PASSWORD: Joi.string().required(),
   DB_TYPE: Joi.string().required().valid('postgres', 'mysql'),
   DB_SYNCHRONIZE_ENTITIES: Joi.boolean().required(),
-  API_KEY: Joi.string().required(),
-  AUTH_DOMAIN: Joi.string().required(),
-  STORAGE_BUCKET: Joi.string().required(),
-  MESSAGING_SENDER_ID: Joi.string().required(),
-  APP_ID: Joi.string().required(),
-  RECAPTCHA_SECRET_KEY: Joi.string().required(),
 });
 
 export const firebaseValidationSchema = Joi.object({
@@ -53,5 +47,4 @@ export const firebaseValidationSchema = Joi.object({
   STORAGE_BUCKET: Joi.string().required(),
   MESSAGING_SENDER_ID: Joi.string().required(),
   APP_ID: Joi.string().required(),
-  RECAPTCHA_SECRET_KEY: Joi.string().required(),
 });
