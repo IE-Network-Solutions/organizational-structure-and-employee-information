@@ -7,7 +7,7 @@ import { CreateMonthDto } from './dto/create-month.dto';
 import { UpdateMonthDto } from './dto/update-month.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Month } from './entities/month.entity';
-import { QueryRunner, Repository } from 'typeorm';
+import { QueryRunner, Repository, LessThanOrEqual } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
@@ -194,16 +194,38 @@ export class MonthService {
   async activatePreviousActiveMonth(tenantId: string): Promise<Month> {
     try {
       const activeMonth = await this.geActiveMonth(tenantId);
-
+ 
       if (!activeMonth) {
         throw new BadRequestException('Active month not found');
       }
 
-      const date = new Date(activeMonth.endDate);
-      //  date.setDate(date.getDate() - 1);
-      const previousMonth = await this.monthRepository.findOne({
-        where: { startDate: date, tenantId, active: false },
+      // Find the previous month by looking for the month that ends closest to (but not after) the active month starts
+      
+      // First, let's see all available months for this tenant
+      const allMonths = await this.monthRepository.find({
+        where: { tenantId, active: false },
+        order: { endDate: 'DESC' }
       });
+      
+      // Let's also check for exact matches - get the most recent month they can be equal
+      const exactMatch = allMonths.find(m => m.endDate.getTime() === activeMonth.startDate.getTime());
+      
+      // If we found an exact match, use it; otherwise use the query
+      let previousMonth;
+      if (exactMatch) {
+        previousMonth = exactMatch;
+      } else {
+        // Find the month that ends closest to (but not after) the active month starts
+        previousMonth = await this.monthRepository.findOne({
+          where: { 
+            tenantId, 
+            active: false,
+            endDate: LessThanOrEqual(activeMonth.startDate)
+          },
+          order: { endDate: 'DESC' } // Get the month that ends closest to active month start
+        });
+      }
+      
       return previousMonth;
     } catch (error) {
       throw new BadRequestException(error.message);
