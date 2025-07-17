@@ -90,7 +90,6 @@ export class EmployeeInformationController {
     );
   }
   @Get('/users/all-employee-data')
-  // @ExcludeAuthGuard()
   allEmployeeData(@Req() request: Request) {
     const tenantId = request['tenantId'];
     return this.employeeInformationService.allEmployeeData(tenantId);
