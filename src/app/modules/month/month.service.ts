@@ -209,7 +209,6 @@ export class MonthService {
       });
 
 
-      console.log( "allInactiveMonths", allInactiveMonths);
       // Compare only the date part (YYYY-MM-DD) without timezone
       const activeMonthStartDate = activeMonth.startDate.toISOString().split('T')[0];
       
