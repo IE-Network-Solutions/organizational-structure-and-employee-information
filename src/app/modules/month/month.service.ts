@@ -205,9 +205,11 @@ export class MonthService {
           tenantId, 
           active: false
         },
-        order: { endDate: 'DESC' }
+        order: { endDate: 'DESC' } // Most recent months first
       });
 
+
+      console.log( "allInactiveMonths", allInactiveMonths);
       // Compare only the date part (YYYY-MM-DD) without timezone
       const activeMonthStartDate = activeMonth.startDate.toISOString().split('T')[0];
       
@@ -215,6 +217,10 @@ export class MonthService {
         const monthEndDate = m.endDate.toISOString().split('T')[0];
         return monthEndDate < activeMonthStartDate;
       });
+
+      if (!previousMonth) {
+        throw new BadRequestException('No previous month found');
+      }
 
       return previousMonth;
     } catch (error) {
