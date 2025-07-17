@@ -83,7 +83,7 @@ describe('UserService', () => {
           provide: PaginationService,
           useValue: mock<PaginationService>(),
         },
-        
+
         {
           provide: DelegationService,
           useValue: mock<DelegationService>(),

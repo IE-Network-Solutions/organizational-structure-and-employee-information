@@ -40,7 +40,7 @@ export class EmployeeJobInformation extends BaseModel {
   @Column({ nullable: true })
   effectiveEndDate: Date;
 
-  @Column({ type: 'timestamp', nullable: true})
+  @Column({ type: 'timestamp', nullable: true })
   resignationSubmittedDate: Date;
 
   @Column({ nullable: true })

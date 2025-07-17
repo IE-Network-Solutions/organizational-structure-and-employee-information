@@ -4,6 +4,8 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { CreateCalendarDto } from './dto/create-calendar.dto';
 import { UpdateCalendarDto } from './dto/update-calendar.dto';
@@ -20,6 +22,7 @@ import { CreateSessionDto } from '../session/dto/create-session.dto';
 import { tenantId } from '../branchs/tests/branch.data';
 import { UpdateSessionDto } from '../session/dto/update-session.dto';
 import { Between } from 'typeorm';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 @Injectable()
 export class CalendarsService {
@@ -29,7 +32,8 @@ export class CalendarsService {
     private paginationService: PaginationService,
     private organizationsService: OrganizationsService,
     private sessionService: SessionService,
-
+    @Inject(forwardRef(() => EmployeeJobInformationService))
+    private employeeJobInformationService: EmployeeJobInformationService,
     private readonly connection: Connection,
   ) {}
   async createCalendar(
@@ -40,13 +44,11 @@ export class CalendarsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      
-      
       // Check if there's already an active calendar
       const activeCalendar = await this.findActiveCalendar(tenantId);
 
       // Force isActive based on year
-      const isActive =!activeCalendar;
+      const isActive = !activeCalendar;
 
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
@@ -166,7 +168,7 @@ export class CalendarsService {
     await this.calendarRepository.softRemove({ id });
     return Calendar;
   }
-async findActiveCalendar(tenantId: string): Promise<Calendar> {
+  async findActiveCalendar(tenantId: string): Promise<Calendar> {
     try {
       const activeCalendar = await this.calendarRepository.findOne({
         where: { isActive: true, tenantId: tenantId },
@@ -181,6 +183,9 @@ async findActiveCalendar(tenantId: string): Promise<Calendar> {
       throw new NotFoundException(`There Is No Active Calendar.`);
     }
   }
+
+ 
+
   async findActiveCalendarForAllTenants(): Promise<Calendar[]> {
     try {
       const calendar = await this.calendarRepository.find({
