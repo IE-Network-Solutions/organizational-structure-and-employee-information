@@ -182,6 +182,10 @@ export class EmployeeInformationService {
     const today = new Date();
     const todayMonth = today.getMonth() + 1;
     const todayDay = today.getDate();
+    
+    // Calculate date one year ago from today
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
 
     const employees = await this.employeeInformationRepository
       .createQueryBuilder('EmployeeInformation')
@@ -192,6 +196,9 @@ export class EmployeeInformationService {
       })
       .andWhere('EXTRACT(DAY FROM EmployeeInformation.joinedDate) = :day', {
         day: todayDay,
+      })
+      .andWhere('EmployeeInformation.joinedDate <= :oneYearAgo', {
+        oneYearAgo: oneYearAgo,
       })
       .getMany();
 
