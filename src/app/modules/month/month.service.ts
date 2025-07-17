@@ -199,30 +199,23 @@ export class MonthService {
         throw new BadRequestException('Active month not found');
       }
 
-      // Find the previous month by looking for the month that ends closest to (but not after) the active month starts
-      
-      // First try to find exact match using JavaScript comparison
-      // const allMonths = await this.monthRepository.find({
-      //   where: { tenantId, active: false },
-      //   order: { endDate: 'DESC' }
-      // });
-      
-      // const exactMatch = allMonths.find(m => m.endDate.getTime() === activeMonth.startDate.getTime());
-      
-      // if (exactMatch) {
-      //   return exactMatch;
-      // }
-      
-      // Fallback to database query if no exact match
-      const previousMonth = await this.monthRepository.findOne({
+      // Get all inactive months and filter by date-only comparison
+      const allInactiveMonths = await this.monthRepository.find({
         where: { 
           tenantId, 
-          active: false,
-          endDate: LessThan(activeMonth.startDate)
+          active: false
         },
-        order: { endDate: 'DESC' } // Get the month that ends closest to active month start
+        order: { endDate: 'DESC' }
       });
+
+      // Compare only the date part (YYYY-MM-DD) without timezone
+      const activeMonthStartDate = activeMonth.startDate.toISOString().split('T')[0];
       
+      const previousMonth = allInactiveMonths.find(m => {
+        const monthEndDate = m.endDate.toISOString().split('T')[0];
+        return monthEndDate < activeMonthStartDate;
+      });
+
       return previousMonth;
     } catch (error) {
       throw new BadRequestException(error.message);
