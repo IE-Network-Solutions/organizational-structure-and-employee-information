@@ -67,4 +67,11 @@ export class EmployeeJobInformationsController {
   submitResignation(@Param('id') id: string) {
     return this.employeeJobInformationService.submitResignation(id);
   }
+
+  @Get('/active/getActiveCalendarhired')
+  async getActiveCalendarhired(@Req() req: Request) {
+    const tenantId = req['tenantId'];
+    return await this.employeeJobInformationService.getActiveCalendarhired(tenantId);
+  }
+
 }
