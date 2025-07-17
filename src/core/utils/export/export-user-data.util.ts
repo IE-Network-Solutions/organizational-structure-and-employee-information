@@ -63,7 +63,7 @@ export async function generateExportFile({
     const doc = new PDFDocument({ margin: 30, size: 'A4' });
     const buffers: Buffer[] = [];
     doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', () => {});
+    // doc.on('end', () => { /* not used */});
     const pageWidth =
       doc.page.width - doc.page.margins.left - doc.page.margins.right;
     const totalColumnWidth = columns.reduce((sum, col) => sum + col.width, 0);
@@ -122,15 +122,10 @@ export async function generateExportFile({
           .fillColor('black')
           .font('Helvetica')
           .fontSize(dataFontSize)
-          .text(
-            text,
-            x + cellPadding,
-            y + 2,
-            {
-              width: col.width - 2 * cellPadding,
-              align: 'center',
-            },
-          );
+          .text(text, x + cellPadding, y + 2, {
+            width: col.width - 2 * cellPadding,
+            align: 'center',
+          });
         x += col.width;
       });
       y += rowHeightAuto;
