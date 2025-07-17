@@ -7,7 +7,7 @@ import { CreateMonthDto } from './dto/create-month.dto';
 import { UpdateMonthDto } from './dto/update-month.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Month } from './entities/month.entity';
-import { QueryRunner, Repository } from 'typeorm';
+import { QueryRunner, Repository, LessThanOrEqual, LessThan } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
@@ -194,16 +194,33 @@ export class MonthService {
   async activatePreviousActiveMonth(tenantId: string): Promise<Month> {
     try {
       const activeMonth = await this.geActiveMonth(tenantId);
-
+ 
       if (!activeMonth) {
         throw new BadRequestException('Active month not found');
       }
 
-      const date = new Date(activeMonth.endDate);
-      //  date.setDate(date.getDate() - 1);
-      const previousMonth = await this.monthRepository.findOne({
-        where: { startDate: date, tenantId, active: false },
+      // Get all inactive months and filter by date-only comparison
+      const allInactiveMonths = await this.monthRepository.find({
+        where: { 
+          tenantId, 
+          active: false
+        },
+        order: { endDate: 'DESC' } // Most recent months first
       });
+
+
+      // Compare only the date part (YYYY-MM-DD) without timezone
+      const activeMonthStartDate = activeMonth.startDate.toISOString().split('T')[0];
+      
+      const previousMonth = allInactiveMonths.find(m => {
+        const monthEndDate = m.endDate.toISOString().split('T')[0];
+        return monthEndDate < activeMonthStartDate;
+      });
+
+      if (!previousMonth) {
+        throw new BadRequestException('No previous month found');
+      }
+
       return previousMonth;
     } catch (error) {
       throw new BadRequestException(error.message);

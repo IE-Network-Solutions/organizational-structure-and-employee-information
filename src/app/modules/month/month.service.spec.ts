@@ -110,6 +110,7 @@ describe('MonthService', () => {
 
       expect(monthRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'month-id' },
+        relations: ['session', 'session.calendar'],
       });
       expect(result).toEqual(monthDataSave());
     });
@@ -124,6 +125,7 @@ describe('MonthService', () => {
       );
       expect(monthRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'invalid-id' },
+        relations: ['session', 'session.calendar'],
       });
     });
   });
