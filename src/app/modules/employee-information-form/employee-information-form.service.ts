@@ -59,7 +59,6 @@ export class EmployeeInformationFormService {
       const queryBuilder = await this.employeeInformationFormRepository
         .createQueryBuilder('employee_information_form')
         .where('employee_information_form.tenantId = :tenantId', { tenantId });
-      // console.log(queryBuilder,"*************************")
       return await this.paginationService.paginate<EmployeeInformationForm>(
         queryBuilder,
         options,

@@ -250,4 +250,43 @@ export class EmployeeInformationService {
       throw error;
     }
   }
+
+  async allEmployeeData(tenantId: string): Promise<EmployeeInformation[]> {
+    try {
+      const employeeInformation = await this.employeeInformationRepository
+        .createQueryBuilder('employeeInformation')
+
+        .leftJoinAndSelect('employeeInformation.user', 'user')
+
+        .leftJoinAndSelect(
+          'user.employeeJobInformation',
+          'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        // .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect(
+          'employeeJobInformation.workSchedule',
+          'workSchedule',
+        )
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
+        .leftJoinAndSelect('employeeJobInformation.department', 'department')
+        .andWhere('user.tenantId = :tenantId', { tenantId })
+        .getMany();
+
+      return employeeInformation;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`EmployeeInformation Not found.`);
+      }
+      throw error;
+    }
+  }
 }

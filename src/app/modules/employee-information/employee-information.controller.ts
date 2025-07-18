@@ -89,4 +89,9 @@ export class EmployeeInformationController {
       employeeId,
     );
   }
+  @Get('/users/all-employee-data')
+  allEmployeeData(@Req() request: Request) {
+    const tenantId = request['tenantId'];
+    return this.employeeInformationService.allEmployeeData(tenantId);
+  }
 }
