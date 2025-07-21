@@ -22,7 +22,8 @@ export class MultiFactorAuthService {
     );
   }
 
-  async send2FACode(email: string, pass: string, tenantId: string) {
+async send2FACode(email: string, pass: string, tenantId: string) {
+
     try {
       // Sign in user using FirebaseAuthService
       const signInResult =

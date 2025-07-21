@@ -96,9 +96,10 @@ export class EmployeeInformationService {
   async findByUSerWithDeletedOne(userId: string) {
     try {
       const user = await this.employeeInformationRepository.findOne({
-        where: { userId: userId },  withDeleted: true,
+        where: { userId: userId },
+        withDeleted: true,
       });
-      return user
+      return user;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`EmployeeInformation Not Found.`);
@@ -110,17 +111,15 @@ export class EmployeeInformationService {
   async update(
     id: string,
     updateEmployeeInformationDto: UpdateEmployeeInformationDto,
-
   ) {
-    try {  
- await this.employeeInformationRepository.update(
+    try {
+      await this.employeeInformationRepository.update(
         { id },
         updateEmployeeInformationDto,
       );
-   return await this.employeeInformationRepository.findOneOrFail({
+      return await this.employeeInformationRepository.findOneOrFail({
         where: { id: id },
       });
-    
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`User with id ${id} not found.`);
@@ -182,6 +181,10 @@ export class EmployeeInformationService {
     const today = new Date();
     const todayMonth = today.getMonth() + 1;
     const todayDay = today.getDate();
+    
+    // Calculate date one year ago from today
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
 
     const employees = await this.employeeInformationRepository
       .createQueryBuilder('EmployeeInformation')
@@ -192,6 +195,9 @@ export class EmployeeInformationService {
       })
       .andWhere('EXTRACT(DAY FROM EmployeeInformation.joinedDate) = :day', {
         day: todayDay,
+      })
+      .andWhere('EmployeeInformation.joinedDate <= :oneYearAgo', {
+        oneYearAgo: oneYearAgo,
       })
       .getMany();
 
@@ -237,6 +243,45 @@ export class EmployeeInformationService {
         .getOne();
 
       return { ...employeeInformation };
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`EmployeeInformation Not found.`);
+      }
+      throw error;
+    }
+  }
+
+  async allEmployeeData(tenantId: string): Promise<EmployeeInformation[]> {
+    try {
+      const employeeInformation = await this.employeeInformationRepository
+        .createQueryBuilder('employeeInformation')
+
+        .leftJoinAndSelect('employeeInformation.user', 'user')
+
+        .leftJoinAndSelect(
+          'user.employeeJobInformation',
+          'employeeJobInformation',
+          'employeeJobInformation.isPositionActive = :isPositionActive',
+          { isPositionActive: true },
+        )
+        // .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+        .leftJoinAndSelect('user.role', 'role')
+        .leftJoinAndSelect(
+          'employeeJobInformation.employementType',
+          'employementType',
+        )
+        .leftJoinAndSelect('employeeInformation.nationality', 'nationality')
+        .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+        .leftJoinAndSelect(
+          'employeeJobInformation.workSchedule',
+          'workSchedule',
+        )
+        .leftJoinAndSelect('employeeJobInformation.position', 'position')
+        .leftJoinAndSelect('employeeJobInformation.department', 'department')
+        .andWhere('user.tenantId = :tenantId', { tenantId })
+        .getMany();
+
+      return employeeInformation;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`EmployeeInformation Not found.`);

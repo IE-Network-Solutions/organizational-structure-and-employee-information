@@ -160,6 +160,7 @@ describe('BranchesService', () => {
     describe('when updatebranch is called', () => {
       let branch: Branch;
       let companyProfileImage: Express.Multer.File;
+      let tenantId: '8f2e3691-423f-4f21-b676-ba3a932b7c7c';
       beforeEach(async () => {
         jest
           .spyOn(branchesService, 'findOneBranch')
@@ -168,14 +169,14 @@ describe('BranchesService', () => {
       });
 
       it('should call branchService.findOneBranch', async () => {
-        await branchesService.updateBranch(branchData().id, createbranchData());
+        await branchesService.updateBranch(branchData().id, createbranchData(), tenantId);
         expect(branchesService.findOneBranch).toHaveBeenCalledWith(
           branchData().id,
         );
       });
 
       it('should call branchRepository.update', async () => {
-        await branchesService.updateBranch(branchData().id, updatebranchData());
+        await branchesService.updateBranch(branchData().id, updatebranchData(), tenantId);
         expect(branchRepository.update).toHaveBeenCalledWith(
           branchData().id,
           updatebranchData(),
@@ -186,6 +187,7 @@ describe('BranchesService', () => {
         branch = await branchesService.updateBranch(
           branchData().id,
           updatebranchData(),
+          tenantId,
         );
         expect(branch).toEqual(branchData());
       });
@@ -198,10 +200,10 @@ describe('BranchesService', () => {
             new NotFoundException(`Branch with Id ${wrongId} not found`),
           );
         await expect(
-          branchesService.updateBranch(wrongId, createbranchData()),
+          branchesService.updateBranch(wrongId, createbranchData(), tenantId),
         ).rejects.toThrow(NotFoundException);
         await expect(
-          branchesService.updateBranch(wrongId, createbranchData()),
+          branchesService.updateBranch(wrongId, createbranchData(), tenantId),
         ).rejects.toThrow(`Branch with Id ${wrongId} not found`);
       });
     });

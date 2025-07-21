@@ -55,6 +55,10 @@ import { DelegationService } from '../../delegations/delegations.service';
 import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { OtherServiceDependenciesService } from '../../other-service-dependencies/other-service-dependencies.service';
+import { ExportUserDto, DownloadFormat } from '../dto/export-user.dto';
+import * as PDFDocument from 'pdfkit';
+import * as ExcelJS from 'exceljs';
+import { generateExportFile } from '@root/src/core/utils/export/export-user-data.util';
 
 @Injectable()
 export class UserService {
@@ -288,6 +292,30 @@ export class UserService {
         .leftJoinAndSelect('employeeJobInformation.department', 'department')
         .andWhere('user.tenantId = :tenantId', { tenantId });
 
+      // Multi-word, multi-field search
+      const { searchString } = filterDto;
+
+      if (searchString && searchString.trim() !== '') {
+        const words = searchString.trim().split(/\s+/);
+        words.forEach((word, idx) => {
+          const param = `searchWord${idx}`;
+
+          queryBuilder.andWhere(
+            `(user.firstName ILIKE :${param} OR user.middleName ILIKE :${param} OR user.lastName ILIKE :${param} OR user.email ILIKE :${param})`,
+            { [param]: `%${word}%` },
+          );
+        });
+
+        //  Add full name matching
+        if (words.length > 1) {
+          const fullNameParam = 'fullNameSearch';
+          queryBuilder.orWhere(
+            `CONCAT(user.firstName, ' ', user.lastName) ILIKE :${fullNameParam} OR CONCAT(user.lastName, ' ', user.firstName) ILIKE :${fullNameParam}`,
+            { [fullNameParam]: `%${searchString.trim()}%` },
+          );
+        }
+      }
+
       // Add gender filter
       if (filterDto.gender) {
         queryBuilder.andWhere('employeeInformation.gender = :gender', {
@@ -449,7 +477,6 @@ export class UserService {
     }
   }
   async findAllUsersByDepartment(tenantId: string, departmentId: string) {
-
     const users = await this.userRepository
       .createQueryBuilder('user')
       .withDeleted()
@@ -469,7 +496,6 @@ export class UserService {
   }
 
   async findAllUsersByAllDepartment(tenantId: string, departmentIds: string[]) {
-
     const users = await this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect(
@@ -1213,4 +1239,156 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
+
+async exportUserData(
+  tenantId: string,
+  exportUserDto: ExportUserDto,
+): Promise<{ fileUrl: string }> {
+  let queryBuilder = this.userRepository
+    .createQueryBuilder('user')
+    .leftJoinAndSelect(
+      'user.employeeJobInformation',
+      'employeeJobInformation',
+      'employeeJobInformation.isPositionActive = :isPositionActive',
+      { isPositionActive: true },
+    )
+    .leftJoinAndSelect('employeeJobInformation.position', 'position')
+    .leftJoinAndSelect('employeeJobInformation.department', 'department')
+    .leftJoinAndSelect('employeeJobInformation.branch', 'branch')
+    .leftJoinAndSelect(
+      'employeeJobInformation.basicSalaries',
+      'jobBasicSalaries',
+    )
+    .leftJoinAndSelect('user.employeeInformation', 'employeeInformation')
+    .leftJoinAndSelect('user.role', 'role')
+    .andWhere('user.tenantId = :tenantId', { tenantId });
+
+  // Apply filters based on ExportUserDto fields
+  if (exportUserDto.employee_name) {
+    queryBuilder = queryBuilder.andWhere(
+      `(user.firstName ILIKE :name OR user.lastName ILIKE :name OR user.middleName ILIKE :name)`,
+      { name: `%${exportUserDto.employee_name}%` },
+    );
+  }
+  if (exportUserDto.allOffices) {
+    queryBuilder = queryBuilder.andWhere(
+      'employeeJobInformation.branchId = :branchId',
+      { branchId: exportUserDto.allOffices },
+    );
+  }
+  if (exportUserDto.allJobs) {
+    queryBuilder = queryBuilder.andWhere(
+      'employeeJobInformation.positionId = :positionId',
+      { positionId: exportUserDto.allJobs },
+    );
+  }
+  if (exportUserDto.allStatus) {
+    queryBuilder = queryBuilder.andWhere('user.status = :status', {
+      status: exportUserDto.allStatus,
+    });
+  }
+  if (exportUserDto.gender) {
+    queryBuilder = queryBuilder.andWhere(
+      'employeeInformation.gender = :gender',
+      { gender: exportUserDto.gender },
+    );
+  }
+  if (exportUserDto.joinedDate) {
+    if (exportUserDto.joinedDateType === 'after') {
+      queryBuilder = queryBuilder.andWhere(
+        'employeeInformation.joinedDate >= :joinedDate',
+        { joinedDate: exportUserDto.joinedDate },
+      );
+    } else if (exportUserDto.joinedDateType === 'before') {
+      queryBuilder = queryBuilder.andWhere(
+        'employeeInformation.joinedDate <= :joinedDate',
+        { joinedDate: exportUserDto.joinedDate },
+      );
+    }
+  }
+
+  const users = await queryBuilder.getMany();
+
+  // Prepare data for export (include salary details)
+  const exportData = users.map((user) => {
+    const jobInfo = user.employeeJobInformation?.[0];
+    // Format joinedDate as dd-mm-YYYY
+    let formattedDate = '';
+    if (user.employeeInformation?.joinedDate) {
+      const d = new Date(user.employeeInformation.joinedDate);
+      const pad = (n) => n.toString().padStart(2, '0');
+      formattedDate = `${pad(d.getDate())}-${pad(
+        d.getMonth() + 1,
+      )}-${d.getFullYear()}`;
+    }
+    // Get basicSalary with status true from jobInfo.basicSalaries
+    let basicSalary = '';
+    if (Array.isArray(jobInfo?.basicSalaries)) {
+      const salaryObj = jobInfo.basicSalaries.find(
+        (item) => item && item.status === true,
+      );
+      basicSalary =
+        salaryObj &&
+        salaryObj.basicSalary !== undefined &&
+        salaryObj.basicSalary !== null
+          ? salaryObj.basicSalary.toString()
+          : '';
+    }
+    return {
+      firstName: user.firstName,
+      middleName: user.middleName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role?.name,
+      jobTitle: jobInfo?.position?.name,
+      department: jobInfo?.department?.name,
+      branch: jobInfo?.branch?.name,
+      joinedDate: formattedDate,
+      basicSalary: basicSalary,
+    };
+  });
+
+  // Define columns for export
+  const columns = [
+    { header: 'First Name', key: 'firstName', width: 11 },
+    { header: 'Middle Name', key: 'middleName', width: 11 },
+    { header: 'Last Name', key: 'lastName', width: 11 },
+    { header: 'Email', key: 'email', width: 16 },
+    { header: 'Role', key: 'role', width: 10 },
+    { header: 'Job Title', key: 'jobTitle', width: 12 },
+    { header: 'Department', key: 'department', width: 12 },
+    { header: 'Branch', key: 'branch', width: 12 },
+    { header: 'Joined Date', key: 'joinedDate', width: 12 },
+    { header: 'Basic Salary', key: 'basicSalary', width: 10 },
+  ];
+
+  // Generate file (Excel or PDF) using utility
+  const { buffer, fileName, mimetype } = await generateExportFile({
+    columns,
+    exportData,
+    exportUserDto,
+  });
+
+  // Create a mock Express.Multer.File object
+  const file: Express.Multer.File = {
+    fieldname: 'file',
+    originalname: fileName,
+    encoding: '7bit',
+    mimetype,
+    size: buffer.length,
+    destination: '',
+    filename: fileName,
+    path: '',
+    buffer,
+    stream: undefined as any,
+  };
+
+  // Upload to file server
+  const uploadResult = await this.fileUploadService.uploadFileToServer(
+    tenantId,
+    file,
+  );
+  const fileUrl = uploadResult?.viewImage || uploadResult?.image;
+  return { fileUrl };
+}
 }

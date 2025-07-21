@@ -135,7 +135,7 @@ describe('CalendarsService', () => {
       expect(result).toEqual(createdCalendar);
       expect(repository.create).toHaveBeenCalledWith({
         ...dto,
-        isActive: true,
+        isActive: false,
         tenantId,
       });
       expect(queryRunner.manager.save).toHaveBeenCalledWith(

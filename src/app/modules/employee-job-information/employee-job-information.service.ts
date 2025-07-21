@@ -13,6 +13,7 @@ import { UpdateEmployeeJobInformationDto } from './dto/update-employee-job-infor
 import { EmployeeJobInformation } from './entities/employee-job-information.entity';
 import { User } from '../users/entities/user.entity';
 import { BasicSalaryService } from '../basic-salary/basic-salary.service';
+import { CalendarsService } from '../calendars/calendars.service';
 
 @Injectable()
 export class EmployeeJobInformationService {
@@ -21,6 +22,7 @@ export class EmployeeJobInformationService {
     private employeeJobInformationRepository: Repository<EmployeeJobInformation>,
     private readonly paginationService: PaginationService,
     private readonly basicSalaryService: BasicSalaryService, // Inject BasicSalaryService
+    private readonly calenderService: CalendarsService,
   ) {}
   async create(
     createEmployeeJobInformationDto: CreateEmployeeJobInformationDto,
@@ -66,6 +68,57 @@ export class EmployeeJobInformationService {
       throw new ConflictException(error.message);
     }
   }
+
+
+  async getActiveCalendarhired(tenantId: string) {
+    try {
+      const paginationOptions = new PaginationDto();
+      const employeeJobInformation = await this.findAll(paginationOptions);
+      const activeCalendar = await this.calenderService.findActiveCalendar(tenantId);
+      const calendarStart = new Date(activeCalendar.startDate);
+      const calendarEnd = new Date(activeCalendar.endDate);
+
+      // Prepare months array
+      const months = [];
+      const current = new Date(
+        calendarStart.getFullYear(),
+        calendarStart.getMonth(),
+        1,
+      );
+      const end = new Date(
+        calendarEnd.getFullYear(),
+        calendarEnd.getMonth(),
+        1,
+      );
+      while (current <= end) {
+        months.push({
+          month: current.toLocaleString('default', { month: 'short' }),
+          year: current.getFullYear(),
+          hired: 0,
+        });
+        current.setMonth(current.getMonth() + 1);
+      }
+
+      // Count hires per month
+      employeeJobInformation.items.forEach((emp) => {
+        const effStart = new Date(emp.effectiveStartDate);
+        if (effStart >= calendarStart && effStart <= calendarEnd) {
+          const month = effStart.toLocaleString('default', { month: 'short' });
+          const year = effStart.getFullYear();
+          const found = months.find(
+            (m) => m.month === month && m.year === year,
+          );
+          if (found) found.hired += 1;
+        }
+      });
+
+      // Return in requested format (without year if you want)
+      return months.map(({ month, hired }) => ({ month, hired }));
+    } catch (error) {
+      throw new NotFoundException(`There Is No Active Calendar.`);
+    }
+  }
+
 
   async findAll(
     paginationOptions: PaginationDto,
@@ -196,24 +249,26 @@ export class EmployeeJobInformationService {
 
   async submitResignation(id: string) {
     try {
-      const jobInfo = await this.employeeJobInformationRepository.findOneOrFail({
-        where: { id: id },
-      });
+      const jobInfo = await this.employeeJobInformationRepository.findOneOrFail(
+        {
+          where: { id: id },
+        },
+      );
 
       if (jobInfo.resignationSubmittedDate) {
-        throw new ConflictException('Resignation has already been submitted for this employee.');
+        throw new ConflictException(
+          'Resignation has already been submitted for this employee.',
+        );
       }
 
       const updateData = {
         resignationSubmittedDate: new Date(),
       };
 
-     return await this.employeeJobInformationRepository.update(
+      return await this.employeeJobInformationRepository.update(
         { id },
-        updateData
+        updateData,
       );
-
-    
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(

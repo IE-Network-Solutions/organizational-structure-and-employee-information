@@ -13,7 +13,7 @@ export class MultiFactorAuthController {
   @Post()
   @ExcludeTenantGuard()
   @ExcludeAuthGuard()
-  async send2FACode(
+ async send2FACode(
     @Req() request: Request,
     @Body() body: Send2FACodeDto,
   ) {
@@ -23,6 +23,7 @@ export class MultiFactorAuthController {
       body.pass,
       tenantId,
     );
+
   }
 
   @Post('verify')
