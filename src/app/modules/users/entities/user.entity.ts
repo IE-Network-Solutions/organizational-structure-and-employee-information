@@ -58,6 +58,9 @@ export class User extends BaseModel {
   @Column({ type: 'varchar', nullable: true })
   firebaseId: string;
 
+  @Column({ type: 'boolean', default: true })
+  is2FAEnabled: boolean;
+
   // @ManyToOne(() => Tenant, (tenant) => tenant.user, {
   //   onDelete: 'SET NULL',
   //   onUpdate: 'CASCADE',
