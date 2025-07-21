@@ -1278,14 +1278,16 @@ async exportUserData(
   }
   if (exportUserDto.allJobs) {
     queryBuilder = queryBuilder.andWhere(
-      'employeeJobInformation.positionId = :positionId',
-      { positionId: exportUserDto.allJobs },
+      'employeeJobInformation.departmentId = :departmentId',
+      { departmentId: exportUserDto.allJobs },
     );
   }
   if (exportUserDto.allStatus) {
-    queryBuilder = queryBuilder.andWhere('user.status = :status', {
-      status: exportUserDto.allStatus,
-    });
+    if (exportUserDto.allStatus === 'notNull') {
+      queryBuilder = queryBuilder.andWhere('user.deletedAt IS NOT NULL');
+    } else if (exportUserDto.allStatus === 'null') {
+      queryBuilder = queryBuilder.andWhere('user.deletedAt IS NULL');
+    }
   }
   if (exportUserDto.gender) {
     queryBuilder = queryBuilder.andWhere(
