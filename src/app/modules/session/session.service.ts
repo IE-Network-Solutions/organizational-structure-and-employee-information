@@ -70,7 +70,7 @@ export class SessionService {
               eachMonth.startDate = month.startDate;
               eachMonth.sessionId = savedSession.id;
               eachMonth.name = month.name;
-              eachMonth.active = month.active || false;
+              eachMonth.active = month.active;
 
               await this.monthService.createMonth(
                 eachMonth,
@@ -141,6 +141,7 @@ export class SessionService {
           createDto.startDate = item.startDate;
           createDto.endDate = item.endDate;
           createDto.months = item.months;
+          createDto.active = item.active;
           if (item.id) {
             return await this.updateSession(item.id, createDto, tenantId);
           } else {
