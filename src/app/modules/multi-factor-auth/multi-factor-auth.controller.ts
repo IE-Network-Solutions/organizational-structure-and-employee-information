@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { MultiFactorAuthService } from './multi-factor-auth.service';
 import { ExcludeTenantGuard } from '@root/src/core/guards/exclud.guard';
 import { ExcludeAuthGuard } from '@root/src/core/guards/exclud.guard';
@@ -13,11 +13,17 @@ export class MultiFactorAuthController {
   @Post()
   @ExcludeTenantGuard()
   @ExcludeAuthGuard()
-  async send2FACode(@Body() body: Send2FACodeDto) {
+ async send2FACode(
+    @Req() request: Request,
+    @Body() body: Send2FACodeDto,
+  ) {
+    const tenantId = request['tenantId'];
     return await this.multiFactorAuthService.send2FACode(
       body.email,
       body.pass,
+      tenantId,
     );
+
   }
 
   @Post('verify')

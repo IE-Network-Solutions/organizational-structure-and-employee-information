@@ -71,10 +71,12 @@ export class CalendarsController {
     return await this.calendarsService.removeCalendar(id);
   }
 
-  @Get('/active/calendar')
+  @Get('active/calendar')
   @ExcludeAuthGuard()
   async findActiveCalander(@Req() req: Request): Promise<Calendar> {
     const tenantId = req['tenantId'];
     return await this.calendarsService.findActiveCalendar(tenantId);
   }
+
+
 }

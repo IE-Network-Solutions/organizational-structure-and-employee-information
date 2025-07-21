@@ -36,6 +36,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserDepartmentService } from './services/user-relation-with-department.service';
 import { DelegationService } from '../delegations/delegations.service';
 import { FirebaseAuthService } from '@root/src/core/firebaseAuth/firbase-auth.service';
+import { OtherServiceDependenciesService } from '../other-service-dependencies/other-service-dependencies.service';
 
 describe('UserController', () => {
   let userController: UserController;
@@ -134,6 +135,10 @@ describe('UserController', () => {
         {
           provide: FirebaseAuthService,
           useValue: mock<FirebaseAuthService>(),
+        },
+        {
+          provide: OtherServiceDependenciesService,
+          useValue: mock<OtherServiceDependenciesService>(),
         },
       ],
     }).compile();
