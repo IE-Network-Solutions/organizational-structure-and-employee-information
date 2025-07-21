@@ -22,16 +22,22 @@ export class MultiFactorAuthService {
     );
   }
 
-  async send2FACode(email: string, pass: string, ) {
+  async send2FACode(email: string, pass: string, tenantId: string) {
     try {
- 
-
       // Sign in user using FirebaseAuthService
       const signInResult =
         await this.firebaseAuthService.signInWithEmailAndPassword(email, pass);
 
       if (!signInResult || !signInResult.user.uid) {
         throw new BadRequestException('Invalid email or password');
+      }
+      // get user detail from the email
+      const user = await this.userService.findUserByEmail(
+        { email: email },
+        tenantId,
+      );
+      if (!user.is2FAEnabled) {
+        return { success: user, is2FAEnabled: false, message: 'Signed in successfully' };
       }
 
       const uid = signInResult.user.uid;
