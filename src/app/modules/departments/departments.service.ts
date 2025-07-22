@@ -205,10 +205,22 @@ export class DepartmentsService {
       await this.departmentRepository.findDescendants(rootDepartment);
     const departmentIds = descendantDepartments.map((d) => d.id);
     departmentIds.push(rootDepartment.id);
-    const users = await this.userService.findAllUsersByAllDepartment(
-      tenantId,
-      departmentIds,
-    );
+    
+    // Use the userRepository directly instead of userService to avoid circular dependency
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+      )
+      .where('employeeJobInformation.departmentId IN (:...departmentIds)', {
+        departmentIds,
+      })
+      .andWhere('employeeJobInformation.isPositionActive = true')
+      .andWhere('user.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId })
+      .getMany();
 
     return users;
   }
@@ -403,6 +415,28 @@ export class DepartmentsService {
       return ancestors.parent;
     } catch (error) {
       throw new NotFoundException(`Department not found`);
+    }
+  }
+
+  async findLevel1Departments(tenantId: string): Promise<any[]> {
+    try {
+      const departments = await this.departmentRepository.find({
+        where: {
+          tenantId: tenantId,
+          level: 1,
+        },
+      });
+      
+      if (!departments || departments.length === 0) {
+        throw new NotFoundException('No level 1 departments found');
+      }
+      
+      return departments;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
     }
   }
 
