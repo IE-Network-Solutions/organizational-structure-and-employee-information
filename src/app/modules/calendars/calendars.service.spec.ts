@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, forwardRef, Inject } from '@nestjs/common';
 import {
   calendarData,
   createCalendarData,
@@ -17,6 +17,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { tenantId } from '../branchs/tests/branch.data';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { SessionService } from '../session/session.service';
+import { EmployeeJobInformationService } from '../employee-job-information/employee-job-information.service';
 
 describe('CalendarsService', () => {
   let service: CalendarsService;
@@ -52,18 +53,27 @@ describe('CalendarsService', () => {
 
     connection = mock<Connection>();
     connection.createQueryRunner.mockReturnValue(queryRunner);
+    const mockCalendarRepository = mock<Repository<Calendar>>();
+    const mockPaginationService = mock<PaginationService>();
+    const mockOrganizationsService = mock<OrganizationsService>();
+    const mockSessionService = mock<SessionService>();
+    const mockEmployeeJobInformationService = mock<EmployeeJobInformationService>();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CalendarsService,
-        { provide: getRepositoryToken(Calendar), useFactory: mockRepository },
+        { provide: getRepositoryToken(Calendar), useValue: mockCalendarRepository },
         {
           provide: PaginationService,
-          useValue: mock<PaginationService>(),
+          useValue: mockPaginationService,
         },
-        { provide: OrganizationsService, useFactory: mockOrganizationsService },
+        { provide: OrganizationsService, useValue: mockOrganizationsService },
         {
           provide: SessionService,
-          useValue: mock<SessionService>(),
+          useValue: mockSessionService,
+        },
+        {
+          provide: EmployeeJobInformationService,
+          useValue: mockEmployeeJobInformationService,
         },
         {
           provide: Connection,
@@ -72,11 +82,19 @@ describe('CalendarsService', () => {
       ],
     }).compile();
 
-    service = module.get<CalendarsService>(CalendarsService);
-    repository = module.get<Repository<Calendar>>(getRepositoryToken(Calendar));
-    paginationService = module.get<PaginationService>(PaginationService);
-    organizationsService =
-      module.get<OrganizationsService>(OrganizationsService);
+    // Create the service manually to avoid circular dependency issues
+    service = new CalendarsService(
+      mockCalendarRepository,
+      mockPaginationService,
+      mockOrganizationsService,
+      mockSessionService,
+      mockEmployeeJobInformationService,
+      connection,
+    );
+
+    repository = mockCalendarRepository;
+    paginationService = mockPaginationService;
+    organizationsService = mockOrganizationsService;
   });
 
   it('should be defined', () => {
