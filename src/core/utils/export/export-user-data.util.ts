@@ -102,8 +102,6 @@ export async function generateExportFile({
         return (
           doc.heightOfString(text, {
             width: col.width - 2 * cellPadding,
-            font: 'Helvetica',
-            size: dataFontSize,
           }) + 4
         );
       });
