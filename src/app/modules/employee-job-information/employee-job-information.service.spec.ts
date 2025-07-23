@@ -16,6 +16,7 @@ import { NotFoundException } from '@nestjs/common';
 import { employeeInformationData } from '../employee-information/tests/employee-information.data';
 import { paginationOptions } from '@root/src/core/commonTestData/commonTest.data';
 import { BasicSalaryService } from '../basic-salary/basic-salary.service';
+import { CalendarsService } from '../calendars/calendars.service';
 
 describe('EmployeeJobInformationService', () => {
   let employeeJobInformationService: EmployeeJobInformationService;
@@ -28,32 +29,42 @@ describe('EmployeeJobInformationService', () => {
   );
 
   beforeEach(async () => {
+    const mockRepository = mock<Repository<EmployeeJobInformation>>();
+    const mockPaginationService = mock<PaginationService>();
+    const mockBasicSalaryService = mock<BasicSalaryService>();
+    const mockCalendarsService = mock<CalendarsService>();
+
     const moduleRef = await Test.createTestingModule({
       providers: [
-        EmployeeJobInformationService,
         {
           provide: PaginationService,
-          useValue: mock<PaginationService>(),
+          useValue: mockPaginationService,
         },
         {
           provide: employeeJobInformationToken,
-          useValue: mock<Repository<EmployeeJobInformation>>(),
+          useValue: mockRepository,
         },
         {
           provide: BasicSalaryService,
-          useValue: mock<BasicSalaryService>(),
+          useValue: mockBasicSalaryService,
+        },
+        {
+          provide: CalendarsService,
+          useValue: mockCalendarsService,
         },
       ],
     }).compile();
 
-    employeeJobInformationService =
-      moduleRef.get<EmployeeJobInformationService>(
-        EmployeeJobInformationService,
-      );
-    employeeJobInformationRepository = moduleRef.get(
-      employeeJobInformationToken,
+    // Create the service manually to avoid circular dependency issues
+    employeeJobInformationService = new EmployeeJobInformationService(
+      mockRepository,
+      mockPaginationService,
+      mockBasicSalaryService,
+      mockCalendarsService,
     );
-    paginationService = moduleRef.get(PaginationService);
+
+    employeeJobInformationRepository = mockRepository;
+    paginationService = mockPaginationService;
   });
 
   describe('create', () => {

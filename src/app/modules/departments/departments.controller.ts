@@ -74,6 +74,14 @@ export class DepartmentsController {
     );
   }
 
+
+
+  @Get('level-1')
+  async findLevel1Departments(@Req() req: Request): Promise<any[]> {
+    const tenantId = req['tenantId'];
+    return await this.departmentsService.findLevel1Departments(tenantId);
+  }
+
   @Get(':id')
   async findOneDepartment(@Param('id') id: string): Promise<Department> {
     return await this.departmentsService.findOneDepartment(id);

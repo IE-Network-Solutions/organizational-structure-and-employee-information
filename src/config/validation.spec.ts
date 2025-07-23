@@ -1,4 +1,4 @@
-import { validationSchema } from '@config/validation';
+import { firebaseValidationSchema } from '@config/validation';
 
 describe('validationSchema', () => {
   it('should validate the configuration object', () => {
@@ -16,15 +16,18 @@ describe('validationSchema', () => {
       DB_PASSWORD: 'password',
       DB_TYPE: 'postgres',
       DB_SYNCHRONIZE_ENTITIES: false,
+      APPROVAL_MODULE: true,
+      FILE_SERVER_URL: 'http://file-server.com',
+      TENANT_URL: 'http://tenant-server.com',
+      EMAIL_SERVER_URL: 'http://email-server.com',
       API_KEY: 'api_key',
       AUTH_DOMAIN: 'auth_domain',
       STORAGE_BUCKET: 'storage_bucket',
       MESSAGING_SENDER_ID: 'messaging_sender_id',
       APP_ID: 'app_id',
-      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
-    const result = validationSchema.validate(validConfig);
+    const result = firebaseValidationSchema.validate(validConfig);
 
     expect(result.error).toBeUndefined();
     expect(result.value).toEqual(validConfig);
@@ -41,15 +44,18 @@ describe('validationSchema', () => {
       DB_NAME: 'mydb',
       DB_USER: 'postgres',
       DB_PASSWORD: 'password',
+      APPROVAL_MODULE: true,
+      FILE_SERVER_URL: 'http://file-server.com',
+      TENANT_URL: 'http://tenant-server.com',
+      EMAIL_SERVER_URL: 'http://email-server.com',
       API_KEY: 'api_key',
       AUTH_DOMAIN: 'auth_domain',
       STORAGE_BUCKET: 'storage_bucket',
       MESSAGING_SENDER_ID: 'messaging_sender_id',
       APP_ID: 'app_id',
-      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
-    expect(validationSchema.validate(invalidConfig).error).toBeDefined();
+    expect(firebaseValidationSchema.validate(invalidConfig).error).toBeDefined();
   });
 
   it('should throw an error if configuration has invalid properties', () => {
@@ -66,14 +72,17 @@ describe('validationSchema', () => {
       DB_USER: 'postgres',
       DB_PASSWORD: 'password',
       DB_SYNCHRONIZE_ENTITIES: false,
+      APPROVAL_MODULE: true,
+      FILE_SERVER_URL: 'http://file-server.com',
+      TENANT_URL: 'http://tenant-server.com',
+      EMAIL_SERVER_URL: 'http://email-server.com',
       API_KEY: 'api_key',
       AUTH_DOMAIN: 'auth_domain',
       STORAGE_BUCKET: 'storage_bucket',
       MESSAGING_SENDER_ID: 'messaging_sender_id',
       APP_ID: 'app_id',
-      RECAPTCHA_SECRET_KEY: 'recaptcha_secret_key',
     };
 
-    expect(validationSchema.validate(invalidConfig).error).toBeDefined();
+    expect(firebaseValidationSchema.validate(invalidConfig).error).toBeDefined();
   });
 });

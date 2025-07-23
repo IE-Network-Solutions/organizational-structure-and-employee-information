@@ -7,7 +7,7 @@ import { CreateMonthDto } from './dto/create-month.dto';
 import { UpdateMonthDto } from './dto/update-month.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Month } from './entities/month.entity';
-import { QueryRunner, Repository } from 'typeorm';
+import { QueryRunner, Repository, LessThanOrEqual, LessThan } from 'typeorm';
 import { PaginationService } from '@root/src/core/pagination/pagination.service';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { PaginationDto } from '@root/src/core/commonDto/pagination-dto';
@@ -84,7 +84,8 @@ export class MonthService {
   async findOneMonth(id: string): Promise<Month> {
     try {
       const month = await this.monthRepository.findOne({
-        where: { id: id },relations: ['session','session.calendar'],
+        where: { id: id },
+        relations: ['session', 'session.calendar'],
       });
       return month;
     } catch (error) {
@@ -96,11 +97,15 @@ export class MonthService {
     id: string,
     updateMonthDto: UpdateMonthDto,
     tenantId: string,
+    setMonth?: boolean,
   ): Promise<Month> {
     try {
       const month = await this.findOneMonth(id);
       if (!month) {
         throw new NotFoundException(`Month Not Found`);
+      }
+      if (setMonth) {
+        updateMonthDto.active = setMonth;
       }
       await this.monthRepository.update({ id }, updateMonthDto);
       return await this.findOneMonth(id);
@@ -112,25 +117,26 @@ export class MonthService {
   async updateBulkMonth(
     updateMonthDto: UpdateMonthDto[],
     tenantId: string,
+    setMonth?: boolean,
   ): Promise<Month[]> {
     try {
       const months = await Promise.all(
         updateMonthDto.map((item) => {
-          const createDto = new  CreateMonthDto();
-          createDto.description=item.description
-          createDto.name=item.name
-          createDto.startDate=item.startDate  
-          createDto.endDate=item.endDate 
+          const createDto = new CreateMonthDto();
+          createDto.description = item.description;
+          createDto.name = item.name;
+          createDto.startDate = item.startDate;
+          createDto.endDate = item.endDate;
           if (item.id) {
-            return this.updateMonth(item.id, createDto, tenantId);
+            return this.updateMonth(item.id, createDto, tenantId, setMonth);
           } else {
-            const createDto = item as CreateMonthDto; 
+            const createDto = item as CreateMonthDto;
             return this.createMonth(createDto, tenantId);
           }
         }),
       );
       return months;
-    }catch (error) {
+    } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
@@ -199,11 +205,29 @@ export class MonthService {
         throw new BadRequestException('Active month not found');
       }
 
-      const date = new Date(activeMonth.endDate);
-      //  date.setDate(date.getDate() - 1);
-      const previousMonth = await this.monthRepository.findOne({
-        where: { startDate: date, tenantId, active: false },
+      // Get all inactive months and filter by date-only comparison
+      const allInactiveMonths = await this.monthRepository.find({
+        where: {
+          tenantId,
+          active: false,
+        },
+        order: { endDate: 'DESC' }, // Most recent months first
       });
+
+      // Compare only the date part (YYYY-MM-DD) without timezone
+      const activeMonthStartDate = activeMonth.startDate
+        .toISOString()
+        .split('T')[0];
+
+      const previousMonth = allInactiveMonths.find((m) => {
+        const monthEndDate = m.endDate.toISOString().split('T')[0];
+        return monthEndDate < activeMonthStartDate;
+      });
+
+      if (!previousMonth) {
+        throw new BadRequestException('No previous month found');
+      }
+
       return previousMonth;
     } catch (error) {
       throw new BadRequestException(error.message);

@@ -5,7 +5,6 @@ import { HttpService } from '@nestjs/axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FirebaseAuthService } from '../../../core/firebaseAuth/firbase-auth.service';
-import { RecaptchaService } from './recaptcha.service';
 import { UserService } from '../users/services/user.service';
 
 @Injectable()
@@ -16,7 +15,6 @@ export class MultiFactorAuthService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly firebaseAuthService: FirebaseAuthService,
-    private readonly recaptchaService: RecaptchaService,
     private readonly userService: UserService,
   ) {
     this.emailServerUrl = this.configService.get<string>(
@@ -24,22 +22,23 @@ export class MultiFactorAuthService {
     );
   }
 
-  async send2FACode(email: string, pass: string, recaptchaToken: string) {
-    try {
-      // Verify reCAPTCHA first
-      const isRecaptchaValid = await this.recaptchaService.verifyToken(
-        recaptchaToken,
-      );
-      if (!isRecaptchaValid) {
-        throw new BadRequestException('reCAPTCHA verification failed');
-      }
+async send2FACode(email: string, pass: string, tenantId: string) {
 
+    try {
       // Sign in user using FirebaseAuthService
       const signInResult =
         await this.firebaseAuthService.signInWithEmailAndPassword(email, pass);
 
       if (!signInResult || !signInResult.user.uid) {
         throw new BadRequestException('Invalid email or password');
+      }
+      // get user detail from the email
+      const user = await this.userService.findUserByEmail(
+        { email: email },
+        tenantId,
+      );
+      if (!user.is2FAEnabled) {
+        return { success: user, is2FAEnabled: false, message: 'Signed in successfully' };
       }
 
       const uid = signInResult.user.uid;

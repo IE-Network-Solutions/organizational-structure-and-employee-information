@@ -94,7 +94,11 @@ export class DepartmentsService {
     try {
       const departmentData = await this.departmentRepository.find({
         where: { tenantId },
-        relations: ['employeeJobInformation', 'employeeJobInformation.user', 'employeeJobInformation.user.role'],
+        relations: [
+          'employeeJobInformation',
+          'employeeJobInformation.user',
+          'employeeJobInformation.user.role',
+        ],
       });
 
       if (!departmentData?.length) {
@@ -104,9 +108,12 @@ export class DepartmentsService {
       // Filter employeeJobInformation to include only departmentLeadOrNot === true
       departmentData.forEach((department) => {
         if (department.employeeJobInformation) {
-          department.employeeJobInformation = department.employeeJobInformation.filter(
-            (info) => info.departmentLeadOrNot === true && info.isPositionActive === true
-          );
+          department.employeeJobInformation =
+            department.employeeJobInformation.filter(
+              (info) =>
+                info.departmentLeadOrNot === true &&
+                info.isPositionActive === true,
+            );
         }
       });
 
@@ -120,22 +127,24 @@ export class DepartmentsService {
                 'employeeJobInformation.user.role',
               ],
             });
-          
+
           // Filter employeeJobInformation for each department in the tree
           const filterEmployeeInfo = (dept: Department): Department => {
             if (dept.employeeJobInformation) {
               dept.employeeJobInformation = dept.employeeJobInformation.filter(
-                (info) => info.departmentLeadOrNot === true && info.isPositionActive === true
+                (info) =>
+                  info.departmentLeadOrNot === true &&
+                  info.isPositionActive === true,
               );
             }
-            
+
             if (dept.department && dept.department.length > 0) {
               dept.department = dept.department.map(filterEmployeeInfo);
             }
-            
+
             return dept;
           };
-          
+
           return filterEmployeeInfo(departmentTree);
         }),
       );
@@ -196,10 +205,22 @@ export class DepartmentsService {
       await this.departmentRepository.findDescendants(rootDepartment);
     const departmentIds = descendantDepartments.map((d) => d.id);
     departmentIds.push(rootDepartment.id);
-    const users = await this.userService.findAllUsersByAllDepartment(
-      tenantId,
-      departmentIds,
-    );
+    
+    // Use the userRepository directly instead of userService to avoid circular dependency
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(
+        'user.employeeJobInformation',
+        'employeeJobInformation',
+      )
+      .where('employeeJobInformation.departmentId IN (:...departmentIds)', {
+        departmentIds,
+      })
+      .andWhere('employeeJobInformation.isPositionActive = true')
+      .andWhere('user.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.deletedAt IS NULL')
+      .andWhere('employeeJobInformation.tenantId = :tenantId', { tenantId })
+      .getMany();
 
     return users;
   }
@@ -224,7 +245,7 @@ export class DepartmentsService {
   ): Promise<Department> {
     try {
       const department = await this.findOneDepartment(id);
-      if(updateDepartmentDto.name){
+      if (updateDepartmentDto.name) {
         const departmentWithName = await this.departmentRepository.findOne({
           where: { name: updateDepartmentDto.name, tenantId: tenantId },
         });
@@ -232,7 +253,7 @@ export class DepartmentsService {
           throw new BadRequestException(
             `Department with name '${updateDepartmentDto.name}' already exists`,
           );
-      }
+        }
       }
       if (department && !parentDepartment) {
         if (department.level !== 0) {
@@ -242,7 +263,7 @@ export class DepartmentsService {
           parentDepartment = parent.parent;
         }
       }
-    
+
       department.name = updateDepartmentDto.name;
       department.branchId = updateDepartmentDto.branchId;
       department.description = updateDepartmentDto.description;
@@ -394,6 +415,28 @@ export class DepartmentsService {
       return ancestors.parent;
     } catch (error) {
       throw new NotFoundException(`Department not found`);
+    }
+  }
+
+  async findLevel1Departments(tenantId: string): Promise<any[]> {
+    try {
+      const departments = await this.departmentRepository.find({
+        where: {
+          tenantId: tenantId,
+          level: 1,
+        },
+      });
+      
+      if (!departments || departments.length === 0) {
+        throw new NotFoundException('No level 1 departments found');
+      }
+      
+      return departments;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
     }
   }
 

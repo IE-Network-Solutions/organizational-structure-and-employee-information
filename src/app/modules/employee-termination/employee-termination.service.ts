@@ -37,18 +37,23 @@ export class EmployeeTerminationService {
     tenantId: string,
   ): Promise<EmployeeTermination> {
     try {
-     const employeeTermination = await this.employeeTerminationRepository.findOne({where: {userId: createEmployeeTerminationDto.userId, isActive: true,tenantId}}); 
-     if(employeeTermination){
-      throw new HttpException(
-        'Employee Termination already exists',
-        409,
-      );  }   
+      const employeeTermination =
+        await this.employeeTerminationRepository.findOne({
+          where: {
+            userId: createEmployeeTerminationDto.userId,
+            isActive: true,
+            tenantId,
+          },
+        });
+      if (employeeTermination) {
+        throw new HttpException('Employee Termination already exists', 409);
+      }
       const createEmployeeTermination =
         await this.employeeTerminationRepository.create({
           ...createEmployeeTerminationDto,
           tenantId: tenantId,
         });
- 
+
       const check = await this.employeeTerminationRepository.save(
         createEmployeeTermination,
       );
@@ -179,16 +184,15 @@ export class EmployeeTerminationService {
         tenantId,
       );
       const employeeInformation =
-      await this.employeenformationService.findByUSerWithDeletedOne(userId);
-    const updateEmployeeInformation: UpdateEmployeeInformationDto = {
-      joinedDate: createEmployeeJobInformationDto['joinedDate'],
- 
-    };
-    updateEmployeeInformation["deletedAt"] = null;
-    await this.employeenformationService.update(
-      employeeInformation.id,
-      updateEmployeeInformation,
-    );
+        await this.employeenformationService.findByUSerWithDeletedOne(userId);
+      const updateEmployeeInformation: UpdateEmployeeInformationDto = {
+        joinedDate: createEmployeeJobInformationDto['joinedDate'],
+      };
+      updateEmployeeInformation['deletedAt'] = null;
+      await this.employeenformationService.update(
+        employeeInformation.id,
+        updateEmployeeInformation,
+      );
 
       await queryRunner.commitTransaction();
       return user;
