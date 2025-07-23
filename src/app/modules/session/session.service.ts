@@ -130,6 +130,7 @@ export class SessionService {
     updateSessionDto: UpdateSessionDto[],
     tenantId: string,
     calendarId: string,
+    setSession?: boolean,
   ): Promise<Session[]> {
     try {
       const sessions = await Promise.all(
@@ -143,7 +144,12 @@ export class SessionService {
           createDto.months = item.months;
           createDto.active = item.active;
           if (item.id) {
-            return await this.updateSession(item.id, createDto, tenantId);
+            return await this.updateSession(
+              item.id,
+              createDto,
+              tenantId,
+              setSession,
+            );
           } else {
             return await this.createSession(createDto, tenantId);
           }
@@ -160,6 +166,7 @@ export class SessionService {
     id: string,
     updateSessionDto: UpdateSessionDto,
     tenantId: string,
+    setSession?: boolean,
   ): Promise<Session> {
     try {
       const session = await this.findOneSession(id);
@@ -169,7 +176,10 @@ export class SessionService {
       if (updateSessionDto.months && updateSessionDto.months.length > 0) {
         const months = updateSessionDto.months;
         delete updateSessionDto.months;
-        await this.monthService.updateBulkMonth(months, tenantId);
+        await this.monthService.updateBulkMonth(months, tenantId, setSession);
+      }
+      if (setSession) {
+        updateSessionDto.active = setSession;
       }
       await this.sessionRepository.update({ id }, updateSessionDto);
 
