@@ -97,11 +97,15 @@ export class MonthService {
     id: string,
     updateMonthDto: UpdateMonthDto,
     tenantId: string,
+    setMonth?: boolean,
   ): Promise<Month> {
     try {
       const month = await this.findOneMonth(id);
       if (!month) {
         throw new NotFoundException(`Month Not Found`);
+      }
+      if (setMonth) {
+        updateMonthDto.active = setMonth;
       }
       await this.monthRepository.update({ id }, updateMonthDto);
       return await this.findOneMonth(id);
@@ -113,6 +117,7 @@ export class MonthService {
   async updateBulkMonth(
     updateMonthDto: UpdateMonthDto[],
     tenantId: string,
+    setMonth?: boolean,
   ): Promise<Month[]> {
     try {
       const months = await Promise.all(
@@ -123,7 +128,7 @@ export class MonthService {
           createDto.startDate = item.startDate;
           createDto.endDate = item.endDate;
           if (item.id) {
-            return this.updateMonth(item.id, createDto, tenantId);
+            return this.updateMonth(item.id, createDto, tenantId, setMonth);
           } else {
             const createDto = item as CreateMonthDto;
             return this.createMonth(createDto, tenantId);
@@ -195,25 +200,26 @@ export class MonthService {
   async activatePreviousActiveMonth(tenantId: string): Promise<Month> {
     try {
       const activeMonth = await this.geActiveMonth(tenantId);
- 
+
       if (!activeMonth) {
         throw new BadRequestException('Active month not found');
       }
 
       // Get all inactive months and filter by date-only comparison
       const allInactiveMonths = await this.monthRepository.find({
-        where: { 
-          tenantId, 
-          active: false
+        where: {
+          tenantId,
+          active: false,
         },
-        order: { endDate: 'DESC' } // Most recent months first
+        order: { endDate: 'DESC' }, // Most recent months first
       });
 
-
       // Compare only the date part (YYYY-MM-DD) without timezone
-      const activeMonthStartDate = activeMonth.startDate.toISOString().split('T')[0];
-      
-      const previousMonth = allInactiveMonths.find(m => {
+      const activeMonthStartDate = activeMonth.startDate
+        .toISOString()
+        .split('T')[0];
+
+      const previousMonth = allInactiveMonths.find((m) => {
         const monthEndDate = m.endDate.toISOString().split('T')[0];
         return monthEndDate < activeMonthStartDate;
       });

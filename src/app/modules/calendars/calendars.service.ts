@@ -44,15 +44,23 @@ export class CalendarsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
+      if (createCalendarDto.isActive && createCalendarDto.isActive === true) {
+        const activeCalendar = await this.findActiveCalendar(tenantId);
+        if (activeCalendar) {
+          activeCalendar.isActive = false;
+          await this.updateCalendar(
+            activeCalendar.id,
+            activeCalendar,
+            tenantId,
+            false,
+          );
+        }
+      }
       // Check if there's already an active calendar
-      const activeCalendar = await this.findActiveCalendar(tenantId);
-
-      // Force isActive based on year
-      const isActive = !activeCalendar;
 
       const createCalendar = await this.calendarRepository.create({
         ...createCalendarDto,
-        isActive: isActive,
+
         tenantId: tenantId,
       });
       const savedCalendar = await queryRunner.manager.save(
@@ -135,6 +143,7 @@ export class CalendarsService {
     id: string,
     updateCalendarDto: UpdateCalendarDto,
     tenantId: string,
+    setSession?: boolean,
   ): Promise<Calendar> {
     try {
       const calendar = await this.findOneCalendar(id);
@@ -144,7 +153,12 @@ export class CalendarsService {
       if (updateCalendarDto.sessions && updateCalendarDto.sessions.length > 0) {
         const session = updateCalendarDto.sessions;
         delete updateCalendarDto.sessions;
-        await this.sessionService.updateBulkSession(session, tenantId, id);
+        await this.sessionService.updateBulkSession(
+          session,
+          tenantId,
+          id,
+          setSession,
+        );
       }
       const updatedCalendar = await this.calendarRepository.update(
         id,
@@ -183,8 +197,6 @@ export class CalendarsService {
       throw new NotFoundException(`There Is No Active Calendar.`);
     }
   }
-
- 
 
   async findActiveCalendarForAllTenants(): Promise<Calendar[]> {
     try {
